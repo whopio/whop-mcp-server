@@ -1,0 +1,17 @@
+# Hand-authored, per-operation metadata layered over the generated registry.
+# Keyed by "METHOD /path". The generator fails on keys that no longer match an
+# operation in the canonical OpenAPI contract.
+#
+# Supported fields:
+#   description:      replaces the public tool description
+#   principals:       restricts supported principal types (user | business | app)
+#   requiresAccount:  overrides whether a selected business account is required
+#
+# Example:
+#   "POST /payments":
+#     description: Charge an existing member off-session using a stored payment method.
+
+overrides:
+  "GET /accounts/me":
+    description: Returns the account the current credential is bound to. Call this first to confirm which account you are operating.
+    requiresAccount: false

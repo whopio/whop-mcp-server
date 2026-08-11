@@ -1,0 +1,361 @@
+# Safety classification for every mutating public operation.
+#
+# Rules are evaluated top to bottom; the FIRST match wins. GET operations are
+# always read_only and never consult this file. A non-GET operation that
+# matches no rule is NOT exposed as a tool: the generator drops it into
+# manifest.meta.pendingReview until someone classifies it here. Surfaced by
+# `whop mcp doctor` and `pnpm generate:summary`.
+#
+# Matchers (any combination; all present matchers must match):
+#   operations: exact "METHOD /path" keys
+#   tags:       OpenAPI tag names
+#   methods:    HTTP methods
+# Settings:
+#   classification: mutating | destructive
+#   financial / credential / externalPublication: booleans (default false)
+#   idempotency: none | supported | required (default none)
+#   confirmation: boolean (default false)
+
+rules:
+  # ── Pure calculations exposed as POST — no side effects ──────────────────
+  - name: quotes-and-calculations
+    match:
+      operations:
+        - POST /swaps/quote
+        - POST /plans/{id}/calculate_tax
+        - POST /withdrawals/{id}/generate_pdf
+        - POST /ad_groups/estimate_reach
+    set:
+      classification: read_only
+
+  # ── Run recording: writes one analytics event, executes nothing ──────────
+  - name: recommended-action-runs
+    match:
+      operations:
+        - POST /recommended_actions/{chain_id}
+    set:
+      classification: mutating
+
+  # ── Money movement: always prepare/confirm + idempotency ─────────────────
+  - name: money-movement
+    match:
+      operations:
+        - POST /payments
+        - POST /payments/{id}/refund
+        - POST /payments/{id}/retry
+        - POST /payments/{id}/void
+        - POST /payouts
+        - POST /withdrawals
+        - POST /transfers
+        - POST /swaps
+        - POST /deposits
+        - POST /topups
+        - POST /company_token_transactions
+        - POST /invoices/{id}/mark_paid
+        - POST /invoices/{id}/mark_uncollectible
+        - POST /invoices/{id}/void
+        - POST /ad_campaigns/{id}/retry_payment
+        - POST /bounties
+    set:
+      classification: mutating
+      financial: true
+      idempotency: required
+      confirmation: true
+
+  # ── Financial configuration ───────────────────────────────────────────────
+  - name: financial-configuration
+    match:
+      operations:
+        - POST /cards
+        - PATCH /cards/{card_id}
+        - POST /fee_markups
+        - POST /memberships/{id}/add_free_days
+        - POST /memberships/{id}/extend
+        - POST /payouts/methods
+        - PATCH /payouts/methods/{payout_method_id}
+        - POST /media/generate
+        - POST /payment_method_domains
+        - POST /payment_method_domains/{id}/verify
+    set:
+      classification: mutating
+      financial: true
+      confirmation: true
+
+  - name: payment-return-url
+    match:
+      operations:
+        - PATCH /payments/{payment_id}/return_url
+    set:
+      classification: mutating
+      financial: true
+      externalPublication: true
+      idempotency: none
+      confirmation: true
+
+  - name: setup-intent-creation
+    match:
+      operations:
+        - POST /setup_intents
+    set:
+      classification: mutating
+      financial: true
+      externalPublication: true
+      idempotency: none
+      confirmation: true
+
+  - name: setup-intent-return-url
+    match:
+      operations:
+        - PATCH /setup_intents/{setup_intent_id}/return_url
+    set:
+      classification: mutating
+      financial: true
+      externalPublication: true
+      idempotency: none
+      confirmation: true
+
+  - name: financial-deletes
+    match:
+      operations:
+        - DELETE /fee_markups/{id}
+    set:
+      classification: destructive
+      financial: true
+      confirmation: true
+
+  # ── Credential and key material ───────────────────────────────────────────
+  - name: credential-creation
+    match:
+      operations:
+        - POST /access_tokens
+        - POST /companies/{parent_company_id}/api_keys
+    set:
+      classification: mutating
+      credential: true
+      confirmation: true
+
+  - name: api-key-writes
+    match:
+      tags: [API Keys]
+      methods: [post, patch]
+    set:
+      classification: mutating
+      credential: true
+      confirmation: true
+
+  - name: api-key-delete
+    match:
+      tags: [API Keys]
+      methods: [delete]
+    set:
+      classification: destructive
+      credential: true
+      confirmation: true
+
+  - name: webhook-endpoint-writes
+    match:
+      tags: [Webhooks]
+      methods: [post, patch]
+    set:
+      classification: mutating
+      credential: true
+      confirmation: true
+
+  - name: webhook-endpoint-delete
+    match:
+      tags: [Webhooks]
+      methods: [delete]
+    set:
+      classification: destructive
+      credential: true
+      confirmation: true
+
+  # ── High-impact membership and dispute actions ────────────────────────────
+  - name: membership-consequential
+    match:
+      operations:
+        - POST /memberships/{id}/cancel
+        - POST /memberships/{id}/pause
+    set:
+      classification: mutating
+      confirmation: true
+
+  - name: membership-restorative
+    match:
+      operations:
+        - POST /memberships/{id}/resume
+        - POST /memberships/{id}/uncancel
+        - POST /memberships/{id}/resync_access
+        - PATCH /memberships/{id}
+    set:
+      classification: mutating
+
+  - name: dispute-evidence
+    match:
+      operations:
+        - POST /disputes/{id}/submit_evidence
+        - POST /disputes/{id}/update_evidence
+        - PATCH /disputes/{id}
+        - POST /disputes/{id}/submit
+    set:
+      classification: mutating
+      confirmation: true
+
+  # ── Resolution center: accepting a buyer claim generally refunds money ────
+  - name: resolution-center-accept
+    match:
+      operations:
+        - POST /resolution_center_cases/{id}/accept
+    set:
+      classification: mutating
+      financial: true
+      idempotency: required
+      confirmation: true
+
+  - name: resolution-center-decisions
+    match:
+      operations:
+        - POST /resolution_center_cases/{id}/deny
+        - POST /resolution_center_cases/{id}/appeal
+        - POST /resolution_center_cases/{id}/withdraw
+    set:
+      classification: mutating
+      confirmation: true
+
+  - name: resolution-center-routine
+    match:
+      tags: [Resolution Center Cases]
+      methods: [post, patch]
+    set:
+      classification: mutating
+
+  # ── Team access grants dashboard permissions ──────────────────────────────
+  - name: team-member-access
+    match:
+      tags: [Team Members]
+      methods: [post, patch]
+    set:
+      classification: mutating
+      confirmation: true
+
+  # ── App builds: promote changes what runs for end users ───────────────────
+  - name: app-build-promote
+    match:
+      operations:
+        - POST /app_builds/{id}/promote
+    set:
+      classification: mutating
+      confirmation: true
+
+  # ── Exports produce files of data the credential can already read ─────────
+  - name: data-exports
+    match:
+      operations:
+        - POST /exports
+    set:
+      classification: mutating
+
+  # ── Notifications push to end users ──────────────────────────────────────
+  - name: notification-blast
+    match:
+      operations:
+        - POST /notifications
+    set:
+      classification: mutating
+      externalPublication: true
+      confirmation: true
+
+  # Marks the caller's own notifications read — no reach beyond the caller.
+  - name: notification-acknowledgement
+    match:
+      operations:
+        - POST /notifications/mark_read
+    set:
+      classification: mutating
+      idempotency: supported
+
+  - name: membership-invitations
+    match:
+      operations:
+        - POST /memberships/invite
+    set:
+      classification: mutating
+      externalPublication: true
+      confirmation: true
+
+  # ── Community content: publishes externally but routine ──────────────────
+  - name: community-publishing
+    match:
+      tags:
+        - Messages
+        - Forum posts
+        - Forums
+        - Reactions
+        - Social Accounts
+      methods: [post, patch]
+    set:
+      classification: mutating
+      externalPublication: true
+
+  - name: reaction-delete
+    match:
+      operations:
+        - DELETE /reactions/{id}
+    set:
+      classification: mutating
+
+  # ── All remaining deletes are destructive and confirmed ──────────────────
+  - name: destructive-deletes
+    match:
+      methods: [delete]
+    set:
+      classification: destructive
+      confirmation: true
+
+  # ── Ordinary resource writes ──────────────────────────────────────────────
+  # This tag list is the reviewed vocabulary: a write under a tag not listed
+  # here (and not matched above) stays in pendingReview until someone adds it.
+  - name: ordinary-writes
+    match:
+      tags:
+        - Access tokens
+        - Account links
+        - Accounts
+        - Ad Campaigns
+        - Ad Groups
+        - Ads
+        - Affiliates
+        - Ai chats
+        - App Builds
+        - Apps
+        - Audiences
+        - Authorized users
+        - Bounties
+        - Bounty Submissions
+        - Chat channels
+        - Checkout Configurations
+        - Companies
+        - Course chapters
+        - Course lessons
+        - Courses
+        - Dm channels
+        - Dm members
+        - Entries
+        - Events
+        - Experiences
+        - Files
+        - Identity profiles
+        - Invoices
+        - Leads
+        - Media
+        - Partners
+        - Plans
+        - Products
+        - Promo Codes
+        - Shipments
+        - Support channels
+        - Users
+        - Verifications
+    set:
+      classification: mutating
+      idempotency: supported

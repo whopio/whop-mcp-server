@@ -1,0 +1,39 @@
+# Public operations intentionally NOT exposed as MCP tools.
+#
+# Every entry must carry a reason and an owner. The generator fails when an
+# entry no longer matches an operation in the canonical OpenAPI contract.
+#
+# Format:
+#   exclusions:
+#     - operation: "POST /example"
+#       reason: why this is not agent-callable
+#       owner: github-handle or team
+
+exclusions:
+  - operation: "GET /verifications/{id}"
+    reason: Legacy GraphQL-proxy duplicate of GET /verifications/{verification_id}, which is the native surface the existing public verifications_get tool maps to.
+    owner: gayatrigt
+  - operation: "PATCH /apps/{app_id}/permissions"
+    reason: Legacy GraphQL-proxy duplicate of PATCH /apps/{id}/permissions (native), which claims the apps_permissions tool name.
+    owner: gayatrigt
+  - operation: "GET /webhooks/{webhook_id}/deliveries"
+    reason: Legacy GraphQL-proxy duplicate of GET /webhooks/{id}/deliveries (native), which claims the webhooks_deliveries tool name.
+    owner: gayatrigt
+  - operation: "GET /users/me/passkeys"
+    reason: Requires a first-party whop.com user session; the hosted Worker uses an OAuth token and the documented stdio setup uses an API key, both of which this endpoint explicitly refuses.
+    owner: gayatrigt
+  - operation: "POST /users/me/passkeys"
+    reason: Registers an account security credential and requires a first-party whop.com user session; the hosted Worker uses an OAuth token and the documented stdio setup uses an API key, both of which this endpoint explicitly refuses.
+    owner: gayatrigt
+  - operation: "POST /users/me/passkeys/challenge"
+    reason: Starts a passkey management ceremony and requires a first-party whop.com user session; the hosted Worker uses an OAuth token and the documented stdio setup uses an API key, both of which this endpoint explicitly refuses.
+    owner: gayatrigt
+  - operation: "DELETE /users/me/passkeys/{id}"
+    reason: Deletes an account security credential and requires a first-party whop.com user session; the hosted Worker uses an OAuth token and the documented stdio setup uses an API key, both of which this endpoint explicitly refuses.
+    owner: gayatrigt
+  - operation: "GET /users/me/oauth_grants"
+    reason: Requires a first-party whop.com user session; the hosted Worker uses an OAuth token and the documented stdio setup uses an API key, both of which this endpoint explicitly refuses.
+    owner: gayatrigt
+  - operation: "POST /users/me/oauth_grants"
+    reason: Authorizes a third-party app and requires a first-party whop.com user session; the hosted Worker uses an OAuth token and the documented stdio setup uses an API key, both of which this endpoint explicitly refuses.
+    owner: gayatrigt

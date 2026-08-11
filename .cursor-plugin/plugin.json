@@ -1,0 +1,28 @@
+{
+  "name": "whop",
+  "displayName": "Whop",
+  "version": "1.0.0",
+  "description": "Connect Cursor to Whop through Whop's official hosted MCP server.",
+  "author": {
+    "name": "Whop"
+  },
+  "publisher": "Whop",
+  "homepage": "https://docs.whop.com/",
+  "repository": "https://github.com/whopio/whop-mcp-server",
+  "license": "Apache-2.0",
+  "logo": "assets/logo.png",
+  "keywords": [
+    "whop",
+    "mcp",
+    "commerce",
+    "payments",
+    "creators"
+  ],
+  "category": "integrations",
+  "tags": [
+    "mcp",
+    "oauth",
+    "commerce"
+  ],
+  "mcpServers": "./mcp.json"
+}

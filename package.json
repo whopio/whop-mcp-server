@@ -1,0 +1,29 @@
+{
+	"name": "whop-mcp-server",
+	"version": "0.0.1",
+	"private": true,
+	"description": "The official public source for Whop's hosted, OAuth-enabled MCP server.",
+	"license": "Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/whopio/whop-mcp-server.git"
+	},
+	"homepage": "https://github.com/whopio/whop-mcp-server#readme",
+	"packageManager": "pnpm@10.23.0",
+	"engines": {
+		"node": ">=22",
+		"pnpm": ">=10"
+	},
+	"devDependencies": {
+		"oxfmt": "^0.42.0",
+		"oxlint": "^1.55.0"
+	},
+	"scripts": {
+		"build": "pnpm --recursive run build",
+		"check": "pnpm check-types && pnpm lint && pnpm test",
+		"check-types": "pnpm build && pnpm --recursive run check-types",
+		"format": "pnpm --recursive run format",
+		"lint": "pnpm --recursive run lint",
+		"test": "pnpm --recursive run test"
+	}
+}

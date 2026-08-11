@@ -1,0 +1,33 @@
+{
+	"name": "@whop/mcp-worker",
+	"version": "0.0.1",
+	"private": true,
+	"description": "Hosted Whop MCP endpoint: OAuth 2.1 authorization server (PKCE, PRM, DCR, CIMD) proxying Whop OIDC, serving the canonical @whop/mcp-server registry over Streamable HTTP.",
+	"license": "Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/whopio/whop-mcp-server.git",
+		"directory": "apps/worker"
+	},
+	"type": "module",
+	"scripts": {
+		"dev": "wrangler dev",
+		"check-types": "tsc --noEmit",
+		"lint": "oxlint src tests",
+		"format": "oxfmt src tests",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@cloudflare/workers-oauth-provider": "0.8.2",
+		"@whop/mcp-server": "workspace:*"
+	},
+	"devDependencies": {
+		"@cloudflare/workers-types": "5.20260722.1",
+		"typescript": "5.9.3",
+		"vitest": "^2.1.9",
+		"wrangler": "4.115.0"
+	},
+	"engines": {
+		"node": ">=22"
+	}
+}
