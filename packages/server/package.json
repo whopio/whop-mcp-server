@@ -1,0 +1,62 @@
+{
+	"name": "@whop/mcp-server",
+	"version": "0.0.1",
+	"private": true,
+	"description": "The canonical Whop MCP server: one OpenAPI-derived operation registry powering the hosted Streamable HTTP endpoint and the local stdio adapter.",
+	"license": "Apache-2.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/whopio/whop-mcp-server.git",
+		"directory": "packages/server"
+	},
+	"files": [
+		"dist",
+		"generated"
+	],
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		},
+		"./stdio": {
+			"types": "./dist/adapters/stdio.d.ts",
+			"import": "./dist/adapters/stdio.js"
+		},
+		"./streamable-http": {
+			"types": "./dist/adapters/streamable-http.d.ts",
+			"import": "./dist/adapters/streamable-http.js"
+		},
+		"./manifest.json": "./generated/manifest.json",
+		"./sse": {
+			"types": "./dist/adapters/sse.d.ts",
+			"import": "./dist/adapters/sse.js"
+		}
+	},
+	"scripts": {
+		"generate": "tsx scripts/generate-registry.ts",
+		"generate:summary": "tsx scripts/generate-registry.ts --summary",
+		"build": "tsx scripts/generate-registry.ts && rm -rf dist && tsup",
+		"prepack": "pnpm build",
+		"check-types": "tsc --noEmit",
+		"lint": "oxlint src scripts tests",
+		"format": "oxfmt src scripts tests metadata",
+		"test": "vitest run"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/sdk": "^1.29.0"
+	},
+	"devDependencies": {
+		"@types/node": "25.3.5",
+		"oxfmt": "^0.42.0",
+		"oxlint": "^1.55.0",
+		"tsup": "8.5.0",
+		"tsx": "4.19.4",
+		"typescript": "5.9.3",
+		"vitest": "^2.1.9",
+		"yaml": "2.8.0"
+	},
+	"engines": {
+		"node": ">=22"
+	}
+}

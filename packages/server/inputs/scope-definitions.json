@@ -1,0 +1,594 @@
+{
+  "access_pass:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "access_pass:create": {
+    "bot": true,
+    "user": true
+  },
+  "access_pass:delete": {
+    "bot": true,
+    "user": true
+  },
+  "access_pass:update": {
+    "bot": true,
+    "user": true
+  },
+  "ad_campaign:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "ad_campaign:create": {
+    "bot": true,
+    "user": true
+  },
+  "ad_campaign:read": {
+    "bot": true,
+    "user": false
+  },
+  "ad_campaign:stats:read": {
+    "bot": true,
+    "user": false
+  },
+  "ad_campaign:update": {
+    "bot": true,
+    "user": true
+  },
+  "affiliate:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "affiliate:create": {
+    "bot": true,
+    "user": true
+  },
+  "affiliate:update": {
+    "bot": true,
+    "user": true
+  },
+  "ai_chat:create": {
+    "bot": false,
+    "user": true
+  },
+  "ai_chat:delete": {
+    "bot": false,
+    "user": true
+  },
+  "ai_chat:update": {
+    "bot": false,
+    "user": true
+  },
+  "airdrop_link:manage": {
+    "bot": true,
+    "user": false
+  },
+  "audience:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "audience:update": {
+    "bot": true,
+    "user": true
+  },
+  "authorized_user:create": {
+    "bot": true,
+    "disallow_app_authorization": true,
+    "user": false
+  },
+  "authorized_user:delete": {
+    "bot": true,
+    "disallow_app_authorization": true,
+    "user": false
+  },
+  "authorized_user:update": {
+    "bot": true,
+    "disallow_api_authorization": true,
+    "disallow_app_authorization": true,
+    "user": false
+  },
+  "bounty:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "bounty:create": {
+    "bot": false,
+    "user": true
+  },
+  "bounty:submission:create": {
+    "bot": false,
+    "user": true
+  },
+  "bounty:submission:delete": {
+    "bot": false,
+    "user": true
+  },
+  "bounty:update": {
+    "bot": true,
+    "user": true
+  },
+  "chat:message:create": {
+    "bot": true,
+    "user": true
+  },
+  "chat:moderate": {
+    "bot": true,
+    "user": true
+  },
+  "chat:read": {
+    "bot": true,
+    "user": true
+  },
+  "checkout_configuration:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "checkout_configuration:create": {
+    "bot": true,
+    "user": true
+  },
+  "checkout_configuration:delete": {
+    "bot": true,
+    "user": true
+  },
+  "child_company:basic:export": {
+    "bot": true,
+    "user": false
+  },
+  "company:authorized_user:read": {
+    "bot": true,
+    "user": true
+  },
+  "company:balance:export": {
+    "bot": true,
+    "user": true
+  },
+  "company:balance:read": {
+    "bot": true,
+    "user": true
+  },
+  "company:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "company:create": {
+    "bot": false,
+    "user": true
+  },
+  "company:create_child": {
+    "bot": true,
+    "user": false
+  },
+  "company:manage_checkout": {
+    "bot": true,
+    "user": true
+  },
+  "company:transfer_ownership": {
+    "bot": true,
+    "disallow_app_authorization": true,
+    "user": false
+  },
+  "company:update": {
+    "bot": true,
+    "user": true
+  },
+  "company:update_child_fees": {
+    "bot": true,
+    "user": false
+  },
+  "company_token_transaction:create": {
+    "bot": true,
+    "user": true
+  },
+  "company_token_transaction:read": {
+    "bot": true,
+    "user": true
+  },
+  "content_rewards:basic:export": {
+    "bot": true,
+    "user": false
+  },
+  "course_analytics:read": {
+    "bot": true,
+    "user": true
+  },
+  "courses:read": {
+    "bot": true,
+    "user": true
+  },
+  "courses:update": {
+    "bot": true,
+    "user": true
+  },
+  "crypto_wallet:manage": {
+    "bot": true,
+    "disallow_api_authorization": true,
+    "disallow_app_authorization": true,
+    "user": false
+  },
+  "crypto_wallet:swap": {
+    "bot": true,
+    "disallow_app_authorization": true,
+    "user": false
+  },
+  "developer:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "developer:create_app": {
+    "bot": true,
+    "user": true
+  },
+  "developer:logs:read": {
+    "bot": true,
+    "user": true
+  },
+  "developer:manage_api_key": {
+    "bot": true,
+    "disallow_api_authorization": true,
+    "disallow_app_authorization": true,
+    "user": false
+  },
+  "developer:manage_builds": {
+    "bot": true,
+    "user": true
+  },
+  "developer:manage_webhook": {
+    "bot": true,
+    "user": false
+  },
+  "developer:update_app": {
+    "bot": true,
+    "user": true
+  },
+  "developer:update_app_authorization": {
+    "bot": true,
+    "disallow_api_authorization": true,
+    "disallow_app_authorization": true,
+    "user": false
+  },
+  "dms:channel:manage": {
+    "bot": true,
+    "user": true
+  },
+  "dms:read": {
+    "bot": true,
+    "user": true
+  },
+  "event:create": {
+    "bot": true,
+    "user": true
+  },
+  "experience:attach": {
+    "bot": true,
+    "user": true
+  },
+  "experience:create": {
+    "bot": true,
+    "user": true
+  },
+  "experience:delete": {
+    "bot": true,
+    "user": true
+  },
+  "experience:detach": {
+    "bot": true,
+    "user": true
+  },
+  "experience:update": {
+    "bot": true,
+    "user": true
+  },
+  "forum:moderate": {
+    "bot": true,
+    "user": true
+  },
+  "forum:post:create": {
+    "bot": true,
+    "user": true
+  },
+  "forum:read": {
+    "bot": true,
+    "user": true
+  },
+  "identity:read": {
+    "bot": true,
+    "user": true
+  },
+  "identity:write": {
+    "bot": true,
+    "user": true
+  },
+  "incorporation:write": {
+    "bot": true,
+    "user": true
+  },
+  "invoice:basic:export": {
+    "bot": true,
+    "user": false
+  },
+  "invoice:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "invoice:create": {
+    "bot": true,
+    "user": true
+  },
+  "invoice:update": {
+    "bot": true,
+    "user": true
+  },
+  "lead:basic:export": {
+    "bot": true,
+    "user": false
+  },
+  "lead:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "lead:manage": {
+    "bot": true,
+    "user": true
+  },
+  "media:generate": {
+    "bot": true,
+    "user": true
+  },
+  "media:read": {
+    "bot": true,
+    "user": true
+  },
+  "member:basic:export": {
+    "bot": true,
+    "user": false
+  },
+  "member:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "member:email:read": {
+    "bot": true,
+    "user": true
+  },
+  "member:journey:read": {
+    "bot": true,
+    "user": true
+  },
+  "member:manage": {
+    "bot": true,
+    "user": true
+  },
+  "member:payment_methods:manage": {
+    "bot": true,
+    "user": true
+  },
+  "member:payment_methods:read": {
+    "bot": true,
+    "user": true
+  },
+  "member:phone:read": {
+    "bot": true,
+    "user": true
+  },
+  "membership:cancel": {
+    "bot": true,
+    "user": true
+  },
+  "membership:create": {
+    "bot": true,
+    "user": false
+  },
+  "membership:resync_access": {
+    "bot": true,
+    "user": true
+  },
+  "notification:create": {
+    "bot": true,
+    "user": true
+  },
+  "partner:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "partner:create": {
+    "bot": true,
+    "user": true
+  },
+  "payment:basic:export": {
+    "bot": true,
+    "user": false
+  },
+  "payment:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "payment:charge": {
+    "bot": true,
+    "user": true
+  },
+  "payment:dispute": {
+    "bot": true,
+    "user": true
+  },
+  "payment:dispute:read": {
+    "bot": true,
+    "user": true
+  },
+  "payment:dispute_alert:read": {
+    "bot": true,
+    "user": true
+  },
+  "payment:manage": {
+    "bot": true,
+    "user": true
+  },
+  "payment:resolution_center": {
+    "bot": true,
+    "user": true
+  },
+  "payment:resolution_center_case:export": {
+    "bot": true,
+    "user": false
+  },
+  "payment:resolution_center_case:manage": {
+    "bot": true,
+    "user": true
+  },
+  "payment:resolution_center_case:read": {
+    "bot": true,
+    "user": true
+  },
+  "payment:setup_intent:read": {
+    "bot": true,
+    "user": true
+  },
+  "payout:account:read": {
+    "bot": true,
+    "user": true
+  },
+  "payout:account:update": {
+    "bot": true,
+    "user": true
+  },
+  "payout:create_destination": {
+    "bot": true,
+    "disallow_app_authorization": true,
+    "user": true
+  },
+  "payout:delete_destination": {
+    "bot": true,
+    "disallow_app_authorization": true,
+    "user": true
+  },
+  "payout:destination:read": {
+    "bot": true,
+    "user": true
+  },
+  "payout:transfer:read": {
+    "bot": true,
+    "user": true
+  },
+  "payout:transfer_funds": {
+    "bot": true,
+    "user": false
+  },
+  "payout:update_destination": {
+    "bot": true,
+    "disallow_app_authorization": true,
+    "user": true
+  },
+  "payout:withdraw_funds": {
+    "bot": true,
+    "user": true
+  },
+  "payout:withdrawal:read": {
+    "bot": true,
+    "user": true
+  },
+  "plan:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "plan:create": {
+    "bot": true,
+    "user": true
+  },
+  "plan:delete": {
+    "bot": true,
+    "user": true
+  },
+  "plan:update": {
+    "bot": true,
+    "user": true
+  },
+  "plan:waitlist:export": {
+    "bot": true,
+    "user": true
+  },
+  "plan:waitlist:manage": {
+    "bot": true,
+    "user": true
+  },
+  "plan:waitlist:read": {
+    "bot": true,
+    "user": true
+  },
+  "promo_code:basic:export": {
+    "bot": true,
+    "user": true
+  },
+  "promo_code:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "promo_code:create": {
+    "bot": true,
+    "user": true
+  },
+  "promo_code:delete": {
+    "bot": true,
+    "user": true
+  },
+  "promo_code:update": {
+    "bot": true,
+    "user": true
+  },
+  "referral:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "shipment:basic:read": {
+    "bot": true,
+    "user": true
+  },
+  "shipment:create": {
+    "bot": true,
+    "user": true
+  },
+  "social_account:create": {
+    "bot": true,
+    "user": true
+  },
+  "social_account:delete": {
+    "bot": true,
+    "user": true
+  },
+  "social_account:read": {
+    "bot": true,
+    "user": true
+  },
+  "stats:read": {
+    "bot": true,
+    "user": true
+  },
+  "support_chat:create": {
+    "bot": true,
+    "user": true
+  },
+  "support_chat:read": {
+    "bot": true,
+    "user": true
+  },
+  "tracking_link:basic:export": {
+    "bot": true,
+    "user": true
+  },
+  "user:balance:read": {
+    "bot": false,
+    "user": true
+  },
+  "user:notifications:read": {
+    "bot": false,
+    "user": true
+  },
+  "user:notifications:update": {
+    "bot": false,
+    "user": true
+  },
+  "user:profile:update": {
+    "bot": false,
+    "disallow_api_authorization": false,
+    "user": true
+  }
+}
