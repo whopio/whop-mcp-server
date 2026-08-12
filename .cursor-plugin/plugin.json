@@ -1,8 +1,8 @@
 {
   "name": "whop",
   "displayName": "Whop",
-  "version": "1.0.0",
-  "description": "Connect Cursor to Whop through Whop's official hosted MCP server.",
+  "version": "1.0.1",
+  "description": "Build, sell, and operate on Whop with AI—manage products, memberships, customers, payments, and more.",
   "author": {
     "name": "Whop"
   },
@@ -18,7 +18,7 @@
     "payments",
     "creators"
   ],
-  "category": "integrations",
+  "category": "payments",
   "tags": [
     "mcp",
     "oauth",
