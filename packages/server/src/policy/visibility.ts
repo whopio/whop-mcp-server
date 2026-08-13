@@ -8,6 +8,13 @@ function scopesSatisfied(granted: string[], required: string[]): boolean {
 	return required.every((scope) => granted.includes(scope));
 }
 
+function scopeAlternativesSatisfied(
+	granted: string[],
+	alternatives: string[][],
+): boolean {
+	return alternatives.some((required) => scopesSatisfied(granted, required));
+}
+
 export interface VisibilityOptions {
 	/**
 	 * Restrict to the native REST surface. The legacy GraphQL-proxy surface is
@@ -34,6 +41,6 @@ export function visibleOperations(
 			(!options.nativeOnly || op.surface === "native") &&
 			op.profiles.includes(principal.permissionProfile) &&
 			op.principals.includes(principal.principalType) &&
-			scopesSatisfied(principal.scopes, op.scopes),
+			scopeAlternativesSatisfied(principal.scopes, op.scopeAlternatives),
 	);
 }

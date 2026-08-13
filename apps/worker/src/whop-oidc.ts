@@ -11,7 +11,6 @@ export interface WhopUserinfo {
 	preferred_username?: string;
 }
 
-/** The public client ID for Whop MCP's registered OAuth application. */
 export const WHOP_MCP_CLIENT_ID = "app_3bVb7SdAznaxnW";
 
 export interface WhopOidcConfig {
@@ -110,7 +109,7 @@ export class WhopOidcClient {
 			new URL("/oauth/userinfo", this.config.apiOrigin),
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
-				redirect: "error",
+				redirect: "manual",
 			},
 		);
 		if (!response.ok) {
@@ -134,7 +133,7 @@ export class WhopOidcClient {
 			{
 				method: "POST",
 				headers: { "Content-Type": "application/x-www-form-urlencoded" },
-				redirect: "error",
+				redirect: "manual",
 				body: new URLSearchParams({
 					client_id: this.config.clientId,
 					client_secret: this.config.clientSecret,

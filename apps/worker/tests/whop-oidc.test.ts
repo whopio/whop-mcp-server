@@ -46,6 +46,35 @@ describe("authorize URL", () => {
 	});
 });
 
+describe("userinfo", () => {
+	it("handles redirects manually so the access token stays on the configured origin", async () => {
+		let redirect: RequestInit["redirect"];
+		vi.stubGlobal("fetch", async (_url: URL | string, init?: RequestInit) => {
+			redirect = init?.redirect;
+			return Response.json({ sub: "user_1" });
+		});
+
+		await expect(client.userinfo("at_1")).resolves.toEqual({ sub: "user_1" });
+		expect(redirect).toBe("manual");
+	});
+
+	it("rejects redirect responses", async () => {
+		vi.stubGlobal(
+			"fetch",
+			async () =>
+				new Response(null, {
+					status: 302,
+					headers: { Location: "https://attacker.test/userinfo" },
+				}),
+		);
+
+		await expect(client.userinfo("at_1")).rejects.toMatchObject({
+			message: "userinfo failed with 302",
+			status: 502,
+		});
+	});
+});
+
 describe("token exchange", () => {
 	it("sends the verifier and parses tokens", async () => {
 		const calls: {
@@ -71,11 +100,29 @@ describe("token exchange", () => {
 		expect(tokens.refreshToken).toBe("rt_1");
 		expect(tokens.expiresAt).toBeGreaterThan(Date.now());
 		expect(calls[0].url).toBe("https://api.whop.test/oauth/token");
-		expect(calls[0].redirect).toBe("error");
+		expect(calls[0].redirect).toBe("manual");
 		const body = new URLSearchParams(calls[0].body);
 		expect(body.get("grant_type")).toBe("authorization_code");
 		expect(body.get("code_verifier")).toBe("verifier-1");
 		expect(body.get("client_secret")).toBe("secret_test");
+	});
+
+	it("rejects redirect responses", async () => {
+		vi.stubGlobal(
+			"fetch",
+			async () =>
+				new Response(null, {
+					status: 307,
+					headers: { Location: "https://attacker.test/token" },
+				}),
+		);
+
+		await expect(
+			client.exchangeCode("code-1", "verifier-1"),
+		).rejects.toMatchObject({
+			message: "Whop token endpoint returned 307: unknown",
+			status: 502,
+		});
 	});
 
 	it("maps upstream 400/401 to a 401 and other failures to 502", async () => {

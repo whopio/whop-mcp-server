@@ -37,7 +37,6 @@
 		"generate": "tsx scripts/generate-registry.ts",
 		"generate:summary": "tsx scripts/generate-registry.ts --summary",
 		"build": "tsx scripts/generate-registry.ts && rm -rf dist && tsup",
-		"prepack": "pnpm build",
 		"check-types": "tsc --noEmit",
 		"lint": "oxlint src scripts tests",
 		"format": "oxfmt src scripts tests metadata",

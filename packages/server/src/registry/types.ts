@@ -86,6 +86,7 @@ export interface OperationDef {
 	accountParam: AccountParam | null;
 	requiresAccount: boolean;
 	principals: PrincipalType[];
+	scopeAlternatives: string[][];
 	scopes: string[];
 	safety: OperationSafety;
 	annotations: ToolAnnotations;
