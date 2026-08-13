@@ -6,4 +6,7 @@ id = "generic-api-key"
 
 [[rules.allowlists]]
 description = "Truncated JWT placeholder in the published Whop OpenAPI snapshot"
+condition = "AND"
+regexTarget = "secret"
+regexes = ['''^eyJhbGciOiJIUzI1NiJ9[.][.][.]$''']
 paths = ["(^|/)packages/server/inputs/openapi[.]json$"]

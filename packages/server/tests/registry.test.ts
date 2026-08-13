@@ -34,41 +34,6 @@ describe("registry generation", () => {
 		expect(JSON.stringify(buildRealRegistry())).toBe(JSON.stringify(registry));
 	});
 
-	it("bundles only public scope capability fields", () => {
-		const doc = JSON.parse(loadOpenApiRaw()) as {
-			paths: Record<
-				string,
-				Record<string, { security?: { bearerAuth?: string[] }[] }>
-			>;
-		};
-		const publicScopes = new Set<string>();
-		for (const item of Object.values(doc.paths)) {
-			for (const method of ["get", "post", "put", "patch", "delete"]) {
-				for (const alternative of item[method]?.security ?? []) {
-					for (const scope of alternative.bearerAuth ?? []) {
-						publicScopes.add(scope);
-					}
-				}
-			}
-		}
-
-		const scopeDefinitions = loadMetadata().scopeDefinitions;
-		expect(Object.keys(scopeDefinitions).sort()).toEqual(
-			[...publicScopes].sort(),
-		);
-		const publicFields = new Set([
-			"bot",
-			"user",
-			"disallow_api_authorization",
-			"disallow_app_authorization",
-		]);
-		for (const definition of Object.values(scopeDefinitions)) {
-			expect(
-				Object.keys(definition).filter((key) => !publicFields.has(key)),
-			).toEqual([]);
-		}
-	});
-
 	it("excludes account security operations that require a first-party session", () => {
 		const sessionOnlyOperations = [
 			"GET /users/me/passkeys",
@@ -108,20 +73,23 @@ describe("registry generation", () => {
 		}
 	});
 
-	it("derives principals from the bundled scope definitions", () => {
+	it("derives principals from the configured scope definitions", () => {
 		const byName = new Map(registry.operations.map((op) => [op.toolName, op]));
 
-		// POST /transfers declares OR-alternatives; payout:transfer_funds is
-		// user: false but the payout:withdraw_funds alternative is grantable,
-		// so user principals keep the tool.
-		expect(byName.get("transfers_create")?.principals).toEqual([
-			"user",
-			"business",
-			"app",
-		]);
-		// Every POST /swaps alternative is user: false; app principals qualify
-		// via payout:transfer_funds, which App API keys may hold.
-		expect(byName.get("swaps_create")?.principals).toEqual(["business", "app"]);
+		for (const toolName of [
+			"bounties_cancel",
+			"support-channels_create",
+			"support-channels_get",
+			"support-channels_list",
+			"swaps_create",
+			"transfers_create",
+		]) {
+			expect(byName.get(toolName)?.principals, toolName).toEqual([
+				"user",
+				"business",
+				"app",
+			]);
+		}
 		expect(byName.get("webhooks_create")?.principals).toEqual([
 			"business",
 			"app",
@@ -139,6 +107,40 @@ describe("registry generation", () => {
 			"user",
 			"business",
 			"app",
+		]);
+	});
+
+	it("mirrors every operation's OpenAPI security blocks into scopeAlternatives", () => {
+		const doc = JSON.parse(loadOpenApiRaw());
+		for (const op of registry.operations) {
+			const security = (doc.paths[op.path]?.[op.method]?.security ?? []) as {
+				bearerAuth?: string[];
+			}[];
+			const alternatives =
+				security.length > 0
+					? security.map((alternative) =>
+							[...(alternative.bearerAuth ?? [])].sort(),
+						)
+					: [[]];
+			const key = `${op.method} ${op.path}`;
+			expect(op.scopeAlternatives, key).toEqual(alternatives);
+			expect(op.scopes, key).toEqual([...new Set(alternatives.flat())].sort());
+		}
+	});
+
+	it("keeps AND-scopes within one alternative distinct from OR-alternatives", () => {
+		const byName = new Map(registry.operations.map((op) => [op.toolName, op]));
+		// The exact scope matrix is pinned once, in the backend's
+		// open_api_schema_spec.rb; this exemplar only guards the shape.
+		expect(byName.get("messages_delete")?.scopeAlternatives).toEqual([
+			["chat:message:create", "chat:read"],
+			["dms:message:manage", "dms:read"],
+			["livestream:chat:read", "livestream:chat:write"],
+			["support_chat:message:create", "support_chat:read"],
+		]);
+		expect(byName.get("dm-channels_update")?.scopeAlternatives).toEqual([
+			["dms:channel:manage"],
+			["support_chat:create"],
 		]);
 	});
 
@@ -161,7 +163,7 @@ describe("registry generation", () => {
 		);
 		expect(generated.length).toBeGreaterThanOrEqual(6);
 		for (const entry of generated) {
-			expect(entry.reason).toContain("scope-definitions.json");
+			expect(entry.reason).toContain("configured scope definitions");
 		}
 	});
 
@@ -176,7 +178,7 @@ describe("registry generation", () => {
 					openapiSha256: "test",
 				},
 			),
-		).toThrow(/No scope-definitions entry/);
+		).toThrow(/No scope definition/);
 	});
 
 	it("tags the native surface and keeps it non-empty", () => {
@@ -202,6 +204,7 @@ describe("registry generation", () => {
 			"POST /payouts",
 			"POST /withdrawals",
 			"POST /transfers",
+			"POST /bounties/{id}/cancel",
 			"POST /wallets/send",
 		]) {
 			const op = byKey.get(key);

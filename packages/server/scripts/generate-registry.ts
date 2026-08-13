@@ -8,12 +8,12 @@ import {
 	GENERATOR_VERSION,
 	type GeneratorMetadata,
 } from "../src/registry/generate.ts";
+import { resolveRegistryInputPaths } from "./input-paths.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const packageRoot = join(__dirname, "..");
-const inputsRoot = join(packageRoot, "inputs");
-const openapiPath = join(inputsRoot, "openapi.json");
-const scopeDefinitionsPath = join(inputsRoot, "scope-definitions.json");
+const { openapiPath, scopeDefinitionsPath } =
+	resolveRegistryInputPaths(packageRoot);
 const manifestPath = join(packageRoot, "generated", "manifest.json");
 
 function loadYaml(name: string): unknown {

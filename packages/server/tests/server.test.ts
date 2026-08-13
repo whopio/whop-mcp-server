@@ -170,10 +170,35 @@ describe("MCP contract", () => {
 			if (tool.name === "connection_status") continue;
 			const op = registry.operations.find((o) => o.toolName === tool.name)!;
 			expect(
-				op.scopes.every((scope) => granted.includes(scope)),
+				op.scopeAlternatives.some((alternative) =>
+					alternative.every((scope) => granted.includes(scope)),
+				),
 				tool.name,
 			).toBe(true);
 		}
+	});
+
+	it("shows a tool when one OpenAPI scope alternative is granted", async () => {
+		const client = await connect({
+			principal: principalFixture({
+				permissionProfile: "standard",
+				scopes: ["support_chat:message:create"],
+			}),
+		});
+		const { tools } = await client.listTools();
+		expect(tools.map((tool) => tool.name)).toContain("messages_create");
+		expect(tools.map((tool) => tool.name)).not.toContain("messages_delete");
+	});
+
+	it("requires every scope within an OpenAPI alternative", async () => {
+		const client = await connect({
+			principal: principalFixture({
+				permissionProfile: "standard",
+				scopes: ["support_chat:message:create", "support_chat:read"],
+			}),
+		});
+		const { tools } = await client.listTools();
+		expect(tools.map((tool) => tool.name)).toContain("messages_delete");
 	});
 
 	it("executes a read tool against the API", async () => {

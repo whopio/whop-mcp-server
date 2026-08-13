@@ -114,6 +114,7 @@ export const WHOP_SCOPES = [
 	"payout:destination:read",
 	"payout:transfer:export",
 	"payout:transfer:read",
+	"payout:transfer_funds",
 	"payout:update_destination",
 	"payout:withdraw_funds",
 	"payout:withdrawal:read",

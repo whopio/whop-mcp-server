@@ -14,7 +14,7 @@ import type {
 	SafetyClassification,
 } from "./types.ts";
 
-export const GENERATOR_VERSION = "2.1.0";
+export const GENERATOR_VERSION = "2.2.0";
 
 const HTTP_METHODS: HttpMethod[] = ["get", "post", "put", "patch", "delete"];
 
@@ -147,10 +147,11 @@ export interface GeneratorMetadata {
 	};
 	overrides: { overrides: Record<string, OperationOverride> };
 	/**
-	 * The public scope-capability projection in inputs/scope-definitions.json.
-	 * Principals are derived from it so tools a connection can never successfully
-	 * call are not offered to it (e.g. developer:manage_api_key is user: false —
-	 * a hosted OAuth grant gets a guaranteed 403).
+	 * The configured scope capabilities record which credential kinds can hold
+	 * each scope. Principals are derived from them so tools a connection can
+	 * never successfully call are not offered to it (e.g.
+	 * developer:manage_api_key is user: false — a hosted OAuth grant gets a
+	 * guaranteed 403).
 	 */
 	scopeDefinitions: Record<string, ScopeDefinition>;
 }
@@ -170,7 +171,7 @@ function principalsForSecurity(
 	const holdable = (scope: string, principal: PrincipalType): boolean => {
 		const definition = definitions[scope];
 		if (!definition) {
-			fail(`No scope-definitions entry for scope "${scope}" on ${key}.`);
+			fail(`No scope definition for scope "${scope}" on ${key}.`);
 		}
 		if (principal === "user") return definition.user === true;
 		if (principal === "business") {
@@ -532,8 +533,10 @@ function buildOperation(
 		security && security.length > 0
 			? security.map((alternative) => [...(alternative.bearerAuth ?? [])])
 			: [[]];
-	// The flat union, kept for scope requesting (profile-scopes.ts) and
-	// display; alternative structure only matters for principal derivation.
+	const scopeAlternatives = alternatives.map((alternative) =>
+		[...new Set(alternative)].sort(),
+	);
+	// The flat union is kept for scope requesting (profile-scopes.ts) and display.
 	const scopes = [...new Set(alternatives.flat())].sort();
 
 	const scopePrincipals = principalsForSecurity(
@@ -569,6 +572,7 @@ function buildOperation(
 		accountParam,
 		requiresAccount: override?.requiresAccount ?? accountParamRequired,
 		principals,
+		scopeAlternatives,
 		scopes,
 		safety,
 		annotations: {
@@ -684,7 +688,7 @@ export function buildRegistry(
 			exclusions.push({
 				operation: key,
 				openapiOperationId: typeof opId === "string" ? opId : "",
-				reason: `No MCP principal can hold the required scope(s) ${operation.scopes.join(", ")} per scope-definitions.json.`,
+				reason: `No MCP principal can hold the required scope(s) ${operation.scopes.join(", ")} per the configured scope definitions.`,
 				owner: "registry-generator",
 			});
 			continue;

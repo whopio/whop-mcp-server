@@ -7,6 +7,7 @@ import {
 	buildRegistry,
 	type GeneratorMetadata,
 } from "../src/registry/generate.ts";
+import { resolveRegistryInputPaths } from "../scripts/input-paths.ts";
 import type { OperationDef, RegistryManifest } from "../src/registry/types.ts";
 import type {
 	CredentialAdapter,
@@ -15,10 +16,11 @@ import type {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 export const packageRoot = join(__dirname, "..");
-const inputsRoot = join(packageRoot, "inputs");
+const { openapiPath, scopeDefinitionsPath } =
+	resolveRegistryInputPaths(packageRoot);
 
 export function loadOpenApiRaw(): string {
-	return readFileSync(join(inputsRoot, "openapi.json"), "utf8");
+	return readFileSync(openapiPath, "utf8");
 }
 
 export function loadMetadata(): GeneratorMetadata {
@@ -28,9 +30,7 @@ export function loadMetadata(): GeneratorMetadata {
 		safety: load("safety.yml"),
 		exclusions: load("exclusions.yml"),
 		overrides: load("operation-overrides.yml"),
-		scopeDefinitions: JSON.parse(
-			readFileSync(join(inputsRoot, "scope-definitions.json"), "utf8"),
-		),
+		scopeDefinitions: JSON.parse(readFileSync(scopeDefinitionsPath, "utf8")),
 	};
 }
 

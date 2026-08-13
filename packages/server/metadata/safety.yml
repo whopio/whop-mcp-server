@@ -56,6 +56,7 @@ rules:
         - POST /invoices/{id}/void
         - POST /ad_campaigns/{id}/retry_payment
         - POST /bounties
+        - POST /bounties/{id}/cancel
     set:
       classification: mutating
       financial: true

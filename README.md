@@ -119,14 +119,13 @@ authorization requests expose it by design.
 
 ## Contributing
 
-1. Fork the repository and create a focused branch.
-2. Make the change, including tests and safety metadata where relevant.
-3. Run `pnpm check` from the repository root.
-4. Open a pull request describing the behavior and its security implications.
+This repository is an automatically generated mirror of the source deployed by
+Whop. Direct source changes here will be overwritten by the next production
+sync. Use GitHub Issues for reproducible bugs and feature requests; the Whop
+team will land changes in the canonical source before publishing them here.
 
-Use GitHub Issues for reproducible bugs and feature requests. Use the
-repository's Security tab for vulnerability reports so sensitive details are
-not posted publicly.
+Use the repository's Security tab for vulnerability reports so sensitive
+details are not posted publicly.
 
 ## Terms, privacy, and license
 

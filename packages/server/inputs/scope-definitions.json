@@ -73,19 +73,19 @@
   },
   "authorized_user:create": {
     "bot": true,
-    "disallow_app_authorization": true,
-    "user": false
+    "user": false,
+    "disallow_app_authorization": true
   },
   "authorized_user:delete": {
     "bot": true,
-    "disallow_app_authorization": true,
-    "user": false
+    "user": false,
+    "disallow_app_authorization": true
   },
   "authorized_user:update": {
     "bot": true,
+    "user": false,
     "disallow_api_authorization": true,
-    "disallow_app_authorization": true,
-    "user": false
+    "disallow_app_authorization": true
   },
   "bounty:basic:read": {
     "bot": true,
@@ -165,8 +165,8 @@
   },
   "company:transfer_ownership": {
     "bot": true,
-    "disallow_app_authorization": true,
-    "user": false
+    "user": false,
+    "disallow_app_authorization": true
   },
   "company:update": {
     "bot": true,
@@ -202,14 +202,14 @@
   },
   "crypto_wallet:manage": {
     "bot": true,
+    "user": false,
     "disallow_api_authorization": true,
-    "disallow_app_authorization": true,
-    "user": false
+    "disallow_app_authorization": true
   },
   "crypto_wallet:swap": {
     "bot": true,
-    "disallow_app_authorization": true,
-    "user": false
+    "user": false,
+    "disallow_app_authorization": true
   },
   "developer:basic:read": {
     "bot": true,
@@ -225,9 +225,9 @@
   },
   "developer:manage_api_key": {
     "bot": true,
+    "user": false,
     "disallow_api_authorization": true,
-    "disallow_app_authorization": true,
-    "user": false
+    "disallow_app_authorization": true
   },
   "developer:manage_builds": {
     "bot": true,
@@ -243,11 +243,15 @@
   },
   "developer:update_app_authorization": {
     "bot": true,
+    "user": false,
     "disallow_api_authorization": true,
-    "disallow_app_authorization": true,
-    "user": false
+    "disallow_app_authorization": true
   },
   "dms:channel:manage": {
+    "bot": true,
+    "user": true
+  },
+  "dms:message:manage": {
     "bot": true,
     "user": true
   },
@@ -328,6 +332,14 @@
     "user": true
   },
   "lead:manage": {
+    "bot": true,
+    "user": true
+  },
+  "livestream:chat:read": {
+    "bot": true,
+    "user": true
+  },
+  "livestream:chat:write": {
     "bot": true,
     "user": true
   },
@@ -453,13 +465,13 @@
   },
   "payout:create_destination": {
     "bot": true,
-    "disallow_app_authorization": true,
-    "user": true
+    "user": true,
+    "disallow_app_authorization": true
   },
   "payout:delete_destination": {
     "bot": true,
-    "disallow_app_authorization": true,
-    "user": true
+    "user": true,
+    "disallow_app_authorization": true
   },
   "payout:destination:read": {
     "bot": true,
@@ -471,12 +483,12 @@
   },
   "payout:transfer_funds": {
     "bot": true,
-    "user": false
+    "user": true
   },
   "payout:update_destination": {
     "bot": true,
-    "disallow_app_authorization": true,
-    "user": true
+    "user": true,
+    "disallow_app_authorization": true
   },
   "payout:withdraw_funds": {
     "bot": true,
@@ -566,6 +578,10 @@
     "bot": true,
     "user": true
   },
+  "support_chat:message:create": {
+    "bot": true,
+    "user": true
+  },
   "support_chat:read": {
     "bot": true,
     "user": true
@@ -588,7 +604,7 @@
   },
   "user:profile:update": {
     "bot": false,
-    "disallow_api_authorization": false,
-    "user": true
+    "user": true,
+    "disallow_api_authorization": false
   }
 }
