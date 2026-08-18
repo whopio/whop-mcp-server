@@ -10,9 +10,6 @@
 #       owner: github-handle or team
 
 exclusions:
-  - operation: "GET /verifications/{id}"
-    reason: Legacy GraphQL-proxy duplicate of GET /verifications/{verification_id}, which is the native surface the existing public verifications_get tool maps to.
-    owner: gayatrigt
   - operation: "PATCH /apps/{app_id}/permissions"
     reason: Legacy GraphQL-proxy duplicate of PATCH /apps/{id}/permissions (native), which claims the apps_permissions tool name.
     owner: gayatrigt

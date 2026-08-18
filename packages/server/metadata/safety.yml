@@ -32,7 +32,7 @@ rules:
   - name: recommended-action-runs
     match:
       operations:
-        - POST /recommended_actions/{chain_id}
+        - POST /recommended_actions/{id}
     set:
       classification: mutating
 
@@ -68,12 +68,12 @@ rules:
     match:
       operations:
         - POST /cards
-        - PATCH /cards/{card_id}
+        - PATCH /cards/{id}
         - POST /fee_markups
         - POST /memberships/{id}/add_free_days
         - POST /memberships/{id}/extend
         - POST /payouts/methods
-        - PATCH /payouts/methods/{payout_method_id}
+        - PATCH /payouts/methods/{id}
         - POST /media/generate
         - POST /payment_method_domains
         - POST /payment_method_domains/{id}/verify
@@ -177,6 +177,7 @@ rules:
       operations:
         - POST /memberships/{id}/cancel
         - POST /memberships/{id}/pause
+        - POST /memberships/{id}/transfer
     set:
       classification: mutating
       confirmation: true
@@ -247,6 +248,17 @@ rules:
     set:
       classification: mutating
       confirmation: true
+
+  # ── Deploying an app: builds the working copy and, unless draft, promotes it
+  # ── to production — the same end effect as app-build-promote ──────────────
+  - name: app-deployment
+    match:
+      operations:
+        - POST /apps/{id}/deploy
+    set:
+      classification: mutating
+      confirmation: true
+      idempotency: supported
 
   # ── Exports produce files of data the credential can already read ─────────
   - name: data-exports

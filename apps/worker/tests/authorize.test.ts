@@ -205,12 +205,12 @@ describe("OAuth authorize", () => {
 		);
 		const state = location.searchParams.get("state") ?? "";
 		expect(pendingKey).toBe(`pending_auth:${state}`);
-		const pending = await openJson<{ profile: string }>(
-			"test-state-key-16ch",
-			pendingValue,
-			state,
-		);
+		const pending = await openJson<{
+			clientName?: string;
+			profile: string;
+		}>("test-state-key-16ch", pendingValue, state);
 		expect(pending?.profile).toBe("admin");
+		expect(pending?.clientName).toBe("Test agent");
 	});
 
 	it("grants full access even when the client requests a narrower profile", async () => {

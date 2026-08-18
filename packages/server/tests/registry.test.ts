@@ -425,6 +425,12 @@ describe("inferOperationName", () => {
 		expect(inferOperationName("POST", "/swaps/quote")).toBe("quote");
 		expect(inferOperationName("GET", "/swaps")).toBe("status");
 		expect(inferOperationName("PATCH", "/users/me")).toBe("update-me");
+		expect(inferOperationName("PATCH", "/payouts/methods/{id}")).toBe(
+			"update-method",
+		);
+		expect(inferOperationName("DELETE", "/payouts/methods/{id}")).toBe(
+			"delete-method",
+		);
 		expect(inferOperationName("GET", "/users/{id}/access/{resource_id}")).toBe(
 			"access",
 		);

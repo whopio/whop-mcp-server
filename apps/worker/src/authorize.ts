@@ -17,6 +17,7 @@ const SESSION_COOKIE = "mcp_auth_session";
 
 interface PendingAuthorization {
 	authRequest: AuthRequest;
+	clientName?: string;
 	codeVerifier: string;
 	profile: string;
 	session: string;
@@ -66,6 +67,7 @@ function redirectResponse(location: string): Response {
 async function redirectUpstream(
 	env: Env,
 	authRequest: AuthRequest,
+	clientName: string | undefined,
 	profile: string,
 ): Promise<Response> {
 	const state = crypto.randomUUID();
@@ -76,6 +78,7 @@ async function redirectUpstream(
 	const session = crypto.randomUUID();
 	const pending: PendingAuthorization = {
 		authRequest,
+		clientName,
 		codeVerifier,
 		profile,
 		session,
@@ -113,7 +116,7 @@ async function handleAuthorize(request: Request, env: Env): Promise<Response> {
 	if (!client) {
 		return errorPage("Unknown OAuth client. Reconnect from your agent.");
 	}
-	return redirectUpstream(env, authRequest, "admin");
+	return redirectUpstream(env, authRequest, client.clientName, "admin");
 }
 
 async function handleCallback(request: Request, env: Env): Promise<Response> {
@@ -158,6 +161,7 @@ async function handleCallback(request: Request, env: Env): Promise<Response> {
 	const props: WhopGrantProps = {
 		userId: userinfo.sub,
 		userName: userinfo.name ?? userinfo.preferred_username ?? null,
+		mcpClientName: pending.clientName,
 		profile: pending.profile,
 		whopAccessToken: tokens.accessToken,
 		whopRefreshToken: tokens.refreshToken,

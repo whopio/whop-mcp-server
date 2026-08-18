@@ -69,8 +69,8 @@ const OP_ID_OVERRIDES: Record<string, string> = {
 	// The verb methods all infer "methods" from the static path segment.
 	"GET /payouts/methods": "methods",
 	"POST /payouts/methods": "create-method",
-	"PATCH /payouts/methods/{payout_method_id}": "update-method",
-	"DELETE /payouts/methods/{payout_method_id}": "delete-method",
+	"PATCH /payouts/methods/{id}": "update-method",
+	"DELETE /payouts/methods/{id}": "delete-method",
 	// Not part of the pre-existing CLI surface; named here to avoid collisions
 	// between methods sharing a static path segment.
 	"GET /affiliates/{id}/overrides": "list-overrides",

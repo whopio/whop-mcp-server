@@ -395,6 +395,14 @@
     "bot": true,
     "user": true
   },
+  "membership:transfer": {
+    "bot": true,
+    "user": true
+  },
+  "membership:update": {
+    "bot": true,
+    "user": true
+  },
   "notification:create": {
     "bot": true,
     "user": true

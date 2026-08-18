@@ -10,6 +10,7 @@ import type { SseSessionDO } from "./sse-session-do.ts";
 export interface WhopGrantProps extends Record<string, unknown> {
 	userId: string;
 	userName: string | null;
+	mcpClientName?: string;
 	profile: string;
 	whopAccessToken: string;
 	whopRefreshToken: string;

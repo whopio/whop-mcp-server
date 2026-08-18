@@ -7,51 +7,53 @@
 	// when it fetches client metadata documents.
 	"compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
 	"dev": {
-		"port": 8788
+		// Fixed so concurrent dev servers never probe onto the same inspector port (see infra/localdev/justfile: inspector port registry).
+		"inspector_port": 9352,
+		"port": 8788,
 	},
 	"upload_source_maps": true,
 	"version_metadata": {
-		"binding": "CF_VERSION_METADATA"
+		"binding": "CF_VERSION_METADATA",
 	},
 	"durable_objects": {
 		"bindings": [
 			{
 				"class_name": "IdempotencyDO",
-				"name": "IDEMPOTENCY"
+				"name": "IDEMPOTENCY",
 			},
 			{
 				"class_name": "SseSessionDO",
-				"name": "SSE_SESSIONS"
-			}
-		]
+				"name": "SSE_SESSIONS",
+			},
+		],
 	},
 	"migrations": [
 		{
 			"tag": "v1",
-			"new_sqlite_classes": ["IdempotencyDO"]
+			"new_sqlite_classes": ["IdempotencyDO"],
 		},
 		{
 			"tag": "v2",
-			"new_sqlite_classes": ["SseSessionDO"]
-		}
+			"new_sqlite_classes": ["SseSessionDO"],
+		},
 	],
 	"secrets": {
 		"required": [
 			"MCP_WHOP_OAUTH_CLIENT_SECRET",
 			"MCP_CONFIRMATION_SECRET",
-			"MCP_STATE_ENCRYPTION_KEY"
-		]
+			"MCP_STATE_ENCRYPTION_KEY",
+		],
 	},
 	"vars": {
 		"MCP_BASE_URL": "http://localhost:8788",
-		"MCP_WHOP_API_ORIGIN": "https://api.whop.com"
+		"MCP_WHOP_API_ORIGIN": "https://api.whop.com",
 	},
 	// Wrangler simulates this namespace during local development. Create and
 	// bind your own namespace before deploying a copy of the worker.
 	"kv_namespaces": [
 		{
 			"binding": "OAUTH_KV",
-			"id": "local-dev-placeholder"
-		}
-	]
+			"id": "local-dev-placeholder",
+		},
+	],
 }

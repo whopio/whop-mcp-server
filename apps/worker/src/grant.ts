@@ -37,6 +37,11 @@ export function parseGrantProps(value: unknown): WhopGrantProps | null {
 	if (typeof props.whopAccessToken !== "string") return null;
 	if (typeof props.whopRefreshToken !== "string") return null;
 	if (typeof props.whopExpiresAt !== "number") return null;
+	if (
+		props.mcpClientName !== undefined &&
+		typeof props.mcpClientName !== "string"
+	)
+		return null;
 	return props as WhopGrantProps;
 }
 
@@ -70,7 +75,13 @@ export function attributionHeaders(
 	props: WhopGrantProps,
 	transport: "http" | "sse",
 ): Record<string, string> {
-	return {
+	const headers: Record<string, string> = {
 		"x-whop-mcp-client": `whop-mcp-worker/${env.CF_VERSION_METADATA.id}; profile=${props.profile}; transport=${transport}`,
 	};
+	const clientName = props.mcpClientName
+		?.replace(/[^\x20-\x7E]/g, "")
+		.trim()
+		.slice(0, 128);
+	if (clientName) headers["x-whop-mcp-client-name"] = clientName;
+	return headers;
 }
