@@ -1,5 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { Buffer } from "node:buffer";
 import { describe, expect, it } from "vitest";
 import type { PrincipalContext } from "../src/policy/types.ts";
 import { InMemoryAuditSink } from "../src/safety/audit.ts";
@@ -15,6 +16,33 @@ import {
 
 const registry = buildRealRegistry();
 const SECRET = "test-secret-key-that-is-long-enough";
+const TEST_INTENT = "Show me my products";
+const TEST_INTENT_ID = "123e4567-e89b-42d3-a456-426614174000";
+
+function withTestIntent(client: Client): Client {
+	const callTool = client.callTool.bind(client);
+	const callToolWithIntent: typeof client.callTool = (
+		params,
+		resultSchema,
+		requestOptions,
+	) =>
+		callTool(
+			params.name === "connection_status"
+				? params
+				: {
+						...params,
+						arguments: {
+							intent: TEST_INTENT,
+							intent_id: TEST_INTENT_ID,
+							...params.arguments,
+						},
+					},
+			resultSchema,
+			requestOptions,
+		);
+	client.callTool = callToolWithIntent;
+	return client;
+}
 
 class FailFirstCompletionStore extends InMemoryIdempotencyStore {
 	#failNextCompletion = true;
@@ -101,6 +129,7 @@ async function connect(
 		auditSink?: InMemoryAuditSink;
 		idempotencyStore?: InMemoryIdempotencyStore;
 		beforeCall?: Parameters<typeof createWhopMcpServer>[0]["beforeCall"];
+		includeIntent?: boolean;
 	} = {},
 ) {
 	const { server } = createWhopMcpServer({
@@ -121,13 +150,17 @@ async function connect(
 		server.connect(serverTransport),
 		client.connect(clientTransport),
 	]);
-	return client;
+	return options.includeIntent === false ? client : withTestIntent(client);
 }
 
 function parseResult(result: unknown): Record<string, unknown> {
 	const content = (result as { content: { type: string; text: string }[] })
 		.content;
 	return JSON.parse(content[0].text);
+}
+
+function decodeMcpContext(value: string): Record<string, unknown> {
+	return JSON.parse(Buffer.from(value, "base64url").toString("utf8"));
 }
 
 describe("MCP contract", () => {
@@ -142,6 +175,24 @@ describe("MCP contract", () => {
 			op.principals.includes("business"),
 		);
 		expect(tools.length).toBe(businessOps.length + 1);
+		for (const tool of tools) {
+			if (tool.name === "connection_status") {
+				expect(tool.inputSchema.properties).not.toHaveProperty("intent");
+				expect(tool.inputSchema.properties).not.toHaveProperty("intent_id");
+				continue;
+			}
+			expect(tool.inputSchema.properties?.intent).toMatchObject({
+				type: "string",
+				pattern: "\\S",
+			});
+			expect(tool.inputSchema.properties?.intent_id).toMatchObject({
+				type: "string",
+				format: "uuid",
+			});
+			expect(tool.inputSchema.required).toEqual(
+				expect.arrayContaining(["intent", "intent_id"]),
+			);
+		}
 	});
 
 	it("filters tools by permission profile", async () => {
@@ -212,6 +263,69 @@ describe("MCP contract", () => {
 		});
 		expect(parseResult(result)).toEqual({ data: [{ id: "prod_1" }] });
 		expect(requests[0].url).toContain("/products");
+		expect(requests[0].url).not.toContain("intent");
+		expect(requests[0].body).toBeUndefined();
+		const context = decodeMcpContext(requests[0].headers["x-whop-mcp-context"]);
+		expect(context).toMatchObject({
+			version: 1,
+			intent: TEST_INTENT,
+			intent_id: TEST_INTENT_ID,
+			intent_char_count: Array.from(TEST_INTENT).length,
+			intent_truncated: false,
+			tool_name: "products_list",
+		});
+		expect(context.tool_call_id).toMatch(
+			/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+		);
+	});
+
+	it("rejects missing or invalid intent attribution before dispatch", async () => {
+		const { fetch, requests } = fakeFetch();
+		const client = await connect({ fetch, includeIntent: false });
+		for (const arguments_ of [
+			{},
+			{ intent: "   ", intent_id: TEST_INTENT_ID },
+			{ intent: TEST_INTENT, intent_id: "not-a-uuid" },
+			{ intent: 42, intent_id: TEST_INTENT_ID },
+		]) {
+			const result = await client.callTool({
+				name: "products_list",
+				arguments: arguments_,
+			});
+			expect(result.isError).toBe(true);
+			expect(parseResult(result)).toMatchObject({
+				error: { code: "invalid_input" },
+			});
+		}
+		expect(requests).toHaveLength(0);
+	});
+
+	it("uses separate tool-call IDs for overlapping intent text", async () => {
+		const { fetch, requests } = fakeFetch();
+		const client = await connect({ fetch });
+		await client.callTool({
+			name: "products_list",
+			arguments: { intent: "Make my ads better" },
+		});
+		await client.callTool({
+			name: "products_list",
+			arguments: {
+				intent: "Make my ads better",
+				intent_id: "223e4567-e89b-42d3-a456-426614174000",
+			},
+		});
+		const contexts = requests.map((request) =>
+			decodeMcpContext(request.headers["x-whop-mcp-context"]),
+		);
+		expect(contexts.map((context) => context.intent)).toEqual([
+			"Make my ads better",
+			"Make my ads better",
+		]);
+		expect(contexts.map((context) => context.intent_id)).toEqual([
+			TEST_INTENT_ID,
+			"223e4567-e89b-42d3-a456-426614174000",
+		]);
+		expect(contexts[0].tool_call_id).not.toBe(contexts[1].tool_call_id);
 	});
 
 	it("returns a structured error for unknown tools", async () => {
@@ -240,6 +354,11 @@ describe("MCP contract", () => {
 		);
 		expect(prepared.prepared).toBe(true);
 		expect(prepared.executed).toBe(false);
+		expect(prepared.arguments).toMatchObject({
+			intent: TEST_INTENT,
+			intent_id: TEST_INTENT_ID,
+			id: "pay_123456",
+		});
 		expect(requests.length).toBe(0);
 		const token = prepared.mcp_confirmation_token as string;
 		expect(token.length).toBeGreaterThan(20);
@@ -256,6 +375,15 @@ describe("MCP contract", () => {
 		);
 		expect(executed).toEqual({ id: "pay_1", status: "refunded" });
 		expect(requests.length).toBe(1);
+		expect(requests[0].body ?? {}).not.toHaveProperty("intent");
+		expect(requests[0].body ?? {}).not.toHaveProperty("intent_id");
+		expect(
+			decodeMcpContext(requests[0].headers["x-whop-mcp-context"]),
+		).toMatchObject({
+			intent: TEST_INTENT,
+			intent_id: TEST_INTENT_ID,
+			tool_name: "payments_refund",
+		});
 
 		const replayed = parseResult(
 			await client.callTool({
@@ -1126,7 +1254,7 @@ describe("confirmation modes and policy hooks", () => {
 			server.connect(serverTransport),
 			client.connect(clientTransport),
 		]);
-		return client;
+		return withTestIntent(client);
 	}
 
 	it("executes confirmation-required tools directly in host-approval mode", async () => {

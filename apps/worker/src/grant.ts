@@ -8,6 +8,17 @@ import type { Env, WhopGrantProps } from "./types.ts";
 
 export const EXPIRY_SLACK_MS = 30_000;
 
+export function normalizeMcpClientName(
+	clientName: string | undefined,
+): string | undefined {
+	return (
+		clientName
+			?.replace(/[^\x20-\x7E]/g, "")
+			.trim()
+			.slice(0, 128) || undefined
+	);
+}
+
 export class StructuredLogAuditSink implements AuditSink {
 	async record(event: AuditEvent): Promise<void> {
 		console.log(JSON.stringify({ type: "mcp_audit", ...event }));
@@ -78,10 +89,7 @@ export function attributionHeaders(
 	const headers: Record<string, string> = {
 		"x-whop-mcp-client": `whop-mcp-worker/${env.CF_VERSION_METADATA.id}; profile=${props.profile}; transport=${transport}`,
 	};
-	const clientName = props.mcpClientName
-		?.replace(/[^\x20-\x7E]/g, "")
-		.trim()
-		.slice(0, 128);
+	const clientName = normalizeMcpClientName(props.mcpClientName);
 	if (clientName) headers["x-whop-mcp-client-name"] = clientName;
 	return headers;
 }

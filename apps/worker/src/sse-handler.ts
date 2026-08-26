@@ -1,4 +1,9 @@
-import { EXPIRY_SLACK_MS, parseGrantProps, unauthorized } from "./grant.ts";
+import {
+	EXPIRY_SLACK_MS,
+	normalizeMcpClientName,
+	parseGrantProps,
+	unauthorized,
+} from "./grant.ts";
 import type { Env } from "./types.ts";
 
 /**
@@ -53,16 +58,19 @@ export function createSseApiHandler() {
 				const stub = env.SSE_SESSIONS.get(
 					env.SSE_SESSIONS.idFromName(sessionId),
 				);
+				const headers: Record<string, string> = {
+					"Content-Type": "application/json",
+					"x-session-owner": props.userId,
+					// The stream outlives the Whop token behind it; hand the DO
+					// the caller's current one so a refreshed connection doesn't
+					// keep calling upstream with the token from /open.
+					"x-session-token": props.whopAccessToken,
+				};
+				const clientName = normalizeMcpClientName(props.mcpClientName);
+				if (clientName) headers["x-session-client-name"] = clientName;
 				return stub.fetch("https://sse-session/message", {
 					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"x-session-owner": props.userId,
-						// The stream outlives the Whop token behind it; hand the DO
-						// the caller's current one so a refreshed connection doesn't
-						// keep calling upstream with the token from /open.
-						"x-session-token": props.whopAccessToken,
-					},
+					headers,
 					body: request.body,
 				});
 			}

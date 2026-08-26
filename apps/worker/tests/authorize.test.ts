@@ -177,7 +177,7 @@ describe("OAuth authorize", () => {
 				parseAuthRequest: async () => AUTH_REQUEST,
 				lookupClient: async () => ({
 					clientId: AUTH_REQUEST.clientId,
-					clientName: "Test agent",
+					clientName: "  Test agent 🦄  ",
 					redirectUris: [AUTH_REQUEST.redirectUri],
 				}),
 			},

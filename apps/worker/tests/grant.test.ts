@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { attributionHeaders } from "../src/grant.ts";
+import { attributionHeaders, normalizeMcpClientName } from "../src/grant.ts";
 import type { Env, WhopGrantProps } from "../src/types.ts";
 
 const env = { CF_VERSION_METADATA: { id: "test-version" } } as Env;
@@ -24,5 +24,13 @@ describe("attributionHeaders", () => {
 			"http",
 		);
 		expect(headers).not.toHaveProperty("x-whop-mcp-client-name");
+	});
+});
+
+describe("normalizeMcpClientName", () => {
+	it("keeps one printable, bounded value for storage and headers", () => {
+		expect(normalizeMcpClientName("  Claude 🦄 Code  ")).toBe("Claude  Code");
+		expect(normalizeMcpClientName("a".repeat(129))).toBe("a".repeat(128));
+		expect(normalizeMcpClientName("  🦄  ")).toBeUndefined();
 	});
 });

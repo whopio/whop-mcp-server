@@ -41,9 +41,17 @@ function parseResult(result: unknown): Record<string, unknown> {
 describe("ChatGPT compat tools", () => {
 	it("lists search and fetch when enabled, and omits them by default", async () => {
 		const withCompat = await connect();
-		const tools = (await withCompat.listTools()).tools.map((t) => t.name);
+		const listedTools = (await withCompat.listTools()).tools;
+		const tools = listedTools.map((tool) => tool.name);
 		expect(tools).toContain("search");
 		expect(tools).toContain("fetch");
+		for (const name of ["search", "fetch"]) {
+			const schema = listedTools.find(
+				(tool) => tool.name === name,
+			)?.inputSchema;
+			expect(schema?.properties).not.toHaveProperty("intent");
+			expect(schema?.properties).not.toHaveProperty("intent_id");
+		}
 
 		const { server } = createWhopMcpServer({
 			registry,

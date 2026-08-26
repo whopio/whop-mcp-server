@@ -2,6 +2,11 @@ import type { OperationDef } from "../registry/types.ts";
 import type { CredentialAdapter, PrincipalContext } from "../policy/types.ts";
 import { enforceAccountBinding } from "../policy/account-binding.ts";
 import { normalizeUpstreamError, redactValue, WhopMcpError } from "./errors.ts";
+import {
+	encodeMcpRequestContext,
+	MCP_CONTEXT_HEADER,
+	type McpRequestContext,
+} from "./mcp-context.ts";
 import { validateAgainstSchema } from "./validate.ts";
 
 export interface DispatcherOptions {
@@ -22,6 +27,7 @@ export interface DispatchOverrides {
 	 * the caller's stable retry key with its user, account, and operation scope.
 	 */
 	idempotencyKey?: string;
+	mcpRequestContext?: McpRequestContext;
 }
 
 const DEFAULT_TIMEOUT_MS = 30_000;
@@ -129,8 +135,18 @@ export class Dispatcher {
 						? { "User-Agent": this.options.userAgent }
 						: {}),
 					...this.options.extraHeaders,
+					...(overrides.mcpRequestContext
+						? {
+								[MCP_CONTEXT_HEADER]: encodeMcpRequestContext(
+									overrides.mcpRequestContext,
+								),
+							}
+						: {}),
 				},
 				body: body !== undefined ? JSON.stringify(body) : undefined,
+				// Workers do not implement "error". Manual mode returns the 3xx
+				// response without replaying bearer or attribution headers.
+				redirect: "manual",
 				signal: controller.signal,
 			});
 		} catch (cause) {
@@ -151,6 +167,15 @@ export class Dispatcher {
 			response.headers.get("x-request-id") ??
 			response.headers.get("cf-ray") ??
 			undefined;
+		if (response.status >= 300 && response.status < 400) {
+			clearTimeout(timeout);
+			await response.body?.cancel().catch(() => {});
+			throw new WhopMcpError(
+				"upstream_error",
+				`${operation.toolName} received an unexpected 3xx response from the Whop API.`,
+				{ status: response.status, requestId },
+			);
+		}
 
 		// The abort timer stays armed through the body read so a slow-trickling
 		// response cannot hang the tool call past the deadline.

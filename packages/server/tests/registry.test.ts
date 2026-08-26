@@ -101,8 +101,8 @@ describe("registry generation", () => {
 			"app",
 		]);
 
-		// payout:withdraw_funds IS user-grantable — withdrawals must stay.
-		expect(byName.get("withdrawals_create")?.principals).toContain("user");
+		// payout:withdraw_funds IS user-grantable — the payout tools must stay.
+		expect(byName.get("payouts_create")?.principals).toContain("user");
 		expect(byName.get("accounts_list")?.principals).toEqual([
 			"user",
 			"business",
@@ -217,6 +217,18 @@ describe("registry generation", () => {
 		).toBeGreaterThan(10);
 	});
 
+	it("treats provider-backed payout quotes as idempotent mutations", () => {
+		const operation = registry.operations.find(
+			(op) => op.method === "post" && op.path === "/payouts/quotes",
+		);
+		expect(operation?.safety).toMatchObject({
+			classification: "mutating",
+			financial: false,
+			idempotency: "required",
+			confirmationRequired: false,
+		});
+	});
+
 	it("treats setup intent creation as confirmed financial configuration", () => {
 		const operation = registry.operations.find(
 			(op) => op.method === "post" && op.path === "/setup_intents",
@@ -261,6 +273,17 @@ describe("registry generation", () => {
 		for (const op of registry.operations) {
 			expect(op.inputSchema.properties, op.toolName).not.toHaveProperty(
 				"mcp_confirmation_token",
+			);
+		}
+	});
+
+	it("reserves intent attribution fields for the MCP runtime", () => {
+		for (const op of registry.operations) {
+			expect(op.inputSchema.properties, op.toolName).not.toHaveProperty(
+				"intent",
+			);
+			expect(op.inputSchema.properties, op.toolName).not.toHaveProperty(
+				"intent_id",
 			);
 		}
 	});

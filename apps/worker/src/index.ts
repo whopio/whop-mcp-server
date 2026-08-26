@@ -1,18 +1,18 @@
-import OAuthProvider, { OAuthError } from "@cloudflare/workers-oauth-provider";
+import OAuthProvider, {
+	getOAuthApi,
+	type OAuthProviderOptions,
+	type TokenExchangeCallbackOptions,
+	type TokenExchangeCallbackResult,
+} from "@cloudflare/workers-oauth-provider";
 import { defaultHandler } from "./authorize.ts";
 import { createMcpApiHandler } from "./mcp-handler.ts";
 import { createSseApiHandler } from "./sse-handler.ts";
-import {
-	WHOP_MCP_CLIENT_ID,
-	WhopOidcClient,
-	WhopOidcError,
-} from "./whop-oidc.ts";
-import type { Env, WhopGrantProps } from "./types.ts";
+import { reconcileGrantOnTokenExchange } from "./token-exchange.ts";
+import { WHOP_MCP_CLIENT_ID, WhopOidcClient } from "./whop-oidc.ts";
+import type { Env } from "./types.ts";
 
 export { IdempotencyDO } from "./idempotency-do.ts";
 export { SseSessionDO } from "./sse-session-do.ts";
-
-const REFRESH_AHEAD_MS = 15 * 60 * 1000;
 
 /**
  * tokenExchangeCallback receives only its options object — no Worker
@@ -28,16 +28,9 @@ let workerEnv: Env | undefined;
  * matched to Whop's, so routine expiry always funnels through here — the
  * only place rotated Whop tokens can be persisted back onto the grant.
  */
-async function tokenExchangeCallback(options: {
-	grantType: string;
-	props: WhopGrantProps;
-	grantId: string;
-	userId: string;
-}): Promise<{ newProps?: WhopGrantProps } | undefined> {
-	if (options.grantType !== "refresh_token") return undefined;
-	const props = options.props;
-	if (props.whopExpiresAt > Date.now() + REFRESH_AHEAD_MS) return undefined;
-
+async function tokenExchangeCallback(
+	options: TokenExchangeCallbackOptions,
+): Promise<TokenExchangeCallbackResult | undefined> {
 	const env = workerEnv;
 	if (!env) {
 		throw new Error("Worker env was not captured before token exchange.");
@@ -48,40 +41,15 @@ async function tokenExchangeCallback(options: {
 		clientSecret: env.MCP_WHOP_OAUTH_CLIENT_SECRET,
 		redirectUri: `${env.MCP_BASE_URL}/callback`,
 	});
-	let tokens;
-	try {
-		tokens = await client.refresh(props.whopRefreshToken);
-	} catch (error) {
-		// invalid_grant makes the client discard the connection and
-		// re-authorize instead of retrying a dead grant. No upstream revoke:
-		// a 401ed refresh token is already unusable, and revoking after losing
-		// a concurrent-refresh race could cascade to the winner's session.
-		if (error instanceof WhopOidcError && error.status === 401) {
-			console.log(
-				JSON.stringify({
-					type: "mcp_oauth_error",
-					event: "upstream_refresh_terminal",
-					grantId: options.grantId,
-				}),
-			);
-			throw new OAuthError("invalid_grant", {
-				description:
-					"The connection's Whop credential is no longer valid. Reconnect to re-authorize.",
-			});
-		}
-		throw error;
-	}
-	return {
-		newProps: {
-			...props,
-			whopAccessToken: tokens.accessToken,
-			whopRefreshToken: tokens.refreshToken,
-			whopExpiresAt: tokens.expiresAt,
-		},
-	};
+	return reconcileGrantOnTokenExchange(options, {
+		lookupClient: (clientId) =>
+			getOAuthApi<Env>(providerOptions, env).lookupClient(clientId),
+		now: Date.now,
+		refreshWhop: (refreshToken) => client.refresh(refreshToken),
+	});
 }
 
-const provider = new OAuthProvider({
+const providerOptions: OAuthProviderOptions<Env> = {
 	apiHandlers: {
 		"/mcp": createMcpApiHandler(),
 		// Prefix-matched: covers GET /sse and POST /sse/message, and the
@@ -97,7 +65,9 @@ const provider = new OAuthProvider({
 	scopesSupported: ["admin"],
 	accessTokenTTL: 3600,
 	tokenExchangeCallback,
-});
+};
+
+const provider = new OAuthProvider<Env>(providerOptions);
 
 export default {
 	fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {

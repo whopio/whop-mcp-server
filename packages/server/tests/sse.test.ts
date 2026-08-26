@@ -86,7 +86,13 @@ describe("SSE transport session", () => {
 			jsonrpc: "2.0",
 			id: 2,
 			method: "tools/call",
-			params: { name: "products_list", arguments: {} },
+			params: {
+				name: "products_list",
+				arguments: {
+					intent: "Show me my products",
+					intent_id: "123e4567-e89b-42d3-a456-426614174000",
+				},
+			},
 		});
 		const [callEvent] = await readEvents(reader, 1);
 		const call = JSON.parse(callEvent.data);
@@ -95,6 +101,7 @@ describe("SSE transport session", () => {
 			data: [{ id: "prod_1" }],
 		});
 		expect(requests.length).toBe(1);
+		expect(requests[0].headers["x-whop-mcp-context"]).toBeDefined();
 		await session.close();
 	});
 

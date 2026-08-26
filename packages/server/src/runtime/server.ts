@@ -29,6 +29,7 @@ import {
 	runSearch,
 	SEARCH_TOOL,
 } from "./chatgpt-compat.ts";
+import type { McpRequestContext } from "./mcp-context.ts";
 
 export const SERVER_NAME = "whop";
 export const SERVER_VERSION = "0.0.1";
@@ -43,7 +44,12 @@ export const SERVER_ICONS = [
 
 const MCP_CONFIRMATION_TOKEN_FIELD = "mcp_confirmation_token";
 const IDEMPOTENCY_KEY_FIELD = "idempotency_key";
+const INTENT_FIELD = "intent";
+const INTENT_ID_FIELD = "intent_id";
 const CONNECTION_STATUS_TOOL = "connection_status";
+const UUID_PATTERN =
+	"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$";
+const UUID_REGEX = new RegExp(UUID_PATTERN);
 
 /**
  * How confirmation-required operations are gated.
@@ -99,6 +105,38 @@ export interface CreateWhopMcpServerOptions {
 export interface WhopMcpServer {
 	server: Server;
 	operations: OperationDef[];
+}
+
+function withIntentContext(inputSchema: JsonSchema): JsonSchema {
+	return {
+		...inputSchema,
+		properties: {
+			...inputSchema.properties,
+			[INTENT_FIELD]: {
+				type: "string",
+				minLength: 1,
+				pattern: "\\S",
+				description:
+					"The original user request that led to this tool call. Copy it verbatim when available.",
+			},
+			[INTENT_ID_FIELD]: {
+				type: "string",
+				format: "uuid",
+				minLength: 36,
+				maxLength: 36,
+				pattern: UUID_PATTERN,
+				description:
+					"A UUID for the user turn that caused this call. Generate it once per user message and reuse it for every tool call made to fulfill that message. Never derive it from the intent text.",
+			},
+		},
+		required: [
+			...new Set([
+				...(inputSchema.required ?? []),
+				INTENT_FIELD,
+				INTENT_ID_FIELD,
+			]),
+		],
+	};
 }
 
 function toolInputSchema(
@@ -230,10 +268,9 @@ export function createWhopMcpServer(
 			...operations.map((op) => ({
 				name: op.toolName,
 				description: toolDescription(op, enforceConfirmation),
-				inputSchema: toolInputSchema(op, enforceConfirmation) as Record<
-					string,
-					unknown
-				>,
+				inputSchema: withIntentContext(
+					toolInputSchema(op, enforceConfirmation),
+				) as Record<string, unknown>,
 				annotations: {
 					readOnlyHint: op.annotations.readOnlyHint,
 					destructiveHint: op.annotations.destructiveHint,
@@ -293,9 +330,17 @@ export function createWhopMcpServer(
 				),
 			);
 		}
+		const intentContext = parseIntentContext(name, rawArgs);
+		if (intentContext instanceof WhopMcpError) {
+			return errorContent(intentContext);
+		}
 
 		try {
-			return await callOperation(operation, rawArgs as Record<string, unknown>);
+			return await callOperation(
+				operation,
+				intentContext.arguments,
+				intentContext.context,
+			);
 		} catch (error) {
 			if (error instanceof WhopMcpError) {
 				await auditSink.record(
@@ -334,10 +379,12 @@ export function createWhopMcpServer(
 		operation: OperationDef,
 		args: Record<string, unknown>,
 		idempotencyKey: string | undefined,
+		intentContext: McpRequestContext,
 	) {
 		await options.beforeCall?.(operation, args, principal);
 		const result = await dispatcher.dispatch(operation, args, principal, {
 			idempotencyKey,
+			mcpRequestContext: intentContext,
 		});
 		await auditSink.record(
 			auditEvent(
@@ -357,6 +404,7 @@ export function createWhopMcpServer(
 	async function callOperation(
 		operation: OperationDef,
 		rawArgs: Record<string, unknown>,
+		intentContext: McpRequestContext,
 	) {
 		const { [MCP_CONFIRMATION_TOKEN_FIELD]: mcpConfirmationToken, ...rest } =
 			rawArgs;
@@ -371,7 +419,7 @@ export function createWhopMcpServer(
 		if (!declaresIdempotencyKey) delete args[IDEMPOTENCY_KEY_FIELD];
 
 		if (!enforceConfirmation || !operation.safety.confirmationRequired) {
-			return executeDirect(operation, args, idempotencyKey);
+			return executeDirect(operation, args, idempotencyKey, intentContext);
 		}
 
 		if (!signer) {
@@ -413,7 +461,11 @@ export function createWhopMcpServer(
 				// this call targets so the approval prompt still shows a business.
 				account_id:
 					principal.accountId ?? targetAccount(operation, injectedArgs),
-				arguments: injectedArgs,
+				arguments: {
+					[INTENT_FIELD]: intentContext.intent,
+					[INTENT_ID_FIELD]: intentContext.intentId,
+					...injectedArgs,
+				},
 				mcp_confirmation_token: issued.token,
 				expires_at: issued.expiresAt,
 				next_step: supportsUpstreamReplay(operation)
@@ -602,6 +654,7 @@ export function createWhopMcpServer(
 			// was hashed over.
 			result = await dispatcher.dispatch(operation, injectedArgs, principal, {
 				idempotencyKey: upstreamKey,
+				mcpRequestContext: intentContext,
 			});
 		} catch (error) {
 			if (!canReconcileUpstream) {
@@ -669,6 +722,47 @@ export function createWhopMcpServer(
 	}
 
 	return { server, operations };
+}
+
+function parseIntentContext(
+	toolName: string,
+	suppliedArgs: Record<string, unknown>,
+):
+	| { arguments: Record<string, unknown>; context: McpRequestContext }
+	| WhopMcpError {
+	const intent = suppliedArgs[INTENT_FIELD];
+	if (typeof intent !== "string" || intent.trim().length === 0) {
+		return new WhopMcpError(
+			"invalid_input",
+			`${toolName} requires a non-empty intent containing the user's original request.`,
+		);
+	}
+	const suppliedIntentId = suppliedArgs[INTENT_ID_FIELD];
+	if (
+		typeof suppliedIntentId !== "string" ||
+		!UUID_REGEX.test(suppliedIntentId)
+	) {
+		return new WhopMcpError(
+			"invalid_input",
+			`${toolName} requires intent_id to be a UUID reused across the current user turn.`,
+		);
+	}
+	const intentId = suppliedIntentId.toLowerCase();
+	const toolCallId = crypto.randomUUID();
+	const {
+		[INTENT_FIELD]: _intent,
+		[INTENT_ID_FIELD]: _intentId,
+		...operationArguments
+	} = suppliedArgs;
+	return {
+		arguments: operationArguments,
+		context: {
+			intent,
+			intentId,
+			toolName,
+			toolCallId,
+		},
+	};
 }
 
 function operationKey(operation: OperationDef): string {
@@ -751,6 +845,7 @@ function buildInstructions(
 					"Consequential tools (payments, refunds, transfers, withdrawals, deletions, credentials) are two-step. The first call is a safe, side-effect-free preview — it is how the user sees exactly what would happen, so always make it when asked. Execution is the user's decision: by default show the preview and get their approval, but explicit standing permission from the user to act without confirmations also counts.",
 				]
 			: []),
+		"For each user message, generate one UUID intent_id and reuse it for every operation tool call made to fulfill that message. Copy the original user request into intent. Both fields are attribution metadata and are not sent as Whop API arguments.",
 		"Call connection_status to see the authenticated identity, account, scopes, and tool coverage.",
 	].join("\n\n");
 }

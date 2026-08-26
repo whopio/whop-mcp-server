@@ -23,10 +23,18 @@ rules:
       operations:
         - POST /swaps/quote
         - POST /plans/{id}/calculate_tax
-        - POST /withdrawals/{id}/generate_pdf
         - POST /ad_groups/estimate_reach
     set:
       classification: read_only
+
+  # ── Payout quotes create a short-lived provider draft, but move no funds ─
+  - name: payout-quotes
+    match:
+      operations:
+        - POST /payouts/quotes
+    set:
+      classification: mutating
+      idempotency: required
 
   # ── Run recording: writes one analytics event, executes nothing ──────────
   - name: recommended-action-runs
@@ -45,7 +53,6 @@ rules:
         - POST /payments/{id}/retry
         - POST /payments/{id}/void
         - POST /payouts
-        - POST /withdrawals
         - POST /transfers
         - POST /swaps
         - POST /deposits
@@ -61,6 +68,17 @@ rules:
       classification: mutating
       financial: true
       idempotency: required
+      confirmation: true
+
+  # ── Payout cancel: returns funds to the balance. Naturally idempotent —
+  #    repeat cancels answer 200 with the payout unchanged — so no key. ─────
+  - name: payout-cancel
+    match:
+      operations:
+        - POST /payouts/{id}/cancel
+    set:
+      classification: mutating
+      financial: true
       confirmation: true
 
   # ── Financial configuration ───────────────────────────────────────────────
@@ -197,6 +215,7 @@ rules:
       operations:
         - POST /disputes/{id}/submit_evidence
         - POST /disputes/{id}/update_evidence
+        - POST /disputes/{id}/upload_evidence
         - PATCH /disputes/{id}
         - POST /disputes/{id}/submit
     set:

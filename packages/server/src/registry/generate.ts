@@ -77,6 +77,10 @@ const OP_ID_OVERRIDES: Record<string, string> = {
 	"POST /affiliates/{id}/overrides": "create-override",
 	"PATCH /affiliates/{id}/overrides/{override_id}": "update-override",
 	"DELETE /affiliates/{id}/overrides/{override_id}": "delete-override",
+	// Both infer "submissions": the {bounty_id} and {id} segments are filtered
+	// out, leaving the same lone static segment.
+	"GET /bounties/{bounty_id}/submissions": "submissions",
+	"GET /bounties/{bounty_id}/submissions/{id}": "get-submission",
 };
 
 const SEND_PATH = "/wallets/send";

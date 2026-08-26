@@ -18,6 +18,8 @@ const upstreamRequests: {
 	url: string;
 	authorization: string | null;
 	mcpClient: string | null;
+	mcpContext: string | null;
+	mcpClientName: string | null;
 	stainlessMcp: string | null;
 }[] = [];
 
@@ -59,7 +61,11 @@ function toolCall(id: number) {
 			name: "products_list",
 			// Hosted connections are not account-bound, so the account rides on
 			// the call.
-			arguments: { account_id: "biz_1" },
+			arguments: {
+				account_id: "biz_1",
+				intent: "List the products for this business.",
+				intent_id: "123e4567-e89b-42d3-a456-426614174000",
+			},
 		},
 	};
 }
@@ -138,6 +144,8 @@ describe("SseSessionDO upstream credential", () => {
 				url: String(input),
 				authorization: headers.get("authorization"),
 				mcpClient: headers.get("x-whop-mcp-client"),
+				mcpContext: headers.get("x-whop-mcp-context"),
+				mcpClientName: headers.get("x-whop-mcp-client-name"),
 				stainlessMcp: headers.get("x-stainless-mcp"),
 			});
 			return new Response(JSON.stringify({ data: [] }), {
@@ -167,6 +175,7 @@ describe("SseSessionDO upstream credential", () => {
 			"whop-mcp-worker/test-version; profile=admin; transport=sse",
 		);
 		expect(request?.stainlessMcp).toBeNull();
+		expect(request?.mcpContext).toBeTruthy();
 	});
 
 	it("uses the refreshed token a later message carries, not the one from open", async () => {
@@ -180,14 +189,28 @@ describe("SseSessionDO upstream credential", () => {
 		);
 	});
 
+	it("uses a client name recovered after the SSE session opened", async () => {
+		const session = await openInitializedSession("token_open");
+		await post(session, "/message", toolCall(2), {
+			"x-session-owner": "user_1",
+			"x-session-client-name": "Claude",
+		});
+		expect((await nextUpstreamRequest())?.mcpClientName).toBe("Claude");
+	});
+
 	it("rejects a message from a different user before touching the credential", async () => {
 		const session = await openInitializedSession("token_open");
 		const before = upstreamRequests.length;
 		const response = await post(session, "/message", toolCall(2), {
 			"x-session-owner": "user_2",
 			"x-session-token": "attacker_token",
+			"x-session-client-name": "Attacker",
 		});
 		expect(response.status).toBe(403);
 		expect(upstreamRequests.length).toBe(before);
+		await post(session, "/message", toolCall(3), {
+			"x-session-owner": "user_1",
+		});
+		expect((await nextUpstreamRequest())?.mcpClientName).toBeNull();
 	});
 });

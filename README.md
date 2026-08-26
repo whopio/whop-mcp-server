@@ -66,6 +66,24 @@ privileges of the OAuth grant. Prepare-and-confirm is not a security boundary
 against a compromised MCP bearer token or Worker: either can act within the
 grant's full privileges.
 
+### Intent attribution
+
+Every API-backed operation tool requires two attribution fields:
+
+- `intent` is the original user request that led to the tool call. Clients
+  should copy it verbatim when available.
+- `intent_id` is a UUID generated once per user message and reused for every
+  operation tool call made to fulfill that message. It distinguishes separate
+  turns that happen to contain the same request text.
+
+These fields are removed before operation validation and are never sent as
+Whop API arguments. A bounded copy is attached to the downstream request so
+Whop can analyze API request intent. The MCP protocol does not expose the host
+conversation, so both values are client-supplied attribution rather than
+server-verified chat history. ChatGPT's fixed-schema `search` and `fetch`
+compatibility tools and the local `connection_status` diagnostic do not use
+these fields.
+
 ## Repository layout
 
 | Path | Purpose |

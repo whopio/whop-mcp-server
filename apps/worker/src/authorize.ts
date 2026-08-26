@@ -10,6 +10,7 @@ import { expandProfileToWhopScopes } from "./profile-scopes.ts";
 import { openJson, sealJson } from "./pending-state.ts";
 import { registry } from "./registry.ts";
 import { errorPage, escapeHtml, htmlResponse, whopLogoSvg } from "./html.ts";
+import { normalizeMcpClientName } from "./grant.ts";
 import type { Env, WhopGrantProps } from "./types.ts";
 
 const PENDING_TTL_SECONDS = 600;
@@ -116,7 +117,12 @@ async function handleAuthorize(request: Request, env: Env): Promise<Response> {
 	if (!client) {
 		return errorPage("Unknown OAuth client. Reconnect from your agent.");
 	}
-	return redirectUpstream(env, authRequest, client.clientName, "admin");
+	return redirectUpstream(
+		env,
+		authRequest,
+		normalizeMcpClientName(client.clientName),
+		"admin",
+	);
 }
 
 async function handleCallback(request: Request, env: Env): Promise<Response> {

@@ -63,6 +63,7 @@ export function staticCredential(
 export interface RecordedRequest {
 	url: string;
 	method: string;
+	redirect?: RequestInit["redirect"];
 	headers: Record<string, string>;
 	body: unknown;
 }
@@ -86,6 +87,7 @@ export function fakeFetch(
 		const recorded: RecordedRequest = {
 			url: String(input),
 			method: init?.method ?? "GET",
+			redirect: init?.redirect,
 			headers,
 			body: typeof init?.body === "string" ? JSON.parse(init.body) : undefined,
 		};

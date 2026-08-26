@@ -4,6 +4,7 @@ import { registry } from "./registry.ts";
 import { durableIdempotencyStore } from "./idempotency-do.ts";
 import {
 	attributionHeaders,
+	normalizeMcpClientName,
 	principalFromProps,
 	StructuredLogAuditSink,
 } from "./grant.ts";
@@ -24,6 +25,7 @@ export class SseSessionDO extends DurableObject<Env> {
 	#session: SseSession | undefined;
 	#ownerUserId: string | undefined;
 	#accessToken: string | undefined;
+	#attributionHeaders: Record<string, string> | undefined;
 
 	async fetch(request: Request): Promise<Response> {
 		const url = new URL(request.url);
@@ -35,6 +37,7 @@ export class SseSessionDO extends DurableObject<Env> {
 			}
 			this.#ownerUserId = props.userId;
 			this.#accessToken = props.whopAccessToken;
+			this.#attributionHeaders = attributionHeaders(this.env, props, "sse");
 			this.#session = new SseSession({
 				registry,
 				endpointUrl,
@@ -56,7 +59,7 @@ export class SseSessionDO extends DurableObject<Env> {
 				auditSink: new StructuredLogAuditSink(),
 				baseUrl: `${this.env.MCP_WHOP_API_ORIGIN}/api/v1`,
 				chatGptCompat: true,
-				extraHeaders: attributionHeaders(this.env, props, "sse"),
+				extraHeaders: this.#attributionHeaders,
 			});
 			return this.#session.response();
 		}
@@ -73,6 +76,13 @@ export class SseSessionDO extends DurableObject<Env> {
 			}
 			const refreshedToken = request.headers.get("x-session-token");
 			if (refreshedToken) this.#accessToken = refreshedToken;
+			const refreshedClientName = normalizeMcpClientName(
+				request.headers.get("x-session-client-name") ?? undefined,
+			);
+			if (refreshedClientName && this.#attributionHeaders) {
+				this.#attributionHeaders["x-whop-mcp-client-name"] =
+					refreshedClientName;
+			}
 			let body: unknown;
 			try {
 				body = await request.json();

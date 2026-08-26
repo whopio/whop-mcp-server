@@ -324,4 +324,92 @@ describe("dispatcher", () => {
 		}).dispatch(op, {}, principal);
 		expect(requests[0].headers["x-client-source"]).toBe("test");
 	});
+
+	it("uses redirect handling supported by Cloudflare Workers", async () => {
+		let redirect: RequestInit["redirect"];
+		const edgeFetch = (async (
+			_input: Parameters<typeof fetch>[0],
+			init?: RequestInit,
+		) => {
+			redirect = init?.redirect;
+			if (init?.redirect === "error") {
+				throw new TypeError(
+					'Invalid redirect value, must be one of "follow" or "manual"',
+				);
+			}
+			return Response.json({ ok: true });
+		}) as typeof fetch;
+		const op = findOperation(registry, "products_list");
+
+		await expect(
+			makeDispatcher(edgeFetch).dispatch(op, {}, principal, {
+				mcpRequestContext: {
+					intent: "List my products",
+					intentId: "123e4567-e89b-42d3-a456-426614174000",
+					toolName: "products_list",
+					toolCallId: "223e4567-e89b-42d3-a456-426614174000",
+				},
+			}),
+		).resolves.toMatchObject({ status: 200 });
+		expect(redirect).toBe("manual");
+	});
+
+	it("rejects upstream redirects without following them", async () => {
+		let requestCount = 0;
+		let bodyCancelled = false;
+		const redirectFetch = (async (
+			_input: Parameters<typeof fetch>[0],
+			init?: RequestInit,
+		) => {
+			requestCount += 1;
+			expect(init?.redirect).toBe("manual");
+			const body = new ReadableStream({
+				cancel() {
+					bodyCancelled = true;
+					throw new Error("cancel failed");
+				},
+			});
+			return new Response(body, {
+				status: 302,
+				headers: {
+					Location: "https://example.test/not-followed",
+					"x-request-id": "req_redirect",
+				},
+			});
+		}) as typeof fetch;
+		const op = findOperation(registry, "products_list");
+
+		await expect(
+			makeDispatcher(redirectFetch).dispatch(op, {}, principal),
+		).rejects.toMatchObject({
+			code: "upstream_error",
+			status: 302,
+			requestId: "req_redirect",
+		});
+		expect(requestCount).toBe(1);
+		expect(bodyCancelled).toBe(true);
+	});
+
+	it("scopes MCP context to one dispatch", async () => {
+		const { fetch, requests } = fakeFetch();
+		const op = findOperation(registry, "products_list");
+		const dispatcher = makeDispatcher(fetch, {
+			extraHeaders: { "x-client-source": "connection" },
+		});
+		await dispatcher.dispatch(op, {}, principal, {
+			mcpRequestContext: {
+				intent: "List my products",
+				intentId: "123e4567-e89b-42d3-a456-426614174000",
+				toolName: "products_list",
+				toolCallId: "223e4567-e89b-42d3-a456-426614174000",
+			},
+		});
+		await dispatcher.dispatch(op, {}, principal);
+		expect(requests[0].headers["x-client-source"]).toBe("connection");
+		expect(requests[0].headers["x-whop-mcp-context"]).toBeTruthy();
+		expect(requests[0].redirect).toBe("manual");
+		expect(requests[1].headers["x-client-source"]).toBe("connection");
+		expect(requests[1].headers["x-whop-mcp-context"]).toBeUndefined();
+		expect(requests[1].redirect).toBe("manual");
+	});
 });
