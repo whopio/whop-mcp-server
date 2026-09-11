@@ -30,6 +30,11 @@ import {
 	SEARCH_TOOL,
 } from "./chatgpt-compat.ts";
 import type { McpRequestContext } from "./mcp-context.ts";
+import {
+	FEEDBACK_TOOLS,
+	submitFeedback,
+	type FeedbackSink,
+} from "./feedback.ts";
 
 export const SERVER_NAME = "whop";
 export const SERVER_VERSION = "0.0.1";
@@ -73,11 +78,13 @@ export interface CreateWhopMcpServerOptions {
 	confirmationSecret?: string;
 	idempotencyStore?: IdempotencyStore;
 	auditSink?: AuditSink;
+	feedbackSink?: FeedbackSink;
 	fetch?: typeof fetch;
 	baseUrl?: string;
 	timeoutMs?: number;
 	maxResponseBytes?: number;
 	clientName?: string;
+	pluginSource?: string;
 	now?: () => number;
 	confirmationTtlMs?: number;
 	/** Restrict to the native REST surface (full surface by default). */
@@ -280,6 +287,7 @@ export function createWhopMcpServer(
 				},
 			})),
 			...(options.chatGptCompat ? [SEARCH_TOOL, FETCH_TOOL] : []),
+			...(options.feedbackSink ? FEEDBACK_TOOLS : []),
 			{
 				name: CONNECTION_STATUS_TOOL,
 				description:
@@ -296,6 +304,33 @@ export function createWhopMcpServer(
 
 	server.setRequestHandler(CallToolRequestSchema, async (request) => {
 		const { name, arguments: rawArgs = {} } = request.params;
+		const feedbackTool =
+			options.feedbackSink && FEEDBACK_TOOLS.find((tool) => tool.name === name);
+		if (feedbackTool && options.feedbackSink) {
+			try {
+				return jsonContent(
+					await submitFeedback(
+						feedbackTool,
+						rawArgs,
+						principal,
+						options.feedbackSink,
+						{
+							clientName: options.clientName,
+							pluginSource: options.pluginSource,
+						},
+					),
+				);
+			} catch (error) {
+				return errorContent(
+					error instanceof WhopMcpError
+						? error
+						: new WhopMcpError(
+								"internal_error",
+								"Could not record the submission.",
+							),
+				);
+			}
+		}
 
 		if (name === CONNECTION_STATUS_TOOL) {
 			return jsonContent(connectionStatus(registry, principal, operations));
@@ -351,6 +386,7 @@ export function createWhopMcpServer(
 						"failed",
 						{
 							clientName: options.clientName,
+							pluginSource: options.pluginSource,
 							errorCode: error.code,
 						},
 					),
@@ -365,6 +401,7 @@ export function createWhopMcpServer(
 					"failed",
 					{
 						clientName: options.clientName,
+						pluginSource: options.pluginSource,
 						errorCode: "internal_error",
 					},
 				),
@@ -394,6 +431,7 @@ export function createWhopMcpServer(
 				"executed",
 				{
 					clientName: options.clientName,
+					pluginSource: options.pluginSource,
 					requestId: result.requestId,
 				},
 			),
@@ -449,6 +487,7 @@ export function createWhopMcpServer(
 					"prepared",
 					{
 						clientName: options.clientName,
+						pluginSource: options.pluginSource,
 					},
 				),
 			);
@@ -536,7 +575,10 @@ export function createWhopMcpServer(
 					operationKey(operation),
 					principal,
 					"replayed",
-					{ clientName: options.clientName },
+					{
+						clientName: options.clientName,
+						pluginSource: options.pluginSource,
+					},
 				),
 			);
 			return jsonContent(result);
@@ -714,6 +756,7 @@ export function createWhopMcpServer(
 				"executed",
 				{
 					clientName: options.clientName,
+					pluginSource: options.pluginSource,
 					requestId: result.requestId,
 				},
 			),

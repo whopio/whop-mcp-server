@@ -51,6 +51,174 @@ describe("dispatcher", () => {
 		expect(requests[0].body).toEqual({ title: "New title" });
 	});
 
+	it("prepares deterministically without performing network or credential work", () => {
+		const { fetch, requests } = fakeFetch();
+		let credentialCalls = 0;
+		const op = findOperation(registry, "payouts_create");
+		const dispatcher = makeDispatcher(fetch, {
+			credentialAdapter: {
+				getCredential: async () => {
+					credentialCalls += 1;
+					return { token: "unused" };
+				},
+			},
+		});
+		const input = { amount: 500, payout_method_id: "potk_abc123" };
+		const first = dispatcher.prepare(op, input, principal, {
+			idempotencyKey: "approved-tool-call",
+		});
+		const second = dispatcher.prepare(op, input, principal, {
+			idempotencyKey: "approved-tool-call",
+		});
+
+		expect(first).toEqual(second);
+		expect(first).toEqual({
+			args: {
+				account_id: "biz_boundAccount",
+				amount: 500,
+				payout_method_id: "potk_abc123",
+			},
+			method: "POST",
+			url: "https://api.whop.test/api/v1/payouts",
+			body: {
+				account_id: "biz_boundAccount",
+				amount: 500,
+				payout_method_id: "potk_abc123",
+			},
+			idempotencyKey: "approved-tool-call",
+		});
+		expect(requests).toHaveLength(0);
+		expect(credentialCalls).toBe(0);
+		expect(Object.isFrozen(first)).toBe(true);
+		expect(Object.isFrozen(first.args)).toBe(true);
+		expect(Object.isFrozen(first.body)).toBe(true);
+	});
+
+	it("dispatches the exact prepared method, URL, body, and idempotency key", async () => {
+		const { fetch, requests } = fakeFetch();
+		const op = findOperation(registry, "payouts_create");
+		const dispatcher = makeDispatcher(fetch);
+		const prepared = dispatcher.prepare(
+			op,
+			{ amount: 500, payout_method_id: "potk_abc123" },
+			principal,
+			{ idempotencyKey: "approved-tool-call" },
+		);
+
+		await dispatcher.dispatchPrepared(op, prepared, principal);
+
+		expect(requests[0]).toMatchObject({
+			method: prepared.method,
+			url: prepared.url,
+			body: prepared.body,
+		});
+		expect(requests[0].headers["idempotency-key"]).toBe(
+			prepared.idempotencyKey,
+		);
+	});
+
+	it("dispatches its immutable registered snapshot instead of caller mutations", async () => {
+		const { fetch, requests } = fakeFetch();
+		const op = findOperation(registry, "payouts_create");
+		const dispatcher = makeDispatcher(fetch);
+		const prepared = dispatcher.prepare(
+			op,
+			{ amount: 500, payout_method_id: "potk_abc123" },
+			principal,
+			{ idempotencyKey: "approved-tool-call" },
+		);
+
+		expect(Reflect.set(prepared, "method", "DELETE")).toBe(false);
+		expect(Reflect.set(prepared, "url", "https://attacker.test/")).toBe(false);
+		expect(Reflect.set(prepared, "idempotencyKey", "changed")).toBe(false);
+		expect(Reflect.set(prepared.body!, "amount", 999)).toBe(false);
+
+		await dispatcher.dispatchPrepared(op, prepared, principal);
+
+		expect(requests[0]).toMatchObject({
+			method: "POST",
+			url: "https://api.whop.test/api/v1/payouts",
+			body: {
+				account_id: "biz_boundAccount",
+				amount: 500,
+				payout_method_id: "potk_abc123",
+			},
+		});
+		expect(requests[0].headers["idempotency-key"]).toBe("approved-tool-call");
+	});
+
+	it("rejects forged, cross-dispatcher, and mismatched-operation handles", async () => {
+		const { fetch, requests } = fakeFetch();
+		let credentialCalls = 0;
+		const dispatcher = makeDispatcher(fetch, {
+			credentialAdapter: {
+				getCredential: async () => {
+					credentialCalls += 1;
+					return { token: "unused" };
+				},
+			},
+		});
+		const op = findOperation(registry, "payouts_create");
+		const prepared = dispatcher.prepare(
+			op,
+			{ amount: 500, payout_method_id: "potk_abc123" },
+			principal,
+			{ idempotencyKey: "approved-tool-call" },
+		);
+		const forged = { ...prepared };
+		const quoteOperation = findOperation(registry, "payouts_quotes");
+
+		await expect(
+			dispatcher.dispatchPrepared(op, forged, principal),
+		).rejects.toMatchObject({ code: "confirmation_invalid" });
+		await expect(
+			makeDispatcher(fetch).dispatchPrepared(op, prepared, principal),
+		).rejects.toMatchObject({ code: "confirmation_invalid" });
+		await expect(
+			dispatcher.dispatchPrepared(quoteOperation, prepared, principal),
+		).rejects.toMatchObject({ code: "confirmation_invalid" });
+		await expect(
+			dispatcher.dispatchPrepared({ ...op }, prepared, principal),
+		).rejects.toMatchObject({ code: "confirmation_invalid" });
+		expect(requests).toHaveLength(0);
+		expect(credentialCalls).toBe(0);
+	});
+
+	it("refuses a prepared dispatch when the per-call principal lacks its scope", async () => {
+		const { fetch, requests } = fakeFetch();
+		const op = findOperation(registry, "payouts_create");
+		const dispatcher = makeDispatcher(fetch);
+		const prepared = dispatcher.prepare(
+			op,
+			{ amount: 500, payout_method_id: "potk_abc123" },
+			principal,
+			{ idempotencyKey: "approved-tool-call" },
+		);
+
+		await expect(
+			dispatcher.dispatchPrepared(op, prepared, {
+				...principal,
+				scopes: [],
+			}),
+		).rejects.toMatchObject({ code: "missing_scope" });
+		expect(requests).toHaveLength(0);
+	});
+
+	it("dispatches shared fields from a union request body", async () => {
+		const { fetch, requests } = fakeFetch();
+		const op = findOperation(registry, "payouts_create");
+		await makeDispatcher(fetch).dispatch(
+			op,
+			{ amount: 500, payout_method_id: "potk_abc123" },
+			principal,
+		);
+		expect(requests[0].body).toEqual({
+			account_id: "biz_boundAccount",
+			amount: 500,
+			payout_method_id: "potk_abc123",
+		});
+	});
+
 	it("URI-encodes and rejects traversal in path values", async () => {
 		const op = findOperation(registry, "products_get");
 		const dispatcher = makeDispatcher(fakeFetch().fetch);
@@ -152,15 +320,15 @@ describe("dispatcher", () => {
 		).rejects.toMatchObject({ code: "invalid_input" });
 	});
 
-	it("allows foreign biz_ IDs in non-account fields (child companies, partners)", async () => {
+	it("allows foreign biz_ IDs in non-account fields (child accounts, partners)", async () => {
 		const { fetch, requests } = fakeFetch();
-		const op = findOperation(registry, "companies_get");
+		const op = findOperation(registry, "accounts_get");
 		await makeDispatcher(fetch).dispatch(
 			op,
 			{ id: "biz_childAccount" },
 			principal,
 		);
-		expect(requests[0].url).toContain("/companies/biz_childAccount");
+		expect(requests[0].url).toContain("/accounts/biz_childAccount");
 	});
 
 	it("serializes array query params as repeated keys", async () => {
@@ -293,22 +461,6 @@ describe("dispatcher", () => {
 		expect(requests[0].headers["idempotency-key"]).toBe("confirm-jti-99");
 	});
 
-	it("injects the bound account into parent_company_id paths", async () => {
-		const { fetch, requests } = fakeFetch();
-		const op = registry.operations.find(
-			(o) =>
-				o.path === "/companies/{parent_company_id}/api_keys" &&
-				o.method === "post",
-		)!;
-		expect(op.accountParam).toBe("parent_company_id");
-		await makeDispatcher(fetch).dispatch(
-			op,
-			{ name: "test key", child_company_id: "biz_childAccount" },
-			principal,
-		);
-		expect(requests[0].url).toContain("/companies/biz_boundAccount/api_keys");
-	});
-
 	it("sends no Idempotency-Key on reads", async () => {
 		const { fetch, requests } = fakeFetch();
 		const op = findOperation(registry, "products_list");
@@ -323,6 +475,31 @@ describe("dispatcher", () => {
 			extraHeaders: { "x-client-source": "test" },
 		}).dispatch(op, {}, principal);
 		expect(requests[0].headers["x-client-source"]).toBe("test");
+	});
+
+	it("scopes extra header overrides to one dispatch", async () => {
+		const { fetch, requests } = fakeFetch();
+		const op = findOperation(registry, "products_list");
+		const dispatcher = makeDispatcher(fetch, {
+			extraHeaders: {
+				"x-client-source": "connection",
+				"x-shared-header": "connection",
+			},
+		});
+		await dispatcher.dispatch(op, {}, principal, {
+			extraHeaders: {
+				"x-call-id": "call_123",
+				"x-shared-header": "dispatch",
+			},
+		});
+		await dispatcher.dispatch(op, {}, principal);
+
+		expect(requests[0].headers["x-client-source"]).toBe("connection");
+		expect(requests[0].headers["x-call-id"]).toBe("call_123");
+		expect(requests[0].headers["x-shared-header"]).toBe("dispatch");
+		expect(requests[1].headers["x-client-source"]).toBe("connection");
+		expect(requests[1].headers["x-call-id"]).toBeUndefined();
+		expect(requests[1].headers["x-shared-header"]).toBe("connection");
 	});
 
 	it("uses redirect handling supported by Cloudflare Workers", async () => {

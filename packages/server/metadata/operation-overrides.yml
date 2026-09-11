@@ -12,6 +12,50 @@
 #     description: Charge an existing member off-session using a stored payment method.
 
 overrides:
+  # "Call this first" sent agents straight into a 403: a user token is bound to
+  # no single account, and that is the credential the hosted MCP actually uses.
   "GET /accounts/me":
-    description: Returns the account the current credential is bound to. Call this first to confirm which account you are operating.
+    description: >-
+      Returns the account an account-scoped credential is bound to. Only works
+      for account-scoped API keys: a user token is not bound to a single account
+      and receives a 403 here. To find or choose an account with a user token,
+      use accounts_list instead. When you already know which account to act on,
+      you do not need this call.
     requiresAccount: false
+
+  # The three filters read as combinable, so agents passed two and were
+  # rejected. Stating the constraint on the operation covers all three at once.
+  "GET /refunds":
+    description: >-
+      Returns a paginated list of refunds. Filter by exactly one of payment_id,
+      company_id, or user_id — these are mutually exclusive and cannot be
+      combined — with optional filtering by creation date.
+
+  # An agent that could not upload stopped rather than attaching a pending file,
+  # because the old wording only implied the ordering.
+  "POST /files":
+    description: >-
+      Creates a file and returns a presigned destination to upload its bytes to.
+      PUT the bytes to `upload_url` (single-part), or to each of
+      `multipart_upload_urls` and then call Complete File Multipart Upload. The
+      file must reach `ready` before its ID can be attached anywhere — attaching
+      one that is still pending fails with "File upload has not completed
+      processing", so confirm the status with files_get first. Once ready, the ID
+      can be attached wherever a file is accepted, such as account legal
+      documents and dispute evidence documents. For a step-by-step walkthrough of
+      single-part and multipart uploads, see the
+      [direct file uploads guide](/developer/guides/direct-file-uploads).
+
+  # Agents asked for a paused ad, got an active one, then could not pause it.
+  "POST /ads":
+    description: >-
+      Creates an ad in an ad group. The new ad is always created with status
+      'active'; status cannot be set at creation. To end up with a paused ad,
+      either duplicate an existing paused ad with ads_duplicate, or create it
+      here and then call ads_pause once its campaign is no longer a draft.
+
+  "POST /ads/{id}/pause":
+    description: >-
+      Pauses an active ad. An ad whose campaign is still a draft cannot be paused
+      or unpaused and returns 400 — launch the campaign first, or duplicate an
+      already-paused ad with ads_duplicate.

@@ -370,9 +370,8 @@ function classifySafety(
 
 interface BodyShape {
 	present: boolean;
+	/** Properties required by the body root and by EVERY variant of a union body. */
 	required: string[];
-	/** Properties required in EVERY variant of a union body. */
-	requiredInAllVariants: string[];
 	properties: Record<string, JsonSchema>;
 	schema: JsonSchema | null;
 }
@@ -387,49 +386,34 @@ function extractBody(
 		| undefined;
 	const jsonSchema = requestBody?.content?.["application/json"]?.schema;
 	if (!jsonSchema) {
-		return {
-			present: false,
-			required: [],
-			requiredInAllVariants: [],
-			properties: {},
-			schema: null,
-		};
+		return { present: false, required: [], properties: {}, schema: null };
 	}
 
 	const schema = dereference(jsonSchema, doc, new Set()) as JsonSchema;
-	const variants = schema.oneOf ?? schema.anyOf ?? [schema];
-	if (!Array.isArray(variants) || variants.length === 0) {
+	const variants = schema.oneOf ?? schema.anyOf ?? [];
+	if (!Array.isArray(variants)) {
 		fail(`Unsupported request body shape for ${key}`);
 	}
 
 	const properties: Record<string, JsonSchema> = {};
-	for (const variant of variants) {
-		if (variant.type && variant.type !== "object") {
+	for (const shape of [schema, ...variants]) {
+		if (shape.type && shape.type !== "object") {
 			fail(`Non-object request body for ${key}`);
 		}
-		for (const [name, propSchema] of Object.entries(variant.properties ?? {})) {
+		for (const [name, propSchema] of Object.entries(shape.properties ?? {})) {
 			properties[name] ??= propSchema;
 		}
 	}
 
-	// Body-level required only holds for a single-variant body; with a oneOf
-	// union the per-variant requirements are enforced at dispatch time via the
-	// full bodySchema.
-	const required =
-		variants.length === 1 ? ((variants[0].required as string[]) ?? []) : [];
-
-	const requiredInAllVariants = (
-		(variants[0].required as string[]) ?? []
-	).filter((name) =>
-		variants.every((variant) =>
-			((variant.required as string[]) ?? []).includes(name),
-		),
+	const requiredInAllVariants = (variants[0]?.required ?? []).filter((name) =>
+		variants.every((variant) => (variant.required ?? []).includes(name)),
 	);
 
 	return {
 		present: true,
-		required,
-		requiredInAllVariants,
+		required: [
+			...new Set([...(schema.required ?? []), ...requiredInAllVariants]),
+		],
 		properties,
 		schema,
 	};
@@ -494,8 +478,7 @@ function buildOperation(
 
 	const accountParamRequired = accountParam
 		? parameters.some((p) => p.name === accountParam && p.required) ||
-			body.required.includes(accountParam) ||
-			body.requiredInAllVariants.includes(accountParam)
+			body.required.includes(accountParam)
 		: false;
 
 	const override = metadata.overrides.overrides[key];
@@ -571,6 +554,7 @@ function buildOperation(
 		parameters,
 		hasRequestBody: body.present,
 		bodyRequired: [...body.required].sort(),
+		bodyProperties: Object.keys(body.properties).sort(),
 		...(body.schema ? { bodySchema: body.schema } : {}),
 		inputSchema,
 		accountParam,

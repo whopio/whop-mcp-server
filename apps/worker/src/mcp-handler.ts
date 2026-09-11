@@ -3,6 +3,7 @@ import { durableIdempotencyStore } from "./idempotency-do.ts";
 import { registry } from "./registry.ts";
 import {
 	attributionHeaders,
+	readPluginSource,
 	credentialAdapterFromProps,
 	EXPIRY_SLACK_MS,
 	parseGrantProps,
@@ -11,6 +12,7 @@ import {
 	unauthorized,
 } from "./grant.ts";
 import type { Env } from "./types.ts";
+import { ApiFeedbackSink } from "./feedback.ts";
 
 /**
  * The authenticated /mcp handler. workers-oauth-provider has already
@@ -44,15 +46,22 @@ export function createMcpApiHandler() {
 				confirmationSecret: env.MCP_CONFIRMATION_SECRET,
 				idempotencyStore: durableIdempotencyStore(env.IDEMPOTENCY),
 				auditSink: new StructuredLogAuditSink(),
+				feedbackSink: new ApiFeedbackSink(
+					env.MCP_WHOP_API_ORIGIN,
+					props.whopAccessToken,
+				),
 				baseUrl: `${env.MCP_WHOP_API_ORIGIN}/api/v1`,
 				requireHttps: env.MCP_BASE_URL.startsWith("https://"),
 				chatGptCompat: true,
 				authenticator: {
 					async authenticate() {
+						const pluginSource = readPluginSource(request);
 						return {
 							principal: principalFromProps(props),
+							clientName: props.mcpClientName,
 							credentialAdapter: credentialAdapterFromProps(props),
-							extraHeaders: attributionHeaders(env, props, "http"),
+							pluginSource,
+							extraHeaders: attributionHeaders(env, props, pluginSource),
 						};
 					},
 				},

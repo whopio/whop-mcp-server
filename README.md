@@ -84,6 +84,26 @@ server-verified chat history. ChatGPT's fixed-schema `search` and `fetch`
 compatibility tools and the local `connection_status` diagnostic do not use
 these fields.
 
+### Feedback and unanswered questions
+
+The hosted server exposes two tools for sending observations to Whop for
+internal review:
+
+- `report_feedback` records a concrete problem, documentation gap, or confusing
+  behavior. Optional fields capture task impact (`blocked`, `degraded`, or
+  `cosmetic`) and a workaround.
+- `ask_question` records a question the available tools and documentation could
+  not answer. It returns a receipt, not an answer; no response will arrive later
+  in the session.
+
+Both require `content` and optionally accept `intention`, `tool`, and
+`modelType`. They do not require `intent` or `intent_id`. Submissions include
+the authenticated identity and available client attribution and are written to
+Whop's ClickHouse analytics events for internal review. Ingestion is asynchronous.
+They are not support tickets or a private
+journal. Remove credentials, personal data, and payment details before sending.
+These tools are available only when the host configures a feedback sink.
+
 ## Repository layout
 
 | Path | Purpose |

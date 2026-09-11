@@ -36,11 +36,11 @@ rules:
       classification: mutating
       idempotency: required
 
-  # ── Run recording: writes one analytics event, executes nothing ──────────
-  - name: recommended-action-runs
+  # ── Economic intelligence: queues a generation, or records a run ─────────
+  - name: economic-intelligence-writes
     match:
       operations:
-        - POST /recommended_actions/{id}
+        - POST /economic_intelligence
     set:
       classification: mutating
 
@@ -52,6 +52,7 @@ rules:
         - POST /payments/{id}/refund
         - POST /payments/{id}/retry
         - POST /payments/{id}/void
+        - POST /payments/{id}/capture
         - POST /payouts
         - POST /transfers
         - POST /swaps
@@ -87,8 +88,8 @@ rules:
       operations:
         - POST /cards
         - PATCH /cards/{id}
+        - PATCH /cashback_rules/{id}
         - POST /fee_markups
-        - POST /memberships/{id}/add_free_days
         - POST /memberships/{id}/extend
         - POST /payouts/methods
         - PATCH /payouts/methods/{id}
@@ -100,6 +101,16 @@ rules:
       financial: true
       confirmation: true
 
+  - name: cashback-rule-creation
+    match:
+      operations:
+        - POST /cashback_rule
+    set:
+      classification: mutating
+      financial: true
+      idempotency: required
+      confirmation: true
+
   - name: payment-return-url
     match:
       operations:
@@ -109,6 +120,18 @@ rules:
       financial: true
       externalPublication: true
       idempotency: none
+      confirmation: true
+
+  # ── Resume a renewal parked on a bank challenge: charges the saved card.
+  #    Naturally idempotent — a live attempt or paid receipt answers 200 with
+  #    the current status and mints nothing — so no key. ─────────────────────
+  - name: payment-resume
+    match:
+      operations:
+        - POST /payments/{payment_id}/resume
+    set:
+      classification: mutating
+      financial: true
       confirmation: true
 
   - name: setup-intent-creation
@@ -147,7 +170,6 @@ rules:
     match:
       operations:
         - POST /access_tokens
-        - POST /companies/{parent_company_id}/api_keys
     set:
       classification: mutating
       credential: true
@@ -204,7 +226,6 @@ rules:
     match:
       operations:
         - POST /memberships/{id}/resume
-        - POST /memberships/{id}/uncancel
         - POST /memberships/{id}/resync_access
         - PATCH /memberships/{id}
     set:
@@ -213,8 +234,6 @@ rules:
   - name: dispute-evidence
     match:
       operations:
-        - POST /disputes/{id}/submit_evidence
-        - POST /disputes/{id}/update_evidence
         - POST /disputes/{id}/upload_evidence
         - PATCH /disputes/{id}
         - POST /disputes/{id}/submit
@@ -276,6 +295,36 @@ rules:
         - POST /apps/{id}/deploy
     set:
       classification: mutating
+      confirmation: true
+      idempotency: supported
+
+  - name: experiment-creation
+    match:
+      operations:
+        - POST /experiments
+    set:
+      classification: mutating
+      idempotency: supported
+
+  - name: experiment-serving
+    match:
+      operations:
+        - PATCH /experiments/{id}
+        - POST /experiments/{id}/activate
+        - POST /experiments/{id}/end
+        - POST /experiments/{id}/pause
+    set:
+      classification: mutating
+      confirmation: true
+
+  - name: domain-publication
+    match:
+      operations:
+        - PATCH /domains/{id}
+        - POST /domains
+    set:
+      classification: mutating
+      externalPublication: true
       confirmation: true
       idempotency: supported
 
@@ -366,7 +415,6 @@ rules:
         - Bounty Submissions
         - Chat channels
         - Checkout Configurations
-        - Companies
         - Course chapters
         - Course lessons
         - Courses

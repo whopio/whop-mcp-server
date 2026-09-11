@@ -27,10 +27,6 @@
     "bot": true,
     "user": false
   },
-  "ad_campaign:stats:read": {
-    "bot": true,
-    "user": false
-  },
   "ad_campaign:update": {
     "bot": true,
     "user": true
@@ -48,15 +44,15 @@
     "user": true
   },
   "ai_chat:create": {
-    "bot": false,
+    "bot": true,
     "user": true
   },
   "ai_chat:delete": {
-    "bot": false,
+    "bot": true,
     "user": true
   },
   "ai_chat:update": {
-    "bot": false,
+    "bot": true,
     "user": true
   },
   "airdrop_link:manage": {
@@ -92,8 +88,9 @@
     "user": true
   },
   "bounty:create": {
-    "bot": false,
-    "user": true
+    "bot": true,
+    "user": true,
+    "disallow_app_authorization": true
   },
   "bounty:submission:create": {
     "bot": false,
@@ -163,6 +160,11 @@
     "bot": true,
     "user": true
   },
+  "company:suspend_child": {
+    "bot": true,
+    "user": false,
+    "disallow_app_authorization": true
+  },
   "company:transfer_ownership": {
     "bot": true,
     "user": false,
@@ -208,8 +210,8 @@
   },
   "crypto_wallet:swap": {
     "bot": true,
-    "user": false,
-    "disallow_app_authorization": true
+    "user": true,
+    "disallow_app_authorization": false
   },
   "developer:basic:read": {
     "bot": true,
@@ -379,7 +381,7 @@
     "bot": true,
     "user": true
   },
-  "member:phone:read": {
+  "member:payment_methods:use": {
     "bot": true,
     "user": true
   },

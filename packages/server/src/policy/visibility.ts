@@ -26,6 +26,19 @@ export interface VisibilityOptions {
 	nativeOnly?: boolean;
 }
 
+export function operationVisibleToPrincipal(
+	operation: OperationDef,
+	principal: PrincipalContext,
+	options: VisibilityOptions = {},
+): boolean {
+	return (
+		(!options.nativeOnly || operation.surface === "native") &&
+		operation.profiles.includes(principal.permissionProfile) &&
+		operation.principals.includes(principal.principalType) &&
+		scopeAlternativesSatisfied(principal.scopes, operation.scopeAlternatives)
+	);
+}
+
 /**
  * The tool surface a connection actually sees: one canonical registry,
  * filtered by surface, permission profile, principal type, and granted
@@ -36,11 +49,7 @@ export function visibleOperations(
 	principal: PrincipalContext,
 	options: VisibilityOptions = {},
 ): OperationDef[] {
-	return registry.operations.filter(
-		(op) =>
-			(!options.nativeOnly || op.surface === "native") &&
-			op.profiles.includes(principal.permissionProfile) &&
-			op.principals.includes(principal.principalType) &&
-			scopeAlternativesSatisfied(principal.scopes, op.scopeAlternatives),
+	return registry.operations.filter((operation) =>
+		operationVisibleToPrincipal(operation, principal, options),
 	);
 }

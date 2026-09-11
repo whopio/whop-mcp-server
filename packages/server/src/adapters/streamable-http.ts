@@ -4,6 +4,7 @@ import type { CredentialAdapter, PrincipalContext } from "../policy/types.ts";
 import type { AuditSink } from "../safety/audit.ts";
 import type { IdempotencyStore } from "../safety/idempotency.ts";
 import { createWhopMcpServer } from "../runtime/server.ts";
+import type { FeedbackSink } from "../runtime/feedback.ts";
 
 /**
  * The hosted adapter's authentication seam. Implementations validate the
@@ -16,6 +17,7 @@ export interface HttpAuthenticator {
 		principal: PrincipalContext;
 		credentialAdapter: CredentialAdapter;
 		clientName?: string;
+		pluginSource?: string;
 		/** Extra attribution headers stamped on this connection's upstream calls. */
 		extraHeaders?: Record<string, string>;
 	}>;
@@ -46,6 +48,7 @@ export interface StreamableHttpAdapterOptions {
 	confirmationSecret: string;
 	idempotencyStore?: IdempotencyStore;
 	auditSink?: AuditSink;
+	feedbackSink?: FeedbackSink;
 	fetch?: typeof fetch;
 	baseUrl?: string;
 	/**
@@ -145,9 +148,11 @@ export function createStreamableHttpHandler(
 			confirmationSecret: options.confirmationSecret,
 			idempotencyStore: options.idempotencyStore,
 			auditSink: options.auditSink,
+			feedbackSink: options.feedbackSink,
 			fetch: options.fetch,
 			baseUrl: options.baseUrl,
 			clientName: auth.clientName,
+			pluginSource: auth.pluginSource,
 			chatGptCompat: options.chatGptCompat,
 			extraHeaders: auth.extraHeaders,
 		});

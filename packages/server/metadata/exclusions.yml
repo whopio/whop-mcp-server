@@ -10,12 +10,9 @@
 #       owner: github-handle or team
 
 exclusions:
-  - operation: "PATCH /apps/{app_id}/permissions"
-    reason: Legacy GraphQL-proxy duplicate of PATCH /apps/{id}/permissions (native), which claims the apps_permissions tool name.
-    owner: gayatrigt
-  - operation: "GET /webhooks/{webhook_id}/deliveries"
-    reason: Legacy GraphQL-proxy duplicate of GET /webhooks/{id}/deliveries (native), which claims the webhooks_deliveries tool name.
-    owner: gayatrigt
+  - operation: "POST /confirmation_tokens"
+    reason: Buyer-facing collection operation that accepts tokenized payment-method material; integrations call it directly through their payment collection flow rather than through an MCP agent.
+    owner: alal3823
   - operation: "GET /users/me/passkeys"
     reason: Requires a first-party whop.com user session; the hosted Worker uses an OAuth token and the documented stdio setup uses an API key, both of which this endpoint explicitly refuses.
     owner: gayatrigt

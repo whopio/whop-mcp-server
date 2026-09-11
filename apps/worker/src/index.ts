@@ -6,13 +6,11 @@ import OAuthProvider, {
 } from "@cloudflare/workers-oauth-provider";
 import { defaultHandler } from "./authorize.ts";
 import { createMcpApiHandler } from "./mcp-handler.ts";
-import { createSseApiHandler } from "./sse-handler.ts";
 import { reconcileGrantOnTokenExchange } from "./token-exchange.ts";
 import { WHOP_MCP_CLIENT_ID, WhopOidcClient } from "./whop-oidc.ts";
 import type { Env } from "./types.ts";
 
 export { IdempotencyDO } from "./idempotency-do.ts";
-export { SseSessionDO } from "./sse-session-do.ts";
 
 /**
  * tokenExchangeCallback receives only its options object — no Worker
@@ -52,9 +50,6 @@ async function tokenExchangeCallback(
 const providerOptions: OAuthProviderOptions<Env> = {
 	apiHandlers: {
 		"/mcp": createMcpApiHandler(),
-		// Prefix-matched: covers GET /sse and POST /sse/message, and the
-		// provider auto-serves the /sse-suffixed protected-resource metadata.
-		"/sse": createSseApiHandler(),
 	},
 	defaultHandler,
 	authorizeEndpoint: "/authorize",

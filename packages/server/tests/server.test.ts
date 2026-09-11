@@ -441,7 +441,7 @@ describe("MCP contract", () => {
 		expect(result).toEqual({ id: "sint_1", status: "requires_action" });
 		expect(requests).toHaveLength(1);
 		expect(requests[0].body).toMatchObject({
-			company_id: "biz_boundAccount",
+			account_id: "biz_boundAccount",
 			confirmation_token: "ctok_buyer_method",
 		});
 		expect(requests[0].body).not.toHaveProperty("mcp_confirmation_token");
@@ -465,7 +465,7 @@ describe("MCP contract", () => {
 		);
 		expect(prepared.prepared, JSON.stringify(prepared)).toBe(true);
 		const injected = prepared.arguments as Record<string, unknown>;
-		expect(injected.company_id).toBe("biz_boundAccount");
+		expect(injected.account_id).toBe("biz_boundAccount");
 
 		// The client follows next_step literally: it resubmits the returned
 		// (account-injected) arguments, not its original pre-injection shape.
@@ -692,6 +692,46 @@ describe("MCP contract", () => {
 
 	it("recovers a committed caller result behind an unknown confirmation", async () => {
 		const { fetch, requests } = fakeFetch(() => ({
+			body: { id: "inv_123456", status: "voided" },
+		}));
+		const client = await connect({
+			fetch,
+			idempotencyStore: new CommitThenFailCompletionStore(true),
+		});
+		const args = { id: "inv_123456" };
+		const prepared = parseResult(
+			await client.callTool({ name: "invoices_void", arguments: args }),
+		);
+		const executionArgs = {
+			...args,
+			mcp_confirmation_token: prepared.mcp_confirmation_token,
+			idempotency_key: "hidden-commit",
+		};
+		const first = await client.callTool({
+			name: "invoices_void",
+			arguments: executionArgs,
+		});
+		expect(first.isError).toBe(true);
+		expect(parseResult(first)).toMatchObject({
+			error: { code: "outcome_unknown" },
+		});
+
+		expect(
+			parseResult(
+				await client.callTool({
+					name: "invoices_void",
+					arguments: executionArgs,
+				}),
+			),
+		).toEqual({ id: "inv_123456", status: "voided" });
+		expect(requests).toHaveLength(1);
+	});
+
+	// payments_refund is a native POST since the 2026-09-02-1 cutover, so a lost
+	// completion is recoverable through Idempotency-Key replay at the API
+	// instead of failing closed.
+	it("retries upstream instead of failing closed for a native POST when completion storage is lost", async () => {
+		const { fetch, requests } = fakeFetch(() => ({
 			body: { id: "pay_123456", status: "refunded" },
 		}));
 		const client = await connect({
@@ -705,7 +745,7 @@ describe("MCP contract", () => {
 		const executionArgs = {
 			...args,
 			mcp_confirmation_token: prepared.mcp_confirmation_token,
-			idempotency_key: "hidden-commit",
+			idempotency_key: "hidden-commit-native",
 		};
 		const first = await client.callTool({
 			name: "payments_refund",
@@ -713,7 +753,10 @@ describe("MCP contract", () => {
 		});
 		expect(first.isError).toBe(true);
 		expect(parseResult(first)).toMatchObject({
-			error: { code: "outcome_unknown" },
+			error: {
+				code: "internal_error",
+				message: expect.stringMatching(/retry with the same/i),
+			},
 		});
 
 		expect(
@@ -724,7 +767,6 @@ describe("MCP contract", () => {
 				}),
 			),
 		).toEqual({ id: "pay_123456", status: "refunded" });
-		expect(requests).toHaveLength(1);
 	});
 
 	it("recovers when caller reservation fails after the confirmation is bound", async () => {
@@ -1025,12 +1067,7 @@ describe("MCP contract", () => {
 	});
 
 	it.each([
-		[
-			"a legacy POST after re-preparation",
-			"payments_refund",
-			"pay_123456",
-			true,
-		],
+		["a legacy POST after re-preparation", "invoices_void", "inv_123456", true],
 		[
 			"a native DELETE with the original token",
 			"ad-campaigns_delete",
@@ -1185,7 +1222,7 @@ describe("MCP contract", () => {
 		const client = await connect();
 		const result = await client.callTool({
 			name: "products_list",
-			arguments: { company_id: "biz_someoneElse" },
+			arguments: { account_id: "biz_someoneElse" },
 		});
 		expect(result.isError).toBe(true);
 		expect(parseResult(result)).toMatchObject({
@@ -1339,7 +1376,7 @@ describe("confirmation modes and policy hooks", () => {
 			(op) => op.surface === "native" && op.principals.includes("business"),
 		);
 		expect(tools.length).toBe(nativeBusinessOps.length + 1);
-		expect(tools.map((t) => t.name)).not.toContain("payments_refund");
+		expect(tools.map((t) => t.name)).not.toContain("affiliates_archive");
 	});
 
 	it("lets beforeCall block an execution", async () => {

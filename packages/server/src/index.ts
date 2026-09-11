@@ -1,19 +1,4 @@
-export type {
-	ExclusionDef,
-	HttpMethod,
-	IdempotencyPolicy,
-	JsonSchema,
-	OperationDef,
-	OperationParameter,
-	OperationSafety,
-	OperationSurface,
-	PendingReviewDef,
-	PrincipalType,
-	RegistryManifest,
-	SafetyClassification,
-	ToolAnnotations,
-} from "./registry/types.ts";
-export type { CredentialAdapter, PrincipalContext } from "./policy/types.ts";
+export * from "./runtime/in-process.ts";
 export {
 	DEFAULT_PROFILE,
 	isProfileName,
@@ -26,7 +11,6 @@ export {
 	type CreateWhopMcpServerOptions,
 	type WhopMcpServer,
 } from "./runtime/server.ts";
-export { WhopMcpError, type WhopMcpErrorCode } from "./runtime/errors.ts";
 export type {
 	CompletedIdempotencyRecord,
 	IdempotencyClaimInput,
@@ -41,3 +25,4 @@ export type {
 	UnknownIdempotencyRecord,
 } from "./safety/idempotency.ts";
 export type { AuditEvent, AuditSink } from "./safety/audit.ts";
+export type { FeedbackSink, FeedbackSubmission } from "./runtime/feedback.ts";

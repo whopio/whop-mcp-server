@@ -19,6 +19,11 @@
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js"
 		},
+		"./in-process": {
+			"types": "./dist/in-process.d.ts",
+			"import": "./dist/in-process.js",
+			"default": "./dist/in-process.js"
+		},
 		"./stdio": {
 			"types": "./dist/adapters/stdio.d.ts",
 			"import": "./dist/adapters/stdio.js"
@@ -27,11 +32,7 @@
 			"types": "./dist/adapters/streamable-http.d.ts",
 			"import": "./dist/adapters/streamable-http.js"
 		},
-		"./manifest.json": "./generated/manifest.json",
-		"./sse": {
-			"types": "./dist/adapters/sse.d.ts",
-			"import": "./dist/adapters/sse.js"
-		}
+		"./manifest.json": "./generated/manifest.json"
 	},
 	"scripts": {
 		"generate": "tsx scripts/generate-registry.ts",

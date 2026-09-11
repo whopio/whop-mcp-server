@@ -8,6 +8,7 @@ export interface AuditEvent {
 	userId?: string;
 	accountId: string | null;
 	clientName?: string;
+	pluginSource?: string;
 	requestId?: string;
 	outcome: "executed" | "failed" | "prepared" | "replayed";
 	errorCode?: string;

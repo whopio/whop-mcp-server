@@ -6,23 +6,19 @@ const env = { CF_VERSION_METADATA: { id: "test-version" } } as Env;
 const props = { profile: "admin", mcpClientName: "Claude" } as WhopGrantProps;
 
 describe("attributionHeaders", () => {
-	it.each(["http", "sse"] as const)(
-		"stamps hosted-worker attribution for %s",
-		(transport) => {
-			const headers = attributionHeaders(env, props, transport);
-			expect(headers).toEqual({
-				"x-whop-mcp-client": `whop-mcp-worker/test-version; profile=admin; transport=${transport}`,
-				"x-whop-mcp-client-name": "Claude",
-			});
-		},
-	);
+	it("stamps hosted-worker attribution", () => {
+		const headers = attributionHeaders(env, props);
+		expect(headers).toEqual({
+			"x-whop-mcp-client":
+				"whop-mcp-worker/test-version; profile=admin; transport=http",
+			"x-whop-mcp-client-name": "Claude",
+		});
+	});
 
 	it("supports grants created before client attribution", () => {
-		const headers = attributionHeaders(
-			env,
-			{ profile: "admin" } as WhopGrantProps,
-			"http",
-		);
+		const headers = attributionHeaders(env, {
+			profile: "admin",
+		} as WhopGrantProps);
 		expect(headers).not.toHaveProperty("x-whop-mcp-client-name");
 	});
 });

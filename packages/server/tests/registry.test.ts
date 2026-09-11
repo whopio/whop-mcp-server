@@ -5,6 +5,26 @@ import { buildRealRegistry, loadMetadata, loadOpenApiRaw } from "./helpers.ts";
 const registry = buildRealRegistry();
 
 describe("registry generation", () => {
+	it("exposes every experiment operation for user and business credentials", () => {
+		const experiments = registry.operations.filter((op) =>
+			op.path.startsWith("/experiments"),
+		);
+		expect(experiments.map((op) => op.toolName).sort()).toEqual([
+			"experiments_activate",
+			"experiments_create",
+			"experiments_end",
+			"experiments_exposures",
+			"experiments_get",
+			"experiments_list",
+			"experiments_pause",
+			"experiments_update",
+		]);
+		for (const op of experiments) {
+			expect(op.principals).toContain("user");
+			expect(op.principals).toContain("business");
+		}
+	});
+
 	it("covers every public operation: exposed, excluded, or pending review", () => {
 		const doc = JSON.parse(loadOpenApiRaw());
 		let total = 0;
@@ -259,6 +279,30 @@ describe("registry generation", () => {
 			expect(op.inputSchema.additionalProperties, op.toolName).toBe(false);
 			expect(op.inputSchema.type).toBe("object");
 		}
+	});
+
+	it("keeps shared union body fields and requirements in tool inputs", () => {
+		for (const op of registry.operations) {
+			const schema = op.bodySchema;
+			if (!schema || (!schema.oneOf && !schema.anyOf)) continue;
+
+			for (const property of Object.keys(schema.properties ?? {})) {
+				expect(op.inputSchema.properties, op.toolName).toHaveProperty(property);
+			}
+			for (const required of schema.required ?? []) {
+				if (required === op.accountParam) continue;
+				expect(op.inputSchema.required, op.toolName).toContain(required);
+			}
+		}
+
+		const payout = registry.operations.find(
+			(operation) => operation.toolName === "payouts_create",
+		);
+		expect(Object.keys(payout?.inputSchema.properties ?? {})).toHaveLength(12);
+		expect(payout?.inputSchema.required).toEqual([
+			"amount",
+			"payout_method_id",
+		]);
 	});
 
 	it("never exposes authorization or version headers as inputs", () => {

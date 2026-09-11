@@ -1,6 +1,7 @@
 import type { OperationDef } from "../registry/types.ts";
 import type { CredentialAdapter, PrincipalContext } from "../policy/types.ts";
 import { enforceAccountBinding } from "../policy/account-binding.ts";
+import { operationVisibleToPrincipal } from "../policy/visibility.ts";
 import { normalizeUpstreamError, redactValue, WhopMcpError } from "./errors.ts";
 import {
 	encodeMcpRequestContext,
@@ -28,21 +29,41 @@ export interface DispatchOverrides {
 	 */
 	idempotencyKey?: string;
 	mcpRequestContext?: McpRequestContext;
+	extraHeaders?: Record<string, string>;
+}
+
+export interface PreparedDispatch {
+	readonly args: Readonly<Record<string, unknown>>;
+	readonly method: string;
+	readonly url: string;
+	readonly body: Readonly<Record<string, unknown>> | undefined;
+	readonly idempotencyKey: string | undefined;
+}
+
+interface RegisteredPreparedDispatch {
+	readonly sourceOperation: OperationDef;
+	readonly operation: OperationDef;
+	readonly request: PreparedDispatch;
 }
 
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_MAX_RESPONSE_BYTES = 512_000;
 
-function bodyPropertyNames(operation: OperationDef): Set<string> {
-	const names = new Set<string>();
-	const schema = operation.bodySchema;
-	if (!schema) return names;
-	for (const variant of schema.oneOf ?? schema.anyOf ?? [schema]) {
-		for (const name of Object.keys(variant.properties ?? {})) {
-			names.add(name);
-		}
+function immutableCopy<T>(value: T): T {
+	if (Array.isArray(value)) {
+		return Object.freeze(value.map((entry) => immutableCopy(entry))) as T;
 	}
-	return names;
+	if (value !== null && typeof value === "object") {
+		return Object.freeze(
+			Object.fromEntries(
+				Object.entries(value).map(([key, entry]) => [
+					key,
+					immutableCopy(entry),
+				]),
+			),
+		) as T;
+	}
+	return value;
 }
 
 /** Path values must be a single, plain segment — no traversal, no separators. */
@@ -50,6 +71,10 @@ const SAFE_PATH_VALUE = /^[A-Za-z0-9][A-Za-z0-9._@-]*$/;
 
 export class Dispatcher {
 	private readonly options: DispatcherOptions;
+	private readonly preparedDispatches = new WeakMap<
+		PreparedDispatch,
+		RegisteredPreparedDispatch
+	>();
 
 	constructor(options: DispatcherOptions) {
 		this.options = options;
@@ -93,28 +118,86 @@ export class Dispatcher {
 		return args;
 	}
 
+	prepare(
+		operation: OperationDef,
+		rawArgs: Record<string, unknown>,
+		principal: PrincipalContext,
+		overrides: Pick<DispatchOverrides, "idempotencyKey"> = {},
+	): PreparedDispatch {
+		const args = this.validate(operation, rawArgs, principal);
+		const request = {
+			args,
+			method: operation.method.toUpperCase(),
+			url: this.buildUrl(operation, args),
+			body: this.buildBody(operation, args),
+			idempotencyKey: overrides.idempotencyKey,
+		};
+		const handle = immutableCopy(request);
+		this.preparedDispatches.set(handle, {
+			sourceOperation: operation,
+			operation: immutableCopy(operation),
+			request: immutableCopy(request),
+		});
+		return handle;
+	}
+
 	async dispatch(
 		operation: OperationDef,
 		rawArgs: Record<string, unknown>,
 		principal: PrincipalContext,
 		overrides: DispatchOverrides = {},
 	): Promise<{ status: number; requestId?: string; body: unknown }> {
-		const args = this.validate(operation, rawArgs, principal);
+		const resolvedOverrides = {
+			...overrides,
+			idempotencyKey:
+				overrides.idempotencyKey ??
+				(operation.safety.idempotency !== "none"
+					? crypto.randomUUID()
+					: undefined),
+		};
+		const prepared = this.prepare(
+			operation,
+			rawArgs,
+			principal,
+			resolvedOverrides,
+		);
+		return this.dispatchPrepared(operation, prepared, principal, {
+			extraHeaders: resolvedOverrides.extraHeaders,
+			mcpRequestContext: resolvedOverrides.mcpRequestContext,
+		});
+	}
 
-		const url = this.buildUrl(operation, args);
-		const body = this.buildBody(operation, args);
+	async dispatchPrepared(
+		operation: OperationDef,
+		prepared: PreparedDispatch,
+		principal: PrincipalContext,
+		overrides: Omit<DispatchOverrides, "idempotencyKey"> = {},
+	): Promise<{ status: number; requestId?: string; body: unknown }> {
+		const registered = this.preparedDispatches.get(prepared);
+		if (
+			!registered ||
+			registered.sourceOperation !== operation ||
+			registered.operation.toolName !== operation.toolName ||
+			registered.operation.openapiOperationId !== operation.openapiOperationId
+		) {
+			throw new WhopMcpError(
+				"confirmation_invalid",
+				"The prepared request is invalid or belongs to a different operation.",
+			);
+		}
+
+		const operationSnapshot = registered.operation;
+		const request = registered.request;
+		if (!operationVisibleToPrincipal(operationSnapshot, principal)) {
+			throw new WhopMcpError(
+				"missing_scope",
+				`The credential cannot execute ${operationSnapshot.toolName}.`,
+			);
+		}
+
+		const { url, body, idempotencyKey } = request;
 
 		const { token } = await this.options.credentialAdapter.getCredential();
-
-		// An explicit override is always honored — even for operations whose
-		// idempotency policy is "none" — because the API accepts Idempotency-Key
-		// on every authenticated POST and a released-for-retry confirmation must
-		// never be able to double-execute.
-		const idempotencyKey =
-			overrides.idempotencyKey ??
-			(operation.safety.idempotency !== "none"
-				? crypto.randomUUID()
-				: undefined);
 
 		const controller = new AbortController();
 		const timeout = setTimeout(
@@ -125,7 +208,7 @@ export class Dispatcher {
 		let response: Response;
 		try {
 			response = await (this.options.fetch ?? fetch)(url, {
-				method: operation.method.toUpperCase(),
+				method: request.method,
 				headers: {
 					Authorization: `Bearer ${token}`,
 					"Api-Version-Date": this.options.apiVersionDate,
@@ -135,6 +218,7 @@ export class Dispatcher {
 						? { "User-Agent": this.options.userAgent }
 						: {}),
 					...this.options.extraHeaders,
+					...overrides.extraHeaders,
 					...(overrides.mcpRequestContext
 						? {
 								[MCP_CONTEXT_HEADER]: encodeMcpRequestContext(
@@ -154,7 +238,7 @@ export class Dispatcher {
 			if (controller.signal.aborted) {
 				throw new WhopMcpError(
 					"timeout",
-					`${operation.toolName} timed out after ${this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS}ms.`,
+					`${operationSnapshot.toolName} timed out after ${this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS}ms.`,
 				);
 			}
 			throw new WhopMcpError(
@@ -172,7 +256,7 @@ export class Dispatcher {
 			await response.body?.cancel().catch(() => {});
 			throw new WhopMcpError(
 				"upstream_error",
-				`${operation.toolName} received an unexpected 3xx response from the Whop API.`,
+				`${operationSnapshot.toolName} received an unexpected 3xx response from the Whop API.`,
 				{ status: response.status, requestId },
 			);
 		}
@@ -186,7 +270,7 @@ export class Dispatcher {
 			if (controller.signal.aborted) {
 				throw new WhopMcpError(
 					"timeout",
-					`${operation.toolName} timed out after ${this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS}ms while reading the response.`,
+					`${operationSnapshot.toolName} timed out after ${this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS}ms while reading the response.`,
 					{ status: response.status, requestId },
 				);
 			}
@@ -204,7 +288,7 @@ export class Dispatcher {
 		if (text.length > maxBytes) {
 			throw new WhopMcpError(
 				"response_too_large",
-				`${operation.toolName} returned ${text.length} characters (limit ${maxBytes}). Narrow the request with filters or pagination.`,
+				`${operationSnapshot.toolName} returned ${text.length} characters (limit ${maxBytes}). Narrow the request with filters or pagination.`,
 				{ status: response.status, requestId },
 			);
 		}
@@ -220,7 +304,12 @@ export class Dispatcher {
 			throw normalizeUpstreamError(response.status, parsed, requestId);
 		}
 
-		this.enforceResponseOwnership(operation, parsed, principal, requestId);
+		this.enforceResponseOwnership(
+			operationSnapshot,
+			parsed,
+			principal,
+			requestId,
+		);
 
 		return {
 			status: response.status,
@@ -324,7 +413,7 @@ export class Dispatcher {
 	): Record<string, unknown> | undefined {
 		if (!operation.hasRequestBody) return undefined;
 		const consumed = new Set(operation.parameters.map((p) => p.name));
-		const bodyProperties = bodyPropertyNames(operation);
+		const bodyProperties = new Set(operation.bodyProperties);
 		const body: Record<string, unknown> = {};
 		for (const [key, value] of Object.entries(args)) {
 			if (value === undefined) continue;

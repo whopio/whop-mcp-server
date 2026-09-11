@@ -28,16 +28,12 @@ The server grants the connected client the full reviewed MCP surface available
 to the signed-in user. Consequential operations use a prepare-and-confirm flow,
 but you should still connect only MCP clients you trust.
 
-Legacy clients can use `https://mcp.whop.com/sse`. New integrations should use
-the `/mcp` endpoint.
-
 ## Runtime architecture
 
 ```text
 MCP client ── OAuth 2.1 + PKCE ──> Cloudflare Worker ── Whop OIDC ──> Whop API
                                   │
-                                  ├─ /mcp  Streamable HTTP
-                                  └─ /sse  legacy HTTP + SSE
+                                  └─ /mcp  Streamable HTTP
 ```
 
 The Worker provides:
@@ -48,7 +44,6 @@ The Worker provides:
 - PKCE for both the MCP client flow and the upstream Whop authorization flow.
 - Encrypted, short-lived pending authorization state in Workers KV.
 - Durable Object-backed idempotency for consequential API operations.
-- Durable Object-backed sessions for the legacy SSE transport.
 - Structured audit events written to the Worker log stream.
 
 ## Local development
@@ -117,7 +112,6 @@ and contains no Whop or Cloudflare account-specific deployment data.
 | --- | --- | --- |
 | `OAUTH_KV` | Workers KV | Pending OAuth authorization state |
 | `IDEMPOTENCY` | Durable Object | Serialized idempotency records |
-| `SSE_SESSIONS` | Durable Object | Legacy SSE sessions |
 | `CF_VERSION_METADATA` | Version metadata | Runtime version attribution |
 
 ## Deploying a separate instance

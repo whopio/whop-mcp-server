@@ -16,8 +16,7 @@ export type OperationSurface = "native" | "legacy";
 
 /**
  * The account-scoping parameters the runtime injects the bound business
- * into. parent_company_id is the same boundary under a different name (e.g.
- * POST /companies/{parent_company_id}/api_keys).
+ * into. parent_company_id is the legacy name for the same boundary.
  */
 export type AccountParam = "company_id" | "account_id" | "parent_company_id";
 
@@ -77,6 +76,8 @@ export interface OperationDef {
 	parameters: OperationParameter[];
 	hasRequestBody: boolean;
 	bodyRequired: string[];
+	/** Every body property name across the root and all union variants. */
+	bodyProperties: string[];
 	/** Full dereferenced request-body schema (including oneOf variants) for dispatch-time validation. */
 	bodySchema?: JsonSchema;
 	/** Merged strict input schema across path, query, and body inputs. */
