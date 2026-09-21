@@ -20,6 +20,13 @@ export interface FeedbackSink {
 }
 
 const commonProperties = {
+	account_id: {
+		type: "string",
+		maxLength: 255,
+		pattern: "^biz_[A-Za-z0-9]+$",
+		description:
+			"The account ID (biz_...) for the affected resource or request. Defaults to the current account context when available. Omit when no specific account is known.",
+	},
 	content: {
 		type: "string",
 		minLength: 1,
@@ -125,6 +132,12 @@ export async function submitFeedback(
 			);
 		}
 	}
+	if (
+		typeof args.account_id === "string" &&
+		!/^biz_[A-Za-z0-9]+$/.test(args.account_id)
+	) {
+		errors.push("account_id must be an account ID (biz_...)");
+	}
 	if (errors.length) {
 		throw new WhopMcpError(
 			"invalid_input",
@@ -136,13 +149,12 @@ export async function submitFeedback(
 		createdAt: new Date().toISOString(),
 		kind: tool.name as FeedbackSubmission["kind"],
 		userId: principal.userId,
-		accountId: principal.accountId,
+		accountId: (args.account_id as string | undefined) ?? principal.accountId,
 		...attribution,
 		fields: Object.fromEntries(
-			Object.entries(args).map(([key, value]) => [
-				key,
-				redactText(value as string),
-			]),
+			Object.entries(args)
+				.filter(([key]) => key !== "account_id")
+				.map(([key, value]) => [key, redactText(value as string)]),
 		),
 	};
 	const submissionId = await sink.record(submission);

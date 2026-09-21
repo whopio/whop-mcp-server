@@ -36,11 +36,12 @@ rules:
       classification: mutating
       idempotency: required
 
-  # ── Economic intelligence: queues a generation, or records a run ─────────
+  # ── Economic intelligence: queues a generation, or retires a card ────────
   - name: economic-intelligence-writes
     match:
       operations:
         - POST /economic_intelligence
+        - PATCH /economic_intelligence/{id}
     set:
       classification: mutating
 
@@ -53,6 +54,8 @@ rules:
         - POST /payments/{id}/retry
         - POST /payments/{id}/void
         - POST /payments/{id}/capture
+        - POST /waitlist_entries/{id}/approve
+        - POST /waitlist_entries/approve_all
         - POST /payouts
         - POST /transfers
         - POST /swaps
@@ -99,6 +102,34 @@ rules:
     set:
       classification: mutating
       financial: true
+      confirmation: true
+
+  - name: partner-referral-request-acceptance
+    match:
+      operations:
+        - POST /partner_referral_requests/{id}/accept
+    set:
+      classification: mutating
+      financial: true
+      idempotency: required
+      confirmation: true
+
+  - name: partner-referral-request-creation
+    match:
+      operations:
+        - POST /partner_referral_requests
+    set:
+      classification: mutating
+      idempotency: supported
+
+  - name: partner-referral-request-decisions
+    match:
+      operations:
+        - POST /partner_referral_requests/{id}/cancel
+        - POST /partner_referral_requests/{id}/decline
+    set:
+      classification: mutating
+      idempotency: supported
       confirmation: true
 
   - name: cashback-rule-creation
@@ -210,6 +241,31 @@ rules:
       classification: destructive
       credential: true
       confirmation: true
+
+  # ── Payment rules decide whether a payment is allowed, so weakening one needs a confirm ──
+  - name: payment-rule-weakening
+    match:
+      operations:
+        - DELETE /payment_rules/{id}
+    set:
+      classification: destructive
+      confirmation: true
+
+  - name: payment-rule-deactivate
+    match:
+      operations:
+        - POST /payment_rules/{id}/deactivate
+    set:
+      classification: mutating
+      confirmation: true
+
+  - name: payment-rule-writes
+    match:
+      tags: [Payment Rules]
+      methods: [post, patch]
+    set:
+      classification: mutating
+      idempotency: supported
 
   # ── High-impact membership and dispute actions ────────────────────────────
   - name: membership-consequential
@@ -385,6 +441,15 @@ rules:
     set:
       classification: mutating
 
+  - name: ad-conversion-value-rule-delete
+    match:
+      operations:
+        - DELETE /ad_conversion_value_rules/{id}
+    set:
+      classification: destructive
+      idempotency: supported
+      confirmation: true
+
   # ── All remaining deletes are destructive and confirmed ──────────────────
   - name: destructive-deletes
     match:
@@ -403,6 +468,7 @@ rules:
         - Account links
         - Accounts
         - Ad Campaigns
+        - Ad Conversion Value Rules
         - Ad Groups
         - Ads
         - Affiliates
@@ -420,7 +486,6 @@ rules:
         - Courses
         - Dm channels
         - Dm members
-        - Entries
         - Events
         - Experiences
         - Files
@@ -436,6 +501,7 @@ rules:
         - Support channels
         - Users
         - Verifications
+        - Waitlist Entries
     set:
       classification: mutating
       idempotency: supported

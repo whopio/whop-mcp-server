@@ -2,7 +2,7 @@ import type { OperationDef } from "../registry/types.ts";
 import type { CredentialAdapter, PrincipalContext } from "../policy/types.ts";
 import { enforceAccountBinding } from "../policy/account-binding.ts";
 import { operationVisibleToPrincipal } from "../policy/visibility.ts";
-import { normalizeUpstreamError, redactValue, WhopMcpError } from "./errors.ts";
+import { normalizeUpstreamError, WhopMcpError } from "./errors.ts";
 import {
 	encodeMcpRequestContext,
 	MCP_CONTEXT_HEADER,
@@ -311,11 +311,26 @@ export class Dispatcher {
 			requestId,
 		);
 
-		return {
-			status: response.status,
-			requestId,
-			body: redactValue(parsed),
-		};
+		if (
+			["Apps", "Cards"].includes(operationSnapshot.tag) &&
+			parsed !== null &&
+			typeof parsed === "object"
+		) {
+			const resources =
+				"data" in parsed && Array.isArray(parsed.data) ? parsed.data : [parsed];
+			for (const resource of resources) {
+				if (
+					resource !== null &&
+					typeof resource === "object" &&
+					"secrets" in resource &&
+					resource.secrets !== null
+				) {
+					resource.secrets = "[redacted]";
+				}
+			}
+		}
+
+		return { status: response.status, requestId, body: parsed };
 	}
 
 	/**
@@ -374,13 +389,6 @@ export class Dispatcher {
 					`Path parameter "${param.name}" contains unsupported characters.`,
 				);
 			}
-			const expectedPrefix = operation.idPrefixes?.[param.name];
-			if (expectedPrefix && !raw.startsWith(`${expectedPrefix}_`)) {
-				throw new WhopMcpError(
-					"invalid_input",
-					`Path parameter "${param.name}" should be a ${expectedPrefix}_… ID, got "${raw}".`,
-				);
-			}
 			path = path.replace(`{${param.name}}`, encodeURIComponent(raw));
 		}
 
@@ -394,17 +402,34 @@ export class Dispatcher {
 		const url = new URL(`${this.options.baseUrl.replace(/\/$/, "")}${path}`);
 		for (const param of operation.parameters) {
 			if (param.in !== "query") continue;
-			const value = args[param.name];
-			if (value === undefined || value === null) continue;
-			if (Array.isArray(value)) {
-				for (const item of value) {
-					url.searchParams.append(`${param.name}[]`, String(item));
-				}
-			} else {
-				url.searchParams.set(param.name, String(value));
-			}
+			this.appendQueryParameter(url.searchParams, param.name, args[param.name]);
 		}
 		return url.toString();
+	}
+
+	private appendQueryParameter(
+		query: URLSearchParams,
+		name: string,
+		value: unknown,
+	): void {
+		if (value === undefined || value === null) return;
+		if (Array.isArray(value)) {
+			for (const item of value) {
+				this.appendQueryParameter(query, `${name}[]`, item);
+			}
+		} else if (typeof value === "object") {
+			for (const [key, entry] of Object.entries(value)) {
+				if (key.includes("[") || key.includes("]")) {
+					throw new WhopMcpError(
+						"invalid_input",
+						`Query parameter "${name}" contains a key with unsupported brackets.`,
+					);
+				}
+				this.appendQueryParameter(query, `${name}[${key}]`, entry);
+			}
+		} else {
+			query.append(name, String(value));
+		}
 	}
 
 	private buildBody(

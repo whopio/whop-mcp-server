@@ -25,6 +25,7 @@ export class ApiFeedbackSink implements FeedbackSink {
 					"Idempotency-Key": submission.id,
 				},
 				body: JSON.stringify({
+					account_id: submission.accountId ?? undefined,
 					source: `mcp_${submission.kind}`,
 					content: [content, ...details].join("\n\n"),
 				}),

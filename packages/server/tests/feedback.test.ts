@@ -17,7 +17,10 @@ interface ToolResponse {
 	result: { isError?: boolean; content: { text: string }[] };
 }
 
-function handler(feedbackSink?: FeedbackSink) {
+function handler(
+	feedbackSink?: FeedbackSink,
+	accountId: string | null = "biz_boundAccount",
+) {
 	return createStreamableHttpHandler({
 		registry,
 		confirmationSecret: "test-confirmation-secret-long-enough",
@@ -28,7 +31,7 @@ function handler(feedbackSink?: FeedbackSink) {
 					throw new HttpAuthError(401, "Authentication required");
 				}
 				return {
-					principal: principalFixture(),
+					principal: { ...principalFixture(), accountId },
 					credentialAdapter: staticCredential(),
 					clientName: "test-client",
 					pluginSource: "test-plugin",
@@ -116,6 +119,42 @@ describe("feedback tools over authenticated HTTP", () => {
 		},
 	);
 
+	it.each(["report_feedback", "ask_question"])(
+		"uses explicit account context for %s",
+		async (name) => {
+			const record = vi.fn().mockResolvedValue("fbk_saved");
+			await handler({ record })(
+				request("tools/call", {
+					name,
+					arguments: { content: "A problem", account_id: "biz_resource" },
+				}),
+			);
+			expect(record).toHaveBeenCalledWith(
+				expect.objectContaining({
+					accountId: "biz_resource",
+					userId: "user_test1",
+					fields: { content: "A problem" },
+				}),
+			);
+		},
+	);
+
+	it("allows accountless submissions", async () => {
+		const record = vi.fn().mockResolvedValue("fbk_saved");
+		await handler(
+			{ record },
+			null,
+		)(
+			request("tools/call", {
+				name: "ask_question",
+				arguments: { content: "A question" },
+			}),
+		);
+		expect(record).toHaveBeenCalledWith(
+			expect.objectContaining({ accountId: null }),
+		);
+	});
+
 	it("records severity and workaround and scrubs recognized credentials from every supplied field", async () => {
 		const record = vi.fn().mockResolvedValue("fbk_saved");
 		await handler({ record })(
@@ -139,6 +178,12 @@ describe("feedback tools over authenticated HTTP", () => {
 		{},
 		{ content: " " },
 		{ content: 42 },
+		{ content: "Valid", account_id: null },
+		{ content: "Valid", account_id: 42 },
+		{ content: "Valid", account_id: "user_wrong" },
+		{ content: "Valid", account_id: "biz_invalid/path" },
+		{ content: "Valid", account_id: "biz_" + "a".repeat(252) },
+
 		{ content: "x".repeat(12001) },
 		{ content: "Valid", intention: "x".repeat(2001) },
 		{ content: "Valid", severity: "critical" },

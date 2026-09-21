@@ -51,6 +51,34 @@ describe("profile scopes", () => {
 		expect(scopes).not.toContain("some_future:permission");
 	});
 
+	it("treats CLI OAuth scopes as grantable", () => {
+		const scopes = expandProfileToWhopScopes("admin", [
+			{
+				profiles: ["admin"],
+				scopes: [
+					"experiment:read",
+					"experiment:manage",
+					"bounty:update",
+					"bounty:submission:create",
+					"bounty:submission:delete",
+					"user:notifications:read",
+					"user:notifications:update",
+					"payment:resolution_center_case:manage",
+					"crypto_wallet:swap",
+				],
+				method: "post",
+				safety: { financial: false, credential: false },
+			},
+		]);
+		expect(scopes).toContain("experiment:read");
+		expect(scopes).toContain("experiment:manage");
+		expect(scopes).toContain("bounty:update");
+		expect(scopes).toContain("bounty:submission:create");
+		expect(scopes).toContain("user:notifications:read");
+		expect(scopes).toContain("payment:resolution_center_case:manage");
+		expect(scopes).toContain("crypto_wallet:swap");
+	});
+
 	it("never hands a non-admin credential a financial-action scope", () => {
 		for (const profile of ["read_only", "standard"]) {
 			const scopes = expandProfileToWhopScopes(profile, operations);

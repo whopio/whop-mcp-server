@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Dispatcher } from "../src/runtime/dispatcher.ts";
+import type { OperationDef } from "../src/registry/types.ts";
 import { WhopMcpError } from "../src/runtime/errors.ts";
 import {
 	buildRealRegistry,
@@ -11,6 +12,25 @@ import {
 
 const registry = buildRealRegistry();
 const principal = principalFixture();
+
+const objectQueryOperation: OperationDef = {
+	...findOperation(registry, "experiments_exposures"),
+	accountParam: null,
+	requiresAccount: false,
+	parameters: [
+		{
+			name: "subject",
+			in: "query",
+			required: false,
+			schema: { type: "object" },
+		},
+	],
+	inputSchema: {
+		type: "object",
+		properties: { subject: { type: "object" } },
+		additionalProperties: false,
+	},
+};
 
 function makeDispatcher(
 	fetchImpl: typeof fetch,
@@ -26,6 +46,230 @@ function makeDispatcher(
 }
 
 describe("dispatcher", () => {
+	it("preserves successful response fields and payout quote tokens", async () => {
+		const quoteToken = "signed-payout-quote";
+		const { fetch, requests } = fakeFetch(() => ({
+			body: {
+				quote_token: quoteToken,
+				access_token: "private-access-token",
+				metadata: { quote_token: "private-nested-token" },
+			},
+		}));
+		const dispatcher = makeDispatcher(fetch);
+		const input = {
+			account_id: principal.accountId,
+			amount: 1,
+			currency: "usd",
+			payout_method_id: "potk_test1",
+		};
+		const quote = await dispatcher.dispatch(
+			findOperation(registry, "payouts_quotes"),
+			input,
+			principal,
+		);
+		expect(quote.body).toEqual({
+			quote_token: quoteToken,
+			access_token: "private-access-token",
+			metadata: { quote_token: "private-nested-token" },
+		});
+		await dispatcher.dispatch(
+			findOperation(registry, "payouts_create"),
+			{ ...input, quote_token: quoteToken },
+			principal,
+		);
+		expect(requests[1].body).toMatchObject({ quote_token: quoteToken });
+		const other = await dispatcher.dispatch(
+			findOperation(registry, "products_list"),
+			{},
+			principal,
+		);
+		expect(other.body).toMatchObject({
+			quote_token: quoteToken,
+			access_token: "private-access-token",
+		});
+	});
+
+	it.each(["apps_get", "apps_create", "apps_update"])(
+		"scrubs only production secrets from %s responses",
+		async (toolName) => {
+			const body = {
+				id: "app_test1",
+				secrets: { DATABASE_PASSWORD: "production-password" },
+				preview_token: "preview-token",
+				default_api_key: { secret_key: "apik_testtoken1234" },
+				description: "Bearer example-token",
+			};
+			const { fetch } = fakeFetch(() => ({ body }));
+			const input =
+				toolName === "apps_create" ? { name: "Test app" } : { id: body.id };
+			const result = await makeDispatcher(fetch).dispatch(
+				findOperation(registry, toolName),
+				input,
+				principal,
+			);
+			expect(result.body).toEqual({ ...body, secrets: "[redacted]" });
+		},
+	);
+
+	it("leaves null app secrets and unrelated secret fields unchanged", async () => {
+		const body = { secrets: null, metadata: { secrets: "ordinary-data" } };
+		const { fetch } = fakeFetch(() => ({ body }));
+		const result = await makeDispatcher(fetch).dispatch(
+			findOperation(registry, "apps_get"),
+			{ id: "app_test1" },
+			principal,
+		);
+		expect(result.body).toEqual(body);
+		const otherBody = {
+			secrets: { value: "ordinary-data" },
+			password: "value",
+			card_number: "test-number",
+		};
+		const other = fakeFetch(() => ({ body: otherBody }));
+		const resultOther = await makeDispatcher(other.fetch).dispatch(
+			findOperation(registry, "products_list"),
+			{},
+			principal,
+		);
+		expect(resultOther.body).toEqual(otherBody);
+	});
+
+	it.each(["cards_get", "cards_list"])(
+		"scrubs card secrets from %s responses",
+		async (toolName) => {
+			const card = {
+				id: "icrd_test1",
+				last4: "4242",
+				secrets: { card_number: "4242424242424242", cvc: "123", pin: "1234" },
+				metadata: { secrets: "ordinary-data" },
+			};
+			const listed = toolName === "cards_list";
+			const pageInfo = { has_next_page: false };
+			const otherCards = [
+				{ id: "icrd_test2", secrets: null },
+				{ id: "icrd_test3" },
+			];
+			const body = listed
+				? { data: [card, ...otherCards], page_info: pageInfo }
+				: card;
+			const { fetch } = fakeFetch(() => ({ body }));
+			const result = await makeDispatcher(fetch).dispatch(
+				findOperation(registry, toolName),
+				listed ? {} : { id: card.id },
+				principal,
+			);
+			const redacted = { ...card, secrets: "[redacted]" };
+			expect(result.body).toEqual(
+				listed
+					? { data: [redacted, ...otherCards], page_info: pageInfo }
+					: redacted,
+			);
+		},
+	);
+
+	it.each(["payments_get", "webhooks_get"])(
+		"preserves workflow credentials in %s responses",
+		async (toolName) => {
+			const body = {
+				client_secret: "payment-client-secret",
+				webhook_secret: "whsec_testsecret1234",
+			};
+			const { fetch } = fakeFetch(() => ({ body }));
+			const result = await makeDispatcher(fetch).dispatch(
+				findOperation(registry, toolName),
+				{ id: toolName === "payments_get" ? "pay_test1" : "hook_test1" },
+				principal,
+			);
+			expect(result.body).toEqual(body);
+		},
+	);
+
+	it("dispatches native metrics with flat filters and the bound account", async () => {
+		const { fetch, requests } = fakeFetch();
+		await makeDispatcher(fetch).dispatch(
+			findOperation(registry, "stats_get"),
+			{
+				metric: "successful_payments",
+				product: "prod_test1",
+				interval: "month",
+				breakdown_by: "product",
+				time_zone: "America/New_York",
+				from: "2026-06-01T00:00:00.000Z",
+				to: "2026-09-12T00:00:00.000Z",
+			},
+			principal,
+		);
+		const query = new URL(requests[0].url).searchParams;
+		expect(new URL(requests[0].url).pathname).toBe(
+			"/api/v1/stats/successful_payments",
+		);
+		expect(query.get("product")).toBe("prod_test1");
+		expect(query.get("interval")).toBe("month");
+		expect(query.get("breakdown_by")).toBe("product");
+		expect(query.get("time_zone")).toBe("America/New_York");
+		expect(query.has("filters")).toBe(false);
+		expect(query.get("account_id")).toBe(principal.accountId);
+	});
+
+	it("serializes nested query values without losing arrays, false, or zero", async () => {
+		const { fetch, requests } = fakeFetch();
+		await makeDispatcher(fetch).dispatch(
+			objectQueryOperation,
+			{
+				subject: {
+					product: ["prod_first", "prod_second"],
+					amount: { gte: 0 },
+					refunded: false,
+					absent: undefined,
+					nothing: null,
+				},
+			},
+			principal,
+		);
+		const query = new URL(requests[0].url).searchParams;
+		expect(query.getAll("subject[product][]")).toEqual([
+			"prod_first",
+			"prod_second",
+		]);
+		expect(query.get("subject[amount][gte]")).toBe("0");
+		expect(query.get("subject[refunded]")).toBe("false");
+		expect(query.has("subject[absent]")).toBe(false);
+		expect(query.has("subject[nothing]")).toBe(false);
+	});
+
+	it("rejects object keys that would change query nesting", async () => {
+		const { fetch, requests } = fakeFetch();
+		await expect(
+			makeDispatcher(fetch).dispatch(
+				objectQueryOperation,
+				{
+					subject: { "scope][account_id": "biz_other" },
+				},
+				principal,
+			),
+		).rejects.toMatchObject({
+			code: "invalid_input",
+			message:
+				'Query parameter "subject" contains a key with unsupported brackets.',
+		});
+		expect(requests).toHaveLength(0);
+	});
+
+	it.each(["biz_boundAccount", "user_test1", "ldgr_test1"])(
+		"accepts the documented ledger account identifier %s",
+		async (id) => {
+			const { fetch, requests } = fakeFetch();
+			await makeDispatcher(fetch).dispatch(
+				findOperation(registry, "ledger-accounts_get"),
+				{ id },
+				principal,
+			);
+			expect(requests[0].url).toBe(
+				`https://api.whop.test/api/v1/ledger_accounts/${id}`,
+			);
+		},
+	);
+
 	it("sends credentials and the pinned API version", async () => {
 		const { fetch, requests } = fakeFetch();
 		const op = findOperation(registry, "products_list");
@@ -238,24 +482,6 @@ describe("dispatcher", () => {
 				JSON.stringify(evil),
 			).rejects.toMatchObject({ code: "invalid_input" });
 		}
-	});
-
-	it("validates ID prefixes where the resource type is known", async () => {
-		const op = registry.operations.find(
-			(o) => o.idPrefixes && Object.keys(o.idPrefixes).length > 0,
-		);
-		expect(op).toBeDefined();
-		const [param, prefix] = Object.entries(op!.idPrefixes!)[0];
-		const args: Record<string, unknown> = {};
-		for (const p of op!.parameters) {
-			if (p.in === "path")
-				args[p.name] = `${op!.idPrefixes![p.name] ?? "x"}_valid123`;
-		}
-		args[param] = "wrongprefix_123";
-		await expect(
-			makeDispatcher(fakeFetch().fetch).dispatch(op!, args, principal),
-		).rejects.toMatchObject({ code: "invalid_input" });
-		expect(prefix).not.toBe("wrongprefix");
 	});
 
 	it("rejects undeclared input properties", async () => {

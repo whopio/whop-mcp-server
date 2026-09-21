@@ -46,9 +46,6 @@ export class WhopMcpError extends Error {
 	}
 }
 
-const SENSITIVE_KEY_PATTERN =
-	/token|secret|password|api_key|apikey|authorization|credential|card_number|cvv|cvc|ssn/i;
-
 const BEARER_PATTERN = /Bearer\s+[A-Za-z0-9._~+/=-]+/g;
 const KEY_PATTERN = /\b(?:apik|sk|whsec|rt|at)_[A-Za-z0-9]{8,}\b/g;
 
@@ -56,21 +53,6 @@ export function redactText(text: string): string {
 	return text
 		.replace(BEARER_PATTERN, "Bearer [redacted]")
 		.replace(KEY_PATTERN, "[redacted]");
-}
-
-export function redactValue(value: unknown): unknown {
-	if (typeof value === "string") return redactText(value);
-	if (Array.isArray(value)) return value.map(redactValue);
-	if (value !== null && typeof value === "object") {
-		const out: Record<string, unknown> = {};
-		for (const [key, entry] of Object.entries(value)) {
-			out[key] = SENSITIVE_KEY_PATTERN.test(key)
-				? "[redacted]"
-				: redactValue(entry);
-		}
-		return out;
-	}
-	return value;
 }
 
 const SAFE_UPSTREAM_FIELDS = ["type", "code", "message", "param", "detail"];

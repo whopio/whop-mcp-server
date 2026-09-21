@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { buildRegistry, inferOperationName } from "../src/registry/generate.ts";
-import { buildRealRegistry, loadMetadata, loadOpenApiRaw } from "./helpers.ts";
+import {
+	buildRealRegistry,
+	findOperation,
+	loadMetadata,
+	loadOpenApiRaw,
+} from "./helpers.ts";
 
 const registry = buildRealRegistry();
 
@@ -82,6 +87,7 @@ describe("registry generation", () => {
 			"ad-campaigns_create",
 			"ad-campaigns_pause",
 			"payments_refund",
+			"partners_retrieve",
 			"products_list",
 			"swaps_quote",
 			"transfers_create",
@@ -268,6 +274,18 @@ describe("registry generation", () => {
 			openWorldHint: true,
 		});
 		expect(operation?.profiles).toEqual(["admin"]);
+	});
+
+	it("requires admin confirmation before assigning partner attribution", () => {
+		const operation = findOperation(
+			registry,
+			"partner-referral-requests_accept",
+		);
+
+		expect(operation.safety.financial).toBe(true);
+		expect(operation.safety.confirmationRequired).toBe(true);
+		expect(operation.safety.idempotency).toBe("required");
+		expect(operation.profiles).toEqual(["admin"]);
 	});
 
 	it("pins the API version from the contract", () => {
@@ -476,9 +494,13 @@ describe("registry generation", () => {
 		});
 	});
 
-	it("derives ID prefixes from path parameter examples", () => {
-		const withPrefixes = registry.operations.filter((op) => op.idPrefixes);
-		expect(withPrefixes.length).toBeGreaterThan(0);
+	it("keeps example IDs as documentation rather than validation constraints", () => {
+		const operation = findOperation(registry, "ledger-accounts_get");
+		expect(operation.inputSchema.properties?.id).toMatchObject({
+			type: "string",
+			example: "ldgr_xxxxxxxxxxxxx",
+		});
+		expect(operation).not.toHaveProperty("idPrefixes");
 	});
 });
 
@@ -491,6 +513,7 @@ describe("inferOperationName", () => {
 		expect(inferOperationName("GET", "/accounts/me")).toBe("me");
 		expect(inferOperationName("POST", "/swaps/quote")).toBe("quote");
 		expect(inferOperationName("GET", "/swaps")).toBe("status");
+		expect(inferOperationName("GET", "/partners/{id}")).toBe("retrieve");
 		expect(inferOperationName("PATCH", "/users/me")).toBe("update-me");
 		expect(inferOperationName("PATCH", "/payouts/methods/{id}")).toBe(
 			"update-method",

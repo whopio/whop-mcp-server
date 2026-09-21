@@ -92,8 +92,6 @@ export interface OperationDef {
 	safety: OperationSafety;
 	annotations: ToolAnnotations;
 	profiles: string[];
-	/** Expected tag prefix per path parameter (e.g. { id: "pay" }), derived from spec examples. */
-	idPrefixes?: Record<string, string>;
 }
 
 export interface ExclusionDef {

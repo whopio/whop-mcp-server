@@ -328,6 +328,39 @@ describe("MCP contract", () => {
 		expect(contexts[0].tool_call_id).not.toBe(contexts[1].tool_call_id);
 	});
 
+	it.each(["user", "business", "app"] as const)(
+		"exposes native stats and rejects legacy stats for %s credentials",
+		async (principalType) => {
+			const { fetch, requests } = fakeFetch();
+			const client = await connect({
+				fetch,
+				principal: principalFixture({
+					principalType,
+					scopes: ["stats:read"],
+					permissionProfile: "read_only",
+				}),
+			});
+			const { tools } = await client.listTools();
+			expect(
+				tools
+					.filter((tool) => tool.name.startsWith("stats_"))
+					.map((tool) => tool.name)
+					.sort(),
+			).toEqual(["stats_get", "stats_list"]);
+			await client.callTool({ name: "stats_list", arguments: {} });
+			expect(new URL(requests[0].url).pathname).toBe("/api/v1/stats");
+			for (const name of ["stats_describe", "stats_metric", "stats_raw"]) {
+				const result = await client.callTool({ name, arguments: {} });
+				expect(result.isError).toBe(true);
+				expect(parseResult(result)).toMatchObject({
+					error: { code: "tool_not_found" },
+				});
+			}
+			expect(requests).toHaveLength(1);
+			await client.close();
+		},
+	);
+
 	it("returns a structured error for unknown tools", async () => {
 		const client = await connect();
 		const result = await client.callTool({

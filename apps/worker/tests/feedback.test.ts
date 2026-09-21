@@ -47,7 +47,10 @@ describe("hosted MCP feedback submissions", () => {
 						method: "tools/call",
 						params: {
 							name,
-							arguments: { content: "The tool documentation is unclear." },
+							arguments: {
+								content: "The tool documentation is unclear.",
+								account_id: "biz_resource",
+							},
 						},
 					}),
 				}),
@@ -72,6 +75,7 @@ describe("hosted MCP feedback submissions", () => {
 			const event = JSON.parse(init.body as string);
 			expect(event).toMatchObject({
 				source: `mcp_${name}`,
+				account_id: "biz_resource",
 				content: "The tool documentation is unclear.\n\nclient: Test Client",
 			});
 			expect(event).not.toHaveProperty("user_id");

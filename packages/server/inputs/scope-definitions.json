@@ -381,10 +381,6 @@
     "bot": true,
     "user": true
   },
-  "member:payment_methods:use": {
-    "bot": true,
-    "user": true
-  },
   "membership:cancel": {
     "bot": true,
     "user": true
@@ -414,6 +410,26 @@
     "user": true
   },
   "partner:create": {
+    "bot": true,
+    "user": true
+  },
+  "partner:referral_request:accept": {
+    "bot": true,
+    "user": true
+  },
+  "partner:referral_request:cancel": {
+    "bot": true,
+    "user": true
+  },
+  "partner:referral_request:create": {
+    "bot": true,
+    "user": true
+  },
+  "partner:referral_request:decline": {
+    "bot": true,
+    "user": true
+  },
+  "partner:referral_request:read": {
     "bot": true,
     "user": true
   },
@@ -525,14 +541,6 @@
     "user": true
   },
   "plan:waitlist:export": {
-    "bot": true,
-    "user": true
-  },
-  "plan:waitlist:manage": {
-    "bot": true,
-    "user": true
-  },
-  "plan:waitlist:read": {
     "bot": true,
     "user": true
   },

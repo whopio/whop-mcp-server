@@ -35,6 +35,7 @@ const STRIPPED_PARAMETERS = new Set(["authorization", "api-version-date"]);
  */
 const OP_ID_OVERRIDES: Record<string, string> = {
 	"GET /swaps": "status",
+	"GET /partners/{id}": "retrieve",
 	// Root-collection GET infers "list", which GET /partners/businesses claims in the Referrals tag.
 	"GET /partners/businesses": "list",
 	"GET /partners/businesses/{id}": "get",
@@ -49,6 +50,8 @@ const OP_ID_OVERRIDES: Record<string, string> = {
 	// GET and PATCH both infer "preferences" from the static path segment.
 	"GET /accounts/{account_id}/preferences": "preferences",
 	"PATCH /accounts/{account_id}/preferences": "update-preferences",
+	"GET /accounts/{account_id}/fees": "fees",
+	"PATCH /accounts/{account_id}/fees": "update-fees",
 	"GET /users/me/preferences": "preferences",
 	"PATCH /users/me/preferences": "update-preferences",
 	"PATCH /users/me/preferences/notifications": "set-notification-preferences",
@@ -247,17 +250,6 @@ function resolveRef(ref: string, doc: OpenApiDocument): unknown {
 	}
 	if (node === undefined) fail(`Unresolvable $ref: ${ref}`);
 	return node;
-}
-
-/**
- * Extracts an expected ID prefix (e.g. "biz" from example "biz_xxxxxxxxxxxxx")
- * so the dispatcher can reject obviously mistyped or cross-resource IDs.
- */
-function idPrefixFromExample(schema: JsonSchema): string | null {
-	const example = schema.example;
-	if (typeof example !== "string") return null;
-	const match = /^([a-zA-Z]+)_x{6,}$/.exec(example);
-	return match ? match[1] : null;
 }
 
 function sortKeys<T>(value: T): T {
@@ -507,13 +499,6 @@ function buildOperation(
 		additionalProperties: false,
 	};
 
-	const idPrefixes: Record<string, string> = {};
-	for (const param of parameters) {
-		if (param.in !== "path") continue;
-		const prefix = idPrefixFromExample(param.schema);
-		if (prefix) idPrefixes[param.name] = prefix;
-	}
-
 	const security = op.security as { bearerAuth?: string[] }[] | undefined;
 	// Missing or empty security means the endpoint takes no scopes at all.
 	const alternatives =
@@ -583,7 +568,6 @@ function buildOperation(
 			openWorldHint: safety.externalPublication,
 		},
 		profiles: profilesForSafety(safety),
-		...(Object.keys(idPrefixes).length > 0 ? { idPrefixes } : {}),
 	}) as OperationDef;
 }
 
