@@ -61,6 +61,10 @@ const OP_ID_OVERRIDES: Record<string, string> = {
 		"experience-notification-preferences",
 	"GET /payouts/supported_methods": "supported-methods",
 	"GET /permissions": "check",
+	// GET, POST and DELETE all infer "partners" from the static path segment.
+	"GET /social_accounts/{id}/partners": "partners",
+	"POST /social_accounts/{id}/partners": "add-partner",
+	"DELETE /social_accounts/{id}/partners/{partner_id}": "remove-partner",
 	// GET and PATCH both infer "me" from the static path segment.
 	"GET /users/me": "me",
 	"PATCH /users/me": "update-me",
@@ -273,6 +277,18 @@ interface RawOperation {
 	pathItemParameters: unknown[];
 	surface: OperationSurface;
 }
+
+// Served only on the vault host, where Basis Theory tokenizes the card details
+// the operation carries before the request reaches Whop. The dispatcher sends
+// every call to one base URL, so it cannot route these and must not offer them;
+// they are listed as exclusions so the contract stays fully accounted for.
+function isVaultOperation(op: Record<string, unknown>): boolean {
+	return op["x-whop-vault"] === true;
+}
+
+const VAULT_EXCLUSION_REASON =
+	"Served only on the vault host (x-whop-vault): the MCP dispatcher sends every call to one base URL and cannot route card details to Basis Theory. Use an official SDK, which routes the operation itself.";
+const VAULT_EXCLUSION_OWNER = "vault-ingress";
 
 function collectOperations(doc: OpenApiDocument): RawOperation[] {
 	const out: RawOperation[] = [];
@@ -627,6 +643,16 @@ export function buildRegistry(
 	for (const raw of rawOperations) {
 		const key = operationKey(raw.method, raw.path);
 		const opId = raw.op.operationId;
+		if (isVaultOperation(raw.op)) {
+			exclusions.push({
+				operation: key,
+				openapiOperationId: typeof opId === "string" ? opId : "",
+				reason: VAULT_EXCLUSION_REASON,
+				owner: VAULT_EXCLUSION_OWNER,
+			});
+			continue;
+		}
+
 		const exclusion = excluded.get(key);
 		if (exclusion) {
 			exclusions.push({

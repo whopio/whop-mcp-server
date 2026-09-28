@@ -49,6 +49,7 @@ export const WHOP_SCOPES = [
 	"courses:read",
 	"courses:update",
 	"crypto_wallet:swap",
+	"crypto_wallet:trade:read",
 	"custom_emoji:update",
 	"developer:basic:read",
 	"developer:create_app",

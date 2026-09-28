@@ -23,6 +23,7 @@ rules:
       operations:
         - POST /swaps/quote
         - POST /plans/{id}/calculate_tax
+        - POST /variants/{id}/calculate_tax
         - POST /ad_groups/estimate_reach
     set:
       classification: read_only
@@ -40,7 +41,6 @@ rules:
   - name: economic-intelligence-writes
     match:
       operations:
-        - POST /economic_intelligence
         - PATCH /economic_intelligence/{id}
     set:
       classification: mutating
@@ -58,7 +58,11 @@ rules:
         - POST /waitlist_entries/approve_all
         - POST /payouts
         - POST /transfers
+        - POST /cashback_rules/payout
         - POST /swaps
+        - POST /trades
+        - POST /trades/{id}/cancel
+        - POST /trades/leverage
         - POST /deposits
         - POST /topups
         - POST /company_token_transactions
@@ -94,6 +98,7 @@ rules:
         - PATCH /cashback_rules/{id}
         - POST /fee_markups
         - POST /memberships/{id}/extend
+        - POST /memberships/{id}/reactivate
         - POST /payouts/methods
         - PATCH /payouts/methods/{id}
         - POST /media/generate
@@ -173,7 +178,7 @@ rules:
       classification: mutating
       financial: true
       externalPublication: true
-      idempotency: none
+      idempotency: required
       confirmation: true
 
   - name: setup-intent-return-url
@@ -500,6 +505,7 @@ rules:
         - Shipments
         - Support channels
         - Users
+        - Variants
         - Verifications
         - Waitlist Entries
     set:

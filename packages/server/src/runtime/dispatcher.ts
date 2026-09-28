@@ -334,7 +334,7 @@ export class Dispatcher {
 	}
 
 	/**
-	 * Path-id GETs (plans_get, payments_get, …) take no account parameter, so
+	 * Path-id GETs (variants_get, payments_get, …) take no account parameter, so
 	 * input-side binding cannot scope them: with a multi-business credential a
 	 * bound connection could read another business's records by id. A fetched
 	 * record's top-level company_id/account_id names its owner — reject it

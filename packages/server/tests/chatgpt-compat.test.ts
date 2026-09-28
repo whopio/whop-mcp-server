@@ -98,7 +98,7 @@ describe("ChatGPT compat tools", () => {
 		);
 		expect(fetched.id).toBe("plan_x1");
 		expect(String(fetched.text)).toContain("500");
-		expect(requests[0].url).toContain("/plans/plan_x1");
+		expect(requests[0].url).toContain("/variants/plan_x1");
 
 		const bad = await client.callTool({
 			name: "fetch",

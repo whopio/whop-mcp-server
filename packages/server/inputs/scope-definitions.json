@@ -156,6 +156,10 @@
     "bot": true,
     "user": false
   },
+  "company:delete_child": {
+    "bot": true,
+    "user": false
+  },
   "company:manage_checkout": {
     "bot": true,
     "user": true
@@ -212,6 +216,15 @@
     "bot": true,
     "user": true,
     "disallow_app_authorization": false
+  },
+  "crypto_wallet:trade": {
+    "bot": true,
+    "user": true,
+    "disallow_app_authorization": true
+  },
+  "crypto_wallet:trade:read": {
+    "bot": true,
+    "user": true
   },
   "developer:basic:read": {
     "bot": true,
@@ -411,6 +424,10 @@
   },
   "partner:create": {
     "bot": true,
+    "user": true
+  },
+  "partner:fees:update": {
+    "bot": false,
     "user": true
   },
   "partner:referral_request:accept": {

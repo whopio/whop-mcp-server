@@ -349,6 +349,30 @@ describe("MCP contract", () => {
 			).toEqual(["stats_get", "stats_list"]);
 			await client.callTool({ name: "stats_list", arguments: {} });
 			expect(new URL(requests[0].url).pathname).toBe("/api/v1/stats");
+			const funnel = await client.callTool({
+				name: "stats_get",
+				arguments: {
+					metric: "funnel",
+					account_id: "biz_boundAccount",
+					from: "2026-09-01",
+					to: "2026-09-14",
+					steps: {
+						"1": { event: "pixel.page", page: "/pricing*" },
+						"2": { event: "payment.completed", plan_id: "plan_monthly" },
+					},
+				},
+			});
+			expect(funnel.isError).not.toBe(true);
+			const funnelUrl = new URL(requests[1].url);
+			expect(funnelUrl.pathname).toBe("/api/v1/stats/funnel");
+			expect(funnelUrl.searchParams.get("steps[1][event]")).toBe("pixel.page");
+			expect(funnelUrl.searchParams.get("steps[1][page]")).toBe("/pricing*");
+			expect(funnelUrl.searchParams.get("steps[2][event]")).toBe(
+				"payment.completed",
+			);
+			expect(funnelUrl.searchParams.get("steps[2][plan_id]")).toBe(
+				"plan_monthly",
+			);
 			for (const name of ["stats_describe", "stats_metric", "stats_raw"]) {
 				const result = await client.callTool({ name, arguments: {} });
 				expect(result.isError).toBe(true);
@@ -356,7 +380,7 @@ describe("MCP contract", () => {
 					error: { code: "tool_not_found" },
 				});
 			}
-			expect(requests).toHaveLength(1);
+			expect(requests).toHaveLength(2);
 			await client.close();
 		},
 	);

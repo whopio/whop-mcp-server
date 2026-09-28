@@ -59,6 +59,41 @@ describe("registry generation", () => {
 		expect(JSON.stringify(buildRealRegistry())).toBe(JSON.stringify(registry));
 	});
 
+	it("lists operations served only on the vault host as exclusions, since one base URL cannot route them", () => {
+		const doc = JSON.parse(loadOpenApiRaw());
+		doc.paths["/payments/pci"] = {
+			post: {
+				...doc.paths["/payments"].post,
+				operationId: "createPciPayment",
+				"x-whop-vault": true,
+				servers: [
+					{
+						url: "https://vault-api.whop.com/api/v1",
+						"x-fern-server-name": "vault",
+					},
+				],
+			},
+		};
+
+		const withVault = buildRegistry(doc, loadMetadata(), {
+			openapiSha256: "test",
+		});
+
+		expect(withVault.operations.some((op) => op.path === "/payments/pci")).toBe(
+			false,
+		);
+		const exclusion = withVault.exclusions.find(
+			(entry) => entry.operation === "POST /payments/pci",
+		);
+		expect(exclusion?.reason).toMatch(/vault host/);
+		expect(exclusion?.owner).toBe("vault-ingress");
+		expect(
+			withVault.operations.some(
+				(op) => op.path === "/payments" && op.method === "post",
+			),
+		).toBe(true);
+	});
+
 	it("excludes account security operations that require a first-party session", () => {
 		const sessionOnlyOperations = [
 			"GET /users/me/passkeys",
@@ -264,13 +299,13 @@ describe("registry generation", () => {
 			classification: "mutating",
 			financial: true,
 			externalPublication: true,
-			idempotency: "none",
+			idempotency: "required",
 			confirmationRequired: true,
 		});
-		expect(operation?.surface).toBe("legacy");
+		expect(operation?.surface).toBe("native");
 		expect(operation?.annotations).toMatchObject({
 			destructiveHint: true,
-			idempotentHint: false,
+			idempotentHint: true,
 			openWorldHint: true,
 		});
 		expect(operation?.profiles).toEqual(["admin"]);

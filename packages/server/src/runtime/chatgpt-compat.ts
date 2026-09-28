@@ -17,8 +17,8 @@ const SEARCH_SOURCES = [
 		titleFields: ["title", "name"],
 	},
 	{
-		toolName: "plans_list",
-		type: "plan",
+		toolName: "variants_list",
+		type: "variant",
 		titleFields: ["title", "internal_notes"],
 	},
 	{ toolName: "payments_list", type: "payment", titleFields: ["id", "status"] },
@@ -32,7 +32,7 @@ const SEARCH_SOURCES = [
 const FETCH_SOURCES: Record<string, string> = {
 	prod: "products_get",
 	pass: "products_get",
-	plan: "plans_get",
+	plan: "variants_get",
 	pay: "payments_get",
 	mem: "memberships_get",
 	mber: "members_get",
@@ -42,7 +42,7 @@ const FETCH_SOURCES: Record<string, string> = {
 export const SEARCH_TOOL = {
 	name: "search",
 	description:
-		"Search the connected Whop account's products, plans, payments, and members by keyword. Returns result IDs for use with fetch.",
+		"Search the connected Whop account's products, variants, payments, and members by keyword. Returns result IDs for use with fetch.",
 	inputSchema: {
 		type: "object",
 		properties: {
