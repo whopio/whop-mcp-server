@@ -37,7 +37,7 @@ rules:
       classification: mutating
       idempotency: required
 
-  # ── Economic intelligence: queues a generation, or retires a card ────────
+  # ── Economic intelligence: runs, retires, or acknowledges a card ─────────
   - name: economic-intelligence-writes
     match:
       operations:
@@ -151,6 +151,7 @@ rules:
     match:
       operations:
         - PATCH /payments/{payment_id}/return_url
+        - PATCH /payments/{id}
     set:
       classification: mutating
       financial: true

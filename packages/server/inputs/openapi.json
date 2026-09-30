@@ -7,7 +7,7 @@
         "name": "Api-Version-Date",
         "required": false,
         "schema": {
-          "example": "2026-09-25",
+          "example": "2026-09-29",
           "type": "string"
         }
       },
@@ -147,6 +147,14 @@
       },
       "Account": {
         "properties": {
+          "ads_spend_usd": {
+            "description": "Lifetime charged ad spend for the account, in USD. Computed only on `list` for callers with `stats:read` on the account; `null` otherwise.",
+            "example": 0.0,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
           "balances": {
             "items": {
               "$ref": "#/components/schemas/AccountBalanceToken",
@@ -444,6 +452,13 @@
               }
             ]
           },
+          "platform_credits": {
+            "items": {
+              "$ref": "#/components/schemas/Money",
+              "description": "Whop-issued platform credits per currency, read from the balance cache. Credits can only be spent on eligible Whop products such as Whop Ads, can never be withdrawn, and are not included in `balances` or `total_usd`. Empty when the account holds none or `total_usd` is `null`."
+            },
+            "type": "array"
+          },
           "privacy_policy": {
             "description": "The account's privacy policy document, or `null` if they have not published one.",
             "oneOf": [
@@ -569,8 +584,8 @@
             ]
           },
           "status_reason": {
-            "description": "Why the account was suspended, as the label shown to the account owner, such as `Suspended - Fraudulent payment activity`. Computed on `retrieve`, `me`, and `suspend`; `null` otherwise, when `status` is not `suspended`, and when the suspension was recorded without a reason.",
-            "example": "Suspended - Fraudulent payment activity",
+            "description": "Why the account was suspended, as the label shown to the account owner, such as `Suspended - Fraudulent activity`. Computed on `retrieve`, `me`, and `suspend`; `null` otherwise, when `status` is not `suspended`, and when the suspension was recorded without a reason.",
+            "example": "Suspended - Fraudulent activity",
             "type": [
               "string",
               "null"
@@ -772,6 +787,7 @@
           "status",
           "status_reason",
           "volume_usd",
+          "ads_spend_usd",
           "capabilities",
           "payment_controls",
           "cards",
@@ -786,6 +802,7 @@
           "tax_collection_enabled_states",
           "total_usd",
           "balances",
+          "platform_credits",
           "stablecoin_rails",
           "economic_intelligence",
           "can_transfer_pending_balance_to_children",
@@ -2779,6 +2796,42 @@
                 "source": "default",
                 "unadjustable_reason": "not_permitted"
               },
+              "boleto": {
+                "adjustable": false,
+                "category": "payments",
+                "default": {
+                  "fixed": {
+                    "amount": "0.30",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 3.9
+                },
+                "ends_at": null,
+                "fixed": {
+                  "amount": "0.30",
+                  "currency": "usd",
+                  "decimals": 2,
+                  "display_decimals": 2
+                },
+                "maximum": null,
+                "minimum": null,
+                "percentage": 3.9,
+                "region": "br",
+                "regions": {},
+                "reset": {
+                  "fixed": {
+                    "amount": "0.30",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 3.9
+                },
+                "source": "default",
+                "unadjustable_reason": "not_permitted"
+              },
               "bre_b": {
                 "adjustable": false,
                 "category": "payments",
@@ -4389,7 +4442,7 @@
           },
           "reward_amount": {
             "$ref": "#/components/schemas/Money",
-            "description": "USD balance credit for this reward. Uses the saved grant amount once fulfillment has started."
+            "description": "USD amount credited for this reward. Uses the saved grant amount once fulfillment has started."
           },
           "status": {
             "description": "This account's reward state. Credited requires a posted ledger entry; processing includes a met requirement awaiting fulfillment. Reversing and reversed reflect a subsequent reward reversal.",
@@ -9349,9 +9402,11 @@
               "2026-09-23",
               "2026-09-24",
               "2026-09-24-1",
-              "2026-09-25"
+              "2026-09-25",
+              "2026-09-28",
+              "2026-09-29"
             ],
-            "example": "2026-09-25",
+            "example": "2026-09-29",
             "type": "string"
           },
           "created_at": {
@@ -16614,7 +16669,7 @@
             ]
           },
           "status": {
-            "description": "Where the dispute stands. `needs_response` is awaiting evidence, `under_review` is with the processor, `won` returned the funds to the seller, `lost` returned them to the customer, and `closed` ended without a ruling. The `warning_` statuses are the same stages for an inquiry, which moves no funds. A dispute past its `evidence_due_at` reports `under_review` — the window to respond has closed.",
+            "description": "Where the dispute stands. `needs_response` is awaiting evidence, `under_review` is with the processor, `won` returned the funds to the seller, `lost` returned them to the customer, and `prevented` means the customer was refunded before any ruling, so it settles like `lost`. The `warning_` statuses are the same stages for an inquiry, which moves no funds. A dispute past its `evidence_due_at` reports `under_review` — the window to respond has closed.",
             "enum": [
               "needs_response",
               "warning_needs_response",
@@ -16622,7 +16677,7 @@
               "warning_under_review",
               "won",
               "lost",
-              "closed",
+              "prevented",
               "warning_closed"
             ],
             "example": "under_review",
@@ -19042,6 +19097,14 @@
               "null"
             ]
           },
+          "acknowledged_at": {
+            "description": "When the executed run was first marked as seen, as an ISO 8601 timestamp, or `null` if it has not been.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "action_type": {
             "description": "Type of action recommended, or `null` when no type is assigned. New values may be added; handle unknown types gracefully.",
             "example": "scale_winning_ads",
@@ -19051,8 +19114,8 @@
             ]
           },
           "ai_chat_id": {
-            "description": "The chat to resume after its initial message is accepted, or null before a chat is ready.",
-            "example": null,
+            "description": "The chat that ran the recommendation, shown only to the user who ran it, or `null` otherwise.",
+            "example": "aich_xxxxxxxxxxxxxx",
             "type": [
               "string",
               "null"
@@ -19067,7 +19130,7 @@
             ]
           },
           "executed_at": {
-            "description": "When the recommendation was approved, as an ISO 8601 timestamp, or `null` if it has not been approved.",
+            "description": "When the recommendation was carried out, as an ISO 8601 timestamp, or `null` if it has not been.",
             "example": "2026-01-01T12:00:00.000Z",
             "type": [
               "string",
@@ -19097,6 +19160,13 @@
               "null"
             ]
           },
+          "inputs": {
+            "items": {
+              "$ref": "#/components/schemas/EconomicIntelligenceInput",
+              "description": "Decisions this recommendation leaves to you. Pick one option or write your own for each before it runs; empty when there is nothing to decide."
+            },
+            "type": "array"
+          },
           "prompt": {
             "description": "Step-by-step instructions for Whop AI, or `null` when no instructions are available.",
             "example": "Create a 20% off promo code for my members.",
@@ -19108,6 +19178,38 @@
           "reasoning": {
             "description": "Evidence and metrics supporting the recommendation, or `null` when no reasoning was provided.",
             "example": "Capped 9 of 14 days.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "result_url": {
+            "description": "Where to view what the run produced, such as the published website or created product, or `null` when the result is only in the chat.",
+            "example": "https://atlas.whop.site/",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "run_by_user_id": {
+            "description": "The user who started the run, prefixed `user_`, or `null` if it has not run or was started without a user, such as with an API key.",
+            "example": "user_xxxxxxxxxxxxxx",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "run_ended_at": {
+            "description": "When Whop AI's run ended, whether executed or incomplete, as an ISO 8601 timestamp, or `null` if it has not ended.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "run_started_at": {
+            "description": "When Whop AI started carrying out the recommendation, as an ISO 8601 timestamp, or `null` if it has not run.",
+            "example": "2026-01-01T12:00:00.000Z",
             "type": [
               "string",
               "null"
@@ -19127,15 +19229,17 @@
             ]
           },
           "status": {
-            "description": "`queued` when awaiting generation; `pending` while generating; `ready` when available for approval; `executed` when approved; `superseded` when rejected or replaced.",
+            "description": "`queued` when awaiting generation; `pending` while generating; `ready` when available to run; `running` while Whop AI carries it out; `executed` when carried out; `incomplete` when Whop AI's run ended without carrying it out; `superseded` when rejected or replaced.",
             "enum": [
               "queued",
               "pending",
               "ready",
+              "running",
               "executed",
+              "incomplete",
               "superseded"
             ],
-            "example": "ready",
+            "example": "executed",
             "type": "string"
           },
           "superseded_at": {
@@ -19179,14 +19283,63 @@
           "prompt",
           "reasoning",
           "expected_tool_calls",
+          "inputs",
           "input",
           "status",
           "executed_at",
           "superseded_at",
+          "run_started_at",
+          "run_ended_at",
+          "run_by_user_id",
+          "result_url",
           "ai_chat_id",
           "created_at",
           "sentiment",
-          "user_feedback"
+          "user_feedback",
+          "acknowledged_at"
+        ],
+        "type": "object"
+      },
+      "EconomicIntelligenceInput": {
+        "properties": {
+          "answer": {
+            "description": "What Whop AI ran with: one of the options or your own text. `null` until a run starts.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Identifies the input when you answer it.",
+            "example": "audience",
+            "type": "string"
+          },
+          "label": {
+            "description": "What you are choosing, such as the daily ad budget.",
+            "example": "Guide audience",
+            "type": "string"
+          },
+          "options": {
+            "items": {
+              "description": "Three suggested values, strongest first. You can answer with one of them or your own text.",
+              "example": "Daily drivers",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "template": {
+            "description": "A plan sentence with one {answer} blank to fill with the selected answer.",
+            "example": "Guide audience: {answer}",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "label",
+          "template",
+          "options",
+          "answer"
         ],
         "type": "object"
       },
@@ -23258,144 +23411,302 @@
           "line_type": {
             "description": "The ledger line category this activity was posted under.",
             "enum": [
-              "account_settlement",
-              "ad_budget_release",
-              "ad_campaign_budget",
-              "ad_publisher_payout",
-              "ad_publisher_payout_received",
-              "ad_spend_charge",
-              "affiliate_fee",
-              "airdrop",
-              "airdrop_link_created",
-              "airdrop_link_redeemed",
-              "airdrop_link_returned",
-              "airdrop_reversal",
-              "application_fee",
-              "application_fee_payout",
-              "balance_reservation",
-              "balance_reservation_reversal",
-              "bank_transfer",
-              "billing_percentage_fee",
-              "buyer_fee",
-              "card_interchange",
-              "card_load_deposit",
-              "card_load_transfer",
-              "card_spend_authorization",
-              "card_spend_authorization_void",
-              "card_spend_refund",
-              "card_unload_deposit",
-              "card_unload_transfer",
-              "cashback",
-              "cashback_funding",
-              "company_referral",
-              "connected_account_negative_balance",
-              "cross_border_percentage_fee",
-              "currency_conversion_incoming",
-              "currency_conversion_outgoing",
-              "dispute_alert_fee",
-              "dispute_hold_adjustment",
-              "dispute_representment_fee",
-              "economic_intelligence_percentage_fee",
-              "external_card_load_deposit",
-              "fraud_prevention_fee",
-              "fx_percentage_fee",
-              "high_risk_merchant_fee",
+              "psp_payment_receivable",
+              "payment_gross",
+              "topup",
+              "topup_fee",
+              "payment_gross_reversal",
+              "topup_reversal",
+              "payment_refund",
+              "payment_refund_reversal",
+              "platform_balance_payment",
+              "platform_balance_payment_refund",
+              "ad_spend_purchase",
+              "psp_refund_payable",
+              "passthrough_gmv",
+              "passthrough_gmv_offset",
               "installment_default",
-              "internal_balance_transfer_incoming",
-              "internal_balance_transfer_outgoing",
+              "aggregated_fee",
+              "payment_processing_fixed_fee",
+              "payment_processing_percentage_fee",
+              "billing_percentage_fee",
+              "cross_border_percentage_fee",
+              "fx_percentage_fee",
+              "orchestration_percentage_fee",
+              "revshare_percentage_fee",
+              "stripe_domestic_processing_fee",
+              "stripe_international_processing_fee",
+              "three_ds_fixed_fee",
+              "whop_processing_fee",
+              "economic_intelligence_percentage_fee",
+              "high_risk_merchant_fee",
+              "fraud_prevention_fee",
+              "buyer_fee",
+              "sales_tax_fee",
+              "payout_fee",
+              "affiliate_fee",
+              "marketplace_affiliate_fee",
+              "application_fee",
+              "platform_markup_fee",
+              "platform_markup_fee_payout",
+              "sales_tax_remittance",
+              "sales_tax_remittance_reversal",
+              "sales_tax_collected",
+              "sales_tax_collected_reversal",
+              "sales_tax_remitted",
+              "payment_dispute",
+              "payment_dispute_adjustment",
+              "payment_dispute_fee",
+              "payment_dispute_reversal",
+              "platform_covered_dispute",
+              "dispute_alert_fee",
+              "dispute_representment_fee",
+              "dispute_hold_adjustment",
+              "dispute_hold_blocked",
+              "psp_dispute_payable",
+              "withdrawal",
+              "withdrawal_payable",
+              "withdrawal_payable_reversal",
+              "withdrawal_fee",
+              "withdrawal_fee_reversal",
+              "withdrawal_markup_fee",
+              "withdrawal_markup_fee_reversal",
+              "withdrawal_markup_fee_payout",
+              "withdrawal_markup_fee_payout_reversal",
+              "withdrawal_reversal",
+              "withdrawal_clawback",
+              "withdrawal_clawback_reversal",
+              "payout_receivable",
+              "withdrawal_reclassification",
+              "clawback_receivable",
+              "clawback_receivable_reversal",
+              "treasury_payin",
+              "treasury_payin_receivable",
+              "onchain_deposit",
+              "onchain_deposit_offset",
+              "onchain_withdrawal",
+              "onchain_withdrawal_offset",
+              "trading_account_withdrawal",
+              "trading_account_withdrawal_offset",
+              "trading_account_deposit",
+              "trading_account_deposit_offset",
+              "onchain_wallet_transfer_outgoing",
+              "onchain_wallet_transfer_incoming",
+              "onchain_swap_source",
+              "onchain_swap_target",
+              "onchain_swap_offset",
+              "whop_swap_fee_received",
+              "swap_fee",
               "internal_withdrawal",
-              "internal_withdrawal_complete",
+              "internal_withdrawal_reversal",
+              "internal_withdrawal_payable",
+              "internal_withdrawal_payable_reversal",
               "internal_withdrawal_fee",
               "internal_withdrawal_fee_reversal",
-              "internal_withdrawal_in_transit",
-              "internal_withdrawal_in_transit_reversal",
               "internal_withdrawal_markup_fee",
+              "internal_withdrawal_markup_fee_reversal",
               "internal_withdrawal_markup_fee_payout",
               "internal_withdrawal_markup_fee_payout_reversal",
-              "internal_withdrawal_markup_fee_reversal",
-              "internal_withdrawal_reversal",
+              "internal_withdrawal_in_transit",
+              "internal_withdrawal_complete",
+              "internal_withdrawal_in_transit_reversal",
+              "card_load_transfer",
+              "card_load_deposit",
+              "card_unload_transfer",
+              "card_unload_deposit",
+              "external_card_load_deposit",
+              "external_card_load_offset",
+              "card_spend_authorization",
+              "card_spend_authorization_hold",
+              "card_spend_capture",
+              "card_spend_capture_offset",
+              "card_spend_authorization_void",
+              "card_spend_authorization_void_release",
+              "card_spend_refund",
+              "card_spend_refund_offset",
+              "cashback",
+              "cashback_expense",
+              "cashback_funding",
+              "card_interchange_receivable",
+              "card_interchange",
+              "account_settlement",
+              "currency_conversion_outgoing",
+              "currency_conversion_incoming",
+              "balance_reservation",
+              "balance_reservation_hold",
+              "balance_reservation_reversal",
+              "balance_reservation_release",
+              "bad_debt_offset",
+              "bad_debt_expense",
+              "platform_credits_payment",
+              "platform_credits_payment_refund",
+              "platform_credits_granted",
+              "platform_balance_transfer_outgoing",
+              "platform_balance_transfer_incoming",
+              "internal_balance_transfer_outgoing",
+              "internal_balance_transfer_incoming",
+              "platform_balance_transfer_fee",
+              "connected_account_clawback",
+              "connected_account_negative_balance",
+              "ad_publisher_payout",
+              "ad_publisher_payout_received",
+              "company_referral",
+              "platform_affiliate_payment",
+              "platform_affiliate_payment_reversal",
+              "onboarding_reward",
+              "partner_grant_reward",
+              "payment_revshare",
+              "payment_revshare_payout",
+              "payment_revshare_reversal",
+              "payment_revshare_refund",
+              "payment_referral",
+              "payment_referral_payable",
+              "payment_referral_reversal",
+              "payment_referral_refund",
+              "application_fee_payable",
+              "application_fee_payout",
+              "platform_earning",
+              "airdrop",
+              "airdrop_reversal",
+              "airdrop_expense",
+              "airdrop_expense_reversal",
+              "airdrop_link_funded",
+              "airdrop_link_canceled",
+              "airdrop_link_returned",
+              "airdrop_link_claimed",
+              "airdrop_link_redeemed",
+              "airdrop_link_created",
+              "resolution_center_refund",
+              "ad_funding_disbursement",
+              "ad_campaign_budget",
+              "ads_card_spread",
+              "ad_spend_charge",
+              "ad_network_cost",
+              "ad_spend_margin",
+              "ad_income_expense",
+              "ad_income_receipt",
+              "ad_budget_release",
+              "ad_network_settlement",
+              "ad_balance_funding_receipt",
+              "misc_reversal",
+              "fx_gain_loss",
+              "fx_markup",
               "legacy_crypto_payment",
               "legacy_payment",
               "legacy_payment_refund",
               "license_sale",
               "license_sale_commission",
               "license_sale_revenue",
-              "marketplace_affiliate_fee",
-              "misc_purchase",
-              "misc_refund",
-              "misc_reversal",
-              "onboarding_reward",
-              "onchain_deposit",
-              "onchain_swap_source",
-              "onchain_swap_target",
-              "onchain_wallet_transfer_incoming",
-              "onchain_wallet_transfer_outgoing",
-              "onchain_withdrawal",
-              "orchestration_percentage_fee",
-              "partner_grant_reward",
-              "passthrough_gmv",
-              "payment_dispute",
-              "payment_dispute_adjustment",
-              "payment_dispute_fee",
-              "payment_dispute_reversal",
-              "payment_gross",
-              "payment_gross_reversal",
-              "payment_processing_fixed_fee",
-              "payment_processing_percentage_fee",
-              "payment_referral",
-              "payment_referral_refund",
-              "payment_referral_reversal",
-              "payment_refund",
-              "payment_refund_reversal",
-              "payment_revshare",
-              "payment_revshare_payout",
-              "payment_revshare_refund",
-              "payment_revshare_reversal",
-              "payout_fee",
-              "platform_affiliate_payment",
-              "platform_affiliate_payment_reversal",
-              "platform_balance_payment",
-              "platform_balance_payment_refund",
-              "platform_balance_transfer_fee",
-              "platform_balance_transfer_incoming",
-              "platform_balance_transfer_outgoing",
-              "platform_covered_dispute",
-              "platform_credits_granted",
-              "platform_credits_payment",
-              "platform_credits_payment_refund",
-              "platform_earning",
-              "platform_markup_fee",
-              "platform_markup_fee_payout",
-              "promo_reversal",
-              "referral_bonus",
-              "resolution_center_refund",
-              "revshare_percentage_fee",
-              "sales_tax_fee",
-              "sales_tax_remittance",
-              "sales_tax_remittance_reversal",
               "software_rental_revshare",
               "software_rental_transaction",
-              "stripe_domestic_processing_fee",
-              "stripe_international_processing_fee",
-              "swap_fee",
-              "three_ds_fixed_fee",
-              "topup",
-              "topup_fee",
-              "topup_reversal",
-              "treasury_payin",
-              "whop_processing_fee",
-              "withdrawal",
-              "withdrawal_clawback",
-              "withdrawal_clawback_reversal",
-              "withdrawal_fee",
-              "withdrawal_fee_reversal",
-              "withdrawal_markup_fee",
-              "withdrawal_markup_fee_payout",
-              "withdrawal_markup_fee_payout_reversal",
-              "withdrawal_markup_fee_reversal",
-              "withdrawal_reclassification",
-              "withdrawal_reversal",
+              "misc_purchase",
+              "misc_refund",
+              "referral_bonus",
+              "promo_reversal",
+              "payment_receivable_settlement",
+              "platform_earning_settlement",
+              "platform_earning_unreconciled_clearing",
+              "payment_receivable_clearing",
+              "payment_receivable_reversal",
+              "payment_unreconciled_clearing",
+              "payment_unreconciled_reversal",
+              "settlement_shortfall_loss",
+              "fx_settlement_gain_loss",
+              "settlement_rounding_variance",
+              "psp_payout_settlement",
+              "psp_payout_deposit",
+              "psp_payout_receivable",
+              "psp_payout_receivable_clearing",
+              "payout_unreconciled_clearing",
+              "psp_currency_conversion_outgoing",
+              "psp_currency_conversion_incoming",
+              "psp_currency_conversion_receivable",
+              "psp_currency_conversion_receivable_clearing",
+              "psp_fx_adjustment",
+              "refund_settlement",
+              "refund_settlement_reversal",
+              "refund_payable_clearing",
+              "refund_payable_reversal",
+              "refund_unreconciled_clearing",
+              "refund_unreconciled_reversal",
+              "psp_account_debit",
+              "payment_refund_fee",
+              "dispute_settlement",
+              "dispute_settlement_reversal",
+              "dispute_payable_clearing",
+              "dispute_payable_reversal",
+              "dispute_unreconciled_clearing",
+              "dispute_unreconciled_reversal",
+              "psp_reserve_hold",
+              "psp_reserve_release",
+              "psp_dispute_fee",
+              "psp_dispute_alert_fee",
+              "psp_refund_fee",
+              "psp_account_updater_fee",
+              "psp_adjusted_processing_fee",
+              "psp_authentication_fee",
+              "psp_commission_fee",
+              "psp_fixed_fee",
+              "psp_gateway_fee",
+              "psp_interchange_fee",
+              "psp_invoice_tax_fee",
+              "psp_markup_fee",
+              "psp_network_token_fee",
+              "psp_optimization_fee",
+              "psp_payment_method_fee",
+              "psp_payout_fee",
+              "psp_processing_fee",
+              "psp_risk_fee",
+              "psp_scheme_fee",
+              "psp_variable_fee",
+              "psp_billing_fee",
+              "psp_tax_service_fee",
+              "psp_connect_fee",
+              "external_account_connection_fee",
+              "psp_external_account_connection_fee",
+              "psp_invoicing_fee",
+              "psp_terminal_fee",
+              "treasury_fee",
+              "psp_treasury_fee",
+              "accelerated_settlement_fee",
+              "psp_accelerated_settlement_fee",
+              "psp_receivable_pooled",
+              "psp_pool_settlement",
+              "psp_pool_clearing",
+              "psp_pool_refund_settlement",
+              "psp_pool_refund_clearing",
+              "psp_correction",
+              "psp_payin_settlement",
+              "psp_payin_clearing",
+              "psp_bank_pull_settlement",
+              "psp_bank_pull_clearing",
+              "psp_pool_dispute_settlement",
+              "psp_payout_consolidation",
+              "psp_withholding_tax",
+              "psp_payout_settlement_reversal",
+              "psp_transfer_settlement",
+              "psp_transfer_settlement_reversal",
+              "psp_collection_settlement",
+              "payout_subsidy",
               "withdrawal_topup_adjustment",
+              "withdrawal_payable_clearing",
+              "withdrawal_payable_clearing_reversal",
+              "identity_verification_fee",
+              "psp_identity_verification_fee",
+              "tax_filing_fee",
+              "psp_tax_filing_fee",
+              "psp_service_fee",
+              "recipient_wallet_load",
+              "psp_recipient_wallet_load",
+              "dispute_management_fee",
+              "psp_dispute_management_fee",
+              "psp_clawback_settlement",
+              "psp_clawback_settlement_reversal",
+              "clawback_receivable_settlement",
+              "clawback_receivable_settlement_reversal",
+              "clawback_fee",
+              "psp_clawback_fee",
+              "bank_transfer",
               "deposit",
               "wallet_transfer_incoming",
               "wallet_transfer_outgoing",
@@ -24253,6 +24564,17 @@
                   "null"
                 ]
               },
+              "created_by_user": {
+                "description": "User who requested the withdrawal. Null for system-generated withdrawals or without payout:withdrawal:read.",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/UserSummary"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
               "estimated_arrival": {
                 "description": "Estimated arrival as an ISO 8601 timestamp (payout sources only; requires payout:withdrawal:read).",
                 "example": "2026-01-01T12:00:00.000Z",
@@ -24260,6 +24582,17 @@
                 "type": [
                   "string",
                   "null"
+                ]
+              },
+              "fee_amount": {
+                "description": "Total withdrawal fees, including markup fees. Requires payout:withdrawal:read.",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Money"
+                  },
+                  {
+                    "type": "null"
+                  }
                 ]
               },
               "fee_kind": {
@@ -24273,6 +24606,19 @@
                   null
                 ],
                 "example": "swap",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "fee_type": {
+                "description": "Whether withdrawal fees are inclusive or exclusive. Requires payout:withdrawal:read.",
+                "enum": [
+                  "exclusive",
+                  "inclusive",
+                  null
+                ],
+                "example": "exclusive",
                 "type": [
                   "string",
                   "null"
@@ -24341,6 +24687,17 @@
                 "type": [
                   "string",
                   "null"
+                ]
+              },
+              "payout_amount": {
+                "description": "Withdrawal principal sent to the destination, excluding fees, in the withdrawal currency. Requires payout:withdrawal:read.",
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/Money"
+                  },
+                  {
+                    "type": "null"
+                  }
                 ]
               },
               "payout_destination": {
@@ -24417,6 +24774,14 @@
               "to_currency": {
                 "description": "Lowercase currency code converted to (swap sources only).",
                 "example": "usd",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "trace_code": {
+                "description": "Bank trace reference for the withdrawal. Requires payout:withdrawal:read.",
+                "example": null,
                 "type": [
                   "string",
                   "null"
@@ -25175,6 +25540,14 @@
             "$ref": "#/components/schemas/StorefrontAccount",
             "description": "The account (seller) this membership belongs to."
           },
+          "billing_period_days": {
+            "description": "Number of days between recurring charges. `null` for non-renewing memberships or memberships with multiple renewal schedules.",
+            "example": 30,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "cancel_at_period_end": {
             "description": "Whether the membership is set to cancel when the current billing period ends. Only meaningful for recurring variants.",
             "example": true,
@@ -25286,6 +25659,11 @@
             "example": "active",
             "type": "string"
           },
+          "updated_at": {
+            "description": "When the membership was last changed, as an ISO 8601 timestamp. Reflects the most recent change to the membership itself, so you can reconcile against webhook retries, replays, and backfills.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
           "user_id": {
             "description": "The buyer, prefixed `user_`. `null` when the buyer is another business or the membership is unclaimed.",
             "example": "user_xxxxxxxxxxxxxx",
@@ -25301,6 +25679,7 @@
           "user_id",
           "product_id",
           "plan_id",
+          "billing_period_days",
           "license_key",
           "phone_number",
           "cancel_at_period_end",
@@ -25311,6 +25690,7 @@
           "manage_url",
           "metadata",
           "created_at",
+          "updated_at",
           "member",
           "account"
         ],
@@ -26510,7 +26890,7 @@
         "properties": {
           "amount": {
             "description": "The amount in major units, as an exact decimal string — `\"10.00\"` is ten dollars. A string so no float rounds it in transit.",
-            "example": "-2.50",
+            "example": "-1234.56",
             "type": "string"
           },
           "currency": {
@@ -28265,6 +28645,7 @@
           "restricted_card",
           "card_velocity_exceeded",
           "contact_issuer",
+          "card_declined_by_issuer",
           "bank_declined",
           "regulatory_blocked",
           "transaction_not_permitted",
@@ -28623,6 +29004,7 @@
               "restricted_card",
               "card_velocity_exceeded",
               "contact_issuer",
+              "card_declined_by_issuer",
               "bank_declined",
               "regulatory_blocked",
               "transaction_not_permitted",
@@ -29948,6 +30330,13 @@
               "null"
             ]
           },
+          "sku": {
+            "description": "The stock keeping unit of the variant this payment charged for (the first item, on a cart), as set by the seller. Accounts with billing-reason SKU suffixes enabled receive it stamped with why the charge happened: `-S` for a first subscription charge, `-R` for a renewal, `-C` for a one-time purchase, `-U` when the payment's own metadata carries `upsell: true`, `-F` when nothing was charged. Other billing reasons carry the bare SKU. Null when the variant has no SKU.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "status": {
             "description": "The current lifecycle state of this payment (e.g., 'draft', 'open', 'paid', 'void').",
             "oneOf": [
@@ -30162,6 +30551,7 @@
           "shipment",
           "payment_method_type",
           "billing_reason",
+          "sku",
           "payments_failed",
           "tax_amount",
           "tax_behavior",
@@ -31091,6 +31481,13 @@
               "null"
             ]
           },
+          "sku": {
+            "description": "The stock keeping unit of the variant this payment charged for (the first item, on a cart), as set by the seller. Accounts with billing-reason SKU suffixes enabled receive it stamped with why the charge happened: `-S` for a first subscription charge, `-R` for a renewal, `-C` for a one-time purchase, `-U` when the payment's own metadata carries `upsell: true`, `-F` when nothing was charged. Other billing reasons carry the bare SKU. Null when the variant has no SKU.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "status": {
             "description": "The current lifecycle state of this payment (e.g., 'draft', 'open', 'paid', 'void').",
             "oneOf": [
@@ -31242,6 +31639,7 @@
           "shipment",
           "payment_method_type",
           "billing_reason",
+          "sku",
           "payments_failed",
           "tax_amount",
           "tax_behavior",
@@ -34825,7 +35223,8 @@
           "three_d_secure",
           "fraud_screening",
           "authorization",
-          "installment"
+          "installment",
+          "deposit"
         ],
         "type": "string"
       },
@@ -38691,6 +39090,14 @@
             "example": 1,
             "type": "number"
           },
+          "sku": {
+            "description": "The variant's stock keeping unit, free text set by the seller (e.g. `TSHIRT-LARGE-BLUE`). Accounts with billing-reason SKU suffixes enabled receive it stamped with why the charge happened: `-S` for a first subscription charge, `-R` for a renewal, `-C` for a one-time purchase, `-U` when the payment's own metadata carries `upsell: true`, `-F` when nothing was charged. Other billing reasons carry the bare SKU. `null` when the variant has no SKU or has been deleted.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "subtotal": {
             "description": "The recorded amount for this item's full quantity, before discounts, tax, and fees, in its purchase currency. Returns `null` when no item amount was recorded.",
             "oneOf": [
@@ -38711,7 +39118,8 @@
           "product_title",
           "label",
           "quantity",
-          "subtotal"
+          "subtotal",
+          "sku"
         ],
         "type": "object"
       },
@@ -40835,8 +41243,22 @@
               "canceled",
               "requires_action"
             ],
-            "example": "succeeded",
+            "example": "requires_action",
             "type": "string"
+          },
+          "three_ds_level": {
+            "description": "3D Secure behavior for supported on-session card payments. `mandate_challenge` requires a 3DS challenge before payment processing; `mandate_if_required` mandates a challenge only when the payment processor requires it; `frictionless_if_required` uses the regular frictionless 3DS flow. Payments of $1,000 or more use `mandate_if_required` unless `mandate_challenge` is selected. Risk and authentication recovery requirements can override the preference. The setting requested for this setup, or `null` when unset.",
+            "enum": [
+              "mandate_challenge",
+              "mandate_if_required",
+              "frictionless_if_required",
+              null
+            ],
+            "example": "frictionless_if_required",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "three_ds_verified": {
             "description": "True when the buyer completed 3D Secure while saving this payment method.",
@@ -40873,6 +41295,7 @@
           "return_url",
           "last_setup_error",
           "three_ds_verified",
+          "three_ds_level",
           "metadata",
           "created_at",
           "updated_at",
@@ -46806,7 +47229,7 @@
     "termsOfService": "https://whop.com/tos-developer-api/",
     "title": "Whop API",
     "version": "1.0.0",
-    "x-api-version-date": "2026-09-25"
+    "x-api-version-date": "2026-09-29"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -65032,9 +65455,11 @@
                       "2026-09-23",
                       "2026-09-24",
                       "2026-09-24-1",
-                      "2026-09-25"
+                      "2026-09-25",
+                      "2026-09-28",
+                      "2026-09-29"
                     ],
-                    "example": "2026-09-25",
+                    "example": "2026-09-29",
                     "type": "string"
                   },
                   "expires_at": {
@@ -65444,9 +65869,11 @@
                       "2026-09-23",
                       "2026-09-24",
                       "2026-09-24-1",
-                      "2026-09-25"
+                      "2026-09-25",
+                      "2026-09-28",
+                      "2026-09-29"
                     ],
-                    "example": "2026-09-25",
+                    "example": "2026-09-29",
                     "type": "string"
                   },
                   "expires_at": {
@@ -88520,7 +88947,7 @@
                   "warning_under_review",
                   "won",
                   "lost",
-                  "closed",
+                  "prevented",
                   "warning_closed"
                 ],
                 "example": "needs_response",
@@ -88688,7 +89115,7 @@
                   "warning_under_review",
                   "won",
                   "lost",
-                  "closed",
+                  "prevented",
                   "warning_closed"
                 ],
                 "example": "needs_response",
@@ -88747,16 +89174,16 @@
                         "status": {
                           "description": "How many of the matching disputes are in each status. Every status is present, including those with a count of zero.",
                           "properties": {
-                            "closed": {
-                              "example": 0,
-                              "type": "integer"
-                            },
                             "lost": {
                               "example": 0,
                               "type": "integer"
                             },
                             "needs_response": {
                               "example": 1,
+                              "type": "integer"
+                            },
+                            "prevented": {
+                              "example": 0,
                               "type": "integer"
                             },
                             "under_review": {
@@ -88787,7 +89214,7 @@
                             "warning_under_review",
                             "won",
                             "lost",
-                            "closed",
+                            "prevented",
                             "warning_closed"
                           ],
                           "type": "object"
@@ -94145,7 +94572,7 @@
     },
     "/economic_intelligence": {
       "get": {
-        "description": "Lists an account's recommendations and generation requests, newest first. Without an account, signed-out visitors receive a business-setup template and eligible users receive their saved setup recommendation.",
+        "description": "Lists an account's recommendations and generation requests, newest first by default. Without an account, signed-out visitors receive a business-setup template and eligible users receive their saved setup recommendation. With `has_run` and no account, users receive the recommendations run on every account they can read.",
         "operationId": "listEconomicIntelligence",
         "parameters": [
           {
@@ -94167,7 +94594,9 @@
                 "queued",
                 "pending",
                 "ready",
+                "running",
                 "executed",
+                "incomplete",
                 "superseded"
               ],
               "type": "string"
@@ -94180,6 +94609,43 @@
             "required": false,
             "schema": {
               "maxLength": 1000,
+              "type": "string"
+            }
+          },
+          {
+            "description": "When true, only recommendations someone has started running, by any user. Without `account_id`, covers every account you can read that has Economic Intelligence. Can't be combined with `input`.",
+            "in": "query",
+            "name": "has_run",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Sort field.",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "default": "created_at",
+              "enum": [
+                "created_at",
+                "run_started_at"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Sort direction.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
               "type": "string"
             }
           },
@@ -94346,7 +94812,7 @@
         }
       ],
       "patch": {
-        "description": "Updates a recommendation status, records feedback, or both. Send `sentiment` to rate it. Include `status: superseded` to retire it and request replacements; a rating alone leaves its status unchanged.",
+        "description": "Updates a recommendation status, records feedback, or both. Send `sentiment` to rate it. Include `status: superseded` to retire a ready recommendation and request replacements; a rating alone leaves its status unchanged. To run a recommendation yourself, send `status: running` to start, then `status: executed` when it is carried out (with `result_id` naming what it changed, or `result_page` naming where it worked, so the result links there) or `status: incomplete` if the run ended without carrying it out. Whop AI reports its own runs the same way. Send `status: acknowledged` once an executed run's result has been seen.",
         "operationId": "updateEconomicIntelligence",
         "parameters": [],
         "requestBody": {
@@ -94360,6 +94826,36 @@
                     "maxLength": 1000,
                     "type": "string"
                   },
+                  "result_id": {
+                    "description": "With `status: executed`, the ID of what the run produced or changed, and the recommendation's `result_url` becomes where to view it: an ad (`ad_`), ad group (`adgrp_`) or ad campaign (`adcamp_`), a website (`app_`), a product (`prod_`), a plan (`plan_`), a checkout link (`ch_`), a promo code (`promo_`), or an experience (`exp_`). Without `result_id` or `result_page`, `result_url` links to the resource the recommendation was about, when it names one. Send only one of `result_id`, `result_page` and `result_url`.",
+                    "example": "prod_xxxxxxxxxxxxx",
+                    "type": "string"
+                  },
+                  "result_page": {
+                    "description": "With `status: executed`, the page where the run's result can be seen when it is not one resource, such as the checkout links list or the store page. The recommendation's `result_url` becomes that page on the account's dashboard, or its store page for `store_page`.",
+                    "enum": [
+                      "home",
+                      "products",
+                      "ads",
+                      "websites",
+                      "checkout_links",
+                      "tracking_links",
+                      "promo_codes",
+                      "payments",
+                      "customers",
+                      "affiliates",
+                      "analytics",
+                      "store_page"
+                    ],
+                    "example": "promo_codes",
+                    "type": "string"
+                  },
+                  "result_url": {
+                    "description": "With `status: executed`, where to view what was produced when it is outside Whop. An http or https URL. Prefer `result_id` for anything on Whop.",
+                    "example": "https://atlas.whop.site/",
+                    "maxLength": 2048,
+                    "type": "string"
+                  },
                   "sentiment": {
                     "description": "A signed-in user can rate a recommendation as `positive` or `negative`. Can be sent alone or together with status.",
                     "enum": [
@@ -94370,17 +94866,20 @@
                     "type": "string"
                   },
                   "status": {
-                    "description": "Use `executed` to record approval, or `superseded` to reject the recommendation.",
+                    "description": "Use `running` to start a run of a ready recommendation, `executed` to record that it was carried out, `incomplete` to record that a running recommendation's run ended without carrying it out, `superseded` to reject a ready recommendation, or `acknowledged` to mark an executed run as seen; the recommendation stays `executed` and records `acknowledged_at`.",
                     "enum": [
+                      "running",
                       "executed",
-                      "superseded"
+                      "incomplete",
+                      "superseded",
+                      "acknowledged"
                     ],
                     "example": "superseded",
                     "type": "string"
                   },
                   "user_feedback": {
                     "description": "An optional explanation of the rating or rejection. Negative feedback informs replacement recommendations.",
-                    "example": "Wrong audience",
+                    "example": "  Focus on returning buyers  ",
                     "maxLength": 2000,
                     "type": "string"
                   }
@@ -103492,6 +103991,28 @@
             "schema": {
               "default": false,
               "type": "boolean"
+            }
+          },
+          {
+            "description": "Which balance the activity changes. `total` includes available, pending, and reserved funds. `available` includes only movements into or out of available funds, including reservations, releases, and fees. Movements within the selected balance are omitted. Omit to preserve the existing activity feed. Requires account_id or user_id; cannot be combined with available_after or available_before.",
+            "in": "query",
+            "name": "balance_type",
+            "required": false,
+            "schema": {
+              "enum": [
+                "total",
+                "available"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Withdrawal ID (wdrl_). With balance_type=available, selects the same period as its statement, after the previous withdrawal and through this withdrawal, excluding this withdrawal and its fee. Requires a single account. Overrides currency and posted-date filters.",
+            "in": "query",
+            "name": "withdrawal_id",
+            "required": false,
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -118036,14 +118557,55 @@
         }
       ],
       "patch": {
-        "description": "Updates a membership: merge metadata key-value pairs, toggle `cancel_at_period_end` — `true` schedules the cancellation for the end of the current billing period, `false` reverses a pending one — or move future renewals to another of the customer's saved payment methods with `payment_method_id`.",
+        "description": "Updates a membership: merge metadata key-value pairs, toggle `cancel_at_period_end` — `true` schedules the cancellation for the end of the current billing period, `false` reverses a pending one — or move future renewals to another of the customer's saved payment methods with `payment_method_id`, or set `billing_period_days` to change renewal cadence for an active, trialing, or past-due membership billed automatically by Whop. The current period end moves to the current period start plus the requested number of days, and future renewals use the same cadence. Invoice, externally billed, and canceling memberships are not supported.",
         "operationId": "updateMembership",
         "parameters": [],
         "requestBody": {
           "content": {
             "application/json": {
+              "examples": {
+                "billing_period_days": {
+                  "summary": "Update Membership",
+                  "value": {
+                    "billing_period_days": 45
+                  }
+                }
+              },
               "schema": {
+                "example": {
+                  "billing_period_days": 45
+                },
+                "minProperties": 1,
+                "not": {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "billing_period_days",
+                        "cancel_at_period_end"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "billing_period_days",
+                        "metadata"
+                      ]
+                    },
+                    {
+                      "required": [
+                        "billing_period_days",
+                        "payment_method_id"
+                      ]
+                    }
+                  ]
+                },
                 "properties": {
+                  "billing_period_days": {
+                    "description": "Number of days between recurring charges. Sets the current period end to the current period start plus this value and applies to every recurring variant. The new period end must remain in the future. Existing non-daily memberships cannot be changed to daily billing.",
+                    "example": 45,
+                    "maximum": 365,
+                    "minimum": 1,
+                    "type": "integer"
+                  },
                   "cancel_at_period_end": {
                     "description": "`true` cancels at the end of the current billing period (the customer keeps access until then); `false` reverses a pending cancellation.",
                     "example": true,
@@ -124296,11 +124858,111 @@
                         "object",
                         "null"
                       ]
+                    },
+                    "nearby": {
+                      "description": "The referrers ranked within five places of the caller, including the caller, best first. Empty when the caller has no referral earnings or is anonymous.",
+                      "items": {
+                        "properties": {
+                          "first_referral_started_at": {
+                            "description": "When the referrer's earliest partner business became active.",
+                            "example": "2026-01-01T12:00:00.000Z",
+                            "format": "date-time",
+                            "type": "string"
+                          },
+                          "rank": {
+                            "description": "1-based leaderboard position.",
+                            "example": 1,
+                            "type": "integer"
+                          },
+                          "total_earnings_usd": {
+                            "description": "The referrer's pending + completed earnings across all referred businesses, in USD.",
+                            "example": "100.00",
+                            "type": "string"
+                          },
+                          "total_volume_usd": {
+                            "description": "Credited GMV across all the referrer's referred businesses, in USD.",
+                            "example": "0.00",
+                            "type": "string"
+                          },
+                          "user": {
+                            "description": "The ranked referrer. Identity fields (id, name, username, profile_picture) are returned only on the caller's own entry; other referrers expose coarse location only.",
+                            "properties": {
+                              "city": {
+                                "description": "The city where the referrer is located, derived from their IP address. Null if location sharing is disabled.",
+                                "example": "Austin",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "country": {
+                                "description": "The country where the referrer is located, derived from their IP address. Null if location sharing is disabled.",
+                                "example": "US",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "id": {
+                                "description": "User ID, prefixed `user_`. Present only on the caller's own entry.",
+                                "example": "user_xxxxxxxxxxxxxx",
+                                "type": "string"
+                              },
+                              "name": {
+                                "description": "The user's display name. Present only on the caller's own entry.",
+                                "example": "Marcus Webb",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "profile_picture": {
+                                "description": "The user's profile picture. Present only on the caller's own entry.",
+                                "properties": {
+                                  "url": {
+                                    "description": "The user's profile picture URL.",
+                                    "example": "https://ui-avatars.com/api/",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "url"
+                                ],
+                                "type": "object"
+                              },
+                              "username": {
+                                "description": "The user's unique username. Present only on the caller's own entry.",
+                                "example": "marcuswebb",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "country",
+                              "city"
+                            ],
+                            "type": [
+                              "object",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "rank",
+                          "total_earnings_usd",
+                          "total_volume_usd",
+                          "first_referral_started_at",
+                          "user"
+                        ],
+                        "type": "object"
+                      },
+                      "maxItems": 11,
+                      "type": "array"
                     }
                   },
                   "required": [
                     "leaders",
-                    "me"
+                    "me",
+                    "nearby"
                   ],
                   "type": "object"
                 }
@@ -124335,11 +124997,41 @@
     },
     "/partners/referred_users": {
       "get": {
-        "description": "Lists the users the caller referred onto Whop (newest first), each with the second-tier earnings the caller has made from that user's businesses.",
+        "description": "Lists the users the caller referred onto Whop, newest first by default, each with the caller's total affiliate earnings from that user across all tiers. Earnings sorting uses cached totals. Authorized staff can set user_id=global to list referrals across partners, with earnings for each user's current primary referrer.",
         "operationId": "listReferredUsers",
         "parameters": [
           {
-            "description": "Search referred users by name or username.",
+            "description": "Set to global to view referred users across partners with each primary referrer's cached total earnings. Requires an admin or partner manager session; OAuth tokens and company API keys cannot use global mode. Optionally narrow to one earning_partner_id or earning_partner_username.",
+            "in": "query",
+            "name": "user_id",
+            "required": false,
+            "schema": {
+              "enum": [
+                "global"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The selected referring partner's user_ ID. Requires user_id=global; cannot be combined with earning_partner_username.",
+            "in": "query",
+            "name": "earning_partner_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The selected referring partner's exact username. Requires user_id=global; cannot be combined with earning_partner_id.",
+            "in": "query",
+            "name": "earning_partner_username",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Search referred users by name or username. In global mode, matches the beginning of usernames only.",
             "in": "query",
             "name": "query",
             "required": false,
@@ -124363,6 +125055,34 @@
             "required": false,
             "schema": {
               "type": "boolean"
+            }
+          },
+          {
+            "description": "The field to sort by. created_at uses the user's signup date; earnings_usd uses the current primary referrer's cached total affiliate earnings from that user.",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "default": "created_at",
+              "enum": [
+                "created_at",
+                "earnings_usd"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The direction to sort results.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
             }
           },
           {
@@ -124415,13 +125135,13 @@
                       "items": {
                         "properties": {
                           "business_count": {
-                            "description": "Number of active businesses this user referred that credit the caller as a second-tier partner. Excludes deleted businesses.",
+                            "description": "Number of active businesses this user referred that credit the caller as a second-tier partner, or any earning partner in global mode. An earning-partner filter narrows the count to that partner. Excludes deleted businesses.",
                             "example": 1,
                             "type": "integer"
                           },
                           "earnings": {
                             "$ref": "#/components/schemas/Money",
-                            "description": "The caller's total earnings across the business referrals included in business_count, in USD."
+                            "description": "Total pending and completed affiliate earnings from this user for their current primary referrer, across all tiers, in USD. Includes historical earnings from removed referrals and deleted businesses."
                           },
                           "joined_at": {
                             "description": "When the referred user joined Whop, as an ISO 8601 timestamp.",
@@ -124558,9 +125278,21 @@
             },
             "description": "referred users listed"
           },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "invalid sort field"
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized",
             "description": "missing or invalid authentication"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "partner selection is not authorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "selected partner not found"
           }
         },
         "security": [
@@ -127338,9 +128070,23 @@
     },
     "/payments": {
       "get": {
-        "description": "Lists payments, newest first. Without filters this is every payment the caller can read: a company credential's own account, or for a user every account they can read payments for. Filters narrow by account, buyer, product, plan, membership, status, billing reason, currency, and creation window. Filtering by `billing_reason=subscription_cycle` also matches renewals recorded as `subscription_update`. `settlement_time_at` is null on list rows — retrieve the payment for it.",
+        "description": "Lists payments, newest first. By default, returns account sales: a company credential's own account, or for a user every account they can read payments for. Set `mode=user_sales` to list only the sales received by the signed-in user's primary ledger account, without a company. This mode requires the user's own Whop login session and cannot be combined with `account_id`. Filters narrow by account, buyer, product, plan, membership, status, billing reason, currency, and creation window. Filtering by `billing_reason=subscription_cycle` also matches renewals recorded as `subscription_update`. `settlement_time_at` is null on list rows — retrieve the payment for it.",
         "operationId": "listPayments",
         "parameters": [
+          {
+            "description": "Which sales to list. `account_sales` returns sales for the accounts the caller can read. `user_sales` returns only sales received by the signed-in user's primary ledger account, without a company; requires their own Whop login session and cannot be combined with `account_id`.",
+            "in": "query",
+            "name": "mode",
+            "required": false,
+            "schema": {
+              "default": "account_sales",
+              "enum": [
+                "account_sales",
+                "user_sales"
+              ],
+              "type": "string"
+            }
+          },
           {
             "description": "Only payments charged by this account, prefixed `biz_`.",
             "in": "query",
@@ -127395,7 +128141,7 @@
             }
           },
           {
-            "description": "Only payments made by this buyer, prefixed `user_`. Payments are listed for the accounts the caller manages, so `me` is not accepted; list the caller's own purchases with `GET /memberships?user_id=me`.",
+            "description": "Only payments made by this buyer, prefixed `user_`. This filters sales the caller can read, so `me` is not accepted; list the caller's own purchases with `GET /memberships?user_id=me`.",
             "in": "query",
             "name": "user_id",
             "required": false,
@@ -127737,7 +128483,7 @@
                     "description": "Find or create a variant for this payment through the compatibility input `plan`. Mutually exclusive with `plan_id` and `line_items`. Creating a variant requires `plan:create`; creating or updating a product requires the corresponding product permission.",
                     "properties": {
                       "application_fee_amount": {
-                        "description": "Application fee collected by the platform in the variant currency (5.00 means $5.00 for USD). Must be positive and below the initial price for one-time variants or renewal price for recurring variants. Paid to the parent account alongside other processing fees; collection is capped to remaining proceeds. Applies to subsequent payments on recurring variants. Only valid for connected accounts with a parent account.",
+                        "description": "Application fee the platform collects per unit, in the variant currency (5.00 means $5.00 for USD). Must be positive and below the initial price for one-time variants or renewal price for recurring variants. Paid to the parent account alongside other processing fees; collection is capped to remaining proceeds. Applies to subsequent payments on recurring variants. Only valid for connected accounts with a parent account.",
                         "example": 2,
                         "type": [
                           "number",
@@ -128445,7 +129191,7 @@
                     "description": "Find or create a variant for this payment through the compatibility input `plan`. Mutually exclusive with `plan_id` and `line_items`. Creating a variant requires `plan:create`; creating or updating a product requires the corresponding product permission.",
                     "properties": {
                       "application_fee_amount": {
-                        "description": "Application fee collected by the platform in the variant currency (5.00 means $5.00 for USD). Must be positive and below the initial price for one-time variants or renewal price for recurring variants. Paid to the parent account alongside other processing fees; collection is capped to remaining proceeds. Applies to subsequent payments on recurring variants. Only valid for connected accounts with a parent account.",
+                        "description": "Application fee the platform collects per unit, in the variant currency (5.00 means $5.00 for USD). Must be positive and below the initial price for one-time variants or renewal price for recurring variants. Paid to the parent account alongside other processing fees; collection is capped to remaining proceeds. Applies to subsequent payments on recurring variants. Only valid for connected accounts with a parent account.",
                         "type": [
                           "number",
                           "null"
@@ -128781,7 +129527,8 @@
                     "description": "Attests that the buyer was told the card will be saved for later charges. `off_session` for merchant-initiated charges, `on_session` for buyer-present ones.",
                     "enum": [
                       "off_session",
-                      "on_session"
+                      "on_session",
+                      null
                     ],
                     "example": "off_session",
                     "type": [
@@ -128849,7 +129596,10 @@
         "tags": [
           "Payments"
         ],
-        "x-whop-docs": "hidden",
+        "x-whop-docs": "gated",
+        "x-whop-docs-groups": [
+          "direct-card"
+        ],
         "x-whop-vault": true
       },
       "x-whop-surface": "native"
@@ -128899,7 +129649,7 @@
           "$ref": "#/components/parameters/ApiVersionDate"
         },
         {
-          "description": "The payment to retrieve, prefixed `pay_`.",
+          "description": "The payment, prefixed `pay_`.",
           "in": "path",
           "name": "id",
           "required": true,
@@ -128908,6 +129658,139 @@
           }
         }
       ],
+      "patch": {
+        "description": "Updates a payment's `shipping_address` or `return_url`. Send the complete `shipping_address`, because it replaces the existing address and any field you leave out is cleared.",
+        "operationId": "updatePayment",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "return_url": {
+                    "description": "Where the buyer continues after completing an off-site step. An absolute https URL without credentials, at most 2,048 characters. Only for payments created with a `confirmation_token`, and only until the buyer has returned. Omit it to leave it unchanged.",
+                    "example": "https://shinetime.example/checkout/thanks",
+                    "type": "string"
+                  },
+                  "shipping_address": {
+                    "description": "The complete new shipping address. It replaces the current address as a whole and is never merged with it, so send every field the address should have, including the ones that are not changing. Any field you leave out is cleared: sending only `city` leaves an address with nothing but a city. Pass null to remove the address, or omit `shipping_address` to leave it unchanged. It cannot change once a shipment exists for the payment.",
+                    "properties": {
+                      "city": {
+                        "description": "City name.",
+                        "example": "Austin",
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "country": {
+                        "description": "ISO 3166-1 alpha-2 country code, such as `US`.",
+                        "example": "US",
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "line1": {
+                        "description": "First line of the street address.",
+                        "example": "1114 Bouldin Ave",
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "line2": {
+                        "description": "Second line of the street address.",
+                        "example": "Unit B",
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "name": {
+                        "description": "The recipient's full name, as it should appear on the shipping label.",
+                        "example": "Dana Whitfield",
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "postal_code": {
+                        "description": "Postal or ZIP code.",
+                        "example": "78704",
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "state": {
+                        "description": "State, province, or region code, such as `CA`.",
+                        "example": "TX",
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      }
+                    },
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            },
+            "description": "shipping address replaced"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1ErrorResponse"
+                }
+              }
+            },
+            "description": "shipping_address is not an object"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "credential without payment:manage"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "payment not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "payment:manage"
+            ]
+          }
+        ],
+        "summary": "Update Payment",
+        "tags": [
+          "Payments"
+        ]
+      },
       "x-whop-surface": "native"
     },
     "/payments/{id}/capture": {
@@ -133938,6 +134821,11 @@
                       "example": "usd",
                       "type": "string"
                     },
+                    "delayed": {
+                      "description": "Whether an in-transit withdrawal is past its settlement window.",
+                      "example": false,
+                      "type": "boolean"
+                    },
                     "destination_amount": {
                       "description": "The amount delivered in the destination currency, as a decimal string. Assigned when the payout is processed, so it is `null` before then and on payouts without a recorded conversion.",
                       "example": "461.7",
@@ -133958,6 +134846,15 @@
                     "estimated_arrival": {
                       "description": "Estimated time the funds become available in the destination account.",
                       "example": "2026-08-03T00:00:00.000Z",
+                      "format": "date-time",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "estimated_arrival_end": {
+                      "description": "End of the expected bank settlement window.",
+                      "example": null,
                       "format": "date-time",
                       "type": [
                         "string",
@@ -134203,6 +135100,67 @@
                       "description": "The finest machine phase under `status` — for example `awaiting_provider_acceptance` vs `in_transit` under `processing`, or the stablecoin conversion phase under `requested`. Informational vocabulary: values can be added without a version bump; `status` is the versioned contract.",
                       "example": "awaiting_provider_acceptance",
                       "type": "string"
+                    },
+                    "timeline": {
+                      "description": "Completed lifecycle events in chronological order. Present when retrieving a withdrawal ID.",
+                      "items": {
+                        "properties": {
+                          "error_message": {
+                            "description": "Failure message, only with payout:destination:read.",
+                            "example": null,
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "estimated_arrival": {
+                            "example": null,
+                            "format": "date-time",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "status": {
+                            "enum": [
+                              "requested",
+                              "awaiting_payment",
+                              "in_transit",
+                              "completed",
+                              "failed",
+                              "canceled",
+                              "denied"
+                            ],
+                            "example": "requested",
+                            "type": "string"
+                          },
+                          "status_detail": {
+                            "description": "Informational event detail; security_review identifies manual review.",
+                            "example": null,
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "timestamp": {
+                            "example": "2026-01-01T12:00:00.000Z",
+                            "format": "date-time",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "status",
+                          "status_detail",
+                          "timestamp",
+                          "estimated_arrival",
+                          "error_message"
+                        ],
+                        "type": "object"
+                      },
+                      "type": "array"
                     },
                     "trace_code": {
                       "description": "ACH trace number the recipient's bank can use to locate this payout. Assigned when the payout is submitted to the bank, so it is `null` before then and on payouts not sent over ACH.",
@@ -143942,7 +144900,8 @@
                   "purpose": {
                     "description": "What the saved payment method will pay for. Set to `ads_billing` when saving a card to pay for Whop Ads on `account_id`: the card is verified by Whop Ads, the merchant that charges it, which helps minimize security declines on ad payments, and it requires `ad_campaign:create` on `account_id`. Omit it for any other payment method.",
                     "enum": [
-                      "ads_billing"
+                      "ads_billing",
+                      null
                     ],
                     "example": "ads_billing",
                     "type": [
@@ -143953,6 +144912,20 @@
                   "return_url": {
                     "description": "Where the buyer continues after completing an off-site step. An absolute https URL without credentials, at most 2,048 characters.",
                     "example": "https://shinetime.example/billing/saved",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "three_ds_level": {
+                    "description": "3D Secure behavior for supported on-session card payments. `mandate_challenge` requires a 3DS challenge before payment processing; `mandate_if_required` mandates a challenge only when the payment processor requires it; `frictionless_if_required` uses the regular frictionless 3DS flow. Payments of $1,000 or more use `mandate_if_required` unless `mandate_challenge` is selected. Risk and authentication recovery requirements can override the preference. Applies to this setup only, and only while the buyer is present: ignored with `payment_method_id`, which re-verifies off session. Not available with `purpose: ads_billing`. Defaults to `frictionless_if_required`.",
+                    "enum": [
+                      "mandate_challenge",
+                      "mandate_if_required",
+                      "frictionless_if_required",
+                      null
+                    ],
+                    "example": "mandate_challenge",
                     "type": [
                       "string",
                       "null"
@@ -144290,7 +145263,10 @@
         "tags": [
           "Setup Intents"
         ],
-        "x-whop-docs": "hidden",
+        "x-whop-docs": "gated",
+        "x-whop-docs-groups": [
+          "direct-card"
+        ],
         "x-whop-vault": true
       },
       "x-whop-surface": "native"
@@ -152920,7 +153896,7 @@
         }
       ],
       "post": {
-        "description": "Completes the OAuth authorization step for the authenticated user: records their consent for the scopes an app asked for and mints the authorization code to hand back to it. Returns the grant, plus a `redirect_url` carrying that code — the one and only time it is returned. Exchange the code at `POST /oauth/token` with the verifier for `code_challenge`. Requires a user session, because consent has to come from the account holder: an API key or an OAuth token is refused, so an app can never authorize itself. Send an `Idempotency-Key` to make a retry safe — a replay returns the original `redirect_url` and its code rather than issuing a second one.",
+        "description": "Completes the OAuth authorization step for the authenticated user: records their consent for the scopes an app asked for and mints the authorization code to hand back to it. Returns the grant, plus a `redirect_url` carrying that code — the one and only time it is returned. Exchange the code at `POST /oauth/token` with the verifier for `code_challenge`, or with the app's secret when a confidential app sent none. Requires a user session, because consent has to come from the account holder: an API key or an OAuth token is refused, so an app can never authorize itself. Send an `Idempotency-Key` to make a retry safe — a replay returns the original `redirect_url` and its code rather than issuing a second one.",
         "operationId": "createOauthGrant",
         "parameters": [
           {
@@ -152943,12 +153919,12 @@
                     "type": "string"
                   },
                   "code_challenge": {
-                    "description": "The PKCE code challenge: the base64url-encoded SHA-256 of your code verifier, without padding.",
+                    "description": "The PKCE code challenge: the base64url-encoded SHA-256 of your code verifier, without padding. Required unless the app is confidential; a confidential app that leaves it out redeems the code with its secret instead of a verifier.",
                     "example": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
                     "type": "string"
                   },
                   "code_challenge_method": {
-                    "description": "How `code_challenge` was derived. Only `S256` is accepted.",
+                    "description": "How `code_challenge` was derived. Only `S256` is accepted. Required with `code_challenge`.",
                     "enum": [
                       "S256"
                     ],
@@ -152957,7 +153933,7 @@
                   },
                   "consent_shown": {
                     "default": true,
-                    "description": "Whether the consent UI listed these scopes for the user. Sending `false` succeeds only when the user has already granted every scope requested.",
+                    "description": "Whether the consent UI listed these scopes for the user. Sending `false` succeeds only when the user has already granted every scope requested, or when the app is one of Whop's own with the consent skip switched on and asks for `openid` alone.",
                     "example": true,
                     "type": "boolean"
                   },
@@ -152996,9 +153972,7 @@
                 "required": [
                   "client_id",
                   "redirect_uri",
-                  "requested_scopes",
-                  "code_challenge",
-                  "code_challenge_method"
+                  "requested_scopes"
                 ],
                 "type": "object"
               }
@@ -160745,8 +161719,9 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
+                  "ads_spend_usd": null,
                   "balances": [],
                   "banner_image_url": null,
                   "business_address": null,
@@ -160834,6 +161809,7 @@
                       "next_payout_date": null
                     }
                   },
+                  "platform_credits": [],
                   "privacy_policy": null,
                   "product_tax_code": null,
                   "recommended_actions": null,
@@ -161065,8 +162041,9 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
+                  "ads_spend_usd": null,
                   "balances": [],
                   "banner_image_url": null,
                   "business_address": null,
@@ -161154,6 +162131,7 @@
                       "next_payout_date": null
                     }
                   },
+                  "platform_credits": [],
                   "privacy_policy": null,
                   "product_tax_code": null,
                   "recommended_actions": null,
@@ -161385,8 +162363,9 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
+                  "ads_spend_usd": null,
                   "balances": [],
                   "banner_image_url": null,
                   "business_address": null,
@@ -161474,6 +162453,7 @@
                       "next_payout_date": null
                     }
                   },
+                  "platform_credits": [],
                   "privacy_policy": null,
                   "product_tax_code": null,
                   "recommended_actions": null,
@@ -161711,7 +162691,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "ad_campaign": {
                     "id": "adcamp_xxxxxxxxxxxxxx"
@@ -162159,7 +163139,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "bid_type": null,
                   "budget_amount": 50.0,
@@ -162514,7 +163494,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "bid_type": null,
                   "budget_amount": 50.0,
@@ -162875,7 +163855,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -163272,7 +164252,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -163669,7 +164649,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -164066,7 +165046,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -164463,7 +165443,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -164632,7 +165612,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -164801,7 +165781,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -164970,7 +165950,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -165139,7 +166119,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -165279,7 +166259,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -165419,7 +166399,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -165559,7 +166539,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -165699,7 +166679,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -165839,7 +166819,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "audience": {
                     "type": "channel",
@@ -166096,7 +167076,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "audience": {
                     "type": "channel",
@@ -166367,7 +167347,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "completed": true,
                   "course": {
@@ -166511,7 +167491,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "amount": "75000000000",
                   "available_at": null,
@@ -166652,7 +167632,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount": 150.0,
@@ -166698,6 +167678,7 @@
                       "product_id": "prod_xxxxxxxxxxxxxx",
                       "product_title": "Ceramic Coating Package",
                       "quantity": 1,
+                      "sku": null,
                       "subtotal": null
                     }
                   ],
@@ -166839,7 +167820,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount": 150.0,
@@ -166885,6 +167866,7 @@
                       "product_id": "prod_xxxxxxxxxxxxxx",
                       "product_title": "Ceramic Coating Package",
                       "quantity": 1,
+                      "sku": null,
                       "subtotal": null
                     }
                   ],
@@ -167026,7 +168008,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": null,
                   "amount": 25.0,
@@ -167164,7 +168146,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -167309,7 +168291,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -167454,7 +168436,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -167599,7 +168581,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -167744,7 +168726,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "download_url": "https://s3.amazonaws.com/uploads/exports/members-export.csv",
@@ -167874,7 +168856,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "download_url": null,
@@ -168004,7 +168986,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "amount": "512345000000",
                   "available_at": "2026-01-01T12:00:00.000Z",
@@ -168144,7 +169126,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "id": "idpf_xxxxxxxxxxxxxx"
                 },
@@ -168277,7 +169259,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -168454,7 +169436,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -168631,7 +169613,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -168808,7 +169790,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -168985,7 +169967,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -169162,7 +170144,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "balances": [
                     {
@@ -169306,7 +170288,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -169446,7 +170428,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -169586,7 +170568,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -169594,6 +170576,7 @@
                     "route": "biz_xxxxxxxxxxxxxx",
                     "title": "Shine Time Auto Detailing"
                   },
+                  "billing_period_days": 30,
                   "cancel_at_period_end": false,
                   "canceled_at": null,
                   "cancellation_reason": null,
@@ -169609,6 +170592,7 @@
                   "plan_id": "plan_xxxxxxxxxxxxxx",
                   "product_id": "prod_xxxxxxxxxxxxxx",
                   "status": "active",
+                  "updated_at": "2026-01-01T12:00:00.000Z",
                   "user_id": "user_xxxxxxxxxxxxxx"
                 },
                 "id": "msg_xxxxxxxxxxxxxxxxxxxxxxxx",
@@ -169731,7 +170715,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -169739,6 +170723,7 @@
                     "route": "biz_xxxxxxxxxxxxxx",
                     "title": "Shine Time Auto Detailing"
                   },
+                  "billing_period_days": 30,
                   "cancel_at_period_end": true,
                   "canceled_at": "2026-01-01T12:00:00.000Z",
                   "cancellation_reason": "The monthly wash club is more than I can spend right now.",
@@ -169754,6 +170739,7 @@
                   "plan_id": "plan_xxxxxxxxxxxxxx",
                   "product_id": "prod_xxxxxxxxxxxxxx",
                   "status": "active",
+                  "updated_at": "2026-01-01T12:00:00.000Z",
                   "user_id": "user_xxxxxxxxxxxxxx"
                 },
                 "id": "msg_xxxxxxxxxxxxxxxxxxxxxxxx",
@@ -169876,7 +170862,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -169884,6 +170870,7 @@
                     "route": "biz_xxxxxxxxxxxxxx",
                     "title": "Shine Time Auto Detailing"
                   },
+                  "billing_period_days": 30,
                   "cancel_at_period_end": false,
                   "canceled_at": "2026-01-01T12:00:00.000Z",
                   "cancellation_reason": "Moving out of Austin — no mobile detailing at the new place.",
@@ -169899,6 +170886,7 @@
                   "plan_id": "plan_xxxxxxxxxxxxxx",
                   "product_id": "prod_xxxxxxxxxxxxxx",
                   "status": "canceled",
+                  "updated_at": "2026-01-01T12:00:00.000Z",
                   "user_id": "user_xxxxxxxxxxxxxx"
                 },
                 "id": "msg_xxxxxxxxxxxxxxxxxxxxxxxx",
@@ -170021,7 +171009,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -170029,6 +171017,7 @@
                     "route": "biz_xxxxxxxxxxxxxx",
                     "title": "Shine Time Auto Detailing"
                   },
+                  "billing_period_days": 30,
                   "cancel_at_period_end": false,
                   "canceled_at": null,
                   "cancellation_reason": null,
@@ -170044,6 +171033,7 @@
                   "plan_id": "plan_xxxxxxxxxxxxxx",
                   "product_id": "prod_xxxxxxxxxxxxxx",
                   "status": "trialing",
+                  "updated_at": "2026-01-01T12:00:00.000Z",
                   "user_id": "user_xxxxxxxxxxxxxx"
                 },
                 "id": "msg_xxxxxxxxxxxxxxxxxxxxxxxx",
@@ -170166,7 +171156,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -170200,6 +171190,7 @@
                       "product_id": "prod_xxxxxxxxxxxxxx",
                       "product_title": "Ceramic Coating Package",
                       "quantity": 1,
+                      "sku": "CERAMIC-COAT-3YR",
                       "subtotal": {
                         "amount": "50.00",
                         "currency": "usd",
@@ -170445,7 +171436,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -170479,6 +171470,7 @@
                       "product_id": "prod_xxxxxxxxxxxxxx",
                       "product_title": "Ceramic Coating Package",
                       "quantity": 1,
+                      "sku": "CERAMIC-COAT-3YR",
                       "subtotal": {
                         "amount": "50.00",
                         "currency": "usd",
@@ -170724,7 +171716,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -170758,6 +171750,7 @@
                       "product_id": "prod_xxxxxxxxxxxxxx",
                       "product_title": "Ceramic Coating Package",
                       "quantity": 1,
+                      "sku": "CERAMIC-COAT-3YR",
                       "subtotal": {
                         "amount": "50.00",
                         "currency": "usd",
@@ -171003,7 +171996,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -171037,6 +172030,7 @@
                       "product_id": "prod_xxxxxxxxxxxxxx",
                       "product_title": "Ceramic Coating Package",
                       "quantity": 1,
+                      "sku": "CERAMIC-COAT-3YR",
                       "subtotal": {
                         "amount": "50.00",
                         "currency": "usd",
@@ -171282,7 +172276,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -171316,6 +172310,7 @@
                       "product_id": "prod_xxxxxxxxxxxxxx",
                       "product_title": "Ceramic Coating Package",
                       "quantity": 1,
+                      "sku": "CERAMIC-COAT-3YR",
                       "subtotal": {
                         "amount": "50.00",
                         "currency": "usd",
@@ -171555,7 +172550,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -171589,6 +172584,7 @@
                       "product_id": "prod_xxxxxxxxxxxxxx",
                       "product_title": "Ceramic Coating Package",
                       "quantity": 1,
+                      "sku": "CERAMIC-COAT-3YR",
                       "subtotal": {
                         "amount": "50.00",
                         "currency": "usd",
@@ -171834,7 +172830,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -171868,6 +172864,7 @@
                       "product_id": "prod_xxxxxxxxxxxxxx",
                       "product_title": "Ceramic Coating Package",
                       "quantity": 1,
+                      "sku": "CERAMIC-COAT-3YR",
                       "subtotal": {
                         "amount": "50.00",
                         "currency": "usd",
@@ -172113,7 +173110,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "amount": "10.0",
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -172587,7 +173584,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "amount": "10.0",
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -173058,7 +174055,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "amount": "10.0",
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -173525,7 +174522,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "address": {
                     "city": "Austin",
@@ -173667,7 +174664,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_reference": "4483",
                   "bank_verification_state": "no_data",
@@ -174220,7 +175217,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -174526,7 +175523,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -174832,7 +175829,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -175138,7 +176135,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -175299,7 +176296,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -175460,7 +176457,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -175621,7 +176618,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -175782,7 +176779,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -175943,7 +176940,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "amount": 50.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -176112,7 +177109,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "amount": 50.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -176281,7 +177278,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -176314,6 +177311,7 @@
                       "product_id": "prod_xxxxxxxxxxxxxx",
                       "product_title": "Ceramic Coating Package",
                       "quantity": 1,
+                      "sku": null,
                       "subtotal": null
                     }
                   ],
@@ -176453,7 +177451,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -176482,6 +177480,7 @@
                       "product_id": "prod_xxxxxxxxxxxxxx",
                       "product_title": "Ceramic Coating Package",
                       "quantity": 1,
+                      "sku": null,
                       "subtotal": null
                     }
                   ],
@@ -176621,7 +177620,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -176650,6 +177649,7 @@
                       "product_id": "prod_xxxxxxxxxxxxxx",
                       "product_title": "Ceramic Coating Package",
                       "quantity": 1,
+                      "sku": null,
                       "subtotal": null
                     }
                   ],
@@ -176789,7 +177789,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -176807,6 +177807,7 @@
                   "payment_method_type": "card",
                   "return_url": null,
                   "status": "canceled",
+                  "three_ds_level": null,
                   "three_ds_verified": false,
                   "updated_at": "2026-01-01T12:00:00.000Z",
                   "user": {
@@ -176938,7 +177939,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -176953,6 +177954,7 @@
                   "payment_method_type": "card",
                   "return_url": null,
                   "status": "requires_action",
+                  "three_ds_level": null,
                   "three_ds_verified": false,
                   "updated_at": "2026-01-01T12:00:00.000Z",
                   "user": {
@@ -177084,7 +178086,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -177140,6 +178142,7 @@
                   "payment_method_type": "card",
                   "return_url": null,
                   "status": "succeeded",
+                  "three_ds_level": null,
                   "three_ds_verified": false,
                   "updated_at": "2026-01-01T12:00:00.000Z",
                   "user": {
@@ -177271,7 +178274,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "carrier": "ups",
@@ -177404,7 +178407,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "carrier": "ups",
@@ -177537,7 +178540,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -177558,7 +178561,7 @@
                   "object": "ledger_activity",
                   "payment": {
                     "amount": {
-                      "amount": "-2.50",
+                      "amount": "-1234.56",
                       "currency": "usd",
                       "decimals": 2,
                       "display_decimals": 2
@@ -177603,8 +178606,23 @@
                     "chain": "plasma",
                     "claim_url": "https://whop.com/claim",
                     "created_at": "2026-01-01T12:00:00.000Z",
+                    "created_by_user": {
+                      "id": "user_xxxxxxxxxxxxxx",
+                      "name": "Dana Whitfield",
+                      "profile_picture": {
+                        "url": "https://ui-avatars.com/api/"
+                      },
+                      "username": "danawhitfield"
+                    },
                     "estimated_arrival": "2026-01-01T12:00:00.000Z",
+                    "fee_amount": {
+                      "amount": "-1234.56",
+                      "currency": "usd",
+                      "decimals": 2,
+                      "display_decimals": 2
+                    },
                     "fee_kind": "swap",
+                    "fee_type": "exclusive",
                     "from_amount": "502.51",
                     "from_currency": "usdt",
                     "id": "airdrp_xxxxxxxxxxxxxx",
@@ -177612,13 +178630,19 @@
                     "object": "airdrop_link",
                     "payer_name": "MassPay",
                     "payment_amount": {
-                      "amount": "-2.50",
+                      "amount": "-1234.56",
                       "currency": "usd",
                       "decimals": 2,
                       "display_decimals": 2
                     },
                     "payment_method_type": "some_string",
                     "payment_processor": "some_string",
+                    "payout_amount": {
+                      "amount": "-1234.56",
+                      "currency": "usd",
+                      "decimals": 2,
+                      "display_decimals": 2
+                    },
                     "payout_destination": {
                       "icon_url": "https://whop-assets-example.s3.amazonaws.com/uploads/image/2026-01-01/ach-activity-icon",
                       "payer_name": "ACH Bank Deposit"
@@ -177630,6 +178654,7 @@
                     "status": "fully_claimed",
                     "to_amount": "500.0",
                     "to_currency": "usd",
+                    "trace_code": null,
                     "tx_hash": "0x5d84a1c7e2f9b036d48c5a7e1b9f2d6c3a8e0b4f7c1d9e5a2b6f8c0d3e7a1b52"
                   },
                   "usd_amount": "23.75",
@@ -177756,7 +178781,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "amount": 250.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -178223,7 +179248,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "amount": 250.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -178690,7 +179715,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "amount": 10.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -179155,7 +180180,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-09-25",
+                "api_version_date": "2026-09-29",
                 "data": {
                   "id": "verf_xxxxxxxxxxxxxx",
                   "last_error_code": null,
