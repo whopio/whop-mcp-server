@@ -20,6 +20,8 @@ describe("hosted MCP feedback submissions", () => {
 			);
 			vi.stubGlobal("fetch", request);
 			const props: WhopGrantProps = {
+				consentVersion: 1,
+				whopScope: "openid profile",
 				userId: "user_reporter",
 				userName: "Reporter",
 				mcpClientName: "Test Client",

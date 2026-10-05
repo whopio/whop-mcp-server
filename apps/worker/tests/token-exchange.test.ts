@@ -20,7 +20,9 @@ import { WhopOidcError } from "../src/whop-oidc.ts";
 
 const NOW = 2_000_000_000_000;
 
-const LEGACY_PROPS: WhopGrantProps = {
+const APPROVED_PROPS: WhopGrantProps = {
+	consentVersion: 1,
+	whopScope: "openid profile",
 	userId: "user_test",
 	userName: null,
 	profile: "admin",
@@ -30,7 +32,7 @@ const LEGACY_PROPS: WhopGrantProps = {
 };
 
 function options(
-	props: WhopGrantProps = LEGACY_PROPS,
+	props: WhopGrantProps = APPROVED_PROPS,
 ): TokenExchangeCallbackOptions {
 	return {
 		grantType: "refresh_token" as TokenExchangeCallbackOptions["grantType"],
@@ -48,6 +50,7 @@ function dependencies() {
 		lookupClient: vi.fn(async () => ({ clientName: "Claude Code" })),
 		now: () => NOW,
 		refreshWhop: vi.fn(async () => ({
+			scope: "openid profile",
 			accessToken: "access_new",
 			refreshToken: "refresh_new",
 			expiresAt: NOW + 60 * 60 * 1000,
@@ -58,17 +61,20 @@ function dependencies() {
 afterEach(() => vi.restoreAllMocks());
 
 describe("reconcileGrantOnTokenExchange", () => {
-	it("backfills a legacy grant while rotating its Whop credential", async () => {
+	it("backfills missing client attribution while refreshing only the approved scopes", async () => {
 		const deps = dependencies();
 		const result = await reconcileGrantOnTokenExchange(options(), deps);
 
 		expect(deps.lookupClient).toHaveBeenCalledWith("client_test");
-		expect(deps.refreshWhop).toHaveBeenCalledWith("refresh_old");
+		expect(deps.refreshWhop).toHaveBeenCalledWith(
+			"refresh_old",
+			"openid profile",
+		);
 		expect(deps.lookupClient.mock.invocationCallOrder[0]).toBeLessThan(
 			deps.refreshWhop.mock.invocationCallOrder[0],
 		);
 		expect(result?.newProps).toEqual({
-			...LEGACY_PROPS,
+			...APPROVED_PROPS,
 			mcpClientName: "Claude Code",
 			whopAccessToken: "access_new",
 			whopRefreshToken: "refresh_new",
@@ -79,7 +85,7 @@ describe("reconcileGrantOnTokenExchange", () => {
 	it("preserves an existing client name without another lookup", async () => {
 		const deps = dependencies();
 		const result = await reconcileGrantOnTokenExchange(
-			options({ ...LEGACY_PROPS, mcpClientName: "Cursor" }),
+			options({ ...APPROVED_PROPS, mcpClientName: "Cursor" }),
 			deps,
 		);
 
@@ -91,7 +97,7 @@ describe("reconcileGrantOnTokenExchange", () => {
 		const deps = dependencies();
 		const result = await reconcileGrantOnTokenExchange(
 			options({
-				...LEGACY_PROPS,
+				...APPROVED_PROPS,
 				whopExpiresAt: NOW + 60 * 60 * 1000,
 			}),
 			deps,
@@ -110,7 +116,7 @@ describe("reconcileGrantOnTokenExchange", () => {
 		const result = await reconcileGrantOnTokenExchange(options(), deps);
 
 		expect(result?.newProps).toEqual({
-			...LEGACY_PROPS,
+			...APPROVED_PROPS,
 			whopAccessToken: "access_new",
 			whopRefreshToken: "refresh_new",
 			whopExpiresAt: NOW + 60 * 60 * 1000,
@@ -158,3 +164,22 @@ describe("reconcileGrantOnTokenExchange", () => {
 		expect(deps.refreshWhop).not.toHaveBeenCalled();
 	});
 });
+
+it.each(["authorization_code", "refresh_token"])(
+	"rejects pre-consent grants during %s",
+	async (grantType) => {
+		const deps = dependencies();
+		const { consentVersion: _, ...legacyProps } = APPROVED_PROPS;
+		await expect(
+			reconcileGrantOnTokenExchange(
+				{
+					...options(),
+					grantType: grantType as TokenExchangeCallbackOptions["grantType"],
+					props: legacyProps,
+				},
+				deps,
+			),
+		).rejects.toThrow("invalid_grant");
+		expect(deps.refreshWhop).not.toHaveBeenCalled();
+	},
+);

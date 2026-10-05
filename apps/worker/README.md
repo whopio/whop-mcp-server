@@ -131,3 +131,16 @@ separate instance, provide your own:
 Keep account IDs, namespace IDs, routes, and secrets in an untracked deployment
 configuration or your deployment system. The example Wrangler configuration is
 not a production deployment manifest.
+
+## Client consent
+
+Connections use Whop's existing OAuth consent screen, which displays the MCP
+client's name, identifier, redirect URI, and requested permissions. The client
+context travels through the single-use upstream authorization code and must
+match the worker's sealed request before it issues a downstream grant. Missing
+or changed context fails closed; an existing Whop app grant cannot skip approval.
+Refreshes request only the scopes returned by that approved code exchange.
+
+Deploy the Whop backend and OAuth frontend before this worker. The worker rejects
+previously issued MCP credentials; existing users must reconnect once to approve
+their client. Dynamic client registration remains available.

@@ -4,7 +4,7 @@ import {
 	type TokenExchangeCallbackOptions,
 	type TokenExchangeCallbackResult,
 } from "@cloudflare/workers-oauth-provider";
-import { normalizeMcpClientName } from "./grant.ts";
+import { normalizeMcpClientName, parseGrantProps } from "./grant.ts";
 import type { WhopGrantProps } from "./types.ts";
 import { WhopOidcError, type WhopTokens } from "./whop-oidc.ts";
 
@@ -13,15 +13,20 @@ const REFRESH_AHEAD_MS = 15 * 60 * 1000;
 interface TokenExchangeDependencies {
 	lookupClient(clientId: string): Promise<{ clientName?: string } | null>;
 	now(): number;
-	refreshWhop(refreshToken: string): Promise<WhopTokens>;
+	refreshWhop(refreshToken: string, scope: string): Promise<WhopTokens>;
 }
 
 export async function reconcileGrantOnTokenExchange(
 	options: TokenExchangeCallbackOptions,
 	dependencies: TokenExchangeDependencies,
 ): Promise<TokenExchangeCallbackResult | undefined> {
+	const props = parseGrantProps(options.props);
+	if (!props) {
+		throw new OAuthError("invalid_grant", {
+			description: "Reconnect to approve this MCP client.",
+		});
+	}
 	if (options.grantType !== GrantType.REFRESH_TOKEN) return undefined;
-	const props = options.props as WhopGrantProps;
 	if (props.whopExpiresAt > dependencies.now() + REFRESH_AHEAD_MS) {
 		return undefined;
 	}
@@ -45,7 +50,10 @@ export async function reconcileGrantOnTokenExchange(
 
 	let tokens: WhopTokens;
 	try {
-		tokens = await dependencies.refreshWhop(props.whopRefreshToken);
+		tokens = await dependencies.refreshWhop(
+			props.whopRefreshToken,
+			props.whopScope,
+		);
 	} catch (error) {
 		if (error instanceof WhopOidcError && error.status === 401) {
 			console.log(

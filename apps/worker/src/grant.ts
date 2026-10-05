@@ -52,6 +52,9 @@ export function unauthorized(env: Env, message: string): Response {
 export function parseGrantProps(value: unknown): WhopGrantProps | null {
 	if (value === null || typeof value !== "object") return null;
 	const props = value as Record<string, unknown>;
+	if (props.consentVersion !== 1) return null;
+	if (typeof props.whopScope !== "string" || !props.whopScope.trim())
+		return null;
 	if (typeof props.userId !== "string") return null;
 	if (typeof props.profile !== "string") return null;
 	if (typeof props.whopAccessToken !== "string") return null;

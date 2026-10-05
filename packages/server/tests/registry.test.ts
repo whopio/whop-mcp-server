@@ -10,6 +10,35 @@ import {
 const registry = buildRealRegistry();
 
 describe("registry generation", () => {
+	it("uses distinct CLI-compatible names for financing application reads", () => {
+		expect(findOperation(registry, "financing-applications_list").path).toBe(
+			"/accounts/{account_id}/financing_applications",
+		);
+		expect(findOperation(registry, "financing-applications_get").path).toBe(
+			"/accounts/{account_id}/financing_applications/{id}",
+		);
+	});
+
+	it("classifies financing draft creation as an idempotent mutation", () => {
+		const operation = findOperation(registry, "financing-applications_create");
+		expect(operation.safety.classification).toBe("mutating");
+		expect(operation.safety.idempotency).toBe("supported");
+	});
+
+	it("names financing writes distinctly and requires confirmation for submission", () => {
+		const update = findOperation(registry, "financing-applications_update");
+		const submit = findOperation(registry, "financing-applications_submit");
+		expect(update.method).toBe("patch");
+		expect(update.path).toBe(
+			"/accounts/{account_id}/financing_applications/{id}",
+		);
+		expect(submit.method).toBe("post");
+		expect(submit.path).toBe(
+			"/accounts/{account_id}/financing_applications/{id}/submit",
+		);
+		expect(submit.safety.confirmationRequired).toBe(true);
+	});
+
 	it("exposes every experiment operation for user and business credentials", () => {
 		const experiments = registry.operations.filter((op) =>
 			op.path.startsWith("/experiments"),
@@ -57,6 +86,25 @@ describe("registry generation", () => {
 
 	it("is deterministic", () => {
 		expect(JSON.stringify(buildRealRegistry())).toBe(JSON.stringify(registry));
+	});
+
+	it("reads a request body that extends a shared component as one flat input", () => {
+		// POST /payments is documented as `allOf: [{ $ref: PaymentInput }, { own fields }]`; a tool
+		// sees one object whose properties and required names are the union of both halves.
+		const operation = registry.operations.find(
+			(op) => op.path === "/payments" && op.method === "post",
+		);
+
+		expect(operation).toBeDefined();
+		expect(Object.keys(operation!.inputSchema.properties ?? {})).toEqual(
+			expect.arrayContaining([
+				"account_id",
+				"plan_id",
+				"line_items",
+				"member_id",
+				"confirmation_token",
+			]),
+		);
 	});
 
 	it("lists operations served only on the vault host as exclusions, since one base URL cannot route them", () => {

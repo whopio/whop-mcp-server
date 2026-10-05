@@ -34,6 +34,11 @@ const STRIPPED_PARAMETERS = new Set(["authorization", "api-version-date"]);
  * lookups here; they exist for naming parity.
  */
 const OP_ID_OVERRIDES: Record<string, string> = {
+	"GET /accounts/{account_id}/financing_applications": "list",
+	"POST /accounts/{account_id}/financing_applications": "create",
+	"GET /accounts/{account_id}/financing_applications/{id}": "get",
+	"PATCH /accounts/{account_id}/financing_applications/{id}": "update",
+	"POST /accounts/{account_id}/financing_applications/{id}/submit": "submit",
 	"GET /swaps": "status",
 	"GET /partners/{id}": "retrieve",
 	// Root-collection GET infers "list", which GET /partners/businesses claims in the Referrals tag.
@@ -397,7 +402,10 @@ function extractBody(
 		return { present: false, required: [], properties: {}, schema: null };
 	}
 
-	const schema = dereference(jsonSchema, doc, new Set()) as JsonSchema;
+	const schema = flattenAllOf(
+		dereference(jsonSchema, doc, new Set()) as JsonSchema,
+		key,
+	);
 	const variants = schema.oneOf ?? schema.anyOf ?? [];
 	if (!Array.isArray(variants)) {
 		fail(`Unsupported request body shape for ${key}`);
@@ -425,6 +433,38 @@ function extractBody(
 		properties,
 		schema,
 	};
+}
+
+/**
+ * A request body that extends a shared component (`allOf: [{ $ref }, { properties }]`, the shape
+ * the backend emits for a body built on Api::V1::PaymentInput) is one object to a tool: its
+ * properties and required names are the union of the parts. Dereferencing already inlined the
+ * refs, so the parts are plain object schemas here. The first part to declare a property wins,
+ * mirroring how the variant properties below are collected.
+ */
+function flattenAllOf(schema: JsonSchema, key: string): JsonSchema {
+	if (!Array.isArray(schema.allOf)) return schema;
+
+	const { allOf, ...rest } = schema;
+	const merged: JsonSchema = {
+		...rest,
+		properties: { ...(schema.properties ?? {}) },
+		required: [...(schema.required ?? [])],
+	};
+	for (const part of allOf.map((part) => flattenAllOf(part, key))) {
+		if (part.type && part.type !== "object") {
+			fail(`Non-object allOf member in the request body for ${key}`);
+		}
+		for (const [name, propSchema] of Object.entries(part.properties ?? {})) {
+			merged.properties![name] ??= propSchema;
+		}
+		for (const name of part.required ?? []) {
+			if (!merged.required!.includes(name)) merged.required!.push(name);
+		}
+		merged.type ??= part.type;
+		merged.description ??= part.description;
+	}
+	return merged;
 }
 
 function buildOperation(

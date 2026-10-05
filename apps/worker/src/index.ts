@@ -43,7 +43,7 @@ async function tokenExchangeCallback(
 		lookupClient: (clientId) =>
 			getOAuthApi<Env>(providerOptions, env).lookupClient(clientId),
 		now: Date.now,
-		refreshWhop: (refreshToken) => client.refresh(refreshToken),
+		refreshWhop: (refreshToken, scope) => client.refresh(refreshToken, scope),
 	});
 }
 

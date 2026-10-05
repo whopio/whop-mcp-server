@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { attributionHeaders, normalizeMcpClientName } from "../src/grant.ts";
+import {
+	attributionHeaders,
+	normalizeMcpClientName,
+	parseGrantProps,
+} from "../src/grant.ts";
 import type { Env, WhopGrantProps } from "../src/types.ts";
 
 const env = { CF_VERSION_METADATA: { id: "test-version" } } as Env;
@@ -29,4 +33,17 @@ describe("normalizeMcpClientName", () => {
 		expect(normalizeMcpClientName("a".repeat(129))).toBe("a".repeat(128));
 		expect(normalizeMcpClientName("  🦄  ")).toBeUndefined();
 	});
+});
+
+it("refuses pre-consent access tokens even before they expire", () => {
+	const legacy = {
+		whopScope: "openid profile",
+		userId: "user_test",
+		profile: "admin",
+		whopAccessToken: "access",
+		whopRefreshToken: "refresh",
+		whopExpiresAt: Date.now() + 3600000,
+	};
+	expect(parseGrantProps(legacy)).toBeNull();
+	expect(parseGrantProps({ ...legacy, consentVersion: 1 })).not.toBeNull();
 });

@@ -4,6 +4,12 @@ import { defaultHandler } from "../src/authorize.ts";
 import { openJson, sealJson } from "../src/pending-state.ts";
 import type { Env } from "../src/types.ts";
 
+const MCP_CLIENT = {
+	client_id: "agent-client",
+	client_name: "Test agent",
+	redirect_uri: "custom-agent:/oauth/callback",
+};
+
 const AUTH_REQUEST: AuthRequest = {
 	responseType: "code",
 	clientId: "agent-client",
@@ -76,6 +82,7 @@ describe("defaultHandler error containment", () => {
 			{
 				authRequest: {},
 				codeVerifier: "cv",
+				mcpClient: MCP_CLIENT,
 				profile: "admin",
 				session: "session-of-the-real-browser",
 			},
@@ -112,60 +119,79 @@ describe("defaultHandler error containment", () => {
 		expect(await response.text()).toContain("Start over");
 	});
 
-	it("redirects a completed grant to a validated custom-scheme URI", async () => {
-		const state = "custom-scheme-state";
-		const session = "custom-scheme-session";
-		const redirectUri = "custom-agent:/oauth/callback";
-		const redirectTo = "custom-agent:/oauth/callback?code=mcp-code";
-		let pendingDeletes = 0;
-		const sealed = await sealJson(
-			"test-state-key-16ch",
-			{
-				authRequest: { ...AUTH_REQUEST, redirectUri },
-				codeVerifier: "code-verifier",
-				profile: "standard",
-				session,
-			},
-			state,
-		);
-		vi.stubGlobal("fetch", async (input: string | URL | Request) => {
-			const url = new URL(
-				input instanceof Request ? input.url : input.toString(),
+	it.each([true, false])(
+		"only completes a grant with matching client approval: %s",
+		async (approved) => {
+			const state = "custom-scheme-state";
+			const session = "custom-scheme-session";
+			const redirectUri = "custom-agent:/oauth/callback";
+			const redirectTo = "custom-agent:/oauth/callback?code=mcp-code";
+			let pendingDeletes = 0;
+			const completeAuthorization = vi.fn(async () => ({ redirectTo }));
+			const sealed = await sealJson(
+				"test-state-key-16ch",
+				{
+					authRequest: { ...AUTH_REQUEST, redirectUri },
+					codeVerifier: "code-verifier",
+					mcpClient: MCP_CLIENT,
+					profile: "standard",
+					session,
+				},
+				state,
 			);
-			if (url.pathname === "/oauth/token") {
-				return Response.json({
-					access_token: "access-token",
-					refresh_token: "refresh-token",
-					expires_in: 3600,
-				});
-			}
-			if (url.pathname === "/oauth/userinfo") {
-				return Response.json({ sub: "user_test" });
-			}
-			throw new Error(`Unexpected fetch: ${url}`);
-		});
-		const response = await defaultHandler.fetch(
-			new Request(
-				`http://localhost:8788/callback?state=${state}&code=upstream-code`,
-				{ headers: { Cookie: `mcp_auth_session=${session}` } },
-			),
-			envStub({
-				OAUTH_KV: {
-					get: async () => sealed,
-					delete: async () => {
-						pendingDeletes += 1;
+			vi.stubGlobal("fetch", async (input: string | URL | Request) => {
+				const url = new URL(
+					input instanceof Request ? input.url : input.toString(),
+				);
+				if (url.pathname === "/oauth/token") {
+					return Response.json({
+						scope: "openid profile",
+						access_token: "access-token",
+						mcp_client: approved ? MCP_CLIENT : undefined,
+						refresh_token: "refresh-token",
+						expires_in: 3600,
+					});
+				}
+				if (url.pathname === "/oauth/userinfo") {
+					return Response.json({ sub: "user_test" });
+				}
+				throw new Error(`Unexpected fetch: ${url}`);
+			});
+			const response = await defaultHandler.fetch(
+				new Request(
+					`http://localhost:8788/callback?state=${state}&code=upstream-code`,
+					{ headers: { Cookie: `mcp_auth_session=${session}` } },
+				),
+				envStub({
+					OAUTH_KV: {
+						get: async () => sealed,
+						delete: async () => {
+							pendingDeletes += 1;
+						},
 					},
-				},
-				OAUTH_PROVIDER: {
-					completeAuthorization: async () => ({ redirectTo }),
-				},
-			}),
-		);
+					OAUTH_PROVIDER: {
+						completeAuthorization,
+					},
+				}),
+			);
 
-		expect(response.status).toBe(302);
-		expect(response.headers.get("Location")).toBe(redirectTo);
-		expect(pendingDeletes).toBe(1);
-	});
+			expect(response.status).toBe(approved ? 302 : 400);
+			if (approved) {
+				expect(response.headers.get("Location")).toBe(redirectTo);
+				expect(completeAuthorization).toHaveBeenCalledWith(
+					expect.objectContaining({
+						props: expect.objectContaining({
+							consentVersion: 1,
+							whopScope: "openid profile",
+						}),
+					}),
+				);
+			} else {
+				expect(completeAuthorization).not.toHaveBeenCalled();
+			}
+			expect(pendingDeletes).toBe(1);
+		},
+	);
 });
 
 describe("OAuth authorize", () => {
@@ -200,6 +226,13 @@ describe("OAuth authorize", () => {
 		const location = new URL(response.headers.get("Location") ?? "");
 		expect(location.origin).toBe("https://api.whop.test");
 		expect(location.searchParams.get("client_id")).toBe("app_3bVb7SdAznaxnW");
+		expect(
+			JSON.parse(location.searchParams.get("mcp_client") ?? "null"),
+		).toEqual({
+			client_id: AUTH_REQUEST.clientId,
+			client_name: "Test agent",
+			redirect_uri: AUTH_REQUEST.redirectUri,
+		});
 		expect(location.searchParams.get("scope")).toContain(
 			"payout:withdraw_funds",
 		);

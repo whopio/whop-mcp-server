@@ -5,6 +5,7 @@ import {
 	WHOP_MCP_CLIENT_ID,
 	WhopOidcClient,
 	WhopOidcError,
+	type McpClient,
 } from "./whop-oidc.ts";
 import { expandProfileToWhopScopes } from "./profile-scopes.ts";
 import { openJson, sealJson } from "./pending-state.ts";
@@ -17,6 +18,7 @@ const PENDING_TTL_SECONDS = 600;
 const SESSION_COOKIE = "mcp_auth_session";
 
 interface PendingAuthorization {
+	mcpClient: McpClient;
 	authRequest: AuthRequest;
 	clientName?: string;
 	codeVerifier: string;
@@ -71,13 +73,22 @@ async function redirectUpstream(
 	clientName: string | undefined,
 	profile: string,
 ): Promise<Response> {
+	const clientId = authRequest.clientId;
+	if (!clientId)
+		return errorPage("Unknown OAuth client. Reconnect from your agent.");
 	const state = crypto.randomUUID();
 	const codeVerifier = generateCodeVerifier();
 	// Ties /callback to this browser — state alone lets an attacker complete
 	// their own sign-in in a victim's browser, linking the victim's agent to
 	// the attacker's account.
 	const session = crypto.randomUUID();
+	const mcpClient: McpClient = {
+		client_id: clientId,
+		client_name: clientName ?? clientId,
+		redirect_uri: authRequest.redirectUri,
+	};
 	const pending: PendingAuthorization = {
+		mcpClient,
 		authRequest,
 		clientName,
 		codeVerifier,
@@ -94,6 +105,7 @@ async function redirectUpstream(
 		state,
 		codeChallenge: await codeChallengeS256(codeVerifier),
 		scopes: expandProfileToWhopScopes(profile, registry.operations),
+		mcpClient,
 	});
 	return new Response(null, {
 		status: 302,
@@ -146,7 +158,7 @@ async function handleCallback(request: Request, env: Env): Promise<Response> {
 		pendingRaw,
 		state,
 	);
-	if (!pending) {
+	if (!pending?.mcpClient) {
 		return errorPage("This sign-in attempt expired. Start over.");
 	}
 	if (cookieValue(request, SESSION_COOKIE) !== pending.session) {
@@ -158,13 +170,19 @@ async function handleCallback(request: Request, env: Env): Promise<Response> {
 	await env.OAUTH_KV.delete(`pending_auth:${state}`);
 
 	const client = oidcClient(env);
-	const tokens = await client.exchangeCode(code, pending.codeVerifier);
+	const tokens = await client.exchangeCode(
+		code,
+		pending.codeVerifier,
+		pending.mcpClient,
+	);
 	const userinfo = await client.userinfo(tokens.accessToken);
 
 	// The grant is the user, never a chosen business: context is the agent's
 	// per-call choice via each operation's account/user parameters, matching
 	// the API's dual-auth model.
 	const props: WhopGrantProps = {
+		consentVersion: 1,
+		whopScope: tokens.scope,
 		userId: userinfo.sub,
 		userName: userinfo.name ?? userinfo.preferred_username ?? null,
 		mcpClientName: pending.clientName,

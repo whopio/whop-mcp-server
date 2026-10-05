@@ -1,4 +1,11 @@
+export interface McpClient {
+	client_id: string;
+	client_name: string;
+	redirect_uri: string;
+}
+
 export interface WhopTokens {
+	scope: string;
 	accessToken: string;
 	refreshToken: string;
 	/** Epoch ms after which the access token must not be used. */
@@ -21,6 +28,8 @@ export interface WhopOidcConfig {
 }
 
 interface TokenResponse {
+	scope?: string;
+	mcp_client?: McpClient;
 	access_token?: string;
 	refresh_token?: string;
 	expires_in?: number;
@@ -73,6 +82,7 @@ export class WhopOidcClient {
 		state: string;
 		codeChallenge: string;
 		scopes: string[];
+		mcpClient: McpClient;
 	}): string {
 		const url = new URL("/oauth/authorize", this.config.apiOrigin);
 		url.search = new URLSearchParams({
@@ -84,23 +94,32 @@ export class WhopOidcClient {
 			code_challenge: options.codeChallenge,
 			code_challenge_method: "S256",
 			nonce: crypto.randomUUID(),
+			mcp_client: JSON.stringify(options.mcpClient),
 		}).toString();
 		return url.toString();
 	}
 
-	async exchangeCode(code: string, codeVerifier: string): Promise<WhopTokens> {
-		return this.tokenRequest({
-			grant_type: "authorization_code",
-			code,
-			redirect_uri: this.config.redirectUri,
-			code_verifier: codeVerifier,
-		});
+	async exchangeCode(
+		code: string,
+		codeVerifier: string,
+		mcpClient: McpClient,
+	): Promise<WhopTokens> {
+		return this.tokenRequest(
+			{
+				grant_type: "authorization_code",
+				code,
+				redirect_uri: this.config.redirectUri,
+				code_verifier: codeVerifier,
+			},
+			mcpClient,
+		);
 	}
 
-	async refresh(refreshToken: string): Promise<WhopTokens> {
+	async refresh(refreshToken: string, scope: string): Promise<WhopTokens> {
 		return this.tokenRequest({
 			grant_type: "refresh_token",
 			refresh_token: refreshToken,
+			scope,
 		});
 	}
 
@@ -127,6 +146,7 @@ export class WhopOidcClient {
 
 	private async tokenRequest(
 		params: Record<string, string>,
+		expectedClient?: McpClient,
 	): Promise<WhopTokens> {
 		const response = await fetch(
 			new URL("/oauth/token", this.config.apiOrigin),
@@ -151,12 +171,27 @@ export class WhopOidcClient {
 		if (!body.refresh_token) {
 			throw new WhopOidcError("Whop token response is missing refresh_token");
 		}
+		if (
+			expectedClient &&
+			(body.mcp_client?.client_id !== expectedClient.client_id ||
+				body.mcp_client?.client_name !== expectedClient.client_name ||
+				body.mcp_client?.redirect_uri !== expectedClient.redirect_uri)
+		) {
+			throw new WhopOidcError(
+				"The OAuth approval did not match this MCP client. Reconnect to approve it.",
+				401,
+			);
+		}
 		// A NaN/negative expiresAt would silently disable the expiry gate.
 		const expiresIn = body.expires_in ?? 3600;
 		if (!Number.isFinite(expiresIn) || expiresIn <= 0) {
 			throw new WhopOidcError("Whop token response has an invalid expires_in");
 		}
+		if (typeof body.scope !== "string" || !body.scope.trim()) {
+			throw new WhopOidcError("Whop token response is missing scope");
+		}
 		return {
+			scope: body.scope,
 			accessToken: body.access_token,
 			refreshToken: body.refresh_token,
 			expiresAt: Date.now() + expiresIn * 1000,

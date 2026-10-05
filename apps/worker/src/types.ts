@@ -7,6 +7,8 @@ import type { IdempotencyDO } from "./idempotency-do.ts";
  * tokens are unreadable at rest without a valid MCP token.
  */
 export interface WhopGrantProps extends Record<string, unknown> {
+	consentVersion: 1;
+	whopScope: string;
 	userId: string;
 	userName: string | null;
 	mcpClientName?: string;
