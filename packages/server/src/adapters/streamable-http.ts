@@ -1,5 +1,6 @@
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import type { RegistryManifest } from "../registry/types.ts";
+import type { SurfaceName } from "../policy/surfaces.ts";
 import type { CredentialAdapter, PrincipalContext } from "../policy/types.ts";
 import type { AuditSink } from "../safety/audit.ts";
 import type { IdempotencyStore } from "../safety/idempotency.ts";
@@ -63,6 +64,8 @@ export interface StreamableHttpAdapterOptions {
 	requireHttps?: boolean;
 	/** Expose the ChatGPT-required search/fetch meta-tools. */
 	chatGptCompat?: boolean;
+	/** The fixed tool subset this endpoint serves (full by default). */
+	surface?: SurfaceName;
 }
 
 function jsonRpcError(status: number, code: number, message: string): Response {
@@ -154,6 +157,7 @@ export function createStreamableHttpHandler(
 			clientName: auth.clientName,
 			pluginSource: auth.pluginSource,
 			chatGptCompat: options.chatGptCompat,
+			surface: options.surface,
 			extraHeaders: auth.extraHeaders,
 		});
 

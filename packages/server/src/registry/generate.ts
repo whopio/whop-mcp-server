@@ -34,11 +34,7 @@ const STRIPPED_PARAMETERS = new Set(["authorization", "api-version-date"]);
  * lookups here; they exist for naming parity.
  */
 const OP_ID_OVERRIDES: Record<string, string> = {
-	"GET /accounts/{account_id}/financing_applications": "list",
-	"POST /accounts/{account_id}/financing_applications": "create",
-	"GET /accounts/{account_id}/financing_applications/{id}": "get",
-	"PATCH /accounts/{account_id}/financing_applications/{id}": "update",
-	"POST /accounts/{account_id}/financing_applications/{id}/submit": "submit",
+	"GET /claim_links/{id}": "get-claim-link",
 	"GET /swaps": "status",
 	"GET /partners/{id}": "retrieve",
 	// Root-collection GET infers "list", which GET /partners/businesses claims in the Referrals tag.
@@ -57,28 +53,28 @@ const OP_ID_OVERRIDES: Record<string, string> = {
 	"PATCH /accounts/{account_id}/preferences": "update-preferences",
 	"GET /accounts/{account_id}/fees": "fees",
 	"PATCH /accounts/{account_id}/fees": "update-fees",
-	"GET /users/me/preferences": "preferences",
-	"PATCH /users/me/preferences": "update-preferences",
-	"PATCH /users/me/preferences/notifications": "set-notification-preferences",
-	"GET /users/me/preferences/notifications/topics":
-		"notification-topic-preferences",
-	"GET /users/me/preferences/notifications/experiences":
-		"experience-notification-preferences",
+	// Docs-subgroup operations are named within their subgroup.
+	// /users/me/preferences is a singleton, so its GET reads rather than lists.
+	"GET /users/me/preferences": "get",
+	"POST /users/me/passkeys": "register",
+	"POST /users/me/oauth_grants": "authorize",
 	"GET /payouts/supported_methods": "supported-methods",
 	"GET /permissions": "check",
 	// GET, POST and DELETE all infer "partners" from the static path segment.
+	"GET /external_accounts/{external_account_id}/partners": "partners",
+	"POST /external_accounts/{external_account_id}/partners": "add-partner",
+	"DELETE /external_accounts/{external_account_id}/partners/{id}":
+		"remove-partner",
 	"GET /social_accounts/{id}/partners": "partners",
 	"POST /social_accounts/{id}/partners": "add-partner",
 	"DELETE /social_accounts/{id}/partners/{partner_id}": "remove-partner",
 	// GET and PATCH both infer "me" from the static path segment.
 	"GET /users/me": "me",
 	"PATCH /users/me": "update-me",
-	// All four infer "me-passkeys" — the {id} segment is filtered out.
-	"GET /users/me/passkeys": "passkeys",
-	"POST /users/me/passkeys": "register-passkey",
-	"DELETE /users/me/passkeys/{id}": "delete-passkey",
-	"POST /users/me/passkeys/challenge": "passkey-challenge",
 	// The verb methods all infer "methods" from the static path segment.
+	// GET and POST both infer "notes" from the static path segment.
+	"GET /members/{member_id}/notes": "list",
+	"POST /members/{member_id}/notes": "create",
 	"GET /payouts/methods": "methods",
 	"POST /payouts/methods": "create-method",
 	"PATCH /payouts/methods/{id}": "update-method",
@@ -98,11 +94,45 @@ const OP_ID_OVERRIDES: Record<string, string> = {
 const SEND_PATH = "/wallets/send";
 const SEND_TAG = "Sends";
 
-export function inferOperationName(method: string, path: string): string {
+export const SUBGROUP_KEY = "x-whop-docs-subgroup";
+
+/** "Preferences/Notifications" → ["preferences", "notifications"], as the CLI nests it. */
+export function subgroupCommandPath(subgroup: string): string[] {
+	return subgroup
+		.split("/")
+		.map((segment) => segment.trim())
+		.filter(Boolean)
+		.map((segment) => segment.toLowerCase().replace(/\s+/g, "-"));
+}
+
+/** Names a subgroup operation from its subgroup's own collection onward, as the CLI does. */
+function subgroupRelativeSegments(
+	key: string,
+	path: string,
+	subgroup: string | undefined,
+): string[] {
+	const segments = path.split("/").filter(Boolean);
+	if (!subgroup) return segments;
+
+	const collection = subgroupCommandPath(subgroup).at(-1)?.replace(/-/g, "_");
+	const start = collection ? segments.indexOf(collection) : -1;
+	if (start === -1) {
+		fail(
+			`${key} is in docs subgroup "${subgroup}", but its path has no "${collection}" segment to name its tool from.`,
+		);
+	}
+	return segments.slice(start);
+}
+
+export function inferOperationName(
+	method: string,
+	path: string,
+	subgroup?: string,
+): string {
 	const key = `${method.toUpperCase()} ${path}`;
 	if (OP_ID_OVERRIDES[key]) return OP_ID_OVERRIDES[key];
 
-	const segments = path.split("/").filter(Boolean);
+	const segments = subgroupRelativeSegments(key, path, subgroup);
 	const actions = segments.slice(1).filter((s) => !s.startsWith("{"));
 	if (actions.length > 0) return actions.join("-");
 
@@ -486,7 +516,13 @@ function buildOperation(
 	if (!tag) fail(`Missing tag for ${key}`);
 
 	const group = groupNameForTag(tag);
-	const toolName = `${group}_${inferOperationName(method, path)}`;
+	const subgroup = op[SUBGROUP_KEY] as string | undefined;
+	// Matches the CLI's own MCP mode, which joins each nested command group with "_".
+	const toolName = [
+		group,
+		...(subgroup ? subgroupCommandPath(subgroup) : []),
+		inferOperationName(method, path, subgroup),
+	].join("_");
 
 	const rawParams = [
 		...raw.pathItemParameters,

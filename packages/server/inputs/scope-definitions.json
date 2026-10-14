@@ -31,6 +31,10 @@
     "bot": true,
     "user": true
   },
+  "ad_pixel:manage": {
+    "bot": false,
+    "user": true
+  },
   "affiliate:basic:read": {
     "bot": true,
     "user": true
@@ -54,6 +58,10 @@
   "ai_chat:update": {
     "bot": true,
     "user": true
+  },
+  "airdrop_link:basic:read": {
+    "bot": true,
+    "user": false
   },
   "airdrop_link:manage": {
     "bot": true,
@@ -190,10 +198,6 @@
     "bot": true,
     "user": true
   },
-  "content_rewards:basic:export": {
-    "bot": true,
-    "user": false
-  },
   "course_analytics:read": {
     "bot": true,
     "user": true
@@ -271,6 +275,14 @@
     "user": true
   },
   "dms:read": {
+    "bot": true,
+    "user": true
+  },
+  "domain:manage": {
+    "bot": true,
+    "user": true
+  },
+  "domain:read": {
     "bot": true,
     "user": true
   },
@@ -422,6 +434,14 @@
     "bot": true,
     "user": true
   },
+  "partner:commission_advance:accept": {
+    "bot": false,
+    "user": true
+  },
+  "partner:commission_advance:update": {
+    "bot": false,
+    "user": true
+  },
   "partner:create": {
     "bot": true,
     "user": true
@@ -429,6 +449,11 @@
   "partner:fees:update": {
     "bot": false,
     "user": true
+  },
+  "partner:handoff": {
+    "bot": false,
+    "user": true,
+    "disallow_app_authorization": true
   },
   "partner:referral_request:accept": {
     "bot": true,

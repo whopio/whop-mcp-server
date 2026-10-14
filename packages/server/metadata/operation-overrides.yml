@@ -12,6 +12,9 @@
 #     description: Charge an existing member off-session using a stored payment method.
 
 overrides:
+  "POST /claim_links/{id}/claim":
+    principals: [user]
+
   # "Call this first" sent agents straight into a 403: a user token is bound to
   # no single account, and that is the credential the hosted MCP actually uses.
   "GET /accounts/me":

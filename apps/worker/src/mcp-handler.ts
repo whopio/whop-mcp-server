@@ -1,3 +1,4 @@
+import type { SurfaceName } from "@whop/mcp-server";
 import { createStreamableHttpHandler } from "@whop/mcp-server/streamable-http";
 import { durableIdempotencyStore } from "./idempotency-do.ts";
 import { registry } from "./registry.ts";
@@ -15,12 +16,15 @@ import type { Env } from "./types.ts";
 import { ApiFeedbackSink } from "./feedback.ts";
 
 /**
- * The authenticated /mcp handler. workers-oauth-provider has already
- * validated the MCP access token and decrypted the grant props by the time
- * this runs; the props carry the server-side Whop credential, which is never
- * exposed to the client or the model.
+ * The authenticated MCP handler for one route. workers-oauth-provider has
+ * already validated the MCP access token and decrypted the grant props by the
+ * time this runs; the props carry the server-side Whop credential, which is
+ * never exposed to the client or the model.
+ *
+ * `surface` is fixed per route, so what a connection can reach depends only
+ * on the URL it was configured with — never on a header the client sends.
  */
-export function createMcpApiHandler() {
+export function createMcpApiHandler(surface: SurfaceName = "full") {
 	return {
 		async fetch(
 			request: Request,
@@ -53,6 +57,7 @@ export function createMcpApiHandler() {
 				baseUrl: `${env.MCP_WHOP_API_ORIGIN}/api/v1`,
 				requireHttps: env.MCP_BASE_URL.startsWith("https://"),
 				chatGptCompat: true,
+				surface,
 				authenticator: {
 					async authenticate() {
 						const pluginSource = readPluginSource(request);

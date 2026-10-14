@@ -8,6 +8,10 @@ import { WhopMcpError } from "../src/runtime/errors.ts";
 import { InMemoryIdempotencyStore } from "../src/safety/idempotency.ts";
 import { createWhopMcpServer } from "../src/runtime/server.ts";
 import {
+	CLAUDE_DIRECTORY_EXCLUSIONS,
+	type SurfaceName,
+} from "../src/policy/surfaces.ts";
+import {
 	buildRealRegistry,
 	fakeFetch,
 	principalFixture,
@@ -130,10 +134,12 @@ async function connect(
 		idempotencyStore?: InMemoryIdempotencyStore;
 		beforeCall?: Parameters<typeof createWhopMcpServer>[0]["beforeCall"];
 		includeIntent?: boolean;
+		surface?: SurfaceName;
 	} = {},
 ) {
 	const { server } = createWhopMcpServer({
 		registry,
+		surface: options.surface,
 		credentialAdapter: staticCredential(),
 		principal: options.principal ?? principalFixture(),
 		confirmationSecret: SECRET,
@@ -346,7 +352,14 @@ describe("MCP contract", () => {
 					.filter((tool) => tool.name.startsWith("stats_"))
 					.map((tool) => tool.name)
 					.sort(),
-			).toEqual(["stats_get", "stats_list"]);
+			).toEqual([
+				"stats_get",
+				"stats_list",
+				"stats_reports_list",
+				"stats_reports_platform_trends",
+				"stats_time-series_get",
+				"stats_time-series_list",
+			]);
 			await client.callTool({ name: "stats_list", arguments: {} });
 			expect(new URL(requests[0].url).pathname).toBe("/api/v1/stats");
 			const funnel = await client.callTool({
@@ -1332,6 +1345,122 @@ describe("MCP contract", () => {
 		expect(status.tool_count).toBe(
 			registry.operations.filter((op) => op.principals.includes("business"))
 				.length,
+		);
+	});
+});
+
+describe("claude_directory surface", () => {
+	const key = (op: { method: string; path: string }) =>
+		`${op.method.toUpperCase()} ${op.path}`;
+
+	it("names only operations that exist in the registry", () => {
+		const keys = new Set(registry.operations.map(key));
+		for (const excluded of CLAUDE_DIRECTORY_EXCLUSIONS.keys()) {
+			expect(keys, excluded).toContain(excluded);
+		}
+	});
+
+	// Every financial write still reachable on the directory surface. A new
+	// financial operation fails this test until someone decides whether it
+	// moves money out of the account (add it to CLAUDE_DIRECTORY_EXCLUSIONS)
+	// or not (add it here).
+	it("pins the financial writes left on the surface", () => {
+		const remaining = registry.operations
+			.filter(
+				(op) =>
+					op.safety.financial &&
+					op.method.toUpperCase() !== "GET" &&
+					!CLAUDE_DIRECTORY_EXCLUSIONS.has(key(op)),
+			)
+			.map(key)
+			.sort();
+		expect(remaining).toEqual(
+			[
+				"DELETE /fee_markups/{id}",
+				"PATCH /cashback_rules/{id}",
+				"PATCH /domains/{id}",
+				"PATCH /payments/{id}",
+				"PATCH /payments/{payment_id}/return_url",
+				"PATCH /setup_intents/{setup_intent_id}/return_url",
+				"POST /ad_campaigns/{id}/retry_payment",
+				"POST /cashback_rule",
+				"POST /company_token_transactions",
+				"POST /deposits",
+				"POST /domains",
+				"POST /fee_markups",
+				"POST /invoices/{id}/mark_paid",
+				"POST /invoices/{id}/mark_uncollectible",
+				"POST /invoices/{id}/void",
+				"POST /memberships/{id}/apply_promo_code",
+				"POST /memberships/{id}/assign_affiliate",
+				"POST /memberships/{id}/extend",
+				"POST /memberships/{id}/reactivate",
+				"POST /partner_referral_requests/{id}/accept",
+				"POST /partners/businesses/{id}/resend_invite",
+				"POST /payment_method_domains",
+				"POST /payment_method_domains/{id}/verify",
+				"POST /payments",
+				"POST /payments/{id}/capture",
+				"POST /payments/{id}/refund",
+				"POST /payments/{id}/retry",
+				"POST /payments/{id}/void",
+				"POST /payments/{payment_id}/resume",
+				"POST /resolution_center_cases/{id}/accept",
+				"POST /setup_intents",
+				"POST /waitlist_entries/approve_all",
+				"POST /waitlist_entries/{id}/approve",
+			].sort(),
+		);
+	});
+
+	it("hides media generation and money-out tools but keeps selling", async () => {
+		const client = await connect({ surface: "claude_directory" });
+		const names = (await client.listTools()).tools.map((t) => t.name);
+		for (const hidden of [
+			"media_generate",
+			"transfers_create",
+			"payouts_create",
+			"bounties_create",
+			"topups_create",
+			"trades_create",
+		]) {
+			expect(names).not.toContain(hidden);
+		}
+		for (const kept of [
+			"payments_refund",
+			"products_create",
+			"payouts_list",
+			"transfers_list",
+			"connection_status",
+		]) {
+			expect(names).toContain(kept);
+		}
+	});
+
+	it("rejects a direct call to an excluded tool", async () => {
+		const { fetch, requests } = fakeFetch();
+		const client = await connect({ surface: "claude_directory", fetch });
+		const result = await client.callTool({
+			name: "transfers_create",
+			arguments: { amount: 10 },
+		});
+		expect(result.isError).toBe(true);
+		expect(JSON.stringify(parseResult(result))).toContain("tool_not_found");
+		expect(requests).toHaveLength(0);
+	});
+
+	it("reports the surface in connection_status", async () => {
+		const client = await connect({ surface: "claude_directory" });
+		const status = parseResult(
+			await client.callTool({ name: "connection_status", arguments: {} }),
+		);
+		expect(status.tool_surface).toBe("claude_directory");
+		expect(status.tool_count).toBe(
+			registry.operations.filter(
+				(op) =>
+					op.principals.includes("business") &&
+					!CLAUDE_DIRECTORY_EXCLUSIONS.has(key(op)),
+			).length,
 		);
 	});
 });

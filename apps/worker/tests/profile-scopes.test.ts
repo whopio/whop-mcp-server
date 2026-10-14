@@ -27,6 +27,26 @@ describe("profile scopes", () => {
 		expect(admin).toContain("payout:withdraw_funds");
 	});
 
+	it("grants the scopes partner tools need, keeping handoffs and money-moving ones on admin", () => {
+		const readOnly = expandProfileToWhopScopes("read_only", operations);
+		expect(readOnly).toContain("partner:referral_request:read");
+		expect(readOnly).not.toContain("partner:referral_request:create");
+		expect(readOnly).not.toContain("partner:fees:update");
+
+		const standard = expandProfileToWhopScopes("standard", operations);
+		expect(standard).toContain("partner:referral_request:create");
+		expect(standard).toContain("partner:referral_request:cancel");
+		expect(standard).toContain("partner:referral_request:decline");
+		expect(standard).not.toContain("partner:referral_request:accept");
+		expect(standard).toContain("partner:fees:update");
+		expect(standard).not.toContain("partner:handoff");
+
+		const admin = expandProfileToWhopScopes("admin", operations);
+		expect(admin).toContain("partner:referral_request:accept");
+		expect(admin).toContain("partner:fees:update");
+		expect(admin).toContain("partner:handoff");
+	});
+
 	it("requests the spec's scope names verbatim when grantable", () => {
 		const scopes = expandProfileToWhopScopes("standard", [
 			{
@@ -49,6 +69,32 @@ describe("profile scopes", () => {
 			},
 		]);
 		expect(scopes).not.toContain("some_future:permission");
+	});
+
+	it("keeps domain management, which buys domains, on admin credentials only", () => {
+		const domainOperations = [
+			{
+				profiles: ["read_only", "standard", "admin"],
+				scopes: ["domain:read"],
+				method: "get",
+				safety: { financial: false, credential: false },
+			},
+			{
+				profiles: ["standard", "admin"],
+				scopes: ["domain:manage"],
+				method: "delete",
+				safety: { financial: false, credential: false },
+			},
+		];
+		expect(expandProfileToWhopScopes("read_only", domainOperations)).toContain(
+			"domain:read",
+		);
+		expect(
+			expandProfileToWhopScopes("standard", domainOperations),
+		).not.toContain("domain:manage");
+		expect(expandProfileToWhopScopes("admin", domainOperations)).toContain(
+			"domain:manage",
+		);
 	});
 
 	it("treats CLI OAuth scopes as grantable", () => {

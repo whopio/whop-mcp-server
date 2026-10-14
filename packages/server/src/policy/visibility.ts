@@ -1,4 +1,5 @@
 import type { OperationDef, RegistryManifest } from "../registry/types.ts";
+import { operationInSurface, type SurfaceName } from "./surfaces.ts";
 import type { PrincipalContext } from "./types.ts";
 
 export const WILDCARD_SCOPE = "*";
@@ -24,6 +25,8 @@ export interface VisibilityOptions {
 	 * clients that accept losing those capabilities for a smaller tool list.
 	 */
 	nativeOnly?: boolean;
+	/** The fixed subset served by the connected route (full by default). */
+	surface?: SurfaceName;
 }
 
 export function operationVisibleToPrincipal(
@@ -33,6 +36,7 @@ export function operationVisibleToPrincipal(
 ): boolean {
 	return (
 		(!options.nativeOnly || operation.surface === "native") &&
+		operationInSurface(operation, options.surface ?? "full") &&
 		operation.profiles.includes(principal.permissionProfile) &&
 		operation.principals.includes(principal.principalType) &&
 		scopeAlternativesSatisfied(principal.scopes, operation.scopeAlternatives)
@@ -41,8 +45,8 @@ export function operationVisibleToPrincipal(
 
 /**
  * The tool surface a connection actually sees: one canonical registry,
- * filtered by surface, permission profile, principal type, and granted
- * scopes.
+ * filtered by API surface, route surface, permission profile, principal
+ * type, and granted scopes.
  */
 export function visibleOperations(
 	registry: RegistryManifest,

@@ -20,6 +20,7 @@ import {
 	type IdempotencyRecord,
 	type IdempotencyStore,
 } from "../safety/idempotency.ts";
+import { DEFAULT_SURFACE, type SurfaceName } from "../policy/surfaces.ts";
 import { visibleOperations } from "../policy/visibility.ts";
 import { Dispatcher } from "./dispatcher.ts";
 import { WhopMcpError } from "./errors.ts";
@@ -89,6 +90,8 @@ export interface CreateWhopMcpServerOptions {
 	confirmationTtlMs?: number;
 	/** Restrict to the native REST surface (full surface by default). */
 	nativeOnly?: boolean;
+	/** The fixed tool subset this endpoint serves (see policy/surfaces.ts). */
+	surface?: SurfaceName;
 	/** Extra headers stamped on every upstream request (attribution). */
 	extraHeaders?: Record<string, string>;
 	/**
@@ -235,6 +238,7 @@ export function createWhopMcpServer(
 
 	const operations = visibleOperations(registry, principal, {
 		nativeOnly: options.nativeOnly,
+		surface: options.surface,
 	});
 	const byName = new Map(operations.map((op) => [op.toolName, op]));
 
@@ -333,7 +337,14 @@ export function createWhopMcpServer(
 		}
 
 		if (name === CONNECTION_STATUS_TOOL) {
-			return jsonContent(connectionStatus(registry, principal, operations));
+			return jsonContent(
+				connectionStatus(
+					registry,
+					principal,
+					operations,
+					options.surface ?? DEFAULT_SURFACE,
+				),
+			);
 		}
 
 		if (options.chatGptCompat && name === SEARCH_TOOL.name) {
@@ -846,6 +857,7 @@ function connectionStatus(
 	registry: RegistryManifest,
 	principal: PrincipalContext,
 	operations: OperationDef[],
+	surface: SurfaceName,
 ) {
 	const byGroup: Record<string, number> = {};
 	for (const op of operations) {
@@ -858,6 +870,7 @@ function connectionStatus(
 		account_title: principal.accountTitle ?? null,
 		principal_type: principal.principalType,
 		permission_profile: principal.permissionProfile,
+		tool_surface: surface,
 		granted_scopes: principal.scopes,
 		tool_count: operations.length,
 		tool_categories: byGroup,

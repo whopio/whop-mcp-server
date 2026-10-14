@@ -59,6 +59,8 @@ export const WHOP_SCOPES = [
 	"dms:channel:manage",
 	"dms:message:manage",
 	"dms:read",
+	"domain:manage",
+	"domain:read",
 	"email",
 	"event:create",
 	"experience:attach",
@@ -105,6 +107,13 @@ export const WHOP_SCOPES = [
 	"openid",
 	"partner:basic:read",
 	"partner:create",
+	"partner:fees:update",
+	"partner:handoff",
+	"partner:referral_request:accept",
+	"partner:referral_request:cancel",
+	"partner:referral_request:create",
+	"partner:referral_request:decline",
+	"partner:referral_request:read",
 	"payment:basic:read",
 	"payment:charge",
 	"payment:dispute",
@@ -204,8 +213,10 @@ const NON_ADMIN_SCOPE_DENYLIST = new Set([
 	"crypto_wallet:swap",
 	"media:generate",
 	"company:update_child_fees",
+	"partner:handoff",
 	"developer:manage_api_key",
 	"developer:manage_webhook",
+	"domain:manage",
 ]);
 
 /**

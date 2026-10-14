@@ -28,3 +28,6 @@ exclusions:
   - operation: "POST /users/me/oauth_grants"
     reason: Authorizes a third-party app and requires a first-party whop.com user session; the hosted Worker uses an OAuth token and the documented stdio setup uses an API key, both of which this endpoint explicitly refuses.
     owner: gayatrigt
+  - operation: "POST /feedback_submissions"
+    reason: The server already ships the report_feedback and ask_question tools, which call this endpoint with their own mcp_* sources and credential redaction.
+    owner: Ryan-Ouyang

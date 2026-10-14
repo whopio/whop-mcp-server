@@ -64,6 +64,15 @@ rules:
       classification: mutating
       idempotency: required
 
+  # ── Starting a PayPal login mints a 15-minute authorize URL for the holder's
+  #    browser; nothing is saved until POST /payouts/methods, which is confirmed ─
+  - name: payout-paypal-login
+    match:
+      operations:
+        - POST /payouts/paypal_link_sessions
+    set:
+      classification: mutating
+
   # ── Economic intelligence: runs, retires, or acknowledges a card ─────────
   - name: economic-intelligence-writes
     match:
@@ -85,11 +94,10 @@ rules:
         - POST /waitlist_entries/approve_all
         - POST /payouts
         - POST /transfers
+        - POST /claim_links/{id}/claim
         - POST /cashback_rules/payout
         - POST /swaps
         - POST /trades
-        - POST /trades/{id}/cancel
-        - POST /trades/leverage
         - POST /deposits
         - POST /topups
         - POST /company_token_transactions
@@ -126,6 +134,7 @@ rules:
         - POST /fee_markups
         - POST /memberships/{id}/extend
         - POST /memberships/{id}/apply_promo_code
+        - POST /memberships/{id}/assign_affiliate
         - POST /memberships/{id}/reactivate
         - POST /payouts/methods
         - PATCH /payouts/methods/{id}
@@ -145,6 +154,29 @@ rules:
       classification: mutating
       financial: true
       idempotency: required
+      confirmation: true
+
+  # ── A partner hands a business they set up to its new owner. Ownership only
+  #    moves once the recipient accepts, but it cannot be taken back. ────────
+  - name: account-ownership-handoff
+    match:
+      operations:
+        - POST /accounts/{id}/transfer_ownership
+    set:
+      classification: mutating
+      financial: true
+      idempotency: supported
+      confirmation: true
+
+  # ── Resending the handoff email needs the handoff's own scope, so it lives on
+  #    the same profile rather than showing up where it can only 403. ────────
+  - name: account-ownership-handoff-resend
+    match:
+      operations:
+        - POST /partners/businesses/{id}/resend_invite
+    set:
+      classification: mutating
+      financial: true
       confirmation: true
 
   - name: partner-referral-request-creation
@@ -270,6 +302,24 @@ rules:
   - name: webhook-endpoint-delete
     match:
       tags: [Webhooks]
+      methods: [delete]
+    set:
+      classification: destructive
+      credential: true
+      confirmation: true
+
+  - name: ad-pixel-writes
+    match:
+      tags: [Ad Pixels]
+      methods: [post, patch]
+    set:
+      classification: mutating
+      credential: true
+      confirmation: true
+
+  - name: ad-pixel-delete
+    match:
+      tags: [Ad Pixels]
       methods: [delete]
     set:
       classification: destructive
@@ -414,15 +464,24 @@ rules:
         - POST /domains
     set:
       classification: mutating
+      financial: true
       externalPublication: true
       confirmation: true
       idempotency: supported
+
+  - name: domain-check
+    match:
+      operations:
+        - POST /domains/{id}/check
+    set:
+      classification: mutating
 
   # ── Exports produce files of data the credential can already read ─────────
   - name: data-exports
     match:
       operations:
         - POST /exports
+        - POST /payments/{id}/generate_pdf
     set:
       classification: mutating
 
@@ -462,6 +521,7 @@ rules:
         - Forum posts
         - Forums
         - Reactions
+        - External Accounts
         - Social Accounts
       methods: [post, patch]
     set:
@@ -527,6 +587,7 @@ rules:
         - Invoices
         - Leads
         - Media
+        - Members
         - Partners
         - Plans
         - Products

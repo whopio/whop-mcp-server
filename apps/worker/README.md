@@ -25,7 +25,11 @@ servers:
 ```
 
 The server grants the connected client the full reviewed MCP surface available
-to the signed-in user. Consequential operations use a prepare-and-confirm flow,
+to the signed-in user. `https://mcp.whop.com/claude/mcp` serves the Claude
+plugin directory surface instead: the same server without AI media generation
+or tools that move money out of the account (see
+`packages/server/src/policy/surfaces.ts`). Tokens are audience-bound to the
+route they were issued for. Consequential operations use a prepare-and-confirm flow,
 but you should still connect only MCP clients you trust.
 
 ## Runtime architecture
@@ -33,7 +37,8 @@ but you should still connect only MCP clients you trust.
 ```text
 MCP client ── OAuth 2.1 + PKCE ──> Cloudflare Worker ── Whop OIDC ──> Whop API
                                   │
-                                  └─ /mcp  Streamable HTTP
+                                  ├─ /mcp         Streamable HTTP (full surface)
+                                  └─ /claude/mcp  Streamable HTTP (directory surface)
 ```
 
 The Worker provides:

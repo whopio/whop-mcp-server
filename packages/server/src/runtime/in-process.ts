@@ -15,6 +15,14 @@ export type {
 } from "../registry/types.ts";
 export type { CredentialAdapter, PrincipalContext } from "../policy/types.ts";
 export {
+	CLAUDE_DIRECTORY_EXCLUSIONS,
+	DEFAULT_SURFACE,
+	isSurfaceName,
+	operationInSurface,
+	SURFACE_NAMES,
+	type SurfaceName,
+} from "../policy/surfaces.ts";
+export {
 	visibleOperations,
 	type VisibilityOptions,
 } from "../policy/visibility.ts";

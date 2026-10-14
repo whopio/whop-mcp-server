@@ -11,23 +11,32 @@ const registry = buildRealRegistry();
 
 describe("registry generation", () => {
 	it("uses distinct CLI-compatible names for financing application reads", () => {
-		expect(findOperation(registry, "financing-applications_list").path).toBe(
-			"/accounts/{account_id}/financing_applications",
-		);
-		expect(findOperation(registry, "financing-applications_get").path).toBe(
-			"/accounts/{account_id}/financing_applications/{id}",
-		);
+		expect(
+			findOperation(registry, "accounts_financing-applications_list").path,
+		).toBe("/accounts/{account_id}/financing_applications");
+		expect(
+			findOperation(registry, "accounts_financing-applications_get").path,
+		).toBe("/accounts/{account_id}/financing_applications/{id}");
 	});
 
 	it("classifies financing draft creation as an idempotent mutation", () => {
-		const operation = findOperation(registry, "financing-applications_create");
+		const operation = findOperation(
+			registry,
+			"accounts_financing-applications_create",
+		);
 		expect(operation.safety.classification).toBe("mutating");
 		expect(operation.safety.idempotency).toBe("supported");
 	});
 
 	it("names financing writes distinctly and requires confirmation for submission", () => {
-		const update = findOperation(registry, "financing-applications_update");
-		const submit = findOperation(registry, "financing-applications_submit");
+		const update = findOperation(
+			registry,
+			"accounts_financing-applications_update",
+		);
+		const submit = findOperation(
+			registry,
+			"accounts_financing-applications_submit",
+		);
 		expect(update.method).toBe("patch");
 		expect(update.path).toBe(
 			"/accounts/{account_id}/financing_applications/{id}",

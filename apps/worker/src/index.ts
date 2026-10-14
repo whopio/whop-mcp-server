@@ -50,6 +50,10 @@ async function tokenExchangeCallback(
 const providerOptions: OAuthProviderOptions<Env> = {
 	apiHandlers: {
 		"/mcp": createMcpApiHandler(),
+		// The Claude plugin directory listing: no AI media generation and no
+		// money-out tools. Tokens issued for this route are audience-bound to
+		// it, so they cannot be replayed against the full /mcp surface.
+		"/claude/mcp": createMcpApiHandler("claude_directory"),
 	},
 	defaultHandler,
 	authorizeEndpoint: "/authorize",
