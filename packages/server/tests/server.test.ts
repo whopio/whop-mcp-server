@@ -1385,7 +1385,7 @@ describe("claude_directory surface", () => {
 				"POST /ad_campaigns/{id}/retry_payment",
 				"POST /cashback_rule",
 				"POST /company_token_transactions",
-				"POST /deposits",
+				"POST /disputes/{id}/accept",
 				"POST /domains",
 				"POST /fee_markups",
 				"POST /invoices/{id}/mark_paid",
@@ -1421,7 +1421,7 @@ describe("claude_directory surface", () => {
 			"transfers_create",
 			"payouts_create",
 			"bounties_create",
-			"topups_create",
+			"deposits_create",
 			"trades_create",
 		]) {
 			expect(names).not.toContain(hidden);

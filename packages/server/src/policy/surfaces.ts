@@ -51,7 +51,7 @@ export const CLAUDE_DIRECTORY_EXCLUSIONS: ReadonlyMap<string, string> = new Map(
 		// Spending instruments and balance top-ups from a stored method
 		["POST /cards", "issues a spending card"],
 		["PATCH /cards/{id}", "changes a spending card"],
-		["POST /topups", "charges the account's stored payment method"],
+		["POST /deposits", "can charge the account's stored payment method"],
 		// Trading and currency conversion
 		["POST /swaps", "trades or converts currency"],
 		["POST /trades", "submits trading orders"],

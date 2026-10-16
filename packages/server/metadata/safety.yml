@@ -99,7 +99,6 @@ rules:
         - POST /swaps
         - POST /trades
         - POST /deposits
-        - POST /topups
         - POST /company_token_transactions
         - POST /invoices/{id}/mark_paid
         - POST /invoices/{id}/mark_uncollectible
@@ -379,6 +378,17 @@ rules:
         - POST /disputes/{id}/submit
     set:
       classification: mutating
+      confirmation: true
+
+  # Accepting concedes the chargeback to the customer for good.
+  - name: dispute-accept
+    match:
+      operations:
+        - POST /disputes/{id}/accept
+    set:
+      classification: mutating
+      financial: true
+      idempotency: supported
       confirmation: true
 
   # ── Resolution center: accepting a buyer claim generally refunds money ────
