@@ -51,11 +51,12 @@ const OP_ID_OVERRIDES: Record<string, string> = {
 	// GET and PATCH both infer "preferences" from the static path segment.
 	"GET /accounts/{account_id}/preferences": "preferences",
 	"PATCH /accounts/{account_id}/preferences": "update-preferences",
-	"GET /accounts/{account_id}/fees": "fees",
-	"PATCH /accounts/{account_id}/fees": "update-fees",
+	"GET /accounts/{account_id}/financing_providers": "financing-providers",
 	// Docs-subgroup operations are named within their subgroup.
 	// /users/me/preferences is a singleton, so its GET reads rather than lists.
 	"GET /users/me/preferences": "get",
+	"GET /accounts/{account_id}/fees": "get",
+	"PATCH /accounts/{account_id}/fees": "update",
 	"POST /users/me/passkeys": "register",
 	"POST /users/me/oauth_grants": "authorize",
 	"GET /payouts/supported_methods": "supported-methods",
@@ -71,6 +72,8 @@ const OP_ID_OVERRIDES: Record<string, string> = {
 	// GET and PATCH both infer "me" from the static path segment.
 	"GET /users/me": "me",
 	"PATCH /users/me": "update-me",
+	// Root-collection POST infers "create", which POST /ads already claims in the Ads tag.
+	"POST /ad_stats": "report-stats",
 	// The verb methods all infer "methods" from the static path segment.
 	// GET and POST both infer "notes" from the static path segment.
 	"GET /members/{member_id}/notes": "list",
@@ -105,7 +108,7 @@ export function subgroupCommandPath(subgroup: string): string[] {
 		.map((segment) => segment.toLowerCase().replace(/\s+/g, "-"));
 }
 
-/** Names a subgroup operation from its subgroup's own collection onward, as the CLI does. */
+/** Names a subgroup operation from its subgroup's own collection onward (its last segment, or all of them joined with "_"), as the CLI does. */
 function subgroupRelativeSegments(
 	key: string,
 	path: string,
@@ -114,11 +117,19 @@ function subgroupRelativeSegments(
 	const segments = path.split("/").filter(Boolean);
 	if (!subgroup) return segments;
 
-	const collection = subgroupCommandPath(subgroup).at(-1)?.replace(/-/g, "_");
-	const start = collection ? segments.indexOf(collection) : -1;
+	const commandPath = subgroupCommandPath(subgroup).map((segment) =>
+		segment.replace(/-/g, "_"),
+	);
+	const collections = [
+		...new Set([commandPath.at(-1), commandPath.join("_")]),
+	].filter((collection): collection is string => Boolean(collection));
+	const start =
+		collections
+			.map((collection) => segments.indexOf(collection))
+			.find((index) => index !== -1) ?? -1;
 	if (start === -1) {
 		fail(
-			`${key} is in docs subgroup "${subgroup}", but its path has no "${collection}" segment to name its tool from.`,
+			`${key} is in docs subgroup "${subgroup}", but its path has no ${collections.map((collection) => `"${collection}"`).join(" or ")} segment to name its tool from.`,
 		);
 	}
 	return segments.slice(start);
@@ -184,6 +195,7 @@ export interface ScopeDefinition {
 	bot?: boolean;
 	disallow_api_authorization?: boolean;
 	disallow_app_authorization?: boolean;
+	app_owned?: boolean;
 }
 
 export interface GeneratorMetadata {
@@ -219,11 +231,14 @@ function principalsForSecurity(
 		if (!definition) {
 			fail(`No scope definition for scope "${scope}" on ${key}.`);
 		}
-		if (principal === "user") return definition.user === true;
+		if (principal === "user") {
+			return definition.user === true && definition.app_owned !== true;
+		}
 		if (principal === "business") {
 			return (
 				definition.bot === true &&
-				definition.disallow_api_authorization !== true
+				definition.disallow_api_authorization !== true &&
+				definition.app_owned !== true
 			);
 		}
 		return (

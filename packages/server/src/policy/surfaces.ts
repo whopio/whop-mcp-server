@@ -52,6 +52,7 @@ export const CLAUDE_DIRECTORY_EXCLUSIONS: ReadonlyMap<string, string> = new Map(
 		["POST /cards", "issues a spending card"],
 		["PATCH /cards/{id}", "changes a spending card"],
 		["POST /deposits", "can charge the account's stored payment method"],
+		["POST /deposits/{id}/reverse", "sends a deposit back to its sender"],
 		// Trading and currency conversion
 		["POST /swaps", "trades or converts currency"],
 		["POST /trades", "submits trading orders"],

@@ -17,10 +17,17 @@
 #   confirmation: boolean (default false)
 
 rules:
+  - name: customer-tracking-lookup
+    match:
+      operations:
+        - POST /shipments/lookup
+    set:
+      classification: read_only
+
   - name: financing-application-submit
     match:
       operations:
-        - POST /accounts/{account_id}/financing_applications/{id}/submit
+        - POST /financing_applications/{id}/submit
     set:
       classification: mutating
       idempotency: supported
@@ -29,8 +36,8 @@ rules:
   - name: financing-application-draft-writes
     match:
       operations:
-        - POST /accounts/{account_id}/financing_applications
-        - PATCH /accounts/{account_id}/financing_applications/{id}
+        - POST /financing_applications
+        - PATCH /financing_applications/{id}
     set:
       classification: mutating
       idempotency: supported
@@ -99,10 +106,8 @@ rules:
         - POST /swaps
         - POST /trades
         - POST /deposits
+        - POST /deposits/{id}/reverse
         - POST /company_token_transactions
-        - POST /invoices/{id}/mark_paid
-        - POST /invoices/{id}/mark_uncollectible
-        - POST /invoices/{id}/void
         - POST /ad_campaigns/{id}/retry_payment
         - POST /bounties
         - POST /bounties/{id}/cancel
@@ -110,6 +115,35 @@ rules:
       classification: mutating
       financial: true
       idempotency: required
+      confirmation: true
+
+  # A PDF of an invoice the credential can already read; nothing is issued or charged.
+  - name: invoice-pdf
+    match:
+      operations:
+        - POST /invoices/{id}/generate_pdf
+    set:
+      classification: mutating
+
+  - name: invoice-issuance-and-collection
+    match:
+      tags: [Invoices]
+      methods: [post]
+    set:
+      classification: mutating
+      financial: true
+      externalPublication: true
+      idempotency: required
+      confirmation: true
+
+  - name: invoice-scheduling
+    match:
+      tags: [Invoices]
+      methods: [patch]
+    set:
+      classification: mutating
+      financial: true
+      externalPublication: true
       confirmation: true
 
   # ── Payout cancel: returns funds to the balance. Naturally idempotent —
@@ -437,6 +471,14 @@ rules:
       classification: mutating
       confirmation: true
 
+  # ── App installations: the app's own key-value state about one install ───
+  - name: app-installation-metadata
+    match:
+      operations:
+        - PATCH /app_installations/{id}
+    set:
+      classification: mutating
+
   # ── Deploying an app: builds the working copy and, unless draft, promotes it
   # ── to production — the same end effect as app-build-promote ──────────────
   - name: app-deployment
@@ -485,6 +527,28 @@ rules:
         - POST /domains/{id}/check
     set:
       classification: mutating
+
+  # ── Email addresses: the responses can carry a mailbox password ─────────
+  - name: email-address-writes
+    match:
+      operations:
+        - PATCH /email_addresses/{id}
+        - POST /email_addresses
+    set:
+      classification: mutating
+      credential: true
+      confirmation: true
+      idempotency: supported
+
+  - name: email-address-password-reset
+    match:
+      operations:
+        - POST /email_addresses/{id}/reset_password
+    set:
+      classification: mutating
+      credential: true
+      confirmation: true
+      idempotency: supported
 
   # ── Exports produce files of data the credential can already read ─────────
   - name: data-exports
@@ -596,6 +660,7 @@ rules:
         - Identity profiles
         - Invoices
         - Leads
+        - Livestreams
         - Media
         - Members
         - Partners

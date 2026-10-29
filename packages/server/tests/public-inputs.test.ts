@@ -31,6 +31,7 @@ it.skipIf(!existsSync(new URL("../inputs/openapi.json", import.meta.url)))(
 			"user",
 			"disallow_api_authorization",
 			"disallow_app_authorization",
+			"app_owned",
 		]);
 		for (const definition of Object.values(definitions)) {
 			expect(

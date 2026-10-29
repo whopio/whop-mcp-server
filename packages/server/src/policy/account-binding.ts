@@ -22,8 +22,19 @@ export function enforceAccountBinding(
 	principal: PrincipalContext,
 ): Record<string, unknown> {
 	const bound = principal.accountId;
+	// "platform" is the stats API's Whop-wide aggregate mode. Only the
+	// business count is opened to MCP callers; other platform metrics stay
+	// behind the account boundary.
+	const platformStats =
+		["stats_get", "stats_time-series_get"].includes(operation.toolName) &&
+		args.metric === "businesses" &&
+		args.account_id === "platform";
 
-	checkAccountFields(args, bound, "$");
+	checkAccountFields(
+		platformStats ? { ...args, account_id: undefined } : args,
+		bound,
+		"$",
+	);
 
 	if (operation.requiresAccount && !bound && !operation.accountParam) {
 		throw new WhopMcpError(

@@ -10,41 +10,47 @@ import {
 const registry = buildRealRegistry();
 
 describe("registry generation", () => {
+	it("exposes guest tracking as a read", () => {
+		const lookup = registry.operations.find(
+			(op) => op.path === "/shipments/lookup",
+		);
+		expect(lookup?.safety.classification).toBe("read_only");
+		expect(lookup?.profiles).toContain("read_only");
+	});
+
+	it("keeps preview channel controls out of the public registry", () => {
+		expect(
+			registry.operations.filter((operation) =>
+				operation.path.startsWith("/channels"),
+			),
+		).toEqual([]);
+	});
+
 	it("uses distinct CLI-compatible names for financing application reads", () => {
-		expect(
-			findOperation(registry, "accounts_financing-applications_list").path,
-		).toBe("/accounts/{account_id}/financing_applications");
-		expect(
-			findOperation(registry, "accounts_financing-applications_get").path,
-		).toBe("/accounts/{account_id}/financing_applications/{id}");
+		expect(findOperation(registry, "financing-applications_list").path).toBe(
+			"/financing_applications",
+		);
+		expect(findOperation(registry, "financing-applications_get").path).toBe(
+			"/financing_applications/{id}",
+		);
+		expect(findOperation(registry, "accounts_financing-providers").path).toBe(
+			"/accounts/{account_id}/financing_providers",
+		);
 	});
 
 	it("classifies financing draft creation as an idempotent mutation", () => {
-		const operation = findOperation(
-			registry,
-			"accounts_financing-applications_create",
-		);
+		const operation = findOperation(registry, "financing-applications_create");
 		expect(operation.safety.classification).toBe("mutating");
 		expect(operation.safety.idempotency).toBe("supported");
 	});
 
 	it("names financing writes distinctly and requires confirmation for submission", () => {
-		const update = findOperation(
-			registry,
-			"accounts_financing-applications_update",
-		);
-		const submit = findOperation(
-			registry,
-			"accounts_financing-applications_submit",
-		);
+		const update = findOperation(registry, "financing-applications_update");
+		const submit = findOperation(registry, "financing-applications_submit");
 		expect(update.method).toBe("patch");
-		expect(update.path).toBe(
-			"/accounts/{account_id}/financing_applications/{id}",
-		);
+		expect(update.path).toBe("/financing_applications/{id}");
 		expect(submit.method).toBe("post");
-		expect(submit.path).toBe(
-			"/accounts/{account_id}/financing_applications/{id}/submit",
-		);
+		expect(submit.path).toBe("/financing_applications/{id}/submit");
 		expect(submit.safety.confirmationRequired).toBe(true);
 	});
 
@@ -108,7 +114,7 @@ describe("registry generation", () => {
 		expect(Object.keys(operation!.inputSchema.properties ?? {})).toEqual(
 			expect.arrayContaining([
 				"account_id",
-				"plan_id",
+				"variant_id",
 				"line_items",
 				"member_id",
 				"confirmation_token",
@@ -212,6 +218,17 @@ describe("registry generation", () => {
 			"business",
 			"app",
 		]);
+		for (const toolName of [
+			"app-installations_get",
+			"app-installations_list",
+		]) {
+			expect(byName.get(toolName)?.principals, toolName).toEqual([
+				"user",
+				"business",
+				"app",
+			]);
+		}
+		expect(byName.get("app-installations_update")?.principals).toEqual(["app"]);
 		// security: [] means public — every principal.
 		expect(byName.get("swaps_quote")?.principals).toEqual([
 			"user",
@@ -335,6 +352,38 @@ describe("registry generation", () => {
 		).toBeGreaterThan(10);
 	});
 
+	it("requires confirmation for invoice writes that can schedule collection", () => {
+		const writes = registry.operations.filter(
+			(operation) =>
+				operation.tag === "Invoices" &&
+				["post", "patch"].includes(operation.method) &&
+				operation.path !== "/invoices/{id}/generate_pdf",
+		);
+		expect(writes.length).toBeGreaterThanOrEqual(2);
+		for (const operation of writes) {
+			expect(operation.safety, operation.toolName).toMatchObject({
+				classification: "mutating",
+				financial: true,
+				externalPublication: true,
+				confirmationRequired: true,
+				idempotency: operation.method === "post" ? "required" : "none",
+			});
+		}
+	});
+
+	it("treats generating an invoice PDF as a plain mutation", () => {
+		const operation = registry.operations.find(
+			(op) => op.method === "post" && op.path === "/invoices/{id}/generate_pdf",
+		);
+		expect(operation?.safety).toMatchObject({
+			classification: "mutating",
+			financial: false,
+			externalPublication: false,
+			confirmationRequired: false,
+			idempotency: "none",
+		});
+	});
+
 	it("treats provider-backed payout quotes as idempotent mutations", () => {
 		const operation = registry.operations.find(
 			(op) => op.method === "post" && op.path === "/payouts/quotes",
@@ -408,7 +457,7 @@ describe("registry generation", () => {
 		const payout = registry.operations.find(
 			(operation) => operation.toolName === "payouts_create",
 		);
-		expect(Object.keys(payout?.inputSchema.properties ?? {})).toHaveLength(12);
+		expect(Object.keys(payout?.inputSchema.properties ?? {})).toHaveLength(13);
 		expect(payout?.inputSchema.required).toEqual([
 			"amount",
 			"payout_method_id",

@@ -27,20 +27,13 @@ const commonProperties = {
 		description:
 			"The account ID (biz_...) for the affected resource or request. Defaults to the current account context when available. Omit when no specific account is known.",
 	},
-	content: {
-		type: "string",
-		minLength: 1,
-		maxLength: 12000,
-		pattern: "\\S",
-		description:
-			"The observation or unanswered question, with enough context for Whop to understand it. Remove secrets and personal or payment data before submitting.",
-	},
 	intention: {
 		type: "string",
 		minLength: 1,
 		maxLength: 2000,
 		pattern: "\\S",
-		description: "What you were trying to accomplish when this came up.",
+		description:
+			"What you were trying to accomplish when this came up, in one short sentence.",
 	},
 	tool: {
 		type: "string",
@@ -59,6 +52,16 @@ const commonProperties = {
 	},
 };
 
+function contentProperty(example: string) {
+	return {
+		type: "string",
+		minLength: 1,
+		maxLength: 12000,
+		pattern: "\\S",
+		description: `A short note a Whop engineer can understand in one read. Lead with the problem or question in one plain sentence, say what you expected, and include only the IDs needed to reproduce it. Mention what you already ruled out only when it changes where to look. Example: "${example}" Remove secrets and personal or payment data before submitting.`,
+	};
+}
+
 const annotations = {
 	readOnlyHint: false,
 	destructiveHint: false,
@@ -72,10 +75,13 @@ export const FEEDBACK_TOOLS: (Tool & {
 	{
 		name: "report_feedback",
 		description:
-			"Report a concrete problem or friction with Whop or these tools for internal review: an incorrect result, confusing error, documentation gap, or unexpected API behavior. Describe what happened and what you expected; include sanitized request/response details when useful. Returns a submission receipt only; no follow-up will reach this session. Submit only real observations, one per call. Never include credentials, secrets, personal data, or payment details.",
+			"Report a concrete problem or friction with Whop or these tools for internal review: an incorrect result, confusing error, documentation gap, or unexpected API behavior. Whop engineers read these directly, so keep each field brief and plain. Returns a submission receipt only; no follow-up will reach this session. Submit only real observations, one per call. Never include credentials, secrets, personal data, or payment details.",
 		inputSchema: {
 			type: "object",
 			properties: {
+				content: contentProperty(
+					"products_update cannot set the post-checkout redirect URL, so I could not change where buyers land after buying prod_abc123. I expected a redirect_url field like the one checkout-configurations_create accepts.",
+				),
 				...commonProperties,
 				severity: {
 					type: "string",
@@ -89,7 +95,7 @@ export const FEEDBACK_TOOLS: (Tool & {
 					maxLength: 4000,
 					pattern: "\\S",
 					description:
-						"What worked instead, if anything. Omit if no workaround was found.",
+						"What worked instead, in a sentence or two. Omit if no workaround was found.",
 				},
 			},
 			required: ["content"],
@@ -103,7 +109,12 @@ export const FEEDBACK_TOOLS: (Tool & {
 			"Record a question about Whop you could not answer using the available tools and documentation. This collects gaps for Whop's internal review; it is not a live support or question-answering service. Returns a submission receipt only. No answer will come back now or later in this session: do not wait, poll, or repeat the question expecting an answer. Continue using available documentation and your best judgment. Submit only real unanswered questions. Never include credentials, secrets, personal data, or payment details.",
 		inputSchema: {
 			type: "object",
-			properties: commonProperties,
+			properties: {
+				content: contentProperty(
+					"Can a plan's renewal price differ from its initial price for existing members? The plans docs only cover new purchases.",
+				),
+				...commonProperties,
+			},
 			required: ["content"],
 			additionalProperties: false,
 		},

@@ -527,7 +527,7 @@ describe("MCP contract", () => {
 			await client.callTool({
 				name: "payments_create",
 				arguments: {
-					plan_id: "plan_test1234",
+					variant_id: "plan_test1234",
 					member_id: "mem_test1234",
 					payment_method_id: "pm_test1234",
 				},
@@ -762,15 +762,15 @@ describe("MCP contract", () => {
 
 	it("recovers a committed caller result behind an unknown confirmation", async () => {
 		const { fetch, requests } = fakeFetch(() => ({
-			body: { id: "inv_123456", status: "voided" },
+			body: { id: "ad_123456", deleted: true },
 		}));
 		const client = await connect({
 			fetch,
 			idempotencyStore: new CommitThenFailCompletionStore(true),
 		});
-		const args = { id: "inv_123456" };
+		const args = { id: "ad_123456" };
 		const prepared = parseResult(
-			await client.callTool({ name: "invoices_void", arguments: args }),
+			await client.callTool({ name: "ad-campaigns_delete", arguments: args }),
 		);
 		const executionArgs = {
 			...args,
@@ -778,7 +778,7 @@ describe("MCP contract", () => {
 			idempotency_key: "hidden-commit",
 		};
 		const first = await client.callTool({
-			name: "invoices_void",
+			name: "ad-campaigns_delete",
 			arguments: executionArgs,
 		});
 		expect(first.isError).toBe(true);
@@ -789,11 +789,11 @@ describe("MCP contract", () => {
 		expect(
 			parseResult(
 				await client.callTool({
-					name: "invoices_void",
+					name: "ad-campaigns_delete",
 					arguments: executionArgs,
 				}),
 			),
-		).toEqual({ id: "inv_123456", status: "voided" });
+		).toEqual({ id: "ad_123456", deleted: true });
 		expect(requests).toHaveLength(1);
 	});
 
@@ -1137,22 +1137,28 @@ describe("MCP contract", () => {
 	});
 
 	it.each([
-		["a legacy POST after re-preparation", "invoices_void", "inv_123456", true],
+		[
+			"a legacy POST after re-preparation",
+			"fee-markups_create",
+			{ account_id: "biz_boundAccount", fee_type: "crypto_deposit_markup" },
+			true,
+		],
 		[
 			"a native DELETE with the original token",
 			"ad-campaigns_delete",
-			"ad_123456",
+			{ id: "ad_123456" },
 			false,
 		],
 	])(
 		"fails closed for %s when completion storage is lost",
-		async (_scenario, toolName, id, reprepare) => {
-			const { fetch, requests } = fakeFetch(() => ({ body: { id } }));
+		async (_scenario, toolName, args, reprepare) => {
+			const { fetch, requests } = fakeFetch(() => ({
+				body: { success: true },
+			}));
 			const client = await connect({
 				fetch,
 				idempotencyStore: new FailFirstCompletionStore(),
 			});
-			const args = { id };
 			const prepared = parseResult(
 				await client.callTool({ name: toolName, arguments: args }),
 			);
@@ -1379,6 +1385,7 @@ describe("claude_directory surface", () => {
 				"DELETE /fee_markups/{id}",
 				"PATCH /cashback_rules/{id}",
 				"PATCH /domains/{id}",
+				"PATCH /invoices/{id}",
 				"PATCH /payments/{id}",
 				"PATCH /payments/{payment_id}/return_url",
 				"PATCH /setup_intents/{setup_intent_id}/return_url",
@@ -1388,8 +1395,11 @@ describe("claude_directory surface", () => {
 				"POST /disputes/{id}/accept",
 				"POST /domains",
 				"POST /fee_markups",
-				"POST /invoices/{id}/mark_paid",
+				"POST /invoices",
+				"POST /invoices/{id}/issue",
 				"POST /invoices/{id}/mark_uncollectible",
+				"POST /invoices/{id}/send",
+				"POST /invoices/{id}/unschedule",
 				"POST /invoices/{id}/void",
 				"POST /memberships/{id}/apply_promo_code",
 				"POST /memberships/{id}/assign_affiliate",
