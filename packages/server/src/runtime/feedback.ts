@@ -1,8 +1,10 @@
-import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import type { PrincipalContext } from "../policy/types.ts";
-import type { JsonSchema } from "../registry/types.ts";
-import { redactText, WhopMcpError } from "./errors.ts";
-import { validateAgainstSchema } from "./validate.ts";
+import {
+	type BuiltinTool,
+	type ToolDefinition,
+	validateToolArgs,
+} from "./builtin-tool.ts";
+import { redactText } from "./errors.ts";
 
 export interface FeedbackSubmission {
 	id: string;
@@ -69,9 +71,7 @@ const annotations = {
 	openWorldHint: true,
 };
 
-export const FEEDBACK_TOOLS: (Tool & {
-	inputSchema: JsonSchema & Tool["inputSchema"];
-})[] = [
+export const FEEDBACK_TOOLS: ToolDefinition[] = [
 	{
 		name: "report_feedback",
 		description:
@@ -122,39 +122,32 @@ export const FEEDBACK_TOOLS: (Tool & {
 	},
 ];
 
+type FeedbackAttribution = { clientName?: string; pluginSource?: string };
+
+export function feedbackTools(
+	sink: FeedbackSink,
+	principal: PrincipalContext,
+	attribution: FeedbackAttribution,
+): BuiltinTool[] {
+	return FEEDBACK_TOOLS.map((definition) => ({
+		definition,
+		call: async (args) =>
+			JSON.stringify(
+				await submitFeedback(definition, args, principal, sink, attribution),
+				null,
+				2,
+			),
+	}));
+}
+
 export async function submitFeedback(
-	tool: Tool,
+	tool: ToolDefinition,
 	args: Record<string, unknown>,
 	principal: PrincipalContext,
 	sink: FeedbackSink,
-	attribution: { clientName?: string; pluginSource?: string },
+	attribution: FeedbackAttribution,
 ) {
-	const schema = tool.inputSchema as JsonSchema;
-	const errors = validateAgainstSchema(args, schema);
-	for (const [key, value] of Object.entries(args)) {
-		if (typeof value !== "string") continue;
-		const maxLength = schema.properties?.[key]?.maxLength;
-		if (
-			!value.trim() ||
-			(typeof maxLength === "number" && value.length > maxLength)
-		) {
-			errors.push(
-				`${key} must be nonblank and within its declared length limit`,
-			);
-		}
-	}
-	if (
-		typeof args.account_id === "string" &&
-		!/^biz_[A-Za-z0-9]+$/.test(args.account_id)
-	) {
-		errors.push("account_id must be an account ID (biz_...)");
-	}
-	if (errors.length) {
-		throw new WhopMcpError(
-			"invalid_input",
-			`Invalid ${tool.name} input: ${errors.slice(0, 5).join("; ")}`,
-		);
-	}
+	validateToolArgs(tool, args);
 	const submission: FeedbackSubmission = {
 		id: crypto.randomUUID(),
 		createdAt: new Date().toISOString(),

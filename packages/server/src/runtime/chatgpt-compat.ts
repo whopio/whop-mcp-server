@@ -1,6 +1,8 @@
 import type { OperationDef } from "../registry/types.ts";
 import type { PrincipalContext } from "../policy/types.ts";
+import type { BuiltinTool, ToolDefinition } from "./builtin-tool.ts";
 import type { Dispatcher } from "./dispatcher.ts";
+import { WhopMcpError } from "./errors.ts";
 
 /**
  * ChatGPT-required meta-tools. Outside developer mode (and in deep research),
@@ -39,7 +41,7 @@ const FETCH_SOURCES: Record<string, string> = {
 	user: "users_get",
 };
 
-export const SEARCH_TOOL = {
+const SEARCH_TOOL: ToolDefinition = {
 	name: "search",
 	description:
 		"Search the connected Whop account's products, variants, payments, and members by keyword. Returns result IDs for use with fetch.",
@@ -54,7 +56,7 @@ export const SEARCH_TOOL = {
 	annotations: { readOnlyHint: true },
 };
 
-export const FETCH_TOOL = {
+const FETCH_TOOL: ToolDefinition = {
 	name: "fetch",
 	description:
 		"Fetch the full record for one Whop resource ID returned by search (e.g. prod_…, plan_…, pay_…, mem_…).",
@@ -103,7 +105,7 @@ function rowTitle(
 	return String(row.id ?? "");
 }
 
-export async function runSearch(
+async function runSearch(
 	query: string,
 	visibleOps: OperationDef[],
 	dispatcher: Dispatcher,
@@ -148,7 +150,7 @@ export async function runSearch(
 	return { results: results.slice(0, 50) };
 }
 
-export async function runFetch(
+async function runFetch(
 	id: string,
 	visibleOps: OperationDef[],
 	dispatcher: Dispatcher,
@@ -167,4 +169,38 @@ export async function runFetch(
 		text: JSON.stringify(result.body, null, 2),
 		url: "https://whop.com/dashboard",
 	};
+}
+
+export function chatGptTools(
+	visibleOps: OperationDef[],
+	dispatcher: Dispatcher,
+	principal: PrincipalContext,
+): BuiltinTool[] {
+	return [
+		{
+			definition: SEARCH_TOOL,
+			call: async (args) => {
+				const query = typeof args.query === "string" ? args.query : "";
+				return JSON.stringify(
+					await runSearch(query, visibleOps, dispatcher, principal),
+					null,
+					2,
+				);
+			},
+		},
+		{
+			definition: FETCH_TOOL,
+			call: async (args) => {
+				const id = typeof args.id === "string" ? args.id : "";
+				const fetched = await runFetch(id, visibleOps, dispatcher, principal);
+				if (!fetched) {
+					throw new WhopMcpError(
+						"invalid_input",
+						`No fetchable resource for id "${id}". Use an id returned by search.`,
+					);
+				}
+				return JSON.stringify(fetched, null, 2);
+			},
+		},
+	];
 }

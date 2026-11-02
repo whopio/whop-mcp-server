@@ -43,6 +43,7 @@ export async function serveStdio(options: ServeStdioOptions): Promise<void> {
 		principal,
 		confirmationMode: options.confirmationMode ?? "host-approval",
 		auditSink: options.auditSink ?? new ConsoleErrorAuditSink(),
+		docs: options.docs ?? true,
 	});
 
 	const transport = new StdioServerTransport();

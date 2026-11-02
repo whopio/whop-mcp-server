@@ -54,6 +54,7 @@ export function createMcpApiHandler(surface: SurfaceName = "full") {
 					env.MCP_WHOP_API_ORIGIN,
 					props.whopAccessToken,
 				),
+				docs: true,
 				baseUrl: `${env.MCP_WHOP_API_ORIGIN}/api/v1`,
 				requireHttps: env.MCP_BASE_URL.startsWith("https://"),
 				chatGptCompat: true,

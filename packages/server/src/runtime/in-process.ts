@@ -47,3 +47,5 @@ export {
 	type FeedbackSubmission,
 	submitFeedback,
 } from "./feedback.ts";
+export { docsTools, type DocsOptions } from "./docs.ts";
+export type { BuiltinTool, ToolDefinition } from "./builtin-tool.ts";

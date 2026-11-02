@@ -50,6 +50,7 @@ export interface StreamableHttpAdapterOptions {
 	idempotencyStore?: IdempotencyStore;
 	auditSink?: AuditSink;
 	feedbackSink?: FeedbackSink;
+	docs?: boolean;
 	fetch?: typeof fetch;
 	baseUrl?: string;
 	/**
@@ -152,6 +153,7 @@ export function createStreamableHttpHandler(
 			idempotencyStore: options.idempotencyStore,
 			auditSink: options.auditSink,
 			feedbackSink: options.feedbackSink,
+			docs: options.docs,
 			fetch: options.fetch,
 			baseUrl: options.baseUrl,
 			clientName: auth.clientName,

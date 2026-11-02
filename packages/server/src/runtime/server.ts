@@ -24,18 +24,11 @@ import { DEFAULT_SURFACE, type SurfaceName } from "../policy/surfaces.ts";
 import { visibleOperations } from "../policy/visibility.ts";
 import { Dispatcher } from "./dispatcher.ts";
 import { WhopMcpError } from "./errors.ts";
-import {
-	FETCH_TOOL,
-	runFetch,
-	runSearch,
-	SEARCH_TOOL,
-} from "./chatgpt-compat.ts";
+import type { BuiltinTool, ToolDefinition } from "./builtin-tool.ts";
+import { chatGptTools } from "./chatgpt-compat.ts";
 import type { McpRequestContext } from "./mcp-context.ts";
-import {
-	FEEDBACK_TOOLS,
-	submitFeedback,
-	type FeedbackSink,
-} from "./feedback.ts";
+import { docsTools } from "./docs.ts";
+import { feedbackTools, type FeedbackSink } from "./feedback.ts";
 
 export const SERVER_NAME = "whop";
 export const SERVER_VERSION = "0.0.1";
@@ -52,10 +45,20 @@ const MCP_CONFIRMATION_TOKEN_FIELD = "mcp_confirmation_token";
 const IDEMPOTENCY_KEY_FIELD = "idempotency_key";
 const INTENT_FIELD = "intent";
 const INTENT_ID_FIELD = "intent_id";
-const CONNECTION_STATUS_TOOL = "connection_status";
 const UUID_PATTERN =
 	"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89aAbB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$";
 const UUID_REGEX = new RegExp(UUID_PATTERN);
+const CONNECTION_STATUS_TOOL: ToolDefinition = {
+	name: "connection_status",
+	description:
+		"Returns safe diagnostics for this connection: authenticated identity, selected account, permission profile, scopes, tool coverage, and build metadata. Never returns credentials.",
+	inputSchema: {
+		type: "object",
+		properties: {},
+		additionalProperties: false,
+	},
+	annotations: { readOnlyHint: true },
+};
 
 /**
  * How confirmation-required operations are gated.
@@ -80,6 +83,8 @@ export interface CreateWhopMcpServerOptions {
 	idempotencyStore?: IdempotencyStore;
 	auditSink?: AuditSink;
 	feedbackSink?: FeedbackSink;
+	/** Expose docs_search and docs_query, backed by docs.whop.com/mcp. */
+	docs?: boolean;
 	fetch?: typeof fetch;
 	baseUrl?: string;
 	timeoutMs?: number;
@@ -262,6 +267,38 @@ export function createWhopMcpServer(
 		extraHeaders: options.extraHeaders,
 	});
 
+	const builtins: BuiltinTool[] = [
+		...(options.chatGptCompat
+			? chatGptTools(operations, dispatcher, principal)
+			: []),
+		...(options.feedbackSink
+			? feedbackTools(options.feedbackSink, principal, {
+					clientName: options.clientName,
+					pluginSource: options.pluginSource,
+				})
+			: []),
+		...(options.docs
+			? docsTools({ fetch: options.fetch, timeoutMs: options.timeoutMs })
+			: []),
+		{
+			definition: CONNECTION_STATUS_TOOL,
+			call: async () =>
+				JSON.stringify(
+					connectionStatus(
+						registry,
+						principal,
+						operations,
+						options.surface ?? DEFAULT_SURFACE,
+					),
+					null,
+					2,
+				),
+		},
+	];
+	const builtinByName = new Map(
+		builtins.map((tool) => [tool.definition.name, tool]),
+	);
+
 	const server = new Server(
 		{ name: SERVER_NAME, version: SERVER_VERSION, icons: SERVER_ICONS },
 		{
@@ -270,6 +307,7 @@ export function createWhopMcpServer(
 				principal,
 				operations,
 				enforceConfirmation,
+				builtins,
 			),
 		},
 	);
@@ -290,81 +328,30 @@ export function createWhopMcpServer(
 					title: op.summary,
 				},
 			})),
-			...(options.chatGptCompat ? [SEARCH_TOOL, FETCH_TOOL] : []),
-			...(options.feedbackSink ? FEEDBACK_TOOLS : []),
-			{
-				name: CONNECTION_STATUS_TOOL,
-				description:
-					"Returns safe diagnostics for this connection: authenticated identity, selected account, permission profile, scopes, tool coverage, and build metadata. Never returns credentials.",
-				inputSchema: {
-					type: "object",
-					properties: {},
-					additionalProperties: false,
-				},
-				annotations: { readOnlyHint: true },
-			},
+			...builtins.map((tool) => tool.definition),
 		],
 	}));
 
-	server.setRequestHandler(CallToolRequestSchema, async (request) => {
+	server.setRequestHandler(CallToolRequestSchema, async (request, extra) => {
 		const { name, arguments: rawArgs = {} } = request.params;
-		const feedbackTool =
-			options.feedbackSink && FEEDBACK_TOOLS.find((tool) => tool.name === name);
-		if (feedbackTool && options.feedbackSink) {
+		const builtin = builtinByName.get(name);
+		if (builtin) {
 			try {
-				return jsonContent(
-					await submitFeedback(
-						feedbackTool,
-						rawArgs,
-						principal,
-						options.feedbackSink,
+				return {
+					content: [
 						{
-							clientName: options.clientName,
-							pluginSource: options.pluginSource,
+							type: "text" as const,
+							text: await builtin.call(rawArgs, extra.signal),
 						},
-					),
-				);
+					],
+				};
 			} catch (error) {
 				return errorContent(
 					error instanceof WhopMcpError
 						? error
-						: new WhopMcpError(
-								"internal_error",
-								"Could not record the submission.",
-							),
+						: new WhopMcpError("internal_error", `${name} failed.`),
 				);
 			}
-		}
-
-		if (name === CONNECTION_STATUS_TOOL) {
-			return jsonContent(
-				connectionStatus(
-					registry,
-					principal,
-					operations,
-					options.surface ?? DEFAULT_SURFACE,
-				),
-			);
-		}
-
-		if (options.chatGptCompat && name === SEARCH_TOOL.name) {
-			const query = typeof rawArgs.query === "string" ? rawArgs.query : "";
-			return jsonContent(
-				await runSearch(query, operations, dispatcher, principal),
-			);
-		}
-		if (options.chatGptCompat && name === FETCH_TOOL.name) {
-			const id = typeof rawArgs.id === "string" ? rawArgs.id : "";
-			const fetched = await runFetch(id, operations, dispatcher, principal);
-			if (!fetched) {
-				return errorContent(
-					new WhopMcpError(
-						"invalid_input",
-						`No fetchable resource for id "${id}". Use an id returned by search.`,
-					),
-				);
-			}
-			return jsonContent(fetched);
 		}
 
 		const operation = byName.get(name);
@@ -886,6 +873,7 @@ function buildInstructions(
 	principal: PrincipalContext,
 	operations: OperationDef[],
 	enforceConfirmation: boolean,
+	builtins: BuiltinTool[],
 ): string {
 	return [
 		`Whop MCP server. This connection is authenticated as ${
@@ -902,6 +890,7 @@ function buildInstructions(
 				]
 			: []),
 		"For each user message, generate one UUID intent_id and reuse it for every operation tool call made to fulfill that message. Copy the original user request into intent. Both fields are attribution metadata and are not sent as Whop API arguments.",
+		...builtins.flatMap((tool) => tool.instruction ?? []),
 		"Call connection_status to see the authenticated identity, account, scopes, and tool coverage.",
 	].join("\n\n");
 }

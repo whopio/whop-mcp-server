@@ -1396,6 +1396,7 @@ describe("claude_directory surface", () => {
 				"POST /domains",
 				"POST /fee_markups",
 				"POST /invoices",
+				"POST /invoices/{id}/charge",
 				"POST /invoices/{id}/issue",
 				"POST /invoices/{id}/mark_uncollectible",
 				"POST /invoices/{id}/send",

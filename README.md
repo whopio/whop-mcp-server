@@ -104,6 +104,25 @@ They are not support tickets or a private
 journal. Remove credentials, personal data, and payment details before sending.
 These tools are available only when the host configures a feedback sink.
 
+### Documentation search
+
+Two read-only tools let an agent read the Whop documentation without
+installing the separate docs server at `https://docs.whop.com/mcp`:
+
+- `docs_search` takes a plain-language `query`, and optionally a docs
+  `version`, and returns matching excerpts with page paths and links. Each
+  excerpt is capped at 2,000 characters and names the `docs_query` command
+  that reads its full page.
+- `docs_query` runs a read-only, shell-style `command` such as `tree`, `rg`, or
+  `head` against a virtual filesystem holding only the documentation pages. Use
+  it to read a page that `docs_search` returned.
+
+Both proxy to the public docs server, send no Whop credentials, and skip the
+prepare-and-confirm flow. They are available on every surface and permission
+profile. The stdio adapter enables them by default; the hosted adapter enables
+them with `docs: true`. A 429 from the docs server is returned as
+`upstream_error` with status 429 and its `Retry-After` hint.
+
 ## Repository layout
 
 | Path | Purpose |

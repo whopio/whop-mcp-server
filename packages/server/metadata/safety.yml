@@ -49,7 +49,6 @@ rules:
         - POST /swaps/quote
         - POST /plans/{id}/calculate_tax
         - POST /variants/{id}/calculate_tax
-        - POST /ad_groups/estimate_reach
     set:
       classification: read_only
 
@@ -609,15 +608,6 @@ rules:
     set:
       classification: mutating
 
-  - name: ad-conversion-value-rule-delete
-    match:
-      operations:
-        - DELETE /ad_conversion_value_rules/{id}
-    set:
-      classification: destructive
-      idempotency: supported
-      confirmation: true
-
   # ── All remaining deletes are destructive and confirmed ──────────────────
   - name: destructive-deletes
     match:
@@ -636,7 +626,6 @@ rules:
         - Account links
         - Accounts
         - Ad Campaigns
-        - Ad Conversion Value Rules
         - Ad Groups
         - Ads
         - Affiliates
