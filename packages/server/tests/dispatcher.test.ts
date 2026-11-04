@@ -307,7 +307,11 @@ describe("dispatcher", () => {
 				},
 			},
 		});
-		const input = { amount: 500, payout_method_id: "potk_abc123" };
+		const input = {
+			amount: 500,
+			payout_method_id: "potk_abc123",
+			quote_token: "signed_quote",
+		};
 		const first = dispatcher.prepare(op, input, principal, {
 			idempotencyKey: "approved-tool-call",
 		});
@@ -321,6 +325,7 @@ describe("dispatcher", () => {
 				account_id: "biz_boundAccount",
 				amount: 500,
 				payout_method_id: "potk_abc123",
+				quote_token: "signed_quote",
 			},
 			method: "POST",
 			url: "https://api.whop.test/api/v1/payouts",
@@ -328,6 +333,7 @@ describe("dispatcher", () => {
 				account_id: "biz_boundAccount",
 				amount: 500,
 				payout_method_id: "potk_abc123",
+				quote_token: "signed_quote",
 			},
 			idempotencyKey: "approved-tool-call",
 		});
@@ -344,7 +350,11 @@ describe("dispatcher", () => {
 		const dispatcher = makeDispatcher(fetch);
 		const prepared = dispatcher.prepare(
 			op,
-			{ amount: 500, payout_method_id: "potk_abc123" },
+			{
+				amount: 500,
+				payout_method_id: "potk_abc123",
+				quote_token: "signed_quote",
+			},
 			principal,
 			{ idempotencyKey: "approved-tool-call" },
 		);
@@ -367,7 +377,11 @@ describe("dispatcher", () => {
 		const dispatcher = makeDispatcher(fetch);
 		const prepared = dispatcher.prepare(
 			op,
-			{ amount: 500, payout_method_id: "potk_abc123" },
+			{
+				amount: 500,
+				payout_method_id: "potk_abc123",
+				quote_token: "signed_quote",
+			},
 			principal,
 			{ idempotencyKey: "approved-tool-call" },
 		);
@@ -386,6 +400,7 @@ describe("dispatcher", () => {
 				account_id: "biz_boundAccount",
 				amount: 500,
 				payout_method_id: "potk_abc123",
+				quote_token: "signed_quote",
 			},
 		});
 		expect(requests[0].headers["idempotency-key"]).toBe("approved-tool-call");
@@ -405,7 +420,11 @@ describe("dispatcher", () => {
 		const op = findOperation(registry, "payouts_create");
 		const prepared = dispatcher.prepare(
 			op,
-			{ amount: 500, payout_method_id: "potk_abc123" },
+			{
+				amount: 500,
+				payout_method_id: "potk_abc123",
+				quote_token: "signed_quote",
+			},
 			principal,
 			{ idempotencyKey: "approved-tool-call" },
 		);
@@ -434,7 +453,11 @@ describe("dispatcher", () => {
 		const dispatcher = makeDispatcher(fetch);
 		const prepared = dispatcher.prepare(
 			op,
-			{ amount: 500, payout_method_id: "potk_abc123" },
+			{
+				amount: 500,
+				payout_method_id: "potk_abc123",
+				quote_token: "signed_quote",
+			},
 			principal,
 			{ idempotencyKey: "approved-tool-call" },
 		);
@@ -453,13 +476,18 @@ describe("dispatcher", () => {
 		const op = findOperation(registry, "payouts_create");
 		await makeDispatcher(fetch).dispatch(
 			op,
-			{ amount: 500, payout_method_id: "potk_abc123" },
+			{
+				amount: 500,
+				payout_method_id: "potk_abc123",
+				quote_token: "signed_quote",
+			},
 			principal,
 		);
 		expect(requests[0].body).toEqual({
 			account_id: "biz_boundAccount",
 			amount: 500,
 			payout_method_id: "potk_abc123",
+			quote_token: "signed_quote",
 		});
 	});
 
@@ -708,15 +736,15 @@ describe("dispatcher", () => {
 		expect(requests[0].headers["idempotency-key"]).toMatch(/^[0-9a-f-]{36}$/);
 	});
 
-	it("uses the caller-provided idempotency key for confirmed operations", async () => {
+	it("uses the caller-provided idempotency key", async () => {
 		const { fetch, requests } = fakeFetch();
 		const op = findOperation(registry, "payments_refund");
 		expect(op.safety.financial).toBe(true);
 		expect(op.safety.idempotency).toBe("required");
 		await makeDispatcher(fetch).dispatch(op, { id: "pay_abc123" }, principal, {
-			idempotencyKey: "confirm-jti-42",
+			idempotencyKey: "caller-key-42",
 		});
-		expect(requests[0].headers["idempotency-key"]).toBe("confirm-jti-42");
+		expect(requests[0].headers["idempotency-key"]).toBe("caller-key-42");
 	});
 
 	it("honors an override key even when the idempotency policy is none", async () => {
@@ -725,9 +753,9 @@ describe("dispatcher", () => {
 		expect(op.safety.confirmationRequired).toBe(true);
 		expect(op.safety.idempotency).toBe("none");
 		await makeDispatcher(fetch).dispatch(op, { id: "mem_abc123" }, principal, {
-			idempotencyKey: "confirm-jti-99",
+			idempotencyKey: "caller-key-99",
 		});
-		expect(requests[0].headers["idempotency-key"]).toBe("confirm-jti-99");
+		expect(requests[0].headers["idempotency-key"]).toBe("caller-key-99");
 	});
 
 	it("sends no Idempotency-Key on reads", async () => {

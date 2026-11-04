@@ -10,8 +10,6 @@ import { reconcileGrantOnTokenExchange } from "./token-exchange.ts";
 import { WHOP_MCP_CLIENT_ID, WhopOidcClient } from "./whop-oidc.ts";
 import type { Env } from "./types.ts";
 
-export { IdempotencyDO } from "./idempotency-do.ts";
-
 /**
  * tokenExchangeCallback receives only its options object — no Worker
  * bindings — so the fetch wrapper below captures env before delegating to

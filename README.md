@@ -47,24 +47,16 @@ to access across every business the user manages; grants are not bound to one
 business. Only connect MCP clients you trust, inspect requested actions, and
 disconnect access when it is no longer needed.
 
-### Prepare and confirm
+### Approval and retries
 
-Consequential operations, including financial, credential, and destructive
-actions, use a two-step safeguard:
+Every tool call executes when it is made. Approval belongs to the MCP host:
+financial, credential, and destructive tools carry `destructiveHint`, which
+hosts use to ask the user before running them.
 
-1. The first call prepares the operation and returns a preview plus an
-   `mcp_confirmation_token`. It does not execute the operation.
-2. After the user reviews and approves the preview, the client calls the same
-   tool with the same arguments, the confirmation token, and a stable
-   `idempotency_key` to execute it.
-
-Clients should never confirm consequential actions without user approval. They
-must reuse the same idempotency key when retrying. If an outcome is reported as
-unknown, verify the result before attempting another execution. These
-safeguards reduce accidental or duplicate actions; they do not reduce the
-privileges of the OAuth grant. Prepare-and-confirm is not a security boundary
-against a compromised MCP bearer token or Worker: either can act within the
-grant's full privileges.
+Write tools accept an `idempotency_key`, which the server sends to the Whop
+API as the `Idempotency-Key` header. Reuse the same key when retrying a call
+whose outcome is unclear; the API replays the completed response instead of
+executing twice.
 
 ### Intent attribution
 
@@ -106,8 +98,8 @@ These tools are available only when the host configures a feedback sink.
 
 ### Documentation search
 
-Two read-only tools let an agent read the Whop documentation without
-installing the separate docs server at `https://docs.whop.com/mcp`:
+Two read-only tools let an agent search and read the Whop documentation over
+the same connection:
 
 - `docs_search` takes a plain-language `query`, and optionally a docs
   `version`, and returns matching excerpts with page paths and links. Each
@@ -117,10 +109,9 @@ installing the separate docs server at `https://docs.whop.com/mcp`:
   `head` against a virtual filesystem holding only the documentation pages. Use
   it to read a page that `docs_search` returned.
 
-Both proxy to the public docs server, send no Whop credentials, and skip the
-prepare-and-confirm flow. They are available on every surface and permission
+Both read the public documentation and send no Whop credentials. They are available on every surface and permission
 profile. The stdio adapter enables them by default; the hosted adapter enables
-them with `docs: true`. A 429 from the docs server is returned as
+them with `docs: true`. A rate-limited docs lookup is returned as
 `upstream_error` with status 429 and its `Retry-After` hint.
 
 ## Repository layout

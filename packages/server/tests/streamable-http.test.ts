@@ -12,7 +12,6 @@ import {
 } from "./helpers.ts";
 
 const registry = buildRealRegistry();
-const SECRET = "test-secret-key-that-is-long-enough";
 
 const okAuthenticator: HttpAuthenticator = {
 	async authenticate(request) {
@@ -35,7 +34,6 @@ function makeHandler() {
 	return createStreamableHttpHandler({
 		registry,
 		authenticator: okAuthenticator,
-		confirmationSecret: SECRET,
 		fetch: fakeFetch().fetch,
 		allowedOrigins: ["https://claude.ai"],
 	});
@@ -98,7 +96,6 @@ describe("streamable HTTP adapter", () => {
 		const handler = createStreamableHttpHandler({
 			registry,
 			authenticator: okAuthenticator,
-			confirmationSecret: SECRET,
 			fetch: fakeFetch().fetch,
 		});
 		const response = await handler(
@@ -144,7 +141,6 @@ describe("streamable HTTP adapter", () => {
 		const handler = createStreamableHttpHandler({
 			registry,
 			authenticator: okAuthenticator,
-			confirmationSecret: SECRET,
 			requireHttps: true,
 		});
 		const response = await handler(

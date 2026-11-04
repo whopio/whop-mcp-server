@@ -22,10 +22,6 @@ export interface ServeStdioOptions extends Omit<
  * touches stdout; logs and audit events go to stderr. Credentials come from an
  * injected adapter (the public CLI passes its keychain/profile resolution) or
  * the WHOP_API_KEY environment fallback — never from MCP client config values.
- *
- * Confirmation defaults to "host-approval": local hosts already interpose
- * per-call human approval, and destructiveHint disables auto-approve, so the
- * token round-trip would be a second "are you sure?".
  */
 export async function serveStdio(options: ServeStdioOptions): Promise<void> {
 	const credentialAdapter = options.credentialAdapter ?? envCredentialAdapter();
@@ -41,7 +37,6 @@ export async function serveStdio(options: ServeStdioOptions): Promise<void> {
 		...options,
 		credentialAdapter,
 		principal,
-		confirmationMode: options.confirmationMode ?? "host-approval",
 		auditSink: options.auditSink ?? new ConsoleErrorAuditSink(),
 		docs: options.docs ?? true,
 	});

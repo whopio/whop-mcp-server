@@ -10,14 +10,12 @@ import {
 } from "./helpers.ts";
 
 const registry = buildRealRegistry();
-const SECRET = "test-secret-key-that-is-long-enough";
 
 async function connect(options: { fetch?: typeof fetch } = {}) {
 	const { server } = createWhopMcpServer({
 		registry,
 		credentialAdapter: staticCredential(),
 		principal: principalFixture(),
-		confirmationSecret: SECRET,
 		fetch: options.fetch ?? fakeFetch().fetch,
 		baseUrl: "https://api.whop.test/api/v1",
 		chatGptCompat: true,
@@ -57,7 +55,6 @@ describe("ChatGPT compat tools", () => {
 			registry,
 			credentialAdapter: staticCredential(),
 			principal: principalFixture(),
-			confirmationSecret: SECRET,
 			fetch: fakeFetch().fetch,
 		});
 		const client = new Client({ name: "t", version: "1.0.0" });

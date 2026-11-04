@@ -21,7 +21,6 @@ const props: WhopGrantProps = {
 const env = {
 	MCP_BASE_URL: "https://mcp.whop.test",
 	MCP_WHOP_API_ORIGIN: "https://api.whop.test",
-	MCP_CONFIRMATION_SECRET: "test-confirmation-secret-long-enough",
 	CF_VERSION_METADATA: { id: "test-version" },
 } as Env;
 

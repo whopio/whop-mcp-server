@@ -1,5 +1,4 @@
 import type { OAuthHelpers } from "@cloudflare/workers-oauth-provider";
-import type { IdempotencyDO } from "./idempotency-do.ts";
 
 /**
  * Everything the MCP handler needs per grant. Stored end-to-end encrypted by
@@ -20,12 +19,10 @@ export interface WhopGrantProps extends Record<string, unknown> {
 
 export interface Env {
 	OAUTH_KV: KVNamespace;
-	IDEMPOTENCY: DurableObjectNamespace<IdempotencyDO>;
 	OAUTH_PROVIDER: OAuthHelpers;
 	MCP_BASE_URL: string;
 	MCP_WHOP_API_ORIGIN: string;
 	MCP_WHOP_OAUTH_CLIENT_SECRET: string;
-	MCP_CONFIRMATION_SECRET: string;
 	MCP_STATE_ENCRYPTION_KEY: string;
 	CF_VERSION_METADATA: { id: string };
 }

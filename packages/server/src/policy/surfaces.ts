@@ -56,6 +56,7 @@ export const CLAUDE_DIRECTORY_EXCLUSIONS: ReadonlyMap<string, string> = new Map(
 		// Trading and currency conversion
 		["POST /swaps", "trades or converts currency"],
 		["POST /trades", "submits trading orders"],
+		["POST /trades/{id}/cancel", "cancels trading orders"],
 	],
 );
 

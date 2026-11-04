@@ -1,6 +1,5 @@
 import type { SurfaceName } from "@whop/mcp-server";
 import { createStreamableHttpHandler } from "@whop/mcp-server/streamable-http";
-import { durableIdempotencyStore } from "./idempotency-do.ts";
 import { registry } from "./registry.ts";
 import {
 	attributionHeaders,
@@ -47,8 +46,6 @@ export function createMcpApiHandler(surface: SurfaceName = "full") {
 
 			const handler = createStreamableHttpHandler({
 				registry,
-				confirmationSecret: env.MCP_CONFIRMATION_SECRET,
-				idempotencyStore: durableIdempotencyStore(env.IDEMPOTENCY),
 				auditSink: new StructuredLogAuditSink(),
 				feedbackSink: new ApiFeedbackSink(
 					env.MCP_WHOP_API_ORIGIN,

@@ -29,8 +29,8 @@ to the signed-in user. `https://mcp.whop.com/claude/mcp` serves the Claude
 plugin directory surface instead: the same server without AI media generation
 or tools that move money out of the account (see
 `packages/server/src/policy/surfaces.ts`). Tokens are audience-bound to the
-route they were issued for. Consequential operations use a prepare-and-confirm flow,
-but you should still connect only MCP clients you trust.
+route they were issued for. Connect only MCP clients you trust: the client's
+host decides which tool calls the user approves.
 
 ## Runtime architecture
 
@@ -48,7 +48,6 @@ The Worker provides:
   `@cloudflare/workers-oauth-provider`.
 - PKCE for both the MCP client flow and the upstream Whop authorization flow.
 - Encrypted, short-lived pending authorization state in Workers KV.
-- Durable Object-backed idempotency for consequential API operations.
 - Structured audit events written to the Worker log stream.
 
 ## Local development
@@ -73,8 +72,8 @@ The Worker starts at `http://localhost:8788`. The registered Whop OAuth app
 must allow `http://localhost:8788/callback` as a redirect URI, and its client
 secret must be permitted to exchange OAuth tokens.
 
-Replace every placeholder in `.dev.vars`. Use separate random values for the
-confirmation and state-encryption secrets; for example:
+Replace every placeholder in `.dev.vars`. Use a random value for the
+state-encryption secret; for example:
 
 ```bash
 openssl rand -hex 32
@@ -108,7 +107,6 @@ and contains no Whop or Cloudflare account-specific deployment data.
 | Name | Purpose |
 | --- | --- |
 | `MCP_WHOP_OAUTH_CLIENT_SECRET` | Confidential Whop OAuth client credential |
-| `MCP_CONFIRMATION_SECRET` | Signs prepare-and-confirm state for consequential operations |
 | `MCP_STATE_ENCRYPTION_KEY` | Encrypts pending OAuth state stored in KV |
 
 ### Cloudflare bindings
@@ -116,7 +114,6 @@ and contains no Whop or Cloudflare account-specific deployment data.
 | Binding | Type | Purpose |
 | --- | --- | --- |
 | `OAUTH_KV` | Workers KV | Pending OAuth authorization state |
-| `IDEMPOTENCY` | Durable Object | Serialized idempotency records |
 | `CF_VERSION_METADATA` | Version metadata | Runtime version attribution |
 
 ## Deploying a separate instance
@@ -131,7 +128,7 @@ separate instance, provide your own:
    redirect URI. If it is a different app, update the public client ID in
    `src/whop-oidc.ts` and provide its secret through your deployment's secret
    store.
-4. HTTPS `MCP_BASE_URL` and the three required secrets listed above.
+4. HTTPS `MCP_BASE_URL` and the two required secrets listed above.
 
 Keep account IDs, namespace IDs, routes, and secrets in an untracked deployment
 configuration or your deployment system. The example Wrangler configuration is

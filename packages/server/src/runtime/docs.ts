@@ -10,6 +10,12 @@ const DEFAULT_TIMEOUT_MS = 20_000;
 const MAX_RESPONSE_CHARS = 512_000;
 const MAX_RESULT_CHARS = 2_000;
 const MAX_ERROR_CHARS = 500;
+const UPSTREAM_NO_RESULTS = "No results found";
+const UPSTREAM_BLOCKED_PATTERN = /\b403 Forbidden\b/;
+const NO_RESULTS_MESSAGE =
+	"No results found. Try different words, or omit version to search the current docs.";
+const BLOCKED_MESSAGE =
+	"Whop docs blocked this request because it looks like an attack, such as a system path or SQL injection. Rephrase it in plain words.";
 
 export interface DocsOptions {
 	fetch?: typeof fetch;
@@ -208,10 +214,14 @@ async function callDocsMcp(
 		part.type === "text" && typeof part.text === "string" ? [part.text] : [],
 	);
 	if (message.result?.isError) {
-		throw new WhopMcpError(
-			"upstream_error",
-			`Whop docs: ${errorText(parts.join("\n\n"))}`,
-		);
+		const text = parts.join("\n\n");
+		if (text.trim() === UPSTREAM_NO_RESULTS) return [NO_RESULTS_MESSAGE];
+		if (UPSTREAM_BLOCKED_PATTERN.test(text)) {
+			throw new WhopMcpError("upstream_error", BLOCKED_MESSAGE, {
+				status: 403,
+			});
+		}
+		throw new WhopMcpError("upstream_error", `Whop docs: ${errorText(text)}`);
 	}
 	return parts;
 }

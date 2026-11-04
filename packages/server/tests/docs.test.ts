@@ -52,7 +52,6 @@ function handler(
 ) {
 	return createStreamableHttpHandler({
 		registry,
-		confirmationSecret: "test-confirmation-secret-long-enough",
 		docs: options.docs ?? true,
 		fetch: options.fetch,
 		surface: options.surface,
@@ -278,6 +277,33 @@ describe("docs upstream", () => {
 		await expect(search(fetch).call({ query: "x" })).rejects.toMatchObject({
 			code: "upstream_error",
 			message: "Whop docs: Unknown tool",
+		});
+	});
+
+	it("returns an empty search as a result, not an error", async () => {
+		const fetch = vi.fn(async () => sse(textResult("No results found", true)));
+		await expect(
+			search(fetch).call({ query: "webhooks", version: "v9" }),
+		).resolves.toBe(
+			"No results found. Try different words, or omit version to search the current docs.",
+		);
+	});
+
+	it.each([
+		["docs_search", "Search failed: 403 Forbidden", search, { query: "x" }],
+		[
+			"docs_query",
+			"Docs filesystem query failed: 403 Forbidden",
+			query,
+			{ command: "ls" },
+		],
+	])("explains a request %s has blocked", async (_name, text, tool, args) => {
+		const fetch = vi.fn(async () => sse(textResult(text, true)));
+		await expect(tool(fetch).call(args)).rejects.toMatchObject({
+			code: "upstream_error",
+			status: 403,
+			message:
+				"Whop docs blocked this request because it looks like an attack, such as a system path or SQL injection. Rephrase it in plain words.",
 		});
 	});
 

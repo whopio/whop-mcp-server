@@ -14,12 +14,6 @@ import {
 	InMemoryAuditSink,
 	type AuditSink,
 } from "../safety/audit.ts";
-import { ConfirmationSigner, hashArguments } from "../safety/confirmation.ts";
-import {
-	InMemoryIdempotencyStore,
-	type IdempotencyRecord,
-	type IdempotencyStore,
-} from "../safety/idempotency.ts";
 import { DEFAULT_SURFACE, type SurfaceName } from "../policy/surfaces.ts";
 import { visibleOperations } from "../policy/visibility.ts";
 import { Dispatcher } from "./dispatcher.ts";
@@ -41,7 +35,6 @@ export const SERVER_ICONS = [
 	},
 ];
 
-const MCP_CONFIRMATION_TOKEN_FIELD = "mcp_confirmation_token";
 const IDEMPOTENCY_KEY_FIELD = "idempotency_key";
 const INTENT_FIELD = "intent";
 const INTENT_ID_FIELD = "intent_id";
@@ -60,30 +53,13 @@ const CONNECTION_STATUS_TOOL: ToolDefinition = {
 	annotations: { readOnlyHint: true },
 };
 
-/**
- * How confirmation-required operations are gated.
- *
- *   "enforce"        the server runs the prepare/confirm token flow itself.
- *                    The hosted worker uses this: it cannot trust every MCP
- *                    client to interpose human approval.
- *   "host-approval"  confirmation-required operations execute directly. The
- *                    stdio adapter defaults to this: local hosts (Claude
- *                    Code, Claude Desktop, Cursor, VS Code) already prompt
- *                    per call, and destructiveHint disables auto-approve.
- */
-export type ConfirmationMode = "enforce" | "host-approval";
-
 export interface CreateWhopMcpServerOptions {
 	registry: RegistryManifest;
 	credentialAdapter: CredentialAdapter;
 	principal: PrincipalContext;
-	confirmationMode?: ConfirmationMode;
-	/** Required when confirmationMode is "enforce". */
-	confirmationSecret?: string;
-	idempotencyStore?: IdempotencyStore;
 	auditSink?: AuditSink;
 	feedbackSink?: FeedbackSink;
-	/** Expose docs_search and docs_query, backed by docs.whop.com/mcp. */
+	/** Expose docs_search and docs_query. */
 	docs?: boolean;
 	fetch?: typeof fetch;
 	baseUrl?: string;
@@ -91,8 +67,6 @@ export interface CreateWhopMcpServerOptions {
 	maxResponseBytes?: number;
 	clientName?: string;
 	pluginSource?: string;
-	now?: () => number;
-	confirmationTtlMs?: number;
 	/** Restrict to the native REST surface (full surface by default). */
 	nativeOnly?: boolean;
 	/** The fixed tool subset this endpoint serves (see policy/surfaces.ts). */
@@ -100,9 +74,8 @@ export interface CreateWhopMcpServerOptions {
 	/** Extra headers stamped on every upstream request (attribution). */
 	extraHeaders?: Record<string, string>;
 	/**
-	 * Policy hook invoked after validation, immediately before an operation
-	 * executes (on both direct and confirmed executions). Throw a WhopMcpError
-	 * to block the call.
+	 * Policy hook invoked immediately before an operation executes. Throw a
+	 * WhopMcpError to block the call.
 	 */
 	beforeCall?: (
 		operation: OperationDef,
@@ -154,58 +127,28 @@ function withIntentContext(inputSchema: JsonSchema): JsonSchema {
 	};
 }
 
-function toolInputSchema(
-	operation: OperationDef,
-	enforceConfirmation: boolean,
-): JsonSchema {
-	const confirmed =
-		enforceConfirmation && operation.safety.confirmationRequired;
+function toolInputSchema(operation: OperationDef): JsonSchema {
 	const offersIdempotencyKey =
 		operation.safety.confirmationRequired ||
 		operation.safety.idempotency !== "none";
-	if (!confirmed && !offersIdempotencyKey) {
-		return operation.inputSchema;
-	}
+	if (!offersIdempotencyKey) return operation.inputSchema;
 
-	const properties: Record<string, JsonSchema> = {
-		...operation.inputSchema.properties,
-	};
-	if (confirmed) {
-		properties[MCP_CONFIRMATION_TOKEN_FIELD] = {
-			type: "string",
-			description:
-				"Leave unset on the first call to prepare this operation and receive a confirmation token. Pass the token back, after the user approves, to execute.",
-		};
-	}
-	if (offersIdempotencyKey) {
-		const upstreamReplay = supportsUpstreamReplay(operation);
-		properties[IDEMPOTENCY_KEY_FIELD] = {
-			type: "string",
-			description: upstreamReplay
-				? confirmed
-					? "Caller-chosen stable retry key. Required when executing with a confirmation token; reuse the same key when retrying. The native API replays completed requests and rejects requests still in flight."
-					: "Caller-chosen stable retry key. Reuse the same key when retrying after a timeout or error. The native API replays completed requests and rejects requests still in flight."
-				: confirmed
-					? "Caller-chosen stable key for local replay and conflict detection. Required when executing with a confirmation token; reuse the same key when retrying. If the outcome is reported as unknown, verify the effect instead of executing again."
+	return {
+		...operation.inputSchema,
+		properties: {
+			...operation.inputSchema.properties,
+			[IDEMPOTENCY_KEY_FIELD]: {
+				type: "string",
+				description: supportsUpstreamReplay(operation)
+					? "Caller-chosen stable retry key. Reuse the same key when retrying after a timeout or error. The native API replays completed requests and rejects requests still in flight."
 					: "Caller-chosen stable key forwarded to the API. Reuse the same key when retrying, but verify the operation outcome after an ambiguous error.",
-		};
-	}
-	return { ...operation.inputSchema, properties };
+			},
+		},
+	};
 }
 
-function toolDescription(
-	operation: OperationDef,
-	enforceConfirmation: boolean,
-): string {
-	const parts: string[] = [];
-	if (operation.description) parts.push(operation.description);
-	else if (operation.summary) parts.push(operation.summary);
-	if (enforceConfirmation && operation.safety.confirmationRequired) {
-		parts.push(
-			"Two-step tool. Without mcp_confirmation_token, calling it is a SAFE PREVIEW: nothing executes, no money moves, no data changes — it returns exactly what would happen plus a confirmation token. Show that preview to the user. Executing is the user's decision, not yours: call again with the token once they approve, in the moment or through standing permission they have given you.",
-		);
-	}
-	return parts.join("\n\n");
+function toolDescription(operation: OperationDef): string {
+	return operation.description || operation.summary || "";
 }
 
 function jsonContent(value: unknown): {
@@ -233,14 +176,6 @@ export function createWhopMcpServer(
 	options: CreateWhopMcpServerOptions,
 ): WhopMcpServer {
 	const { registry, principal } = options;
-	const confirmationMode = options.confirmationMode ?? "enforce";
-	const enforceConfirmation = confirmationMode === "enforce";
-	if (enforceConfirmation && !options.confirmationSecret) {
-		throw new Error(
-			'createWhopMcpServer requires confirmationSecret when confirmationMode is "enforce".',
-		);
-	}
-
 	const operations = visibleOperations(registry, principal, {
 		nativeOnly: options.nativeOnly,
 		surface: options.surface,
@@ -248,14 +183,6 @@ export function createWhopMcpServer(
 	const byName = new Map(operations.map((op) => [op.toolName, op]));
 
 	const auditSink = options.auditSink ?? new InMemoryAuditSink();
-	const idempotencyStore =
-		options.idempotencyStore ?? new InMemoryIdempotencyStore();
-	const signer = options.confirmationSecret
-		? new ConfirmationSigner(options.confirmationSecret, {
-				now: options.now,
-				ttlMs: options.confirmationTtlMs,
-			})
-		: null;
 	const dispatcher = new Dispatcher({
 		baseUrl: options.baseUrl ?? DEFAULT_BASE_URL,
 		apiVersionDate: registry.meta.apiVersionDate,
@@ -303,12 +230,7 @@ export function createWhopMcpServer(
 		{ name: SERVER_NAME, version: SERVER_VERSION, icons: SERVER_ICONS },
 		{
 			capabilities: { tools: {} },
-			instructions: buildInstructions(
-				principal,
-				operations,
-				enforceConfirmation,
-				builtins,
-			),
+			instructions: buildInstructions(principal, operations, builtins),
 		},
 	);
 
@@ -316,10 +238,11 @@ export function createWhopMcpServer(
 		tools: [
 			...operations.map((op) => ({
 				name: op.toolName,
-				description: toolDescription(op, enforceConfirmation),
-				inputSchema: withIntentContext(
-					toolInputSchema(op, enforceConfirmation),
-				) as Record<string, unknown>,
+				description: toolDescription(op),
+				inputSchema: withIntentContext(toolInputSchema(op)) as Record<
+					string,
+					unknown
+				>,
 				annotations: {
 					readOnlyHint: op.annotations.readOnlyHint,
 					destructiveHint: op.annotations.destructiveHint,
@@ -410,12 +333,19 @@ export function createWhopMcpServer(
 		}
 	});
 
-	async function executeDirect(
+	async function callOperation(
 		operation: OperationDef,
-		args: Record<string, unknown>,
-		idempotencyKey: string | undefined,
+		rawArgs: Record<string, unknown>,
 		intentContext: McpRequestContext,
 	) {
+		const suppliedKey = rawArgs[IDEMPOTENCY_KEY_FIELD];
+		const idempotencyKey =
+			typeof suppliedKey === "string" ? suppliedKey : undefined;
+		const args = { ...rawArgs };
+		if (!operation.inputSchema.properties?.[IDEMPOTENCY_KEY_FIELD]) {
+			delete args[IDEMPOTENCY_KEY_FIELD];
+		}
+
 		await options.beforeCall?.(operation, args, principal);
 		const result = await dispatcher.dispatch(operation, args, principal, {
 			idempotencyKey,
@@ -435,331 +365,6 @@ export function createWhopMcpServer(
 			),
 		);
 		return jsonContent(result.body);
-	}
-
-	async function callOperation(
-		operation: OperationDef,
-		rawArgs: Record<string, unknown>,
-		intentContext: McpRequestContext,
-	) {
-		const { [MCP_CONFIRMATION_TOKEN_FIELD]: mcpConfirmationToken, ...rest } =
-			rawArgs;
-		const declaresIdempotencyKey = Boolean(
-			operation.inputSchema.properties?.[IDEMPOTENCY_KEY_FIELD],
-		);
-		const idempotencyKey =
-			typeof rest[IDEMPOTENCY_KEY_FIELD] === "string"
-				? (rest[IDEMPOTENCY_KEY_FIELD] as string)
-				: undefined;
-		const args = { ...rest };
-		if (!declaresIdempotencyKey) delete args[IDEMPOTENCY_KEY_FIELD];
-
-		if (!enforceConfirmation || !operation.safety.confirmationRequired) {
-			return executeDirect(operation, args, idempotencyKey, intentContext);
-		}
-
-		if (!signer) {
-			throw new WhopMcpError("internal_error", "Confirmation is unavailable.");
-		}
-
-		// Validate (including account binding and injection) on BOTH steps, and
-		// hash the injected form: prepare returns the injected arguments, so the
-		// client may resubmit either that or its original shape — both must
-		// normalize to the same token hash. The idempotency key is retry
-		// control, not operation semantics, so it never enters the hash.
-		const injectedArgs = dispatcher.validate(operation, args, principal);
-		const hashableArgs = { ...injectedArgs };
-		delete hashableArgs[IDEMPOTENCY_KEY_FIELD];
-
-		if (typeof mcpConfirmationToken !== "string") {
-			const issued = await signer.issue(
-				operation.toolName,
-				hashableArgs,
-				principal,
-			);
-			await auditSink.record(
-				auditEvent(
-					operation.toolName,
-					operationKey(operation),
-					principal,
-					"prepared",
-					{
-						clientName: options.clientName,
-						pluginSource: options.pluginSource,
-					},
-				),
-			);
-			return jsonContent({
-				prepared: true,
-				executed: false,
-				operation: operation.toolName,
-				effect: operation.summary ?? operationKey(operation),
-				// Unbound connections have no grant-level account — name the one
-				// this call targets so the approval prompt still shows a business.
-				account_id:
-					principal.accountId ?? targetAccount(operation, injectedArgs),
-				arguments: {
-					[INTENT_FIELD]: intentContext.intent,
-					[INTENT_ID_FIELD]: intentContext.intentId,
-					...injectedArgs,
-				},
-				mcp_confirmation_token: issued.token,
-				expires_at: issued.expiresAt,
-				next_step: supportsUpstreamReplay(operation)
-					? "Show the user what will happen. After they approve, call this tool again with the same arguments plus mcp_confirmation_token and a stable idempotency_key. Keep using the SAME idempotency_key if you have to retry or re-prepare this operation."
-					: "Show the user what will happen. After they approve, call this tool again with the same arguments plus mcp_confirmation_token and a stable idempotency_key. Keep using the SAME idempotency_key for local replay. If the server reports an unknown outcome, verify the effect instead of executing again.",
-			});
-		}
-
-		const confirmation = await signer.verify(
-			mcpConfirmationToken,
-			operation.toolName,
-			hashableArgs,
-			principal,
-		);
-
-		const argsHash = await hashArguments(hashableArgs);
-		// User-scoped: two users must never share a replay cache even when they
-		// share an account (or when both connections are unbound).
-		const idempotencyScope = `${principal.userId ?? "-"}:${principal.accountId ?? "-"}:${operation.toolName}`;
-
-		// Every confirmed execution requires a caller-chosen stable key: it is
-		// the only identifier that survives a re-prepare (a new token means a
-		// new jti), so it must anchor both the local replay cache and the
-		// upstream Idempotency-Key.
-		if (!idempotencyKey) {
-			throw new WhopMcpError(
-				"invalid_input",
-				`${operation.toolName} requires an idempotency_key when executing.`,
-			);
-		}
-
-		const callerKey = `${idempotencyScope}:${idempotencyKey}`;
-		const upstreamKey = await hashArguments({
-			scope: idempotencyScope,
-			key: idempotencyKey,
-		});
-		const readCallerCompletion = async () => {
-			try {
-				const record = await idempotencyStore.get(callerKey);
-				if (
-					!record ||
-					record.argsHash !== argsHash ||
-					(record.version === 2 && record.callerKeyHash !== upstreamKey)
-				) {
-					return { found: false as const };
-				}
-				return completedResult(record);
-			} catch {
-				return { found: false as const };
-			}
-		};
-		const canReconcileUpstream = supportsUpstreamReplay(operation);
-		const ownerId = crypto.randomUUID();
-		const claimInput = {
-			argsHash,
-			callerKeyHash: upstreamKey,
-			ownerId,
-		};
-		const unknownOutcome = () =>
-			new WhopMcpError(
-				"outcome_unknown",
-				"The execution may have completed, but its outcome cannot be confirmed safely. Verify the operation's effect before preparing another execution, and do not retry it with a new idempotency_key.",
-			);
-		const replay = async (result: unknown) => {
-			await auditSink.record(
-				auditEvent(
-					operation.toolName,
-					operationKey(operation),
-					principal,
-					"replayed",
-					{
-						clientName: options.clientName,
-						pluginSource: options.pluginSource,
-					},
-				),
-			);
-			return jsonContent(result);
-		};
-		const markOutcomeUnknown = async () => {
-			const unknownAt = new Date().toISOString();
-			await Promise.allSettled([
-				idempotencyStore.markUnknown(callerKey, ownerId, unknownAt),
-				idempotencyStore.markUnknown(
-					`confirmation:${confirmation.jti}`,
-					ownerId,
-					unknownAt,
-				),
-			]);
-		};
-
-		const confirmationUseKey = `confirmation:${confirmation.jti}`;
-		const confirmationClaim = await idempotencyStore.claim(
-			confirmationUseKey,
-			claimInput,
-			{ takeoverIncomplete: canReconcileUpstream },
-		);
-		const confirmationRecord = confirmationClaim.record;
-		if (
-			confirmationRecord.argsHash !== argsHash ||
-			(confirmationRecord.version === 2 &&
-				confirmationRecord.callerKeyHash !== upstreamKey)
-		) {
-			throw new WhopMcpError(
-				"confirmation_invalid",
-				"This confirmation token is already bound to another execution. Retry with its original arguments and idempotency_key.",
-			);
-		}
-		const confirmationResult = completedResult(confirmationRecord);
-		if (confirmationResult.found) {
-			return replay(confirmationResult.result);
-		}
-		if (
-			confirmationRecord.version === 2 &&
-			confirmationRecord.state === "outcome_unknown"
-		) {
-			const callerCompletion = await readCallerCompletion();
-			if (callerCompletion.found) {
-				return replay(callerCompletion.result);
-			}
-			throw unknownOutcome();
-		}
-		if (confirmationRecord.version !== 2) {
-			const legacyCaller = await idempotencyStore.get(callerKey);
-			const legacyCallerResult = legacyCaller
-				? completedResult(legacyCaller)
-				: { found: false as const };
-			if (
-				legacyCaller &&
-				legacyCaller.argsHash === argsHash &&
-				legacyCallerResult.found
-			) {
-				return replay(legacyCallerResult.result);
-			}
-			throw unknownOutcome();
-		}
-
-		const callerClaim = await idempotencyStore.claim(callerKey, claimInput, {
-			takeoverIncomplete: canReconcileUpstream,
-		});
-		const callerRecord = callerClaim.record;
-		if (
-			callerRecord.argsHash !== argsHash ||
-			(callerRecord.version === 2 && callerRecord.callerKeyHash !== upstreamKey)
-		) {
-			throw new WhopMcpError(
-				"idempotency_conflict",
-				"This idempotency key was already used with different arguments. Prepare again with a new key for a new operation.",
-			);
-		}
-		const callerResult = completedResult(callerRecord);
-		if (callerResult.found) {
-			await Promise.allSettled([
-				idempotencyStore.complete(
-					confirmationUseKey,
-					ownerId,
-					callerResult.result,
-					new Date().toISOString(),
-				),
-			]);
-			return replay(callerResult.result);
-		}
-		if (
-			callerRecord.version !== 2 ||
-			callerRecord.state === "outcome_unknown"
-		) {
-			throw unknownOutcome();
-		}
-		if (callerClaim.status === "existing") {
-			throw new WhopMcpError(
-				"idempotency_conflict",
-				"An execution with this idempotency key is unfinished. It may still be in flight or may have completed without a stored result. Retry with the same mcp_confirmation_token, arguments, and idempotency_key after a short wait. If it remains unresolved, verify the operation's effect; do not prepare a replacement execution.",
-			);
-		}
-
-		let result: Awaited<ReturnType<typeof dispatcher.dispatch>>;
-		try {
-			await options.beforeCall?.(operation, injectedArgs, principal);
-		} catch (error) {
-			if (callerClaim.status === "acquired") {
-				await Promise.allSettled([
-					idempotencyStore.release(callerKey, ownerId),
-				]);
-			}
-			throw error;
-		}
-
-		try {
-			// Execute exactly the injected form the user approved and the token
-			// was hashed over.
-			result = await dispatcher.dispatch(operation, injectedArgs, principal, {
-				idempotencyKey: upstreamKey,
-				mcpRequestContext: intentContext,
-			});
-		} catch (error) {
-			if (!canReconcileUpstream) {
-				await markOutcomeUnknown();
-				throw unknownOutcome();
-			}
-			throw error;
-		}
-
-		const completedAt = new Date().toISOString();
-		let completedBody = result.body;
-		let completion: Awaited<ReturnType<IdempotencyStore["complete"]>>;
-		try {
-			completion = await idempotencyStore.complete(
-				callerKey,
-				ownerId,
-				result.body,
-				completedAt,
-			);
-		} catch {
-			const callerCompletion = await readCallerCompletion();
-			if (callerCompletion.found) {
-				completion = "already_completed";
-				completedBody = callerCompletion.result;
-			} else if (!canReconcileUpstream) {
-				await markOutcomeUnknown();
-				throw unknownOutcome();
-			} else {
-				throw new WhopMcpError(
-					"internal_error",
-					"The operation may have completed, but its response could not be stored. Retry with the same mcp_confirmation_token, arguments, and idempotency_key.",
-				);
-			}
-		}
-		if (
-			!canReconcileUpstream &&
-			completion !== "completed" &&
-			completion !== "already_completed"
-		) {
-			await markOutcomeUnknown();
-			throw unknownOutcome();
-		}
-		await Promise.allSettled([
-			idempotencyStore.complete(
-				confirmationUseKey,
-				ownerId,
-				completedBody,
-				completedAt,
-			),
-		]);
-
-		await auditSink.record(
-			auditEvent(
-				operation.toolName,
-				operationKey(operation),
-				principal,
-				"executed",
-				{
-					clientName: options.clientName,
-					pluginSource: options.pluginSource,
-					requestId: result.requestId,
-				},
-			),
-		);
-		return jsonContent(completedBody);
 	}
 
 	return { server, operations };
@@ -814,32 +419,6 @@ function supportsUpstreamReplay(operation: OperationDef): boolean {
 	return operation.surface === "native" && operation.method === "post";
 }
 
-function completedResult(
-	record: IdempotencyRecord,
-): { found: true; result: unknown } | { found: false } {
-	if (record.version === 2) {
-		return record.state === "completed"
-			? { found: true, result: record.result }
-			: { found: false };
-	}
-	return Object.hasOwn(record, "result")
-		? { found: true, result: record.result }
-		: { found: false };
-}
-
-/**
- * Only the declared account parameter is trusted — other biz_ fields may
- * name a counterparty rather than the acting business.
- */
-function targetAccount(
-	operation: OperationDef,
-	args: Record<string, unknown>,
-): string | null {
-	if (!operation.accountParam) return null;
-	const value = args[operation.accountParam];
-	return typeof value === "string" ? value : null;
-}
-
 function connectionStatus(
 	registry: RegistryManifest,
 	principal: PrincipalContext,
@@ -872,7 +451,6 @@ function connectionStatus(
 function buildInstructions(
 	principal: PrincipalContext,
 	operations: OperationDef[],
-	enforceConfirmation: boolean,
 	builtins: BuiltinTool[],
 ): string {
 	return [
@@ -884,11 +462,6 @@ function buildInstructions(
 		principal.accountId
 			? "Account binding is enforced server-side: input referencing a different account is rejected. Switching accounts requires the user to reconnect."
 			: "Pick the context per call from what the user asks for: pass account_id/company_id when they mean a specific business (find it with accounts_list if they name it), and pass no account or user filter for questions about the user themselves, like the memberships they own across all of Whop.",
-		...(enforceConfirmation
-			? [
-					"Consequential tools (payments, refunds, transfers, withdrawals, deletions, credentials) are two-step. The first call is a safe, side-effect-free preview — it is how the user sees exactly what would happen, so always make it when asked. Execution is the user's decision: by default show the preview and get their approval, but explicit standing permission from the user to act without confirmations also counts.",
-				]
-			: []),
 		"For each user message, generate one UUID intent_id and reuse it for every operation tool call made to fulfill that message. Copy the original user request into intent. Both fields are attribution metadata and are not sent as Whop API arguments.",
 		...builtins.flatMap((tool) => tool.instruction ?? []),
 		"Call connection_status to see the authenticated identity, account, scopes, and tool coverage.",

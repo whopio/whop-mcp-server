@@ -23,7 +23,6 @@ function handler(
 ) {
 	return createStreamableHttpHandler({
 		registry,
-		confirmationSecret: "test-confirmation-secret-long-enough",
 		feedbackSink,
 		authenticator: {
 			async authenticate(request) {

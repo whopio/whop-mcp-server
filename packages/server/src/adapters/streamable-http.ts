@@ -3,7 +3,6 @@ import type { RegistryManifest } from "../registry/types.ts";
 import type { SurfaceName } from "../policy/surfaces.ts";
 import type { CredentialAdapter, PrincipalContext } from "../policy/types.ts";
 import type { AuditSink } from "../safety/audit.ts";
-import type { IdempotencyStore } from "../safety/idempotency.ts";
 import { createWhopMcpServer } from "../runtime/server.ts";
 import type { FeedbackSink } from "../runtime/feedback.ts";
 
@@ -42,12 +41,6 @@ export class HttpAuthError extends Error {
 export interface StreamableHttpAdapterOptions {
 	registry: RegistryManifest;
 	authenticator: HttpAuthenticator;
-	/**
-	 * The hosted endpoint always runs the prepare/confirm flow itself — it
-	 * cannot trust every MCP client to interpose human approval.
-	 */
-	confirmationSecret: string;
-	idempotencyStore?: IdempotencyStore;
 	auditSink?: AuditSink;
 	feedbackSink?: FeedbackSink;
 	docs?: boolean;
@@ -148,9 +141,6 @@ export function createStreamableHttpHandler(
 			registry: options.registry,
 			credentialAdapter: auth.credentialAdapter,
 			principal: auth.principal,
-			confirmationMode: "enforce",
-			confirmationSecret: options.confirmationSecret,
-			idempotencyStore: options.idempotencyStore,
 			auditSink: options.auditSink,
 			feedbackSink: options.feedbackSink,
 			docs: options.docs,

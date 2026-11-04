@@ -74,6 +74,7 @@ const OP_ID_OVERRIDES: Record<string, string> = {
 	"PATCH /users/me": "update-me",
 	// Root-collection POST infers "create", which POST /ads already claims in the Ads tag.
 	"POST /ad_stats": "report-stats",
+	"POST /ad_issues": "report-issues",
 	// The verb methods all infer "methods" from the static path segment.
 	// GET and POST both infer "notes" from the static path segment.
 	"GET /members/{member_id}/notes": "list",
@@ -660,8 +661,7 @@ function buildOperation(
 			// Hosts key their don't-auto-approve behavior on destructiveHint, so
 			// every confirmation-gated operation (money movement, credentials,
 			// consequential actions) must carry it — not just deletes. Without
-			// it a local host may auto-approve a withdrawal, and on the hosted
-			// path a model could silently echo back its own confirmation token.
+			// it a host may auto-approve a withdrawal.
 			destructiveHint:
 				safety.classification === "destructive" ||
 				safety.confirmationRequired ||

@@ -23,10 +23,7 @@ export interface DispatcherOptions {
 }
 
 export interface DispatchOverrides {
-	/**
-	 * Deterministic Idempotency-Key for this call. The confirmation flow hashes
-	 * the caller's stable retry key with its user, account, and operation scope.
-	 */
+	/** The caller's stable retry key, sent as the Idempotency-Key header. */
 	idempotencyKey?: string;
 	mcpRequestContext?: McpRequestContext;
 	extraHeaders?: Record<string, string>;
@@ -83,8 +80,7 @@ export class Dispatcher {
 	/**
 	 * Enforces account binding, injects the bound account, and validates the
 	 * result against the tool schema (and full request-body schema, including
-	 * oneOf variant requirements). Returns the injected args. Also used by the
-	 * prepare step so users only ever approve operations that can execute.
+	 * oneOf variant requirements). Returns the injected args.
 	 */
 	validate(
 		operation: OperationDef,

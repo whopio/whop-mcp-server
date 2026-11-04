@@ -461,6 +461,7 @@ describe("registry generation", () => {
 		expect(payout?.inputSchema.required).toEqual([
 			"amount",
 			"payout_method_id",
+			"quote_token",
 		]);
 	});
 
@@ -469,14 +470,6 @@ describe("registry generation", () => {
 			const properties = Object.keys(op.inputSchema.properties ?? {});
 			expect(properties).not.toContain("Authorization");
 			expect(properties).not.toContain("Api-Version-Date");
-		}
-	});
-
-	it("reserves mcp_confirmation_token for runtime approval", () => {
-		for (const op of registry.operations) {
-			expect(op.inputSchema.properties, op.toolName).not.toHaveProperty(
-				"mcp_confirmation_token",
-			);
 		}
 	});
 

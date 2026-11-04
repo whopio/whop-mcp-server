@@ -87,7 +87,7 @@ rules:
     set:
       classification: mutating
 
-  # ── Money movement: always prepare/confirm + idempotency ─────────────────
+  # ── Money movement: always confirmation + idempotency ────────────────────
   - name: money-movement
     match:
       operations:
@@ -151,6 +151,17 @@ rules:
     match:
       operations:
         - POST /payouts/{id}/cancel
+    set:
+      classification: mutating
+      financial: true
+      confirmation: true
+
+  # ── Trade cancel: takes a resting order off the book. Naturally idempotent —
+  #    a repeat cancel sends no second cancel — so no key. ─────────────────
+  - name: trade-cancel
+    match:
+      operations:
+        - POST /trades/{id}/cancel
     set:
       classification: mutating
       financial: true

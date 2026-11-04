@@ -10,7 +10,7 @@ export interface AuditEvent {
 	clientName?: string;
 	pluginSource?: string;
 	requestId?: string;
-	outcome: "executed" | "failed" | "prepared" | "replayed";
+	outcome: "executed" | "failed";
 	errorCode?: string;
 }
 
