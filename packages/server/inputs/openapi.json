@@ -49942,6 +49942,16 @@
             "example": false,
             "type": "boolean"
           },
+          "reports_to_chain": {
+            "items": {
+              "$ref": "#/components/schemas/TeamMemberManager",
+              "description": "The managers above this member, nearest first: the member they report to, then that member's manager, up to the top of the reporting line. `[]` when the member reports to the business directly. A caller who may read only their own reporting line sees it end at themselves, and `null` where it is not readable to them. `null` for invites."
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "reports_to_id": {
             "description": "The ID of the team member this member reports to, starting with `ausr_` or `mber_`; treat it as opaque. `null` when the member reports to the business directly, and for invites.",
             "example": "ausr_xxxxxxxxxxxxxx",
@@ -50006,6 +50016,7 @@
           "authorized_role",
           "reports_to_id",
           "direct_reports_count",
+          "reports_to_chain",
           "user"
         ],
         "type": "object"
@@ -50026,6 +50037,24 @@
         "required": [
           "id",
           "name"
+        ],
+        "type": "object"
+      },
+      "TeamMemberManager": {
+        "properties": {
+          "id": {
+            "description": "The manager's team member ID, starting with `ausr_` or `mber_`; treat it as opaque.",
+            "example": "ausr_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserSummary",
+            "description": "The user behind the manager's team membership."
+          }
+        },
+        "required": [
+          "id",
+          "user"
         ],
         "type": "object"
       },
@@ -164541,11 +164570,11 @@
     },
     "/team_members": {
       "get": {
-        "description": "Lists an account's team members, including pending invites. A user credential with `company:basic:read` may list only its own joined membership by passing its own `user_id` and `status=joined`. Listing `role=workforce` is also allowed with the `bounty:create` scope. Members with the view-only Partner role are listed after all other members.",
+        "description": "Lists an account's team members, including pending invites. A user credential with `company:basic:read` may list only its own joined membership by passing its own `user_id` and `status=joined`. Listing `role=workforce` is also allowed with the `bounty:create` scope. A signed-in Partner, or a member others report to, without `company:authorized_user:read` lists only their own joined membership and the members who report up to them, never pending invites. Members with the view-only Partner role are listed after all other members.",
         "operationId": "listTeamMembers",
         "parameters": [
           {
-            "description": "Account ID, prefixed `biz_`.",
+            "description": "Account ID, prefixed `biz_`. A global admin query passes `global` to list the joined members of every partner account, in `created_at` order; of the reporting line filters, only `team_lead_id` and `has_referred_businesses` apply.",
             "in": "query",
             "name": "account_id",
             "required": true,
@@ -164633,6 +164662,24 @@
             "schema": {
               "minimum": 0,
               "type": "integer"
+            }
+          },
+          {
+            "description": "Only return this user, prefixed `user_`, and everyone under them in today's org chart: the same team the stats API's `team_lead_id` reads. With `account_id=global`, their line in every partner account where they hold a role. Pending invites are excluded, and the list pages in `created_at` order without moving Partner-role members last.",
+            "in": "query",
+            "name": "team_lead_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "When true, only members who referred at least one business for their account, the reps the `partner_reps` stats metric counts; when false, only members who referred none. Pending invites are excluded, and the list pages in `created_at` order without moving Partner-role members last.",
+            "in": "query",
+            "name": "has_referred_businesses",
+            "required": false,
+            "schema": {
+              "type": "boolean"
             }
           },
           {
