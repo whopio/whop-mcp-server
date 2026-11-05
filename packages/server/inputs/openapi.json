@@ -7721,6 +7721,22 @@
             "example": 11,
             "type": "number"
           },
+          "target_cost_per_result": {
+            "description": "The desired cost per result for `target_result_event`, in USD. `null` when none is set.",
+            "example": null,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "target_result_event": {
+            "description": "The event `target_cost_per_result` is priced per, such as `purchase` or `lead`. `null` when the campaign has no single goal.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "title": {
             "description": "Display name of the ad campaign.",
             "example": "Ceramic coating — Austin leads",
@@ -7818,6 +7834,8 @@
           "created_at",
           "updated_at",
           "account",
+          "target_cost_per_result",
+          "target_result_event",
           "issues"
         ],
         "type": "object"
@@ -179299,6 +179317,8 @@
                   "special_ad_categories": [],
                   "starts_at": null,
                   "status": "payment_failed",
+                  "target_cost_per_result": null,
+                  "target_result_event": null,
                   "title": "Ceramic Coating Package",
                   "updated_at": "2026-01-01T12:00:00.000Z"
                 },
@@ -179512,6 +179532,22 @@
                         "example": "active",
                         "type": "string"
                       },
+                      "target_cost_per_result": {
+                        "description": "The desired cost per result for `target_result_event`, in USD. `null` when none is set.",
+                        "example": null,
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "target_result_event": {
+                        "description": "The event `target_cost_per_result` is priced per, such as `purchase` or `lead`. `null` when the campaign has no single goal.",
+                        "example": null,
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
                       "title": {
                         "description": "Display name of the ad campaign.",
                         "example": "Ceramic coating — Austin leads",
@@ -179541,6 +179577,8 @@
                       "created_at",
                       "updated_at",
                       "account",
+                      "target_cost_per_result",
+                      "target_result_event",
                       "issues"
                     ],
                     "type": "object"
@@ -179656,6 +179694,8 @@
                   "special_ad_categories": [],
                   "starts_at": null,
                   "status": "paused",
+                  "target_cost_per_result": null,
+                  "target_result_event": null,
                   "title": "Ceramic Coating Package",
                   "updated_at": "2026-01-01T12:00:00.000Z"
                 },
@@ -179872,6 +179912,22 @@
                         "example": "active",
                         "type": "string"
                       },
+                      "target_cost_per_result": {
+                        "description": "The desired cost per result for `target_result_event`, in USD. `null` when none is set.",
+                        "example": null,
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "target_result_event": {
+                        "description": "The event `target_cost_per_result` is priced per, such as `purchase` or `lead`. `null` when the campaign has no single goal.",
+                        "example": null,
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
                       "title": {
                         "description": "Display name of the ad campaign.",
                         "example": "Ceramic coating — Austin leads",
@@ -179901,6 +179957,8 @@
                       "created_at",
                       "updated_at",
                       "account",
+                      "target_cost_per_result",
+                      "target_result_event",
                       "issues"
                     ],
                     "type": "object"
