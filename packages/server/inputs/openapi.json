@@ -44008,6 +44008,14 @@
               "null"
             ]
           },
+          "trial_period_days": {
+            "description": "Free trial days before the first renewal charge. `null` if no trial is configured or the signed-in user has already used a trial on this variant.",
+            "example": null,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
           "unlimited_stock": {
             "description": "Whether the variant has unlimited stock.",
             "example": true,
@@ -44034,7 +44042,8 @@
           "renewal_price",
           "visibility",
           "unlimited_stock",
-          "expiration_days"
+          "expiration_days",
+          "trial_period_days"
         ],
         "type": "object"
       },
