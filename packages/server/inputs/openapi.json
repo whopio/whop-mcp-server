@@ -32535,6 +32535,33 @@
               "null"
             ]
           },
+          "checkout_origin": {
+            "description": "The scheme and host of the website where the buyer opened the checkout, such as `https://store.example.com`. Use it to tell apart payments from different websites on one account. Null when the website was not recorded, including for payments made without the buyer present.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "checkout_surface": {
+            "description": "The checkout experience that produced this payment, such as `embedded_checkout` for a checkout on the account's own website or `off_session` for a subscription renewal. Null when the checkout was not recorded.",
+            "enum": [
+              "hosted_checkout",
+              "embedded_checkout",
+              "custom_checkout",
+              "modal_checkout",
+              "in_app_checkout",
+              "mobile_checkout",
+              "off_session",
+              "card_present",
+              null
+            ],
+            "example": "custom_checkout",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "client_secret": {
             "description": "The credential a buyer's surface presents to poll this payment, set its return URL and resume it when the bank asked the customer to authenticate. Only on payments created from a confirmation token or waiting on that authentication, and always null in list responses — retrieve the payment for it.",
             "example": "pay_xxxxxxxxxxxxxx_secret_vdefault_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
@@ -33063,6 +33090,8 @@
           "ip_address",
           "user_agent",
           "wuid",
+          "checkout_surface",
+          "checkout_origin",
           "payment_rule_matches",
           "risk_signals",
           "financing_installments_count",
@@ -188955,6 +188984,8 @@
                   "billing_reason": "subscription_cycle",
                   "capture_expires_at": "2026-01-06T12:00:00.000Z",
                   "checkout_configuration_id": null,
+                  "checkout_origin": null,
+                  "checkout_surface": null,
                   "client_secret": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "currency": "usd",
@@ -189251,6 +189282,8 @@
                   "billing_reason": "subscription_cycle",
                   "capture_expires_at": "2026-01-06T12:00:00.000Z",
                   "checkout_configuration_id": null,
+                  "checkout_origin": null,
+                  "checkout_surface": null,
                   "client_secret": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "currency": "usd",
@@ -189547,6 +189580,8 @@
                   "billing_reason": "subscription_cycle",
                   "capture_expires_at": null,
                   "checkout_configuration_id": null,
+                  "checkout_origin": null,
+                  "checkout_surface": null,
                   "client_secret": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "currency": "usd",
@@ -189843,6 +189878,8 @@
                   "billing_reason": "subscription_cycle",
                   "capture_expires_at": null,
                   "checkout_configuration_id": null,
+                  "checkout_origin": null,
+                  "checkout_surface": null,
                   "client_secret": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "currency": "usd",
@@ -190139,6 +190176,8 @@
                   "billing_reason": "subscription_cycle",
                   "capture_expires_at": null,
                   "checkout_configuration_id": null,
+                  "checkout_origin": null,
+                  "checkout_surface": null,
                   "client_secret": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "currency": "usd",
@@ -190428,6 +190467,8 @@
                   "billing_reason": "subscription_cycle",
                   "capture_expires_at": null,
                   "checkout_configuration_id": null,
+                  "checkout_origin": null,
+                  "checkout_surface": "off_session",
                   "client_secret": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "currency": "usd",
@@ -190724,6 +190765,8 @@
                   "billing_reason": "subscription_cycle",
                   "capture_expires_at": null,
                   "checkout_configuration_id": null,
+                  "checkout_origin": null,
+                  "checkout_surface": null,
                   "client_secret": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "currency": "usd",
