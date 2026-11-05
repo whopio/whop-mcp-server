@@ -420,6 +420,10 @@
     "bot": true,
     "user": true
   },
+  "member:moderate": {
+    "bot": true,
+    "user": true
+  },
   "member:payment_methods:manage": {
     "bot": true,
     "user": true

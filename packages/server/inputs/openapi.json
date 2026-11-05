@@ -46917,6 +46917,63 @@
         ],
         "type": "object"
       },
+      "ReviewReport": {
+        "properties": {
+          "created_at": {
+            "description": "When the report was filed, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
+          "id": {
+            "description": "The report ID, prefixed `rrpt_`.",
+            "example": "rrpt_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "reason": {
+            "description": "The reason the reporter gave for reporting the review.",
+            "example": "The reviewer bought a different product",
+            "type": "string"
+          },
+          "review_id": {
+            "description": "The ID of the review that was reported, prefixed `rev_`.",
+            "example": "rev_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "status": {
+            "description": "Where the report stands. `pending` reports are waiting for Whop staff, `accepted` reports led to the review being removed, and `rejected` reports left the review up.",
+            "enum": [
+              "pending",
+              "accepted",
+              "rejected"
+            ],
+            "example": "pending",
+            "type": "string"
+          },
+          "updated_at": {
+            "description": "When the report last changed, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
+          "user_id": {
+            "description": "The ID of the user who filed the report, prefixed `user_`. Null if that user no longer exists.",
+            "example": "user_xxxxxxxxxxxxxx",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "review_id",
+          "user_id",
+          "status",
+          "reason",
+          "created_at",
+          "updated_at"
+        ],
+        "type": "object"
+      },
       "ReviewStatus": {
         "description": "The statuses a review can have",
         "enum": [
@@ -157819,6 +157876,224 @@
       },
       "x-whop-surface": "native"
     },
+    "/review_reports": {
+      "get": {
+        "description": "Lists the reports filed against customer reviews on the accounts you can moderate, newest first. Use it to check whether a review was reported and where the report stands. Omit `account_id` to cover every account you can moderate.",
+        "operationId": "listReviewReports",
+        "parameters": [
+          {
+            "description": "Only reports on this account's reviews.",
+            "in": "query",
+            "name": "account_id",
+            "required": false,
+            "schema": {
+              "example": "biz_xxxxxxxxxxxxxx",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only reports filed against this review.",
+            "in": "query",
+            "name": "review_id",
+            "required": false,
+            "schema": {
+              "example": "rev_xxxxxxxxxxxxxx",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only reports in this status.",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "enum": [
+                "pending",
+                "accepted",
+                "rejected"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only reports filed before this timestamp.",
+            "in": "query",
+            "name": "created_before",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only reports filed after this timestamp.",
+            "in": "query",
+            "name": "created_after",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "The field to sort reports by.",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "default": "created_at",
+              "enum": [
+                "created_at"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "The sort direction.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "default": "desc",
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the start of the range.",
+            "in": "query",
+            "name": "first",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results after this cursor. Use `page_info.end_cursor` from the previous response to fetch the next page.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the end of the range.",
+            "in": "query",
+            "name": "last",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results before this cursor. Use `page_info.start_cursor` from the previous response to fetch the previous page.",
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/ReviewReport"
+                      },
+                      "type": "array"
+                    },
+                    "page_info": {
+                      "properties": {
+                        "end_cursor": {
+                          "example": null,
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "has_next_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "has_previous_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "start_cursor": {
+                          "example": "WyJjdXJzb3IiLDFd",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "start_cursor",
+                        "end_cursor",
+                        "has_next_page",
+                        "has_previous_page"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "page_info"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Reports on the account's reviews"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "An unrecognized status"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Missing or invalid authentication"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "The credential cannot moderate the account"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "A review that does not exist"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "member:moderate"
+            ]
+          }
+        ],
+        "summary": "List review reports",
+        "tags": [
+          "Review reports"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        }
+      ],
+      "x-whop-surface": "native"
+    },
     "/reviews": {
       "get": {
         "description": "Lists the published reviews for a product or account. Without `account_id` or `product_id`, a user lists the reviews they wrote, an account or app API key lists its account's reviews, and a request without credentials returns 400.",
@@ -177750,6 +178025,11 @@
       "description": "A Review is a customer's star rating and optional written feedback on a product, shown on the product's store page.\n\nUse the Reviews API to list a product's reviews, filtered by star rating or creation date, and retrieve a review by ID.\n",
       "name": "Reviews",
       "x-whop-summary": "Customer star ratings and written feedback on a product."
+    },
+    {
+      "description": "A Review Report is a request from an account's admins for Whop staff to review a customer's review. Staff remove the review if it breaks the guidelines.\n\nUse the Review Reports API to list the reports filed on an account's reviews, narrowed by review, status, or creation date, and check whether a report is still pending.\n",
+      "name": "Review reports",
+      "x-whop-summary": "Reports an account's admins filed against customer reviews."
     },
     {
       "description": "A Product Affiliate represents a user's enrollment in a product's affiliate program. An enrollment can exist before the user makes a referral or earns a reward.\n\nUse the Product Affiliates API to list product affiliates for an account, search by affiliate name or username, and narrow the results by product, enrollment status, or signup date.\n",
@@ -198287,6 +198567,7 @@
         "Memberships",
         "Shipments",
         "Reviews",
+        "Review reports",
         "Product Affiliates",
         "Plans"
       ]
