@@ -7,7 +7,7 @@
         "name": "Api-Version-Date",
         "required": false,
         "schema": {
-          "example": "2026-11-04",
+          "example": "2026-11-04-1",
           "type": "string"
         }
       },
@@ -5361,47 +5361,52 @@
       },
       "AccountLevel": {
         "properties": {
-          "boosted": {
-            "description": "`true` when this account's own points this month fall short of `current`, so the owner's other accounts lift it to this level.",
-            "example": true,
-            "type": "boolean"
+          "account_level": {
+            "description": "This account's own level from its points alone, from `0` up to `10`. `applied_level` is higher when the owner's other accounts lift it.",
+            "example": 0,
+            "type": "integer"
           },
-          "current": {
-            "description": "Current level, from `0` before the first threshold up to `10`.",
+          "applied_level": {
+            "description": "The level that applies: the highest the owner reached this month or in the 5 months before, from `0` up to `10`.",
             "example": 1,
             "type": "integer"
+          },
+          "boosted": {
+            "description": "`true` when this account's own points this month fall short of `applied_level`, so the owner's other accounts lift it to that level.",
+            "example": true,
+            "type": "boolean"
           },
           "levels": {
             "items": {
               "$ref": "#/components/schemas/AccountProcessingOfferLevel",
-              "description": "Every level from `0` through `10`, with the monthly qualifying spend it takes and its card processing percentage in each card region."
+              "description": "Every level from `0` through `10`, with the monthly qualifying spend it takes and its standard card processing percentage in each card region."
             },
             "type": "array"
           },
           "monthly_ads_spend": {
             "$ref": "#/components/schemas/Money",
-            "description": "Charged Whop Ads spend this calendar month across every account the owner owns, in USD."
+            "description": "Whop Ads charges paid this calendar month across every account the owner owns, net of refunds, in USD, so it can be negative. An account whose month nets to zero or below is left out."
           },
           "monthly_card_spend": {
             "$ref": "#/components/schemas/Money",
-            "description": "Effective Whop Card spend this calendar month across every account the owner owns, in USD."
+            "description": "Captured Whop Card spend this calendar month across every account the owner owns, net of refunds, in USD, so it can be negative. An account whose month nets to zero or below is left out."
           },
           "monthly_qualifying_spend": {
             "$ref": "#/components/schemas/Money",
-            "description": "Qualifying spend this calendar month across every account the owner owns, in USD: Whop Ads spend, Whop Card spend, and a tenth of perpetual trading volume."
+            "description": "Qualifying spend this calendar month across every account the owner owns, plus the owner's partner points, in USD: `points` divided by 10."
           },
           "monthly_trading_volume": {
             "$ref": "#/components/schemas/Money",
-            "description": "Perpetual trading notional volume this calendar month across every account the owner owns, in USD."
+            "description": "Perpetual trading volume filled through Whop this calendar month across every account the owner owns, in USD. An account whose month nets to zero or below is left out."
           },
           "points": {
-            "description": "Points earned this month across every account the owner owns.",
+            "description": "Points earned this month across every account the owner owns, plus the owner's partner points, rounded down. An account whose month nets below zero counts as zero.",
             "example": 41000,
             "type": "integer"
           },
           "points_by_source": {
             "$ref": "#/components/schemas/OwnerLevelPoints",
-            "description": "This month's points, split by where they were earned."
+            "description": "This month's points, split by where they were earned. Each source is net of its refunds, so one can be negative."
           },
           "points_to_next": {
             "description": "Points still needed this month to reach the next level, or `null` at level `10`.",
@@ -5411,11 +5416,6 @@
               "null"
             ]
           },
-          "processing_rate_percentage": {
-            "description": "The standard US and Canada card processing percentage at `current`, before any account's custom rate.",
-            "example": 2.6,
-            "type": "number"
-          },
           "resets_at": {
             "description": "When this month's points reset to zero, as an ISO 8601 timestamp.",
             "example": "2026-01-01T12:00:00.000Z",
@@ -5423,18 +5423,18 @@
           }
         },
         "required": [
-          "current",
+          "applied_level",
           "points",
           "points_by_source",
           "points_to_next",
           "resets_at",
-          "processing_rate_percentage",
           "monthly_qualifying_spend",
           "monthly_ads_spend",
           "monthly_card_spend",
           "monthly_trading_volume",
           "levels",
-          "boosted"
+          "boosted",
+          "account_level"
         ],
         "type": "object"
       },
@@ -10010,9 +10010,10 @@
               "2026-11-02-1",
               "2026-11-03",
               "2026-11-03-1",
-              "2026-11-04"
+              "2026-11-04",
+              "2026-11-04-1"
             ],
-            "example": "2026-11-04",
+            "example": "2026-11-04-1",
             "type": "string"
           },
           "created_at": {
@@ -28353,7 +28354,7 @@
       "Market": {
         "properties": {
           "id": {
-            "description": "The market's name: a perpetual's Hyperliquid name such as `BTC`, which you send as `market` when you create a trade, or a spot asset's symbol such as `BTC` or `XAUT`. A perpetual and a spot market can share an `id`, so `id` and `instrument_type` together identify a market.",
+            "description": "The market's name: a perpetual's Hyperliquid name such as `BTC` or `xyz:TSLA`, which you send as `market` when you create a trade, or a spot asset's symbol such as `BTC` or `XAUT`. A perpetual and a spot market can share an `id`, so `id` and `instrument_type` together identify a market.",
             "example": "BTC",
             "type": "string"
           },
@@ -31442,42 +31443,42 @@
       },
       "OwnerLevel": {
         "properties": {
-          "current": {
-            "description": "Current level, from `0` before the first threshold up to `10`.",
+          "applied_level": {
+            "description": "The level that applies: the highest the owner reached this month or in the 5 months before, from `0` up to `10`.",
             "example": 1,
             "type": "integer"
           },
           "levels": {
             "items": {
               "$ref": "#/components/schemas/AccountProcessingOfferLevel",
-              "description": "Every level from `0` through `10`, with the monthly qualifying spend it takes and its card processing percentage in each card region."
+              "description": "Every level from `0` through `10`, with the monthly qualifying spend it takes and its standard card processing percentage in each card region."
             },
             "type": "array"
           },
           "monthly_ads_spend": {
             "$ref": "#/components/schemas/Money",
-            "description": "Charged Whop Ads spend this calendar month across every account the owner owns, in USD."
+            "description": "Whop Ads charges paid this calendar month across every account the owner owns, net of refunds, in USD, so it can be negative. An account whose month nets to zero or below is left out."
           },
           "monthly_card_spend": {
             "$ref": "#/components/schemas/Money",
-            "description": "Effective Whop Card spend this calendar month across every account the owner owns, in USD."
+            "description": "Captured Whop Card spend this calendar month across every account the owner owns, net of refunds, in USD, so it can be negative. An account whose month nets to zero or below is left out."
           },
           "monthly_qualifying_spend": {
             "$ref": "#/components/schemas/Money",
-            "description": "Qualifying spend this calendar month across every account the owner owns, in USD: Whop Ads spend, Whop Card spend, and a tenth of perpetual trading volume."
+            "description": "Qualifying spend this calendar month across every account the owner owns, plus the owner's partner points, in USD: `points` divided by 10."
           },
           "monthly_trading_volume": {
             "$ref": "#/components/schemas/Money",
-            "description": "Perpetual trading notional volume this calendar month across every account the owner owns, in USD."
+            "description": "Perpetual trading volume filled through Whop this calendar month across every account the owner owns, in USD. An account whose month nets to zero or below is left out."
           },
           "points": {
-            "description": "Points earned this month across every account the owner owns.",
+            "description": "Points earned this month across every account the owner owns, plus the owner's partner points, rounded down. An account whose month nets below zero counts as zero.",
             "example": 41000,
             "type": "integer"
           },
           "points_by_source": {
             "$ref": "#/components/schemas/OwnerLevelPoints",
-            "description": "This month's points, split by where they were earned."
+            "description": "This month's points, split by where they were earned. Each source is net of its refunds, so one can be negative."
           },
           "points_to_next": {
             "description": "Points still needed this month to reach the next level, or `null` at level `10`.",
@@ -31487,11 +31488,6 @@
               "null"
             ]
           },
-          "processing_rate_percentage": {
-            "description": "The standard US and Canada card processing percentage at `current`, before any account's custom rate.",
-            "example": 2.6,
-            "type": "number"
-          },
           "resets_at": {
             "description": "When this month's points reset to zero, as an ISO 8601 timestamp.",
             "example": "2026-01-01T12:00:00.000Z",
@@ -31499,12 +31495,11 @@
           }
         },
         "required": [
-          "current",
+          "applied_level",
           "points",
           "points_by_source",
           "points_to_next",
           "resets_at",
-          "processing_rate_percentage",
           "monthly_qualifying_spend",
           "monthly_ads_spend",
           "monthly_card_spend",
@@ -31516,17 +31511,22 @@
       "OwnerLevelPoints": {
         "properties": {
           "ads": {
-            "description": "Points from charged Whop Ads spend: 10 for every whole dollar.",
+            "description": "Points from paid Whop Ads charges, net of refunds: 10 for every dollar, rounded toward zero.",
             "example": 0,
             "type": "integer"
           },
           "cards": {
-            "description": "Points from Whop Card spend: 10 for every whole dollar.",
+            "description": "Points from captured Whop Card spend, net of refunds: 10 for every dollar, rounded toward zero.",
             "example": 40000,
             "type": "integer"
           },
+          "partners": {
+            "description": "Points from accounts the owner referred as a partner: 1 for every 3 they earn, rounded toward zero.",
+            "example": 0,
+            "type": "integer"
+          },
           "trading": {
-            "description": "Points from perpetual trading volume: 1 for every whole dollar traded.",
+            "description": "Points from perpetual trading volume filled through Whop: 1 for every dollar traded, rounded toward zero.",
             "example": 1000,
             "type": "integer"
           }
@@ -31534,7 +31534,8 @@
         "required": [
           "cards",
           "ads",
-          "trading"
+          "trading",
+          "partners"
         ],
         "type": "object"
       },
@@ -42951,6 +42952,13 @@
               "null"
             ]
           },
+          "experiences": {
+            "items": {
+              "$ref": "#/components/schemas/ProductExperience",
+              "description": "Experiences the product includes, such as courses, chats and apps, oldest first. Holds the first 100; page the rest through `GET /experiences?product_id=`."
+            },
+            "type": "array"
+          },
           "external_identifier": {
             "description": "External identifier stored on the product for your own reference.",
             "example": "SHINE-CERAMIC-01",
@@ -43007,6 +43015,14 @@
               "type": "string"
             },
             "type": "array"
+          },
+          "logo_url": {
+            "description": "Logo image URL shown on product pages and in search results. `null` when the product has no logo.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "marketplace_status": {
             "description": "Listing state on the whop.com marketplace. `pending_review` means submitted and awaiting review; `live_marketplace` means approved and discoverable.",
@@ -43159,6 +43175,8 @@
           "account",
           "default_variant",
           "variant_attributes",
+          "logo_url",
+          "experiences",
           "custom_cta",
           "custom_cta_url",
           "custom_statement_descriptor",
@@ -43263,6 +43281,63 @@
           "name",
           "profile_picture",
           "email"
+        ],
+        "type": "object"
+      },
+      "ProductExperience": {
+        "properties": {
+          "app": {
+            "$ref": "#/components/schemas/ProductExperienceApp",
+            "description": "App the experience runs in."
+          },
+          "id": {
+            "description": "Experience ID, prefixed `exp_`.",
+            "example": "exp_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "logo_url": {
+            "description": "Logo image URL uploaded for this experience. `null` when it has none; show the app's `icon` instead.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "name": {
+            "description": "Experience display name.",
+            "example": "Name1",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "logo_url",
+          "app"
+        ],
+        "type": "object"
+      },
+      "ProductExperienceApp": {
+        "properties": {
+          "icon": {
+            "$ref": "#/components/schemas/AppIcon",
+            "description": "App icon. Falls back to the default app icon when none is uploaded."
+          },
+          "id": {
+            "description": "App ID, prefixed `app_`.",
+            "example": "app_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "name": {
+            "description": "App display name.",
+            "example": "app1",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "icon"
         ],
         "type": "object"
       },
@@ -43611,6 +43686,13 @@
               "null"
             ]
           },
+          "experiences": {
+            "items": {
+              "$ref": "#/components/schemas/ProductExperience",
+              "description": "Experiences the product includes, such as courses, chats and apps, oldest first. Holds the first 100; page the rest through `GET /experiences?product_id=`."
+            },
+            "type": "array"
+          },
           "external_identifier": {
             "description": "External identifier stored on the product for your own reference.",
             "example": "SHINE-CERAMIC-01",
@@ -43646,6 +43728,14 @@
               "type": "string"
             },
             "type": "array"
+          },
+          "logo_url": {
+            "description": "Logo image URL shown on product pages and in search results. `null` when the product has no logo.",
+            "example": "https://whop-assets-example.s3.amazonaws.com/uploads/image/2026-01-01/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "member_count": {
             "description": "Active memberships for this product; 0 if public member counts are disabled.",
@@ -43730,6 +43820,8 @@
           "account",
           "default_variant",
           "variant_attributes",
+          "logo_url",
+          "experiences",
           "gallery_images"
         ],
         "type": "object"
@@ -46739,6 +46831,806 @@
         ],
         "type": "string"
       },
+      "SearchRecord": {
+        "description": "The record a result points to. Its fields depend on `object`, and every type shares basics like `title` and `image_url`.",
+        "discriminator": {
+          "mapping": {
+            "account": "#/components/schemas/SearchRecordAccount",
+            "affiliate": "#/components/schemas/SearchRecordAffiliate",
+            "member": "#/components/schemas/SearchRecordMember",
+            "membership": "#/components/schemas/SearchRecordMembership",
+            "payment": "#/components/schemas/SearchRecordPayment",
+            "promo_code": "#/components/schemas/SearchRecordPromoCode",
+            "resolution_center_case": "#/components/schemas/SearchRecordResolutionCenterCase",
+            "review": "#/components/schemas/SearchRecordReview"
+          },
+          "propertyName": "object"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/SearchRecordAccount"
+          },
+          {
+            "$ref": "#/components/schemas/SearchRecordMember"
+          },
+          {
+            "$ref": "#/components/schemas/SearchRecordMembership"
+          },
+          {
+            "$ref": "#/components/schemas/SearchRecordPayment"
+          },
+          {
+            "$ref": "#/components/schemas/SearchRecordAffiliate"
+          },
+          {
+            "$ref": "#/components/schemas/SearchRecordReview"
+          },
+          {
+            "$ref": "#/components/schemas/SearchRecordResolutionCenterCase"
+          },
+          {
+            "$ref": "#/components/schemas/SearchRecordPromoCode"
+          }
+        ]
+      },
+      "SearchRecordAccount": {
+        "properties": {
+          "banner_image_url": {
+            "description": "Account banner image URL. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "description": {
+            "description": "Short text about the record, such as an account's headline or a case's reason. Display text in your locale that can change without a version change. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Account ID, prefixed `biz_`.",
+            "type": "string"
+          },
+          "image_url": {
+            "description": "Logo or avatar. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "object": {
+            "description": "Always `account`: `account_id` itself or, when `include_subaccounts` is `true`, one of its subaccounts.",
+            "enum": [
+              "account"
+            ],
+            "example": "account",
+            "type": "string"
+          },
+          "parent_account_id": {
+            "description": "Platform account this subaccount belongs to, prefixed `biz_`. `null` when it isn't a subaccount.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subtitle": {
+            "description": "Line shown under the title, such as the account or product the record belongs to. Display text in your locale that can change without a version change. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "description": "Record name, such as a customer's name or a promo code. Display text in your locale that can change without a version change, so show it rather than parse it. `null` when the record has no name.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "title",
+          "subtitle",
+          "description",
+          "image_url",
+          "banner_image_url",
+          "parent_account_id"
+        ],
+        "title": "Account",
+        "type": "object"
+      },
+      "SearchRecordAffiliate": {
+        "properties": {
+          "account_id": {
+            "description": "Account the record belongs to, prefixed `biz_`.",
+            "type": "string"
+          },
+          "description": {
+            "description": "Short text about the record, such as an account's headline or a case's reason. Display text in your locale that can change without a version change. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Affiliate ID, prefixed `aff_`.",
+            "type": "string"
+          },
+          "image_url": {
+            "description": "Logo or avatar. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "object": {
+            "description": "Always `affiliate`.",
+            "enum": [
+              "affiliate"
+            ],
+            "example": "affiliate",
+            "type": "string"
+          },
+          "subtitle": {
+            "description": "Line shown under the title, such as the account or product the record belongs to. Display text in your locale that can change without a version change. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "description": "Record name, such as a customer's name or a promo code. Display text in your locale that can change without a version change, so show it rather than parse it. `null` when the record has no name.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "total_referrals_count": {
+            "description": "Referrals credited to the affiliate, as on the affiliate resource.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "title",
+          "subtitle",
+          "description",
+          "image_url",
+          "total_referrals_count",
+          "account_id"
+        ],
+        "title": "Affiliate",
+        "type": "object"
+      },
+      "SearchRecordMember": {
+        "properties": {
+          "account_id": {
+            "description": "Account the record belongs to, prefixed `biz_`.",
+            "example": "biz_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "description": {
+            "description": "Short text about the record, such as an account's headline or a case's reason. Display text in your locale that can change without a version change. `null` when there's none.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "email": {
+            "description": "The user's email address. `null` without `member:email:read` on the account, when the buyer is another business, or when the user has no assigned email.",
+            "example": "marcus@shinetime.example",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Member ID, prefixed `mber_`.",
+            "example": "mber_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "image_url": {
+            "description": "Logo or avatar. `null` when there's none.",
+            "example": "https://ui-avatars.com/api/",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "object": {
+            "description": "Always `member`.",
+            "enum": [
+              "member"
+            ],
+            "example": "member",
+            "type": "string"
+          },
+          "status": {
+            "description": "`joined` while the member is part of the account, `left` after they leave.",
+            "enum": [
+              "joined",
+              "left"
+            ],
+            "example": "joined",
+            "type": "string"
+          },
+          "subtitle": {
+            "description": "Line shown under the title, such as the account or product the record belongs to. Display text in your locale that can change without a version change. `null` when there's none.",
+            "example": "Shine Time Auto Detailing",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "description": "Record name, such as a customer's name or a promo code. Display text in your locale that can change without a version change, so show it rather than parse it. `null` when the record has no name.",
+            "example": "Dana Ortiz",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "username": {
+            "description": "The user's username. `null` when the buyer is another business.",
+            "example": "danaortiz",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "title",
+          "subtitle",
+          "description",
+          "image_url",
+          "status",
+          "username",
+          "email",
+          "account_id"
+        ],
+        "title": "Member",
+        "type": "object"
+      },
+      "SearchRecordMembership": {
+        "properties": {
+          "account_id": {
+            "description": "Account the record belongs to, prefixed `biz_`.",
+            "type": "string"
+          },
+          "description": {
+            "description": "Short text about the record, such as an account's headline or a case's reason. Display text in your locale that can change without a version change. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Membership ID, prefixed `mem_`.",
+            "type": "string"
+          },
+          "image_url": {
+            "description": "Logo or avatar. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "object": {
+            "description": "Always `membership`.",
+            "enum": [
+              "membership"
+            ],
+            "example": "membership",
+            "type": "string"
+          },
+          "product_id": {
+            "description": "Product the membership is for, prefixed `prod_`.",
+            "type": "string"
+          },
+          "status": {
+            "description": "Billing state of the membership, as on the membership resource. `null` while the membership is a draft: during checkout before its first payment settles, or while its waitlist entry is pending.",
+            "enum": [
+              "trialing",
+              "active",
+              "past_due",
+              "completed",
+              "canceled",
+              "expired",
+              "unresolved",
+              null
+            ],
+            "example": "trialing",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subtitle": {
+            "description": "Line shown under the title, such as the account or product the record belongs to. Display text in your locale that can change without a version change. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "description": "Record name, such as a customer's name or a promo code. Display text in your locale that can change without a version change, so show it rather than parse it. `null` when the record has no name.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "title",
+          "subtitle",
+          "description",
+          "image_url",
+          "status",
+          "product_id",
+          "account_id"
+        ],
+        "title": "Membership",
+        "type": "object"
+      },
+      "SearchRecordPayment": {
+        "properties": {
+          "account_id": {
+            "description": "Account that took the payment, prefixed `biz_`.",
+            "example": "biz_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "created_at": {
+            "description": "When the payment was created, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
+          "description": {
+            "description": "Short text about the record, such as an account's headline or a case's reason. Display text in your locale that can change without a version change. `null` when there's none.",
+            "example": "Dana Ortiz",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Payment ID, prefixed `pay_`.",
+            "example": "pay_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "image_url": {
+            "description": "Logo or avatar. `null` when there's none.",
+            "example": "https://ui-avatars.com/api/",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "object": {
+            "description": "Always `payment`.",
+            "enum": [
+              "payment"
+            ],
+            "example": "payment",
+            "type": "string"
+          },
+          "paid_at": {
+            "description": "When the money was collected, as an ISO 8601 timestamp. `null` while it has not been.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "presentment_total": {
+            "description": "The account-facing total in the currency presented to the buyer, before conversion into the settlement currency. Excludes buyer fees. `null` when the payment has none.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "$ref": "#/components/schemas/ReceiptStatus",
+            "description": "Lifecycle state of the charge, as on the payment resource."
+          },
+          "substatus": {
+            "$ref": "#/components/schemas/FriendlyReceiptStatus",
+            "description": "The dashboard's finer-grained reading of the payment, folding in refunds, disputes and Resolution Center cases."
+          },
+          "subtitle": {
+            "description": "Line shown under the title, such as the account or product the record belongs to. Display text in your locale that can change without a version change. `null` when there's none.",
+            "example": "Shine Time Auto Detailing",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "description": "Record name, such as a customer's name or a promo code. Display text in your locale that can change without a version change, so show it rather than parse it. `null` when the record has no name.",
+            "example": "Dana Ortiz - Ceramic Coating Masterclass",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "total": {
+            "description": "The account-facing total: the price after discounts, plus any tax added on top. Excludes buyer fees, which the buyer pays above this amount — so this is not necessarily what the buyer's statement shows.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "title",
+          "subtitle",
+          "description",
+          "image_url",
+          "total",
+          "presentment_total",
+          "status",
+          "substatus",
+          "created_at",
+          "paid_at",
+          "account_id"
+        ],
+        "title": "Payment",
+        "type": "object"
+      },
+      "SearchRecordPromoCode": {
+        "properties": {
+          "account_id": {
+            "description": "Account the record belongs to, prefixed `biz_`.",
+            "type": "string"
+          },
+          "amount_off": {
+            "description": "Discount amount. Percentage discounts are represented as a decimal fraction.",
+            "type": "number"
+          },
+          "currency": {
+            "description": "Currency used for a fixed-amount discount.",
+            "enum": [
+              "usd",
+              "sgd",
+              "inr",
+              "aud",
+              "brl",
+              "cad",
+              "dkk",
+              "eur",
+              "nok",
+              "gbp",
+              "sek",
+              "chf",
+              "hkd",
+              "huf",
+              "jpy",
+              "mxn",
+              "myr",
+              "pln",
+              "czk",
+              "nzd",
+              "aed",
+              "eth",
+              "ape",
+              "cop",
+              "ron",
+              "thb",
+              "bgn",
+              "idr",
+              "dop",
+              "php",
+              "try",
+              "krw",
+              "twd",
+              "vnd",
+              "pkr",
+              "clp",
+              "uyu",
+              "ars",
+              "zar",
+              "dzd",
+              "tnd",
+              "mad",
+              "kes",
+              "kwd",
+              "jod",
+              "all",
+              "xcd",
+              "amd",
+              "bsd",
+              "bhd",
+              "bob",
+              "bam",
+              "khr",
+              "crc",
+              "xof",
+              "egp",
+              "etb",
+              "gmd",
+              "ghs",
+              "gtq",
+              "gyd",
+              "ils",
+              "jmd",
+              "mop",
+              "mga",
+              "mur",
+              "mdl",
+              "mnt",
+              "nad",
+              "ngn",
+              "mkd",
+              "omr",
+              "pyg",
+              "pen",
+              "qar",
+              "rwf",
+              "sar",
+              "rsd",
+              "lkr",
+              "tzs",
+              "ttd",
+              "uzs",
+              "rub",
+              "btc",
+              "cny",
+              "usdt",
+              "kzt",
+              "awg",
+              "whop_usd",
+              "xau"
+            ],
+            "example": "usd",
+            "type": "string"
+          },
+          "description": {
+            "description": "Short text about the record, such as an account's headline or a case's reason. Display text in your locale that can change without a version change. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Promo code ID, prefixed `promo_`.",
+            "type": "string"
+          },
+          "image_url": {
+            "description": "Logo or avatar. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "object": {
+            "description": "Always `promo_code`.",
+            "enum": [
+              "promo_code"
+            ],
+            "example": "promo_code",
+            "type": "string"
+          },
+          "promo_duration_months": {
+            "description": "Billing intervals the discount applies to. Never `null`.",
+            "type": "integer"
+          },
+          "promo_type": {
+            "description": "Whether the discount is percentage-based or a fixed amount.",
+            "enum": [
+              "percentage",
+              "flat_amount"
+            ],
+            "example": "percentage",
+            "type": "string"
+          },
+          "subtitle": {
+            "description": "Line shown under the title, such as the account or product the record belongs to. Display text in your locale that can change without a version change. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "description": "Record name, such as a customer's name or a promo code. Display text in your locale that can change without a version change, so show it rather than parse it. `null` when the record has no name.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "title",
+          "subtitle",
+          "description",
+          "image_url",
+          "amount_off",
+          "currency",
+          "promo_type",
+          "promo_duration_months",
+          "account_id"
+        ],
+        "title": "Promo code",
+        "type": "object"
+      },
+      "SearchRecordResolutionCenterCase": {
+        "properties": {
+          "account_id": {
+            "description": "Account the record belongs to, prefixed `biz_`.",
+            "type": "string"
+          },
+          "description": {
+            "description": "Short text about the record, such as an account's headline or a case's reason. Display text in your locale that can change without a version change. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Resolution center case ID, prefixed `reso_`.",
+            "type": "string"
+          },
+          "image_url": {
+            "description": "Logo or avatar. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "object": {
+            "description": "Always `resolution_center_case`.",
+            "enum": [
+              "resolution_center_case"
+            ],
+            "example": "resolution_center_case",
+            "type": "string"
+          },
+          "subtitle": {
+            "description": "Line shown under the title, such as the account or product the record belongs to. Display text in your locale that can change without a version change. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "description": "Record name, such as a customer's name or a promo code. Display text in your locale that can change without a version change, so show it rather than parse it. `null` when the record has no name.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "title",
+          "subtitle",
+          "description",
+          "image_url",
+          "account_id"
+        ],
+        "title": "Resolution center case",
+        "type": "object"
+      },
+      "SearchRecordReview": {
+        "properties": {
+          "account_id": {
+            "description": "Account the record belongs to, prefixed `biz_`.",
+            "type": "string"
+          },
+          "created_at": {
+            "description": "When the review was posted, as an ISO 8601 timestamp.",
+            "type": "string"
+          },
+          "description": {
+            "description": "Short text about the record, such as an account's headline or a case's reason. Display text in your locale that can change without a version change. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Review ID, prefixed `rev_`.",
+            "type": "string"
+          },
+          "image_url": {
+            "description": "Logo or avatar. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "object": {
+            "description": "Always `review`.",
+            "enum": [
+              "review"
+            ],
+            "example": "review",
+            "type": "string"
+          },
+          "subtitle": {
+            "description": "Line shown under the title, such as the account or product the record belongs to. Display text in your locale that can change without a version change. `null` when there's none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "title": {
+            "description": "Record name, such as a customer's name or a promo code. Display text in your locale that can change without a version change, so show it rather than parse it. `null` when the record has no name.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "title",
+          "subtitle",
+          "description",
+          "image_url",
+          "created_at",
+          "account_id"
+        ],
+        "title": "Review",
+        "type": "object"
+      },
+      "SearchResult": {
+        "properties": {
+          "match_reason": {
+            "description": "Why the row matched, or `null` for a ranked row whose whole ID or whole title isn't the query. `id`: its ID, or a related one such as its user's, its dispute's, or a plan or payout ID for an account. `link`: a whop.com store or product link. `name`: its whole title. `email`: the email of the user it belongs to. `owner_email`, `team_member_email` or `customer_email`: the email of a subaccount's owner, a member of its team, or one of its customers. `card`: its card's first 6 or 8 and last 4 digits, or the last 4 alone. `phone`: the phone number of the user it belongs to. `payment_number`: the number of the invoice a payment collects, so an invoice from `GET /invoices` comes back as its `payment`.",
+            "enum": [
+              "id",
+              "owner_email",
+              "team_member_email",
+              "email",
+              "customer_email",
+              "card",
+              "phone",
+              "payment_number",
+              "link",
+              "name",
+              null
+            ],
+            "example": "id",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "record": {
+            "$ref": "#/components/schemas/SearchRecord",
+            "description": "The matched record. Get the full record from its own endpoint by `id`."
+          }
+        },
+        "required": [
+          "match_reason",
+          "record"
+        ],
+        "type": "object"
+      },
       "SetupIntent": {
         "properties": {
           "account_id": {
@@ -49373,13 +50265,16 @@
             ]
           },
           "step": {
-            "description": "What a live trade is doing now: `depositing` while the wallet's USDT0 is being sent to the bridge, `landing` once sent and until it reaches the trading balance, `placing` while the order or close is with the venue, `withdrawing` while USDC heads back to the wallet, `returning` while money an unfilled order bridged in goes back. `null` once the trade is no longer pending or processing.",
+            "description": "What a live trade is doing now: `depositing` while the wallet's USDT0 is being sent to the bridge, `landing` once sent and until it reaches the trading balance, `placing` while the order or close is with the venue, `withdrawing` while USDC heads back to the wallet, `returning` while money an unfilled order bridged in goes back. A spot order is `quoting` while the swap is priced, `swapping` while it runs onchain, and `crediting` until the new balance shows in the wallet. `null` once the trade is no longer pending or processing.",
             "enum": [
               "depositing",
               "landing",
               "placing",
               "withdrawing",
               "returning",
+              "quoting",
+              "swapping",
+              "crediting",
               null
             ],
             "example": "placing",
@@ -52286,7 +53181,7 @@
           },
           "api_version_date": {
             "description": "The dated API version (Api-Version-Date) that v1 payloads for this endpoint are pinned to: events serialize exactly like a REST read at this version (the native serializer where the resource has one). Null when unpinned — legacy (v2/v5) webhooks, and v1 webhooks on the legacy payload shape.",
-            "example": "2026-01-01",
+            "example": "2026-11-04-1",
             "type": [
               "string",
               "null"
@@ -52867,7 +53762,7 @@
           },
           "api_version_date": {
             "description": "The dated API version (Api-Version-Date) that v1 payloads for this endpoint are pinned to: events serialize exactly like a REST read at this version (the native serializer where the resource has one). Null when unpinned — legacy (v2/v5) webhooks, and v1 webhooks on the legacy payload shape.",
-            "example": "2026-01-01",
+            "example": "2026-11-04-1",
             "type": [
               "string",
               "null"
@@ -53286,7 +54181,7 @@
     "termsOfService": "https://whop.com/tos-developer-api/",
     "title": "Whop API",
     "version": "1.0.0",
-    "x-api-version-date": "2026-11-04"
+    "x-api-version-date": "2026-11-04-1"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -59136,7 +60031,7 @@
                     ]
                   },
                   "whop_partner_enabled": {
-                    "description": "Set to `true` to turn on Whop Partner mode for the account, so its team can refer businesses and the account is paid partner commission on their sales. Recorded once; `false` is rejected.",
+                    "description": "Set to `true` to turn on Whop Partner mode for the account, so its team can refer businesses and the account is paid partner commission on their sales. Recorded once; `false` is rejected. Only a verified Whop Partner can turn it on.",
                     "example": true,
                     "type": "boolean"
                   }
@@ -71162,9 +72057,10 @@
                       "2026-11-02-1",
                       "2026-11-03",
                       "2026-11-03-1",
-                      "2026-11-04"
+                      "2026-11-04",
+                      "2026-11-04-1"
                     ],
-                    "example": "2026-11-04",
+                    "example": "2026-11-04-1",
                     "type": "string"
                   },
                   "expires_at": {
@@ -71615,9 +72511,10 @@
                       "2026-11-02-1",
                       "2026-11-03",
                       "2026-11-03-1",
-                      "2026-11-04"
+                      "2026-11-04",
+                      "2026-11-04-1"
                     ],
-                    "example": "2026-11-04",
+                    "example": "2026-11-04-1",
                     "type": "string"
                   },
                   "expires_at": {
@@ -130334,6 +131231,15 @@
             }
           },
           {
+            "description": "Only the referral links created for memberships on this business's team, prefixed `biz_`. Needs read access to the business: its owner sees every member's links, a manager the links of the people reporting to them, and other members only their own.",
+            "in": "query",
+            "name": "referring_account_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Only requests with this approval status.",
             "in": "query",
             "name": "status",
@@ -151802,11 +152708,11 @@
     },
     "/products": {
       "get": {
-        "description": "Lists an account's products, or searches the public marketplace when you omit `account_id`.",
+        "description": "Lists an account's products, or searches the public marketplace when you omit `account_id`. Without the `access_pass:basic:read` permission on the account, including when signed out, the list holds only the products its store page lists.",
         "operationId": "listProducts",
         "parameters": [
           {
-            "description": "The unique identifier of the account to list products for. Omit to search the public marketplace.",
+            "description": "Account to list products for, prefixed `biz_`. Without the `access_pass:basic:read` permission on it, only the products its store page lists are returned. Omit to search the public marketplace.",
             "in": "query",
             "name": "account_id",
             "required": false,
@@ -151833,7 +152739,7 @@
             }
           },
           {
-            "description": "Filter to products with a buyable variant of these billing models, such as `one_time` or `renewal`.",
+            "description": "Filter to products with a buyable variant of these billing models, such as `one_time` or `renewal`. On an account list, needs the `access_pass:basic:read` permission.",
             "in": "query",
             "name": "billing_types",
             "required": false,
@@ -151849,7 +152755,7 @@
             }
           },
           {
-            "description": "Only return products whose advertised buyable variant has a displayed price of at least this amount. Recurring variants use renewal price.",
+            "description": "Only return products whose advertised buyable variant has a displayed price of at least this amount. Recurring variants use renewal price. On an account list, needs the `access_pass:basic:read` permission.",
             "in": "query",
             "name": "price_minimum",
             "required": false,
@@ -151858,7 +152764,7 @@
             }
           },
           {
-            "description": "Only return products whose advertised buyable variant has a displayed price of at most this amount. Recurring variants use renewal price.",
+            "description": "Only return products whose advertised buyable variant has a displayed price of at most this amount. Recurring variants use renewal price. On an account list, needs the `access_pass:basic:read` permission.",
             "in": "query",
             "name": "price_maximum",
             "required": false,
@@ -151867,7 +152773,7 @@
             }
           },
           {
-            "description": "Filter to only products matching these visibility states. Ignored on the public marketplace list, which only returns visible products.",
+            "description": "Filter to only products matching these visibility states. Ignored on the public marketplace list, which only returns visible products. Without the `access_pass:basic:read` permission on the account, only `visible` matches anything.",
             "in": "query",
             "name": "visibilities",
             "required": false,
@@ -151918,11 +152824,19 @@
             }
           },
           {
-            "description": "The field to sort results by. Account lists default to `created_at`. Marketplace lists default to `discoverable_at` and accept `created_at` or `discoverable_at`. Cannot be combined with `query`.",
+            "description": "Field to sort results by. Account lists default to `created_at`, and `position` with `direction` `asc` matches the order the store page shows. Without the `access_pass:basic:read` permission, an account list sorts only by `created_at` or `position`. Marketplace lists default to `discoverable_at`, accept only `created_at` or `discoverable_at`, and can't be combined with `query`.",
             "in": "query",
             "name": "order",
             "required": false,
             "schema": {
+              "enum": [
+                "created_at",
+                "active_memberships_count",
+                "usd_gmv",
+                "usd_gmv_30_days",
+                "position",
+                "discoverable_at"
+              ],
               "type": "string"
             }
           },
@@ -152060,15 +152974,19 @@
                 }
               }
             },
-            "description": "marketplace products listed without an account"
+            "description": "store-listed products for a caller without access"
           },
           "400": {
             "$ref": "#/components/responses/InvalidParameters",
-            "description": "marketplace order cannot be combined with query"
+            "description": "account list order is invalid"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized",
-            "description": "missing or invalid authentication"
+            "description": "the credential is invalid"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "the sort or filter needs read access to the account"
           }
         },
         "security": [
@@ -157046,6 +157964,160 @@
       ],
       "x-whop-surface": "native"
     },
+    "/search": {
+      "get": {
+        "description": "Searches one account's records in one call. `account` rows are `account_id` itself and, when you send `include_subaccounts`, its subaccounts; every other row belongs to one of those accounts.\n\nEach `object` needs its own read permission on the record's account, and rows you can't read are left out without an error: `account` (`biz_`, `company:basic:read`), `member` (`mber_`, `member:basic:read`), `membership` (`mem_`, `member:basic:read`), `payment` (`pay_`, `payment:basic:read`), `affiliate` (`aff_`, `affiliate:basic:read`), `review` (`rev_`, `company:basic:read`), `resolution_center_case` (`reso_`, `payment:resolution_center_case:read`) and `promo_code` (`promo_`, `promo_code:basic:read`). A query containing `@` also needs `member:email:read`, and a phone match `member:phone:read`. An invoice's number finds the invoice as its `payment`.\n\n`query` is trimmed and has to be 2 to 250 characters; a full card number returns a `400`. `data` comes identifier matches first, such as a pasted ID, email address, card digits or invoice number, newest first within each kind of match. Every query of 3 or more characters is also ranked, and ranked rows follow, best match first. Each record appears once, and `match_reason` says why it matched. [Search](/api-reference/beta/search/search) lists the query shapes and match reasons.\n\n`first` caps the rows, 20 by default and up to 100. There is no cursor yet, so the response is a single page. Search ranks; to filter one resource or page through every match, use its list endpoint, such as `GET /payments?query=`.",
+        "operationId": "listSearchResults",
+        "parameters": [
+          {
+            "description": "Text to search for, 2 to 250 characters.",
+            "in": "query",
+            "name": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Kinds of records to search. Defaults to every kind. `account` rows are `account_id` itself and, with `include_subaccounts`, its subaccounts.",
+            "in": "query",
+            "name": "types",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "account",
+                  "member",
+                  "membership",
+                  "payment",
+                  "affiliate",
+                  "review",
+                  "resolution_center_case",
+                  "promo_code"
+                ],
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "The account to search, prefixed `biz_`. Records other than accounts belong to it, or with `include_subaccounts` to its subaccounts. Your credential needs read access to it; an account you can't read is a 404.",
+            "in": "query",
+            "name": "account_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "`true` also searches the subaccounts of a platform `account_id`: an ID, an email, card digits or a phone number finds their records, and the subaccounts themselves are found as `account` rows by name, ID or store link, or by the email of their owner, a team member or a customer. Safe to send for any account: one without subaccounts is searched as if this were false.",
+            "in": "query",
+            "name": "include_subaccounts",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Number of results to return from the start of the range.",
+            "in": "query",
+            "name": "first",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/SearchResult"
+                      },
+                      "type": "array"
+                    },
+                    "page_info": {
+                      "properties": {
+                        "end_cursor": {
+                          "example": null,
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "has_next_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "has_previous_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "start_cursor": {
+                          "example": null,
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "has_next_page",
+                        "end_cursor",
+                        "has_previous_page",
+                        "start_cursor"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "page_info"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Search results: identifier matches first, then ranked rows, best match first."
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "`query` outside 2 to 250 characters or a full card number, a missing `account_id`, an unknown `types` value, or `first` outside 1 to 100."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "missing credentials"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "An account that doesn't exist, or one your credential can't read."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "company:basic:read"
+            ]
+          }
+        ],
+        "summary": "Search account records",
+        "tags": [
+          "Search"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        }
+      ],
+      "x-whop-surface": "native"
+    },
     "/setup_intents": {
       "get": {
         "description": "Lists setup intents newest first. An account API key lists its own account; a user token lists every account it can read, or one account with `account_id`.",
@@ -159156,7 +160228,6 @@
                           "breakdowns": {
                             "description": "The values `breakdown_by` accepts.",
                             "items": {
-                              "example": "product_category",
                               "type": "string"
                             },
                             "type": "array"
@@ -159178,7 +160249,6 @@
                                 "available_on": {
                                   "description": "Properties only. The breakdowns this property can ride along with.",
                                   "items": {
-                                    "example": "industry_type",
                                     "type": "string"
                                   },
                                   "type": "array"
@@ -159197,12 +160267,10 @@
                                 },
                                 "key": {
                                   "description": "The column's key, as `columns` accepts it and as rows carry it.",
-                                  "example": "product_category",
                                   "type": "string"
                                 },
                                 "name": {
                                   "description": "The column's display name.",
-                                  "example": "Product category",
                                   "type": "string"
                                 },
                                 "set": {
@@ -159211,7 +160279,7 @@
                                     "fixed",
                                     "open"
                                   ],
-                                  "example": "open",
+                                  "example": "fixed",
                                   "type": "string"
                                 },
                                 "type": {
@@ -159260,22 +160328,18 @@
                           },
                           "description": {
                             "description": "What the report measures.",
-                            "example": "Payments across all of Whop, by business type, industry type, product category, account country or customer country.",
                             "type": "string"
                           },
                           "key": {
                             "description": "The report's key, which is also the last segment of its path.",
-                            "example": "platform_trends",
                             "type": "string"
                           },
                           "path": {
                             "description": "The path that retrieves the report.",
-                            "example": "/api/v1/stats/reports/platform_trends",
                             "type": "string"
                           },
                           "window_field": {
                             "description": "The timestamp a range window filters on, such as `paid_at`.",
-                            "example": "paid_at",
                             "nullable": true,
                             "type": "string"
                           },
@@ -159323,693 +160387,6 @@
           }
         ],
         "summary": "List Reports",
-        "tags": [
-          "Stats"
-        ],
-        "x-whop-docs-subgroup": "Reports"
-      },
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/ApiVersionDate"
-        }
-      ],
-      "x-whop-surface": "native"
-    },
-    "/stats/reports/platform_trends": {
-      "get": {
-        "description": "Retrieves payments across all of Whop for up to four windows at once, optionally broken down by business type, industry type, product category, account country or customer country. The report covers the whole platform, so it takes no `account_id` and any authenticated caller can read it.",
-        "operationId": "retrievePlatformTrendsReport",
-        "parameters": [
-          {
-            "description": "What each row is. Omit it for one row per window, holding the window's total.",
-            "in": "query",
-            "name": "breakdown_by",
-            "required": false,
-            "schema": {
-              "enum": [
-                "business_type",
-                "industry_type",
-                "product_category",
-                "account_country",
-                "customer_country"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "Comma-separated properties and metrics to return on each row. `business_type` can ride along on `industry_type` rows. Defaults to `gross_revenue,businesses`.",
-            "in": "query",
-            "name": "columns",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Comma-separated windows, at most four: `1d`, `7d`, `30d`, `90d`, `365d`, `mtd`, `qtd`, `ytd`, `all_time`, an explicit `2026-09-01..2026-10-01`, any of these prefixed `prev:` for the equal-length period before, or suffixed `@2026-09-01` to end earlier. Defaults to `30d`.",
-            "in": "query",
-            "name": "windows",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "IANA zone that day, month, quarter and year boundaries fall in. Defaults to `Etc/UTC`.",
-            "in": "query",
-            "name": "time_zone",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "The requested metric that ranks rows, by its value in the first window. Defaults to the first requested metric.",
-            "in": "query",
-            "name": "order",
-            "required": false,
-            "schema": {
-              "enum": [
-                "gross_revenue",
-                "businesses",
-                "products",
-                "payments",
-                "customers",
-                "aov",
-                "repeat_rate",
-                "median_gross_revenue",
-                "new_businesses",
-                "new_customers",
-                "avg_business_age",
-                "avg_owner_age",
-                "avg_customer_age"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "Ranking direction. Defaults to `desc`.",
-            "in": "query",
-            "name": "direction",
-            "required": false,
-            "schema": {
-              "enum": [
-                "asc",
-                "desc"
-              ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "Currency every money metric is converted into. Defaults to `usd`.",
-            "in": "query",
-            "name": "convert_to",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Only counts payments to businesses of these comma-separated business types, such as `education`.",
-            "in": "query",
-            "name": "business_type",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Only counts payments to businesses in these comma-separated industry types, such as `options_trading`.",
-            "in": "query",
-            "name": "industry_type",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Only counts payments for products in these comma-separated product categories, such as `algo_trading_course`.",
-            "in": "query",
-            "name": "product_category",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Only counts payments to accounts located in these comma-separated countries, as ISO 3166-1 alpha-2 codes such as `US`.",
-            "in": "query",
-            "name": "account_country",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Only counts payments from customers in these comma-separated countries, as ISO 3166-1 alpha-2 codes such as `US`.",
-            "in": "query",
-            "name": "customer_country",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Only counts payments to businesses with an app created from one of these comma-separated blueprint app IDs, such as `app_xxxxxxxxxxxxxx`.",
-            "in": "query",
-            "name": "blueprint",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "description": "Number of results to return from the start of the range.",
-            "in": "query",
-            "name": "first",
-            "required": false,
-            "schema": {
-              "default": 20,
-              "maximum": 1000,
-              "type": "integer"
-            }
-          },
-          {
-            "description": "Return results after this cursor. Use `page_info.end_cursor` from the previous response to fetch the next page.",
-            "in": "query",
-            "name": "after",
-            "required": false,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "example": {
-                    "data": {
-                      "breakdown_by": "industry_type",
-                      "columns": [
-                        {
-                          "key": "industry_type",
-                          "name": "Industry type",
-                          "type": "property"
-                        },
-                        {
-                          "key": "business_type",
-                          "name": "Business type",
-                          "type": "property"
-                        },
-                        {
-                          "aggregate": "sum",
-                          "key": "gross_revenue",
-                          "name": "Gross revenue",
-                          "type": "metric",
-                          "unit": "money",
-                          "weight": null
-                        },
-                        {
-                          "aggregate": "sum",
-                          "key": "businesses",
-                          "name": "Businesses",
-                          "type": "metric",
-                          "unit": "count",
-                          "weight": null
-                        }
-                      ],
-                      "data_as_of": "2026-10-07T04:48:34Z",
-                      "report": "platform_trends",
-                      "reports": [
-                        {
-                          "rows": [
-                            {
-                              "business_type": {
-                                "id": "services",
-                                "name": "Services"
-                              },
-                              "businesses": 828,
-                              "gross_revenue": {
-                                "amount": "7002670.25",
-                                "currency": "usd",
-                                "decimals": 2,
-                                "display_decimals": 2
-                              },
-                              "industry_type": {
-                                "id": "marketing_agency",
-                                "name": "Marketing Agency"
-                              }
-                            }
-                          ],
-                          "window": {
-                            "as_of": null,
-                            "from": "2026-09-30T04:00:00Z",
-                            "key": "7d",
-                            "kind": "range",
-                            "time_zone": "Etc/UTC",
-                            "to": "2026-10-07T04:00:00Z"
-                          }
-                        },
-                        {
-                          "rows": [
-                            {
-                              "business_type": {
-                                "id": "services",
-                                "name": "Services"
-                              },
-                              "businesses": 796,
-                              "gross_revenue": {
-                                "amount": "5841223.30",
-                                "currency": "usd",
-                                "decimals": 2,
-                                "display_decimals": 2
-                              },
-                              "industry_type": {
-                                "id": "marketing_agency",
-                                "name": "Marketing Agency"
-                              }
-                            }
-                          ],
-                          "window": {
-                            "as_of": null,
-                            "from": "2026-09-23T04:00:00Z",
-                            "key": "prev:7d",
-                            "kind": "range",
-                            "time_zone": "Etc/UTC",
-                            "to": "2026-09-30T04:00:00Z"
-                          }
-                        }
-                      ]
-                    },
-                    "page_info": {
-                      "end_cursor": "MQ",
-                      "has_next_page": true,
-                      "has_previous_page": false,
-                      "start_cursor": "MQ"
-                    }
-                  },
-                  "properties": {
-                    "data": {
-                      "properties": {
-                        "breakdown_by": {
-                          "description": "What each row is, or `null` for one total row per window.",
-                          "example": "industry_type",
-                          "nullable": true,
-                          "type": "string"
-                        },
-                        "columns": {
-                          "description": "The breakdown first, then each requested property and metric, in row order.",
-                          "items": {
-                            "properties": {
-                              "aggregate": {
-                                "description": "Metrics only. How to combine the metric across rows.",
-                                "enum": [
-                                  "sum",
-                                  "average",
-                                  "none"
-                                ],
-                                "example": "sum",
-                                "type": "string"
-                              },
-                              "key": {
-                                "description": "The column's key on each row.",
-                                "example": "industry_type",
-                                "type": "string"
-                              },
-                              "name": {
-                                "description": "The column's display name.",
-                                "example": "Industry type",
-                                "type": "string"
-                              },
-                              "type": {
-                                "description": "An attribute of the row, or a number measured over it.",
-                                "enum": [
-                                  "property",
-                                  "metric"
-                                ],
-                                "example": "property",
-                                "type": "string"
-                              },
-                              "unit": {
-                                "description": "Metrics only. Sets the value's JSON type.",
-                                "enum": [
-                                  "money",
-                                  "count",
-                                  "rate",
-                                  "months",
-                                  "years"
-                                ],
-                                "example": "money",
-                                "type": "string"
-                              },
-                              "weight": {
-                                "description": "Metrics only. The column an `average` metric is weighted by.",
-                                "example": null,
-                                "nullable": true,
-                                "type": "string"
-                              }
-                            },
-                            "required": [
-                              "key",
-                              "name",
-                              "type"
-                            ],
-                            "type": "object"
-                          },
-                          "type": "array"
-                        },
-                        "data_as_of": {
-                          "description": "When the data was read, as an ISO 8601 timestamp.",
-                          "example": "2026-01-01T12:00:00.000Z",
-                          "type": "string"
-                        },
-                        "report": {
-                          "description": "The report's key.",
-                          "example": "platform_trends",
-                          "type": "string"
-                        },
-                        "reports": {
-                          "description": "One entry per requested window, in request order. Rows line up by index across entries.",
-                          "items": {
-                            "properties": {
-                              "rows": {
-                                "description": "The page of rows. Only the requested columns are present. Every breakdown value with a sale is listed, down to a single business.",
-                                "items": {
-                                  "properties": {
-                                    "account_country": {
-                                      "nullable": true,
-                                      "properties": {
-                                        "id": {
-                                          "description": "The value's id, such as `options_trading`.",
-                                          "example": "education",
-                                          "type": "string"
-                                        },
-                                        "name": {
-                                          "description": "The value's display name.",
-                                          "example": "Education",
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "id",
-                                        "name"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    "aov": {
-                                      "description": "Gross revenue per payment.",
-                                      "oneOf": [
-                                        {
-                                          "$ref": "#/components/schemas/Money"
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "avg_business_age": {
-                                      "description": "Average age in months of the businesses that sold.",
-                                      "nullable": true,
-                                      "type": "number"
-                                    },
-                                    "avg_customer_age": {
-                                      "description": "Average age in years of the paying customers.",
-                                      "nullable": true,
-                                      "type": "number"
-                                    },
-                                    "avg_owner_age": {
-                                      "description": "Average age in years of those businesses' owners.",
-                                      "nullable": true,
-                                      "type": "number"
-                                    },
-                                    "business_type": {
-                                      "nullable": true,
-                                      "properties": {
-                                        "id": {
-                                          "description": "The value's id, such as `options_trading`.",
-                                          "example": "education",
-                                          "type": "string"
-                                        },
-                                        "name": {
-                                          "description": "The value's display name.",
-                                          "example": "Education",
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "id",
-                                        "name"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    "businesses": {
-                                      "description": "Businesses with a paid payment.",
-                                      "example": 3,
-                                      "nullable": true,
-                                      "type": "integer"
-                                    },
-                                    "customer_country": {
-                                      "nullable": true,
-                                      "properties": {
-                                        "id": {
-                                          "description": "The value's id, such as `options_trading`.",
-                                          "example": "education",
-                                          "type": "string"
-                                        },
-                                        "name": {
-                                          "description": "The value's display name.",
-                                          "example": "Education",
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "id",
-                                        "name"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    "customers": {
-                                      "description": "Distinct paying customers. A customer who pays in two groups counts in both.",
-                                      "nullable": true,
-                                      "type": "integer"
-                                    },
-                                    "gross_revenue": {
-                                      "description": "Paid sales, before refunds and fees, measured the way an account's gross revenue is.",
-                                      "oneOf": [
-                                        {
-                                          "$ref": "#/components/schemas/Money"
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "industry_type": {
-                                      "nullable": true,
-                                      "properties": {
-                                        "id": {
-                                          "description": "The value's id, such as `options_trading`.",
-                                          "example": "education",
-                                          "type": "string"
-                                        },
-                                        "name": {
-                                          "description": "The value's display name.",
-                                          "example": "Education",
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "id",
-                                        "name"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    "median_gross_revenue": {
-                                      "description": "The median paid volume per business that sold.",
-                                      "oneOf": [
-                                        {
-                                          "$ref": "#/components/schemas/Money"
-                                        },
-                                        {
-                                          "type": "null"
-                                        }
-                                      ]
-                                    },
-                                    "new_businesses": {
-                                      "description": "Businesses created in the window that also sold in it.",
-                                      "nullable": true,
-                                      "type": "integer"
-                                    },
-                                    "new_customers": {
-                                      "description": "Customers who joined Whop in the window and paid in it. A customer who pays in two groups counts in both.",
-                                      "nullable": true,
-                                      "type": "integer"
-                                    },
-                                    "payments": {
-                                      "description": "Paid payments.",
-                                      "nullable": true,
-                                      "type": "integer"
-                                    },
-                                    "product_category": {
-                                      "nullable": true,
-                                      "properties": {
-                                        "id": {
-                                          "description": "The value's id, such as `options_trading`.",
-                                          "example": "education",
-                                          "type": "string"
-                                        },
-                                        "name": {
-                                          "description": "The value's display name.",
-                                          "example": "Education",
-                                          "type": "string"
-                                        }
-                                      },
-                                      "required": [
-                                        "id",
-                                        "name"
-                                      ],
-                                      "type": "object"
-                                    },
-                                    "products": {
-                                      "description": "Products with a paid payment.",
-                                      "nullable": true,
-                                      "type": "integer"
-                                    },
-                                    "repeat_rate": {
-                                      "description": "Share of customers who paid more than once, as a fraction.",
-                                      "nullable": true,
-                                      "type": "number"
-                                    }
-                                  },
-                                  "type": "object"
-                                },
-                                "type": "array"
-                              },
-                              "window": {
-                                "properties": {
-                                  "as_of": {
-                                    "description": "Always `null` for a range window.",
-                                    "example": null,
-                                    "nullable": true,
-                                    "type": "string"
-                                  },
-                                  "from": {
-                                    "description": "Start of the data that answered the window, as an ISO 8601 timestamp. `null` for `all_time`.",
-                                    "example": "2026-01-01T12:00:00.000Z",
-                                    "nullable": true,
-                                    "type": "string"
-                                  },
-                                  "key": {
-                                    "description": "The window as requested, such as `30d` or `prev:7d`.",
-                                    "example": "prev:7d",
-                                    "type": "string"
-                                  },
-                                  "kind": {
-                                    "description": "Always `range` for this report.",
-                                    "enum": [
-                                      "range"
-                                    ],
-                                    "example": "range",
-                                    "type": "string"
-                                  },
-                                  "time_zone": {
-                                    "description": "The zone the window's boundaries fall in.",
-                                    "example": "Etc/UTC",
-                                    "type": "string"
-                                  },
-                                  "to": {
-                                    "description": "End of the data that answered the window, exclusive, as an ISO 8601 timestamp.",
-                                    "example": "2026-01-01T12:00:00.000Z",
-                                    "nullable": true,
-                                    "type": "string"
-                                  }
-                                },
-                                "required": [
-                                  "key",
-                                  "kind",
-                                  "from",
-                                  "to",
-                                  "as_of",
-                                  "time_zone"
-                                ],
-                                "type": "object"
-                              }
-                            },
-                            "required": [
-                              "window",
-                              "rows"
-                            ],
-                            "type": "object"
-                          },
-                          "type": "array"
-                        }
-                      },
-                      "required": [
-                        "report",
-                        "breakdown_by",
-                        "columns",
-                        "reports",
-                        "data_as_of"
-                      ],
-                      "type": "object"
-                    },
-                    "page_info": {
-                      "properties": {
-                        "end_cursor": {
-                          "description": "Pass as `after` for the next page.",
-                          "example": null,
-                          "nullable": true,
-                          "type": "string"
-                        },
-                        "has_next_page": {
-                          "description": "Whether more rows follow this page.",
-                          "example": false,
-                          "type": "boolean"
-                        },
-                        "has_previous_page": {
-                          "description": "Whether rows precede this page.",
-                          "example": false,
-                          "type": "boolean"
-                        },
-                        "start_cursor": {
-                          "description": "The cursor of the first row on this page.",
-                          "example": "MQ",
-                          "nullable": true,
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "end_cursor",
-                        "start_cursor",
-                        "has_next_page",
-                        "has_previous_page"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "data",
-                    "page_info"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Platform trends for each requested window, with rows in the same order in every window."
-          },
-          "400": {
-            "$ref": "#/components/responses/InvalidParameters",
-            "description": "The request parameters are invalid."
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": []
-          }
-        ],
-        "summary": "Retrieve Platform Trends",
         "tags": [
           "Stats"
         ],
@@ -164962,7 +165339,7 @@
                     "type": "integer"
                   },
                   "market": {
-                    "description": "The market: a perpetual such as `BTC`, or for spot an asset the wallet can swap into, such as `BTC` or `XAUT`. Required for an order or close, and a close takes only a perpetual; not accepted for a deposit or withdraw.",
+                    "description": "The market: a perpetual such as `BTC` or `xyz:TSLA`, or for spot an asset the wallet can swap into, such as `BTC` or `XAUT`. Required for an order or close, and a close takes only a perpetual; not accepted for a deposit or withdraw.",
                     "example": "BTC",
                     "type": "string"
                   },
@@ -165149,7 +165526,7 @@
     },
     "/trades/markets": {
       "get": {
-        "description": "Returns every market you can trade on Whop.\n\n- **Spot:** listed by symbol: `BTC`, `SOL` and `XAUT` (gold).\n- **Perpetuals:** such as `BTC`. Send the `id` as `market` when you create a trade.\n\nThe same symbol can appear twice, once as a perpetual and once as spot, so use `id` together with `instrument_type` to tell them apart. Results are sorted by `id`, then `instrument_type`.\n\nThis endpoint is public: no API key is needed, and each IP address can make up to 60 requests a minute.",
+        "description": "Returns every market you can trade on Whop.\n\n- **Spot:** listed by symbol: `BTC`, `SOL` and `XAUT` (gold).\n- **Perpetuals:** such as `BTC`, and stock and commodity perpetuals from Hyperliquid's `xyz` exchange, such as `xyz:TSLA`. Send the `id` as `market` when you create a trade.\n\nThe same symbol can appear twice, once as a perpetual and once as spot, so use `id` together with `instrument_type` to tell them apart. Results are sorted by `id`, then `instrument_type`.\n\nThis endpoint is public: no API key is needed, and each IP address can make up to 60 requests a minute.",
         "operationId": "listMarkets",
         "parameters": [
           {
@@ -165284,6 +165661,18 @@
                             "display_decimals": 8
                           },
                           "size_decimals": 2
+                        },
+                        {
+                          "id": "xyz:TSLA",
+                          "instrument_type": "perpetual",
+                          "max_leverage": 20,
+                          "price": {
+                            "amount": "441.500000",
+                            "currency": "usd",
+                            "decimals": 6,
+                            "display_decimals": 6
+                          },
+                          "size_decimals": 3
                         }
                       ],
                       "page_info": {
@@ -165667,7 +166056,7 @@
                               },
                               "logo_url": {
                                 "description": "Business logo or user avatar URL. Null when no image is available.",
-                                "example": null,
+                                "example": "https://whop-assets-example.s3.amazonaws.com/uploads/image/2026-01-01/shine-time-logo",
                                 "type": [
                                   "string",
                                   "null"
@@ -175754,7 +176143,7 @@
                 "properties": {
                   "api_version_date": {
                     "description": "The dated API version (Api-Version-Date) to pin this webhook's payloads to. Omit to leave the webhook unpinned, tracking the current payload shape.",
-                    "example": "2026-01-01",
+                    "example": "2026-11-04-1",
                     "type": [
                       "string",
                       "null"
@@ -176092,7 +176481,7 @@
                 "properties": {
                   "api_version_date": {
                     "description": "The dated API version (Api-Version-Date) to pin this webhook's payloads to. Only valid for `v1` webhooks. Omit to leave the current pin unchanged, or pass `null` to unpin and track the current payload shape.",
-                    "example": "2026-01-01",
+                    "example": "2026-11-04-1",
                     "type": [
                       "string",
                       "null"
@@ -176993,6 +177382,11 @@
       "x-whop-summary": "An account's team members and the roles that scope their access."
     },
     {
+      "description": "Search finds one account's records in one call: members, memberships, payments, affiliates, reviews, resolution center cases, promo codes and accounts. A pasted identifier finds its records exactly and they come first, ahead of ranked text matches.\n\nUse the Search API behind a search box or a command menu over an account's data: find the customer behind an email or a card, open a payment from its ID or invoice number, or jump to a member by name. To filter one resource and page through every match, use that resource's list endpoint instead.\n",
+      "name": "Search",
+      "x-whop-summary": "Find an account's members, payments and other records in one call, by ID, email, card, phone, number, link or text."
+    },
+    {
       "description": "An External Account represents an account on another platform linked to a Whop account or user, such as a Facebook page, Instagram account, TikTok account, or Klaviyo account. You connect it through OAuth or an API key, or Whop creates it for you. External account IDs are prefixed `sacc_`.\n\nUse the External Accounts API to list connected accounts, [connect a profile through OAuth](/api-reference/beta/external-accounts/connect-an-external-account), [create a Whop-managed Facebook page or TikTok account, or connect a Klaviyo account with its API key](/api-reference/beta/external-accounts/create-an-external-account), and disconnect an external account.\n",
       "name": "External Accounts",
       "x-whop-summary": "Accounts on other platforms linked to an account or user."
@@ -177366,7 +177760,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -177692,7 +178086,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -178018,7 +178412,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "disabled_at": "2026-01-01T12:00:00.000Z",
@@ -178151,7 +178545,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -178483,7 +178877,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "ad_campaign": {
                     "id": "adcamp_xxxxxxxxxxxxxx"
@@ -178806,7 +179200,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -179163,7 +179557,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -179526,7 +179920,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "ad_campaign": {
                     "id": "adcamp_xxxxxxxxxxxxxx"
@@ -179934,7 +180328,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxx2",
@@ -180080,7 +180474,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxx2",
@@ -180226,7 +180620,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -180647,7 +181041,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -181068,7 +181462,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -181489,7 +181883,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -181910,7 +182304,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -182079,7 +182473,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -182248,7 +182642,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -182417,7 +182811,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -182586,7 +182980,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -182726,7 +183120,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -182866,7 +183260,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -183006,7 +183400,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -183146,7 +183540,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -183286,7 +183680,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "audience": {
                     "type": "channel",
@@ -183543,7 +183937,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "audience": {
                     "type": "channel",
@@ -183814,7 +184208,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "completed": true,
                   "course": {
@@ -183958,7 +184352,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "amount": "75000000000",
                   "available_at": null,
@@ -184099,7 +184493,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "acceptable": true,
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -184290,7 +184684,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "acceptable": false,
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -184481,7 +184875,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": null,
                   "amount": 25.0,
@@ -184622,7 +185016,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -184767,7 +185161,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -184912,7 +185306,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -185057,7 +185451,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -185202,7 +185596,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -185347,7 +185741,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -185492,7 +185886,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -185637,7 +186031,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "events": [
                     {
@@ -186060,7 +186454,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "download_url": "https://s3.amazonaws.com/uploads/exports/members-export.csv",
@@ -186190,7 +186584,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "download_url": null,
@@ -186320,7 +186714,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "amount": "512345000000",
                   "available_at": "2026-01-01T12:00:00.000Z",
@@ -186460,7 +186854,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "id": "idpf_xxxxxxxxxxxxxx"
                 },
@@ -186593,7 +186987,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -186777,7 +187171,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -186961,7 +187355,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -187145,7 +187539,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -187329,7 +187723,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -187513,7 +187907,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "balances": [
                     {
@@ -187657,7 +188051,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -187814,7 +188208,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -187971,7 +188365,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -188147,7 +188541,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -188323,7 +188717,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -188499,7 +188893,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -188795,7 +189189,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -189091,7 +189485,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -189387,7 +189781,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -189683,7 +190077,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -189972,7 +190366,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -190268,7 +190662,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -190564,7 +190958,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -191045,7 +191439,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -191523,7 +191917,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -191997,7 +192391,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "address": {
                     "city": "Austin",
@@ -192139,7 +192533,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_reference": "4483",
                   "bank_verification_state": null,
@@ -192719,7 +193113,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -193032,7 +193426,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -193345,7 +193739,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -193658,7 +194052,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -193672,6 +194066,7 @@
                   "custom_statement_descriptor": null,
                   "default_variant": null,
                   "description": "Two-stage paint correction, a three-year ceramic coating, and sealed wheel faces.",
+                  "experiences": [],
                   "external_identifier": null,
                   "gallery_images": [],
                   "global_affiliate_percentage": 30.0,
@@ -193679,6 +194074,7 @@
                   "headline": "A showroom finish that lasts three years",
                   "id": "prod_xxxxxxxxxxxxxx",
                   "labels": [],
+                  "logo_url": null,
                   "marketplace_status": "not_available",
                   "member_affiliate_percentage": 0.0,
                   "member_affiliate_status": "disabled",
@@ -193819,7 +194215,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -193833,6 +194229,7 @@
                   "custom_statement_descriptor": null,
                   "default_variant": null,
                   "description": "Two-stage paint correction, a three-year ceramic coating, and sealed wheel faces.",
+                  "experiences": [],
                   "external_identifier": null,
                   "gallery_images": [],
                   "global_affiliate_percentage": 30.0,
@@ -193840,6 +194237,7 @@
                   "headline": "A showroom finish that lasts three years",
                   "id": "prod_xxxxxxxxxxxxxx",
                   "labels": [],
+                  "logo_url": null,
                   "marketplace_status": "not_available",
                   "member_affiliate_percentage": 0.0,
                   "member_affiliate_status": "disabled",
@@ -193980,7 +194378,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -193994,6 +194392,7 @@
                   "custom_statement_descriptor": null,
                   "default_variant": null,
                   "description": "Two-stage paint correction, a three-year ceramic coating, and sealed wheel faces.",
+                  "experiences": [],
                   "external_identifier": null,
                   "gallery_images": [],
                   "global_affiliate_percentage": 30.0,
@@ -194001,6 +194400,7 @@
                   "headline": "A showroom finish that lasts three years",
                   "id": "prod_xxxxxxxxxxxxxx",
                   "labels": [],
+                  "logo_url": null,
                   "marketplace_status": "live_marketplace",
                   "member_affiliate_percentage": 0.0,
                   "member_affiliate_status": "disabled",
@@ -194141,7 +194541,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -194155,6 +194555,7 @@
                   "custom_statement_descriptor": null,
                   "default_variant": null,
                   "description": "Two-stage paint correction, a three-year ceramic coating, and sealed wheel faces.",
+                  "experiences": [],
                   "external_identifier": null,
                   "gallery_images": [],
                   "global_affiliate_percentage": 30.0,
@@ -194162,6 +194563,7 @@
                   "headline": "A showroom finish that lasts three years",
                   "id": "prod_xxxxxxxxxxxxxx",
                   "labels": [],
+                  "logo_url": null,
                   "marketplace_status": "not_available",
                   "member_affiliate_percentage": 0.0,
                   "member_affiliate_status": "disabled",
@@ -194302,7 +194704,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -194316,6 +194718,7 @@
                   "custom_statement_descriptor": null,
                   "default_variant": null,
                   "description": "Two-stage paint correction, a three-year ceramic coating, and sealed wheel faces.",
+                  "experiences": [],
                   "external_identifier": null,
                   "gallery_images": [],
                   "global_affiliate_percentage": 30.0,
@@ -194323,6 +194726,7 @@
                   "headline": "A showroom finish that lasts three years",
                   "id": "prod_xxxxxxxxxxxxxx",
                   "labels": [],
+                  "logo_url": null,
                   "marketplace_status": "not_available",
                   "member_affiliate_percentage": 0.0,
                   "member_affiliate_status": "disabled",
@@ -194463,7 +194867,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "amount": 50.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -194633,7 +195037,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "amount": 50.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -194803,7 +195207,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -194976,7 +195380,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -195145,7 +195549,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -195314,7 +195718,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -195464,7 +195868,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -195611,7 +196015,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -195800,7 +196204,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "carrier": "ups",
@@ -195933,7 +196337,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "carrier": "ups",
@@ -196066,7 +196470,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -196307,7 +196711,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "amount": {
                     "amount": "250.00",
@@ -196406,7 +196810,7 @@
                           },
                           "logo_url": {
                             "description": "Business logo or user avatar URL. Null when no image is available.",
-                            "example": null,
+                            "example": "https://whop-assets-example.s3.amazonaws.com/uploads/image/2026-01-01/shine-time-logo",
                             "type": [
                               "string",
                               "null"
@@ -196697,7 +197101,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "amount": {
                     "amount": "250.00",
@@ -196796,7 +197200,7 @@
                           },
                           "logo_url": {
                             "description": "Business logo or user avatar URL. Null when no image is available.",
-                            "example": null,
+                            "example": "https://whop-assets-example.s3.amazonaws.com/uploads/image/2026-01-01/shine-time-logo",
                             "type": [
                               "string",
                               "null"
@@ -197087,7 +197491,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "amount": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -197174,7 +197578,7 @@
                           },
                           "logo_url": {
                             "description": "Business logo or user avatar URL. Null when no image is available.",
-                            "example": null,
+                            "example": "https://whop-assets-example.s3.amazonaws.com/uploads/image/2026-01-01/shine-time-logo",
                             "type": [
                               "string",
                               "null"
@@ -197465,7 +197869,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-04",
+                "api_version_date": "2026-11-04-1",
                 "data": {
                   "id": "verf_xxxxxxxxxxxxxx",
                   "last_error_code": null,
@@ -197560,6 +197964,7 @@
         "Users",
         "Members",
         "Team Members",
+        "Search",
         "External Accounts",
         "Social Accounts"
       ]

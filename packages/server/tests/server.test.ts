@@ -273,7 +273,6 @@ describe("MCP contract", () => {
 				"stats_get",
 				"stats_list",
 				"stats_reports_list",
-				"stats_reports_platform_trends",
 				"stats_time-series_get",
 				"stats_time-series_list",
 			]);
