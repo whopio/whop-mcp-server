@@ -195,7 +195,7 @@
             ]
           },
           "business_type": {
-            "description": "High-level business category for the account. See the [business types and industries glossary](/api-reference/beta/accounts/account#business-types-and-industries-glossary) for valid values.",
+            "description": "High-level business category for the account. See the [business types and industries glossary](/api-reference/accounts/account#business-types-and-industries-glossary) for valid values.",
             "example": "software",
             "type": [
               "string",
@@ -248,7 +248,7 @@
           },
           "company_formation": {
             "$ref": "#/components/schemas/AccountCompanyFormation",
-            "description": "Company formation state for the account, managed through [Form Company](/api-reference/beta/accounts/form-company). A `draft` `status` until the formation checkout is paid, then filing progress with downloadable documents and signatures awaiting action. Empty when the formation state is temporarily unavailable."
+            "description": "Company formation state for the account, managed through [Form Company](/api-reference/accounts/form-company). A `draft` `status` until the formation checkout is paid, then filing progress with downloadable documents and signatures awaiting action. Empty when the formation state is temporarily unavailable."
           },
           "country": {
             "description": "Country where the account is located.",
@@ -350,7 +350,7 @@
             "type": "string"
           },
           "industry_type": {
-            "description": "Specific industry vertical for the account. See the [business types and industries glossary](/api-reference/beta/accounts/account#business-types-and-industries-glossary) for valid values.",
+            "description": "Specific industry vertical for the account. See the [business types and industries glossary](/api-reference/accounts/account#business-types-and-industries-glossary) for valid values.",
             "example": "trading",
             "type": [
               "string",
@@ -60334,7 +60334,7 @@
         }
       ],
       "post": {
-        "description": "Starts an LLC or C-Corp formation for a business account. The application is validated and the response returns a hosted checkout URL; once paid, the filing is submitted. Track progress through the account's [`company_formation`](/api-reference/beta/accounts/retrieve-account) field on Retrieve Account.",
+        "description": "Starts an LLC or C-Corp formation for a business account. The application is validated and the response returns a hosted checkout URL; once paid, the filing is submitted. Track progress through the account's [`company_formation`](/api-reference/accounts/retrieve-account) field on Retrieve Account.",
         "operationId": "formCompany",
         "parameters": [
           {
@@ -112041,7 +112041,7 @@
                     "type": "object"
                   },
                   {
-                    "description": "Provisions a Whop-managed TikTok account for the account. Requires the account's `logo`; configure it with [Update Account](/api-reference/beta/accounts/update-account). The account is returned before TikTok has created it — its `id` is usable right away, and the rest of the profile fills in once provisioning finishes.",
+                    "description": "Provisions a Whop-managed TikTok account for the account. Requires the account's `logo`; configure it with [Update Account](/api-reference/accounts/update-account). The account is returned before TikTok has created it — its `id` is usable right away, and the rest of the profile fills in once provisioning finishes.",
                     "properties": {
                       "account_id": {
                         "description": "The Account (biz_ identifier) to create the external account for. An account-scoped API key may omit this to default to its own account. Account API keys cannot update their own account's branding through Update Account; use a user-authenticated path.",
@@ -158441,7 +158441,7 @@
     },
     "/search": {
       "get": {
-        "description": "Searches one account's records in one call. `account` rows are `account_id` itself and, when you send `include_subaccounts`, its subaccounts; every other row belongs to one of those accounts.\n\nEach `object` needs its own read permission on the record's account, and rows you can't read are left out without an error: `account` (`biz_`, `company:basic:read`), `member` (`mber_`, `member:basic:read`), `membership` (`mem_`, `member:basic:read`), `payment` (`pay_`, `payment:basic:read`), `affiliate` (`aff_`, `affiliate:basic:read`), `review` (`rev_`, `company:basic:read`), `resolution_center_case` (`reso_`, `payment:resolution_center_case:read`) and `promo_code` (`promo_`, `promo_code:basic:read`). A query containing `@` also needs `member:email:read`, and a phone match `member:phone:read`. An invoice's number finds the invoice as its `payment`.\n\n`query` is trimmed and has to be 2 to 250 characters; a full card number returns a `400`. `data` comes identifier matches first, such as a pasted ID, email address, card digits or invoice number, newest first within each kind of match. Every query of 3 or more characters is also ranked, and ranked rows follow, best match first. Each record appears once, and `match_reason` says why it matched. [Search](/api-reference/beta/search/search) lists the query shapes and match reasons.\n\n`first` caps the rows, 20 by default and up to 100. There is no cursor yet, so the response is a single page. Search ranks; to filter one resource or page through every match, use its list endpoint, such as `GET /payments?query=`.",
+        "description": "Searches one account's records in one call. `account` rows are `account_id` itself and, when you send `include_subaccounts`, its subaccounts; every other row belongs to one of those accounts.\n\nEach `object` needs its own read permission on the record's account, and rows you can't read are left out without an error: `account` (`biz_`, `company:basic:read`), `member` (`mber_`, `member:basic:read`), `membership` (`mem_`, `member:basic:read`), `payment` (`pay_`, `payment:basic:read`), `affiliate` (`aff_`, `affiliate:basic:read`), `review` (`rev_`, `company:basic:read`), `resolution_center_case` (`reso_`, `payment:resolution_center_case:read`) and `promo_code` (`promo_`, `promo_code:basic:read`). A query containing `@` also needs `member:email:read`, and a phone match `member:phone:read`. An invoice's number finds the invoice as its `payment`.\n\n`query` is trimmed and has to be 2 to 250 characters; a full card number returns a `400`. `data` comes identifier matches first, such as a pasted ID, email address, card digits or invoice number, newest first within each kind of match. Every query of 3 or more characters is also ranked, and ranked rows follow, best match first. Each record appears once, and `match_reason` says why it matched. [Search](/api-reference/search/search) lists the query shapes and match reasons.\n\n`first` caps the rows, 20 by default and up to 100. There is no cursor yet, so the response is a single page. Search ranks; to filter one resource or page through every match, use its list endpoint, such as `GET /payments?query=`.",
         "operationId": "listSearchResults",
         "parameters": [
           {
@@ -160221,7 +160221,7 @@
                     "type": "object"
                   },
                   {
-                    "description": "Provisions a Whop-managed TikTok account for the account. Requires the account's `logo`; configure it with [Update Account](/api-reference/beta/accounts/update-account). The account is returned before TikTok has created it — its `id` is usable right away, and the rest of the profile fills in once provisioning finishes.",
+                    "description": "Provisions a Whop-managed TikTok account for the account. Requires the account's `logo`; configure it with [Update Account](/api-reference/accounts/update-account). The account is returned before TikTok has created it — its `id` is usable right away, and the rest of the profile fills in once provisioning finishes.",
                     "properties": {
                       "account_id": {
                         "description": "The Account (biz_ identifier) to create the external account for. An account-scoped API key may omit this to default to its own account. Account API keys cannot update their own account's branding through Update Account; use a user-authenticated path.",
@@ -177880,7 +177880,7 @@
       "x-whop-summary": "Find an account's members, payments and other records in one call, by ID, email, card, phone, number, link or text."
     },
     {
-      "description": "An External Account represents an account on another platform linked to a Whop account or user, such as a Facebook page, Instagram account, TikTok account, or Klaviyo account. You connect it through OAuth or an API key, or Whop creates it for you. External account IDs are prefixed `sacc_`.\n\nUse the External Accounts API to list connected accounts, [connect a profile through OAuth](/api-reference/beta/external-accounts/connect-an-external-account), [create a Whop-managed Facebook page or TikTok account, or connect a Klaviyo account with its API key](/api-reference/beta/external-accounts/create-an-external-account), and disconnect an external account.\n",
+      "description": "An External Account represents an account on another platform linked to a Whop account or user, such as a Facebook page, Instagram account, TikTok account, or Klaviyo account. You connect it through OAuth or an API key, or Whop creates it for you. External account IDs are prefixed `sacc_`.\n\nUse the External Accounts API to list connected accounts, [connect a profile through OAuth](/api-reference/external-accounts/connect-an-external-account), [create a Whop-managed Facebook page or TikTok account, or connect a Klaviyo account with its API key](/api-reference/external-accounts/create-an-external-account), and disconnect an external account.\n",
       "name": "External Accounts",
       "x-whop-summary": "Accounts on other platforms linked to an account or user."
     },
@@ -177890,7 +177890,7 @@
       "x-whop-summary": "Deprecated compatibility endpoints for external accounts."
     },
     {
-      "description": "A Payment is one charge against a buyer, for one or more variants. Create an on-session payment with a `confirmation_token` for the method the buyer selected, or an off-session payment with an existing member's stored payment method.\n\nUse the Payments API to charge buyers, list and retrieve payments, and refund, void, capture, or retry them. Collection runs in the background, so the create response is not the outcome. Poll [Retrieve status](/api-reference/beta/payments/retrieve-payment-status) for how far the payment has gone and, while it is `requires_action`, what the buyer must do next: follow a redirect, complete 3D Secure, display transfer instructions, or link a bank account. Update the payment's `return_url` to change where they land afterwards, up until they come back.\n",
+      "description": "A Payment is one charge against a buyer, for one or more variants. Create an on-session payment with a `confirmation_token` for the method the buyer selected, or an off-session payment with an existing member's stored payment method.\n\nUse the Payments API to charge buyers, list and retrieve payments, and refund, void, capture, or retry them. Collection runs in the background, so the create response is not the outcome. Poll [Retrieve status](/api-reference/payments/retrieve-payment-status) for how far the payment has gone and, while it is `requires_action`, what the buyer must do next: follow a redirect, complete 3D Secure, display transfer instructions, or link a bank account. Update the payment's `return_url` to change where they land afterwards, up until they come back.\n",
       "name": "Payments",
       "x-whop-summary": "A charge against a buyer, and the step they still owe."
     },
@@ -177910,12 +177910,12 @@
       "x-whop-summary": "A purchase priced before it is paid: its lines, promo code and tax."
     },
     {
-      "description": "A Setup Intent saves a buyer's payment method for later without taking money now. Create one from a confirmation token the payment elements collected in setup mode, or from a payment method already on file to re-verify it. It runs the same collection flow a payment does, so the buyer may still owe a step: 3D Secure on a card, a hosted enrollment, or linking a bank account.\n\nThe create response is the setup intent as created, not its outcome. Hand its `client_secret` to the elements' `handleNextAction`, or poll [Retrieve status](/api-reference/beta/setup-intents/retrieve-setup-status) for how far the setup has gone and what is outstanding. Once it reaches `succeeded`, `payment_method_id` names the saved method and Create Payment charges it.\n",
+      "description": "A Setup Intent saves a buyer's payment method for later without taking money now. Create one from a confirmation token the payment elements collected in setup mode, or from a payment method already on file to re-verify it. It runs the same collection flow a payment does, so the buyer may still owe a step: 3D Secure on a card, a hosted enrollment, or linking a bank account.\n\nThe create response is the setup intent as created, not its outcome. Hand its `client_secret` to the elements' `handleNextAction`, or poll [Retrieve status](/api-reference/setup-intents/retrieve-setup-status) for how far the setup has gone and what is outstanding. Once it reaches `succeeded`, `payment_method_id` names the saved method and Create Payment charges it.\n",
       "name": "Setup Intents",
       "x-whop-summary": "Saving a buyer's payment method without charging it."
     },
     {
-      "description": "A Refund is one full or partial reversal of a payment, issued with [Refund Payment](/api-reference/beta/payments/refund-payment). It records how much moved, through which provider, and whether it succeeded.\n\nUse the Refunds API to list the refunds on a payment or across an account, and to retrieve a single refund.\n",
+      "description": "A Refund is one full or partial reversal of a payment, issued with [Refund Payment](/api-reference/payments/refund-payment). It records how much moved, through which provider, and whether it succeeded.\n\nUse the Refunds API to list the refunds on a payment or across an account, and to retrieve a single refund.\n",
       "name": "Refunds",
       "x-whop-summary": "Money returned to a buyer from a payment."
     },
@@ -177935,7 +177935,7 @@
       "x-whop-summary": "Chargebacks filed against an account, with evidence and outcomes."
     },
     {
-      "description": "A Payment Rule lets an account act on its own payments before they reach the bank: block them, let them through, send them to review, or ask the buyer for 3D Secure. Each rule matches on a small set of payment attributes, and every condition must hold for it to apply.\n\nA rule's definition is fixed once created, so the payments it decided keep naming the rule that decided them. Use [Replace](/api-reference/beta/payment-rules/replace-a-payment-rule) to change one, and [List fields](/api-reference/beta/payment-rules/list-fields) for the attributes, operators and values a condition can use.\n",
+      "description": "A Payment Rule lets an account act on its own payments before they reach the bank: block them, let them through, send them to review, or ask the buyer for 3D Secure. Each rule matches on a small set of payment attributes, and every condition must hold for it to apply.\n\nA rule's definition is fixed once created, so the payments it decided keep naming the rule that decided them. Use [Replace](/api-reference/payment-rules/replace-a-payment-rule) to change one, and [List fields](/api-reference/payment-rules/list-fields) for the attributes, operators and values a condition can use.\n",
       "name": "Payment Rules",
       "x-whop-summary": "Rules an account writes to decide its own payments."
     },
@@ -177991,7 +177991,7 @@
       "x-whop-summary": "Place orders, close positions, and move funds for perpetual and spot trading from a Whop-managed wallet."
     },
     {
-      "description": "A Verification represents a legal identity for a person or business. Accounts and users complete verification when Whop needs to confirm who they are before enabling payouts or compliance-sensitive workflows.\n\nUse the Verifications API to start or resume a hosted verification session, check review status, and submit requested details or documents. If `requested_information` contains items, submit answers with [Update Verification](/api-reference/beta/verifications/update-verification).\n",
+      "description": "A Verification represents a legal identity for a person or business. Accounts and users complete verification when Whop needs to confirm who they are before enabling payouts or compliance-sensitive workflows.\n\nUse the Verifications API to start or resume a hosted verification session, check review status, and submit requested details or documents. If `requested_information` contains items, submit answers with [Update Verification](/api-reference/verifications/update-verification).\n",
       "name": "Verifications",
       "x-whop-summary": "Legal identity required before payouts and card issuing."
     },
@@ -178066,7 +178066,7 @@
       "x-whop-summary": "Versioned build artifacts deployed to an app's platforms."
     },
     {
-      "description": "An App Installation represents one install of your app on one account. An account installs an app once, however many experiences it adds, so an installation holds state that belongs to the account rather than to one experience, such as a sync cursor or the ID of the account it's linked to in another system.\n\nUse the App Installations API to [list the accounts your app is installed on](/api-reference/beta/app-installations/list-app-installations), [retrieve one](/api-reference/beta/app-installations/retrieve-app-installation), and [update](/api-reference/beta/app-installations/update-app-installation) the `metadata` and `external_id` your app keeps on it. An account can also list the apps installed on it, and a developer every installation of their app. Only the app and its developer see `metadata` and `external_id`, and only the app can change them.\n",
+      "description": "An App Installation represents one install of your app on one account. An account installs an app once, however many experiences it adds, so an installation holds state that belongs to the account rather than to one experience, such as a sync cursor or the ID of the account it's linked to in another system.\n\nUse the App Installations API to [list the accounts your app is installed on](/api-reference/app-installations/list-app-installations), [retrieve one](/api-reference/app-installations/retrieve-app-installation), and [update](/api-reference/app-installations/update-app-installation) the `metadata` and `external_id` your app keeps on it. An account can also list the apps installed on it, and a developer every installation of their app. Only the app and its developer see `metadata` and `external_id`, and only the app can change them.\n",
       "name": "App Installations",
       "x-whop-summary": "Your app's installations on accounts, and the data it keeps about each one."
     },
@@ -178076,22 +178076,22 @@
       "x-whop-summary": "Feature flags and A/B experiments for gradual rollout."
     },
     {
-      "description": "The Payment Method Domains API is deprecated. Add, check, and remove Apple Pay domains with the `apple_pay` capability of the [Domains API](/api-reference/beta/domains/domain) instead. These endpoints keep working and return `Deprecation` and successor `Link` headers. A domain keeps its ID, so `/domains/{id}` takes the `dom_` or `pmd_` ID these endpoints return.\n\nA Payment Method Domain registers a hostname with a wallet provider so its payment methods can appear at a checkout served from that domain. The domain proves ownership by hosting the provider's association file — for Apple Pay, at `/.well-known/apple-developer-merchantid-domain-association` — and `status` reports whether verification has completed. Embedded surfaces like the [Express Checkout element](/elements/beta/checkout/expressCheckout) only render Apple Pay, Google Pay and PayPal express on a `verified` domain (first-party whop.com pages are pre-approved).\n\n| Payment Method Domains API | Domains API |\n| --- | --- |\n| `GET /payment_method_domains?status=verified` | `GET /domains?apple_pay=ready`, or `apple_pay=any` for every Apple Pay domain |\n| `?hostname=` | `?domain=` |\n| `GET /payment_method_domains/{id}` | `GET /domains/{id}` |\n| `POST /payment_method_domains` with `hostname` and `account_id` | `POST /domains` with `domain`, `account_id`, and `apple_pay: {}`. If the account already has the domain, `PATCH /domains/{id}` with `apple_pay: {}` |\n| `POST /payment_method_domains/{id}/verify` | `POST /domains/{id}/check` |\n| `DELETE /payment_method_domains/{id}` | `PATCH /domains/{id}` with `apple_pay: null` |\n| `hostname` | `domain` |\n| `status: verified` | `apple_pay.state: ready` |\n| `status: pending` | `apple_pay.state: pending` while Whop registers the domain, or `action_required` until you host the association file and check the domain |\n| `provider` | No field: every Apple Pay domain is registered with Apple |\n\nRegistration runs in the background, so creating or checking a domain returns `pending`: retrieve the domain until `apple_pay.state` is `ready` or `action_required`. The Domains API needs the `domain:read` and `domain:manage` permissions instead of `company:manage_checkout`, so give API keys those scopes. `DELETE /domains/{id}` removes the whole domain, including any website on it, so use `PATCH` to remove only Apple Pay.\n",
+      "description": "The Payment Method Domains API is deprecated. Add, check, and remove Apple Pay domains with the `apple_pay` capability of the [Domains API](/api-reference/domains/domain) instead. These endpoints keep working and return `Deprecation` and successor `Link` headers. A domain keeps its ID, so `/domains/{id}` takes the `dom_` or `pmd_` ID these endpoints return.\n\nA Payment Method Domain registers a hostname with a wallet provider so its payment methods can appear at a checkout served from that domain. The domain proves ownership by hosting the provider's association file — for Apple Pay, at `/.well-known/apple-developer-merchantid-domain-association` — and `status` reports whether verification has completed. Embedded surfaces like the [Express Checkout element](/elements/beta/checkout/expressCheckout) only render Apple Pay, Google Pay and PayPal express on a `verified` domain (first-party whop.com pages are pre-approved).\n\n| Payment Method Domains API | Domains API |\n| --- | --- |\n| `GET /payment_method_domains?status=verified` | `GET /domains?apple_pay=ready`, or `apple_pay=any` for every Apple Pay domain |\n| `?hostname=` | `?domain=` |\n| `GET /payment_method_domains/{id}` | `GET /domains/{id}` |\n| `POST /payment_method_domains` with `hostname` and `account_id` | `POST /domains` with `domain`, `account_id`, and `apple_pay: {}`. If the account already has the domain, `PATCH /domains/{id}` with `apple_pay: {}` |\n| `POST /payment_method_domains/{id}/verify` | `POST /domains/{id}/check` |\n| `DELETE /payment_method_domains/{id}` | `PATCH /domains/{id}` with `apple_pay: null` |\n| `hostname` | `domain` |\n| `status: verified` | `apple_pay.state: ready` |\n| `status: pending` | `apple_pay.state: pending` while Whop registers the domain, or `action_required` until you host the association file and check the domain |\n| `provider` | No field: every Apple Pay domain is registered with Apple |\n\nRegistration runs in the background, so creating or checking a domain returns `pending`: retrieve the domain until `apple_pay.state` is `ready` or `action_required`. The Domains API needs the `domain:read` and `domain:manage` permissions instead of `company:manage_checkout`, so give API keys those scopes. `DELETE /domains/{id}` removes the whole domain, including any website on it, so use `PATCH` to remove only Apple Pay.\n",
       "name": "Payment Method Domains",
       "x-whop-summary": "Deprecated: domains verified to show Apple Pay at checkout. Use Domains instead."
     },
     {
-      "description": "An Ad Campaign is the top-level container for paid ads. It sets the objective and budget strategy shared by its [ad groups](/api-reference/beta/ad-groups/ad-group) and ads.\n\nUse the Ad Campaigns API to create campaigns, list campaigns for an account, retrieve or update campaign settings, and pause or resume campaign delivery.\n\nAds billing combines eligible spend across the account's campaigns. A failed payment blocks delivery with `delivery_status: payment_failed` while preserving the configured active/paused `status`. Fix the account's payment method and [retry its ads payment](/api-reference/beta/accounts/retry-failed-ads-payments) once for the account. The retry is asynchronous: acceptance does not confirm payment. Successful settlement clears the block; active campaigns can resume if otherwise eligible, while paused campaigns stay paused. See [billing and retries](/developer/ads/overview#paying-for-ads).\n",
+      "description": "An Ad Campaign is the top-level container for paid ads. It sets the objective and budget strategy shared by its [ad groups](/api-reference/ad-groups/ad-group) and ads.\n\nUse the Ad Campaigns API to create campaigns, list campaigns for an account, retrieve or update campaign settings, and pause or resume campaign delivery.\n\nAds billing combines eligible spend across the account's campaigns. A failed payment blocks delivery with `delivery_status: payment_failed` while preserving the configured active/paused `status`. Fix the account's payment method and [retry its ads payment](/api-reference/accounts/retry-failed-ads-payments) once for the account. The retry is asynchronous: acceptance does not confirm payment. Successful settlement clears the block; active campaigns can resume if otherwise eligible, while paused campaigns stay paused. See [billing and retries](/developer/ads/overview#paying-for-ads).\n",
       "name": "Ad Campaigns",
       "x-whop-summary": "Objective and budget for a set of ads."
     },
     {
-      "description": "An Ad Group sits inside an [ad campaign](/api-reference/beta/ad-campaigns/ad-campaign) and controls delivery for [ads](/api-reference/beta/ads/ad). It sets the audience, schedule, and budget for its ads.\n\nUse the Ad Groups API to create ad groups in campaigns, list or retrieve targeting and delivery settings, update budgets or targeting, delete groups that should stop running, and pause or resume delivery.\n",
+      "description": "An Ad Group sits inside an [ad campaign](/api-reference/ad-campaigns/ad-campaign) and controls delivery for [ads](/api-reference/ads/ad). It sets the audience, schedule, and budget for its ads.\n\nUse the Ad Groups API to create ad groups in campaigns, list or retrieve targeting and delivery settings, update budgets or targeting, delete groups that should stop running, and pause or resume delivery.\n",
       "name": "Ad Groups",
       "x-whop-summary": "Audience, schedule, and budget within a campaign."
     },
     {
-      "description": "An Ad is the individual creative unit delivered by an [ad group](/api-reference/beta/ad-groups/ad-group). It holds the copy, creative assets, and destination URL for one ad.\n\nUse the Ads API to list ads for an account, create ads inside ad groups, retrieve or update creative details, delete ads that should stop running, and pause or resume delivery.\n",
+      "description": "An Ad is the individual creative unit delivered by an [ad group](/api-reference/ad-groups/ad-group). It holds the copy, creative assets, and destination URL for one ad.\n\nUse the Ads API to list ads for an account, create ads inside ad groups, retrieve or update creative details, delete ads that should stop running, and pause or resume delivery.\n",
       "name": "Ads",
       "x-whop-summary": "The creative: copy, assets, and destination URL."
     },
@@ -178116,12 +178116,12 @@
       "x-whop-summary": "Pre-built traffic analytics tables and series."
     },
     {
-      "description": "A Person is an identity-linked profile of a visitor or customer of an account, assembled from every [event](/api-reference/beta/events/event) the person generated, such as pixel page views, ad clicks, leads, and payments.\n\nUse the People API to list and segment the people of an account by activity, purchases, traffic source, or marketing touch, and to retrieve one person by person ID, user ID, email address, or phone number.\n",
+      "description": "A Person is an identity-linked profile of a visitor or customer of an account, assembled from every [event](/api-reference/events/event) the person generated, such as pixel page views, ad clicks, leads, and payments.\n\nUse the People API to list and segment the people of an account by activity, purchases, traffic source, or marketing touch, and to retrieve one person by person ID, user ID, email address, or phone number.\n",
       "name": "People",
       "x-whop-summary": "Visitors and customers of an account, with identity, purchase, and traffic profiles."
     },
     {
-      "description": "An Event records conversion or engagement activity for an account, such as page views, purchases, or leads. Each event ties the action to the [person](/api-reference/beta/people/person) who took it, so activity can be attributed to the ads and links that drove it.\n\nUse the Events API to send new tracking events, list recent identity-linked events for an account, and inspect the events recorded for a person. The resource also exposes an anonymized read mode — the pulse feed — a platform-wide snapshot of recent purchases that carries nothing identifying. The pulse feed is public; other Events endpoints require authentication and are scoped to an account.\n\nEvents are only as good as the pixel sending them, so [Validate Pixel](/api-reference/beta/events/validate-pixel) answers whether an account's pixel is working: it reads the events the pixel has sent, and when you pass a `url` whose page hasn't sent any lately, it fetches that page and looks for the pixel in its source. Use it before launching an ad to confirm its destination is tracked, or in a setup flow to tell a merchant whether their install is live.\n",
+      "description": "An Event records conversion or engagement activity for an account, such as page views, purchases, or leads. Each event ties the action to the [person](/api-reference/people/person) who took it, so activity can be attributed to the ads and links that drove it.\n\nUse the Events API to send new tracking events, list recent identity-linked events for an account, and inspect the events recorded for a person. The resource also exposes an anonymized read mode — the pulse feed — a platform-wide snapshot of recent purchases that carries nothing identifying. The pulse feed is public; other Events endpoints require authentication and are scoped to an account.\n\nEvents are only as good as the pixel sending them, so [Validate Pixel](/api-reference/events/validate-pixel) answers whether an account's pixel is working: it reads the events the pixel has sent, and when you pass a `url` whose page hasn't sent any lately, it fetches that page and looks for the pixel in its source. Use it before launching an ad to confirm its destination is tracked, or in a setup flow to tell a merchant whether their install is live.\n",
       "name": "Events",
       "x-whop-summary": "Conversion and engagement events tracked for attribution."
     },
@@ -178141,7 +178141,7 @@
       "x-whop-summary": "Chat messages, attachments, reactions and polls."
     },
     {
-      "description": "A Livestream represents a live video broadcast in an experience. After a recorded livestream ends, members can watch the replay, and moderators can pin the best recordings to feature them.\n\nUse the Livestreams API to [list an experience's livestreams](/api-reference/beta/livestreams/list-livestreams), [retrieve one](/api-reference/beta/livestreams/retrieve-livestream) with its recording, and [pin](/api-reference/beta/livestreams/pin-livestream) or [unpin](/api-reference/beta/livestreams/unpin-livestream) recordings.\n",
+      "description": "A Livestream represents a live video broadcast in an experience. After a recorded livestream ends, members can watch the replay, and moderators can pin the best recordings to feature them.\n\nUse the Livestreams API to [list an experience's livestreams](/api-reference/livestreams/list-livestreams), [retrieve one](/api-reference/livestreams/retrieve-livestream) with its recording, and [pin](/api-reference/livestreams/pin-livestream) or [unpin](/api-reference/livestreams/unpin-livestream) recordings.\n",
       "name": "Livestreams",
       "x-whop-summary": "Live video broadcasts in an experience, and their recordings."
     },
