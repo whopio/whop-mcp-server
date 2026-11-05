@@ -33935,6 +33935,13 @@
                   "null"
                 ]
               },
+              "split_pay_required_payments": {
+                "description": "How many payments a recurring variant collects before it stops billing, from 2 to 115. Only valid for `renewal` variants. `null` bills until the subscription is canceled.",
+                "type": [
+                  "integer",
+                  "null"
+                ]
+              },
               "title": {
                 "description": "Variant title.",
                 "type": [
@@ -122021,6 +122028,13 @@
                                 "null"
                               ]
                             },
+                            "split_pay_required_payments": {
+                              "description": "How many payments a recurring variant collects before it stops billing, from 2 to 115. Only valid for `renewal` variants. `null` bills until the subscription is canceled.",
+                              "type": [
+                                "integer",
+                                "null"
+                              ]
+                            },
                             "title": {
                               "description": "Variant title.",
                               "example": "Paint correction",
@@ -122653,6 +122667,13 @@
                               "description": "Recurring price in the variant currency.",
                               "type": [
                                 "number",
+                                "null"
+                              ]
+                            },
+                            "split_pay_required_payments": {
+                              "description": "How many payments a recurring variant collects before it stops billing, from 2 to 115. Only valid for `renewal` variants. `null` bills until the subscription is canceled.",
+                              "type": [
+                                "integer",
                                 "null"
                               ]
                             },
@@ -140571,6 +140592,13 @@
                                     "null"
                                   ]
                                 },
+                                "split_pay_required_payments": {
+                                  "description": "How many payments a recurring variant collects before it stops billing, from 2 to 115. Only valid for `renewal` variants. `null` bills until the subscription is canceled.",
+                                  "type": [
+                                    "integer",
+                                    "null"
+                                  ]
+                                },
                                 "title": {
                                   "description": "Variant title.",
                                   "type": [
@@ -141437,6 +141465,13 @@
                             "description": "Recurring price in the variant currency.",
                             "type": [
                               "number",
+                              "null"
+                            ]
+                          },
+                          "split_pay_required_payments": {
+                            "description": "How many payments a recurring variant collects before it stops billing, from 2 to 115. Only valid for `renewal` variants. `null` bills until the subscription is canceled.",
+                            "type": [
+                              "integer",
                               "null"
                             ]
                           },
