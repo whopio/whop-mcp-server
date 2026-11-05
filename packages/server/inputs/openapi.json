@@ -6852,6 +6852,10 @@
             "example": 27,
             "type": "number"
           },
+          "content_review": {
+            "$ref": "#/components/schemas/AdContentReview",
+            "description": "Whop's content review of this ad: whether it has finished, which ad networks it is recommended for, and the content rules it breaks."
+          },
           "cost_per_added_to_cart": {
             "description": "Spend divided by attributed add-to-cart events; null when they are not the goal and none are attributed.",
             "example": 6.515675675675676,
@@ -7264,6 +7268,7 @@
           "ad_group",
           "ad_campaign",
           "creatives",
+          "content_review",
           "created_at",
           "updated_at",
           "issues"
@@ -7837,6 +7842,81 @@
           "target_cost_per_result",
           "target_result_event",
           "issues"
+        ],
+        "type": "object"
+      },
+      "AdContentReview": {
+        "properties": {
+          "networks": {
+            "items": {
+              "$ref": "#/components/schemas/AdContentReviewNetwork",
+              "description": "Whether each network can run the ad. Empty until the review finishes."
+            },
+            "type": "array"
+          },
+          "status": {
+            "description": "`reviewed` once Whop content review finishes, `in_review` while it runs, `not_reviewed` when it never ran.",
+            "enum": [
+              "reviewed",
+              "in_review",
+              "not_reviewed"
+            ],
+            "example": "not_reviewed",
+            "type": "string"
+          },
+          "tags": {
+            "items": {
+              "$ref": "#/components/schemas/AdContentReviewTag",
+              "description": "Every rule the review found the ad breaks, on any network. Empty when it breaks none or the review hasn't finished."
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "status",
+          "networks",
+          "tags"
+        ],
+        "type": "object"
+      },
+      "AdContentReviewNetwork": {
+        "properties": {
+          "recommended": {
+            "description": "Whether the ad passes Whop's content policy and this network's.",
+            "type": "boolean"
+          },
+          "title": {
+            "description": "The network. `whop` is Whop's own content policy, which every other network also requires.",
+            "enum": [
+              "whop",
+              "meta",
+              "tiktok",
+              "google"
+            ],
+            "example": "whop",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "recommended"
+        ],
+        "type": "object"
+      },
+      "AdContentReviewTag": {
+        "properties": {
+          "message": {
+            "description": "The evidence the review recorded for this rule.",
+            "type": "string"
+          },
+          "title": {
+            "description": "The rule Whop content review found the ad breaks.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "message"
         ],
         "type": "object"
       },
@@ -179015,6 +179095,11 @@
                     "id": "adgrp_xxxxxxxxxxxxxx"
                   },
                   "call_to_action": null,
+                  "content_review": {
+                    "networks": [],
+                    "status": "not_reviewed",
+                    "tags": []
+                  },
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "creatives": [],
                   "delivery_status": "in_review",
@@ -179114,6 +179199,10 @@
                           "string",
                           "null"
                         ]
+                      },
+                      "content_review": {
+                        "$ref": "#/components/schemas/AdContentReview",
+                        "description": "Whop's content review of this ad: whether it has finished, which ad networks it is recommended for, and the content rules it breaks."
                       },
                       "created_at": {
                         "description": "When the ad was created, as an ISO 8601 timestamp.",
@@ -179232,6 +179321,7 @@
                       "ad_group",
                       "ad_campaign",
                       "creatives",
+                      "content_review",
                       "created_at",
                       "updated_at",
                       "issues"
