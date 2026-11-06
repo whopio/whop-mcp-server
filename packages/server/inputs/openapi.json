@@ -12071,6 +12071,628 @@
         ],
         "type": "string"
       },
+      "Automation": {
+        "properties": {
+          "account_id": {
+            "description": "ID of the account the automation belongs to, prefixed `biz_`.",
+            "example": "biz_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "active_enrollments_count": {
+            "description": "Members currently in the automation.",
+            "example": 0,
+            "type": "integer"
+          },
+          "created_at": {
+            "description": "When the automation was created, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
+          "created_by_actor": {
+            "$ref": "#/components/schemas/AutomationActor",
+            "description": "Who created the automation."
+          },
+          "draft_version": {
+            "description": "The version that step edits change. Always `published_version` plus one, or `1` before the first publish.",
+            "example": 2,
+            "type": "integer"
+          },
+          "has_unpublished_changes": {
+            "description": "Whether the draft has edits that `POST /automations/{id}/publish` would publish. Always `true` before the first publish.",
+            "example": false,
+            "type": "boolean"
+          },
+          "id": {
+            "description": "Automation ID, prefixed `ato_`.",
+            "example": "ato_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "name": {
+            "description": "The automation's name, shown on the dashboard. Up to 255 characters.",
+            "example": "After an order",
+            "type": "string"
+          },
+          "published_at": {
+            "description": "When the automation was last published, as an ISO 8601 timestamp. `null` until its first publish.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "published_by_actor": {
+            "description": "Who last published the automation. `null` until its first publish.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AutomationActor"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "published_version": {
+            "description": "The version new members start on. `null` until the automation is first published.",
+            "example": 1,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "secret_names": {
+            "items": {
+              "description": "Names of the automation's secrets, which its steps' code reads as environment variables. Their values are never returned.",
+              "example": "SHOP_TOKEN",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "status": {
+            "description": "`active` enrolls members and runs their steps. `closed` enrolls no one new, and members already in it finish. `stopped` enrolls no one, and its members' enrollments have ended. A new automation is `stopped` until its first publish makes it `active`.",
+            "enum": [
+              "active",
+              "closed",
+              "stopped"
+            ],
+            "example": "active",
+            "type": "string"
+          },
+          "total_enrollments_count": {
+            "description": "How many times members have enrolled in the automation, including enrollments that have ended.",
+            "example": 0,
+            "type": "integer"
+          },
+          "trigger_event": {
+            "description": "The webhook event that enrolls the member it's about, such as `payment.succeeded`. `null` for an automation that only `POST /automations/{id}/trigger` enrolls into. Fixed once the automation has been published.",
+            "enum": [
+              "payment.succeeded",
+              "payment.failed",
+              "membership.activated",
+              "membership.trial_ending_soon",
+              "member.created",
+              "invoice.created",
+              "invoice.paid",
+              "invoice.past_due",
+              "refund.created",
+              "dispute.created",
+              "resolution_center_case.created",
+              "resolution_center_case.decided",
+              "course_lesson_interaction.completed",
+              null
+            ],
+            "example": "payment.succeeded",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updated_at": {
+            "description": "When the automation was last updated, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "name",
+          "status",
+          "trigger_event",
+          "published_version",
+          "draft_version",
+          "has_unpublished_changes",
+          "published_at",
+          "published_by_actor",
+          "created_by_actor",
+          "secret_names",
+          "active_enrollments_count",
+          "total_enrollments_count",
+          "created_at",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "AutomationActor": {
+        "properties": {
+          "id": {
+            "description": "ID of the user, account or app, prefixed `user_`, `biz_` or `app_`.",
+            "example": "biz_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "object": {
+            "description": "What acted: a `user`, an `account` through one of its API keys, or an `app`.",
+            "enum": [
+              "user",
+              "account",
+              "app"
+            ],
+            "example": "account",
+            "type": "string"
+          }
+        },
+        "required": [
+          "object",
+          "id"
+        ],
+        "type": "object"
+      },
+      "AutomationEnrollment": {
+        "properties": {
+          "account_id": {
+            "description": "ID of the account the automation belongs to, prefixed `biz_`.",
+            "example": "biz_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "automation_id": {
+            "description": "ID of the automation, prefixed `ato_`.",
+            "example": "ato_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "created_at": {
+            "description": "When the member enrolled, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
+          "ended_at": {
+            "description": "When the enrollment ended, as an ISO 8601 timestamp. `null` while it's active.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "Automation enrollment ID, prefixed `atoe_`.",
+            "example": "atoe_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "member_id": {
+            "description": "ID of the member in the automation, prefixed `mber_`.",
+            "example": "mber_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "next_run_at": {
+            "description": "When that step runs for this member, as an ISO 8601 timestamp. `null` once the enrollment ends.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "next_step_id": {
+            "description": "ID of that step in the member's version, prefixed `atos_`. `null` once the enrollment ends.",
+            "example": "atos_xxxxxxxxxxxxxx",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "next_step_key": {
+            "description": "The `key` of the step the member is waiting on, in their version. `null` once the enrollment ends.",
+            "example": 1,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "status": {
+            "description": "`active` while the member moves through the automation, `completed` after its last step, `canceled` when the account canceled the enrollment or stopped or deleted the automation.",
+            "enum": [
+              "active",
+              "completed",
+              "canceled"
+            ],
+            "example": "active",
+            "type": "string"
+          },
+          "trigger_event": {
+            "description": "The webhook event that enrolled the member. `null` when `POST /automations/{id}/trigger` enrolled them.",
+            "enum": [
+              "payment.succeeded",
+              "payment.failed",
+              "membership.activated",
+              "membership.trial_ending_soon",
+              "member.created",
+              "invoice.created",
+              "invoice.paid",
+              "invoice.past_due",
+              "refund.created",
+              "dispute.created",
+              "resolution_center_case.created",
+              "resolution_center_case.decided",
+              "course_lesson_interaction.completed",
+              null
+            ],
+            "example": "payment.succeeded",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "trigger_resource_id": {
+            "description": "ID of the record the triggering event was about, such as a `pay_` payment or `mem_` membership. `null` when a trigger request enrolled them.",
+            "example": "mber_xxxxxxxxxxxxxx",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updated_at": {
+            "description": "When the enrollment last changed, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
+          "user_id": {
+            "description": "ID of the member's user, prefixed `user_`. `null` when the member is another business.",
+            "example": "user_xxxxxxxxxxxxxx",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "version": {
+            "description": "The automation version the member is on. It changes only when a publish moves members to the new version.",
+            "example": 1,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "automation_id",
+          "member_id",
+          "user_id",
+          "status",
+          "version",
+          "next_step_key",
+          "next_step_id",
+          "next_run_at",
+          "trigger_event",
+          "trigger_resource_id",
+          "ended_at",
+          "created_at",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "AutomationStep": {
+        "properties": {
+          "action_type": {
+            "description": "What the step does: `wait` holds the member for `config.delay_seconds`, `email` emails them, and `message` sends them a message from a team member. A draft step can switch between `email` and `message`, which clears `config.sender_id`. A `wait` can't become a sending step, or the other way round.",
+            "enum": [
+              "wait",
+              "email",
+              "message"
+            ],
+            "example": "email",
+            "type": "string"
+          },
+          "automation_id": {
+            "description": "ID of the automation the step belongs to, prefixed `ato_`.",
+            "example": "ato_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "config": {
+            "$ref": "#/components/schemas/AutomationStepConfig",
+            "description": "The step's settings for its `action_type`: `delay_seconds` for a `wait`, `sender_id` for an `email` or `message`. Writing it replaces the whole object."
+          },
+          "created_at": {
+            "description": "When the step was created, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
+          "id": {
+            "description": "Automation step ID, prefixed `atos_`. A step gets a new ID in every version; `key` stays the same.",
+            "example": "atos_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "issues": {
+            "items": {
+              "description": "What must be fixed before the draft can be published, such as code that hasn't been written. Empty when there's nothing.",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "key": {
+            "description": "Identifies the same step across versions. A new step gets a key no step of the automation has used.",
+            "example": 2,
+            "type": "integer"
+          },
+          "previous_step_id": {
+            "description": "ID of the step this one runs after, prefixed `atos_`. `null` when it runs first, directly after the member enrolls.",
+            "example": "atos_xxxxxxxxxxxxxx",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sender": {
+            "description": "The sender `config.sender_id` names. `null` on a `wait`, and when the step sends from the default sender.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AutomationStepSender"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "source_code": {
+            "description": "An `email` or `message` step's code: a TSX module whose default export gets the member and returns `message.send()`, `message.skip()` or `message.exit()` from `whop:message`. An `email` step sends its `subject`, its `react` element as the body and its `text` as the plain-text part; a `message` step sends its `text`. The code can import `react` and `@react-email/components`, and reads the account through the `whop` client from `whop:message`, which can only read: it holds every account-level `:read` permission that both the admin role and Whop AI hold except `payout:account:read`, as listed for previewing a step. Setting it, or previewing the step, needs every one of those permissions. Up to 64,000 characters. `null` on a `wait`, and until it is written.",
+            "example": "export default () => message.send({ subject: \"Thanks!\", text: \"Thanks for your order!\" });",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "updated_at": {
+            "description": "When the step was last updated, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
+          "version": {
+            "description": "The automation version this step is part of. Only the draft version's steps can change.",
+            "example": 1,
+            "type": "integer"
+          },
+          "waiting_enrollments_count": {
+            "description": "Members on this step's version who are waiting for it to run.",
+            "example": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "automation_id",
+          "version",
+          "key",
+          "previous_step_id",
+          "action_type",
+          "config",
+          "sender",
+          "source_code",
+          "issues",
+          "waiting_enrollments_count",
+          "created_at",
+          "updated_at"
+        ],
+        "type": "object"
+      },
+      "AutomationStepConfig": {
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/AutomationStepWaitConfig"
+          },
+          {
+            "$ref": "#/components/schemas/AutomationStepEmailConfig"
+          },
+          {
+            "$ref": "#/components/schemas/AutomationStepMessageConfig"
+          }
+        ],
+        "description": "The step's settings for its `action_type`: `delay_seconds` for a `wait`, and `sender_id` for an `email` or a `message`. Writing it replaces the whole object."
+      },
+      "AutomationStepEmailAddressSender": {
+        "properties": {
+          "address": {
+            "description": "The address the email comes from, such as hello@example.com.",
+            "type": "string"
+          },
+          "id": {
+            "description": "Email address ID, prefixed `emaddr_`.",
+            "type": "string"
+          },
+          "object": {
+            "description": "Always `email_address`.",
+            "enum": [
+              "email_address"
+            ],
+            "example": "email_address",
+            "type": "string"
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "address"
+        ],
+        "title": "Email address",
+        "type": "object"
+      },
+      "AutomationStepEmailConfig": {
+        "properties": {
+          "sender_id": {
+            "description": "The mailbox the email comes from, prefixed `emaddr_`: an email address on the account whose domain can send email. Naming one needs what `/email_addresses` asks to use it. `null` sends from the account's name through Whop.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "sender_id"
+        ],
+        "title": "Email",
+        "type": "object"
+      },
+      "AutomationStepMessageConfig": {
+        "properties": {
+          "sender_id": {
+            "description": "The team member the message comes from, as a user ID prefixed `user_`. Only that member can name themselves. `null` sends as the account owner.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "sender_id"
+        ],
+        "title": "Message",
+        "type": "object"
+      },
+      "AutomationStepPreview": {
+        "properties": {
+          "action_type": {
+            "description": "The step's action type: `email` or `message`.",
+            "enum": [
+              "email",
+              "message"
+            ],
+            "example": "email",
+            "type": "string"
+          },
+          "html": {
+            "description": "The email's HTML, with Whop's footer. Its unsubscribe link is a placeholder until the email is sent. `null` unless an `email` step sends.",
+            "example": "<html><body><p>Hi there</p><table role=\"presentation\" data-whop-footer width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:32px 0 0;border-top:1px solid #e6e6e6;\">\n<tr><td style=\"padding:20px 16px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#6f6f6f;\">\n<p style=\"margin:0 0 8px;\">You&#39;re receiving this because you bought from Batman1. <a href=\"{{whop_unsubscribe_url}}\" style=\"color:#6f6f6f;text-decoration:underline;\">Unsubscribe from Batman1 emails</a>.</p>\n<p style=\"margin:0 0 8px;\">Problem with your order? <a href=\"https://whop.com/@me/settings/resolution-center/\" style=\"color:#6f6f6f;text-decoration:underline;\">Open a case in the Resolution Center</a>.</p>\n<p style=\"margin:0;font-weight:600;color:#9a9a9a;\">Sent with Whop</p>\n<!--whop:open-pixel-->\n</td></tr>\n</table>\n\n</body></html>",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "outcome": {
+            "description": "What the step does for this member: `sent` its message, `skipped` it and moved on to the next step, or `exited` the automation.",
+            "enum": [
+              "sent",
+              "skipped",
+              "exited"
+            ],
+            "example": "sent",
+            "type": "string"
+          },
+          "preheader": {
+            "description": "The inbox preview line after the subject. `null` when the email has none.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "reason": {
+            "description": "Why the step skipped or exited, as the step's code said. `null` when it sends or gave no reason.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "subject": {
+            "description": "The email's subject. `null` unless an `email` step sends.",
+            "example": "How's the kettle?",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "text": {
+            "description": "The message as plain text: the message on a `message` step, or the email's plain-text version with Whop's footer. `null` unless the step sends.",
+            "example": "Hi there\n\n--\nYou're receiving this because you bought from Batman1. Unsubscribe from Batman1 emails: {{whop_unsubscribe_url}}\nProblem with your order? Open a case in the Resolution Center: https://whop.com/@me/settings/resolution-center/\nSent with Whop",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "outcome",
+          "action_type",
+          "subject",
+          "preheader",
+          "html",
+          "text",
+          "reason"
+        ],
+        "type": "object"
+      },
+      "AutomationStepSender": {
+        "description": "Who a step's message comes from. `object` picks the shape: an `email_address` for an `email` step, a `user` on the team for a `message` step.",
+        "discriminator": {
+          "mapping": {
+            "email_address": "#/components/schemas/AutomationStepEmailAddressSender",
+            "user": "#/components/schemas/AutomationStepUserSender"
+          },
+          "propertyName": "object"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AutomationStepEmailAddressSender"
+          },
+          {
+            "$ref": "#/components/schemas/AutomationStepUserSender"
+          }
+        ]
+      },
+      "AutomationStepUserSender": {
+        "properties": {
+          "id": {
+            "description": "User ID of the team member the message comes from, prefixed `user_`.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The team member's display name. `null` when they haven't set one.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "object": {
+            "description": "Always `user`.",
+            "enum": [
+              "user"
+            ],
+            "example": "user",
+            "type": "string"
+          },
+          "username": {
+            "description": "The team member's username.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "username",
+          "name"
+        ],
+        "title": "User",
+        "type": "object"
+      },
+      "AutomationStepWaitConfig": {
+        "properties": {
+          "delay_seconds": {
+            "description": "Seconds the member waits before the next step, from 1 to 31,536,000 (365 days).",
+            "example": 86400,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "delay_seconds"
+        ],
+        "title": "Wait",
+        "type": "object"
+      },
       "BillingReasons": {
         "description": "The reason why a specific payment was billed",
         "enum": [
@@ -41493,6 +42115,9 @@
           "authorized_user:create",
           "authorized_user:delete",
           "authorized_user:update",
+          "automation:manage",
+          "automation:read",
+          "automation:write",
           "bounty:basic:read",
           "bounty:capture_clip:complete",
           "bounty:capture_clip:create",
@@ -41789,6 +42414,9 @@
           "AuthorizedUserCreate",
           "AuthorizedUserDelete",
           "AuthorizedUserUpdate",
+          "AutomationManage",
+          "AutomationRead",
+          "AutomationWrite",
           "BountyBasicRead",
           "BountyCaptureClipComplete",
           "BountyCaptureClipCreate",
@@ -77720,6 +78348,1525 @@
         ],
         "x-group-title": "Identity"
       }
+    },
+    "/automation_enrollments": {
+      "get": {
+        "description": "Lists members' enrollments in automations, newest first.",
+        "operationId": "listAutomationEnrollments",
+        "parameters": [
+          {
+            "description": "Only this account's enrollments, prefixed `biz_`. Defaults to the credential's account, or every account a user can read.",
+            "in": "query",
+            "name": "account_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this automation's enrollments, prefixed `ato_`.",
+            "in": "query",
+            "name": "automation_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only this member's enrollments, prefixed `mber_`.",
+            "in": "query",
+            "name": "member_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only enrollments with this status.",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "enum": [
+                "active",
+                "completed",
+                "canceled"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only members on this automation version.",
+            "in": "query",
+            "name": "version",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Field to sort by.",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "enum": [
+                "created_at"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Sort direction.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the start of the range.",
+            "in": "query",
+            "name": "first",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results after this cursor. Use `page_info.end_cursor` from the previous response to fetch the next page.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the end of the range.",
+            "in": "query",
+            "name": "last",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results before this cursor. Use `page_info.start_cursor` from the previous response to fetch the previous page.",
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/AutomationEnrollment"
+                      },
+                      "type": "array"
+                    },
+                    "page_info": {
+                      "properties": {
+                        "end_cursor": {
+                          "example": null,
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "has_next_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "has_previous_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "start_cursor": {
+                          "example": "WyJjdXJzb3IiLDFd",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "start_cursor",
+                        "end_cursor",
+                        "has_next_page",
+                        "has_previous_page"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "page_info"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Automation enrollment list"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "unknown status"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "unauthenticated"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:read"
+            ]
+          }
+        ],
+        "summary": "List Automation Enrollments",
+        "tags": [
+          "Automation Enrollments"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        }
+      ],
+      "x-whop-surface": "native"
+    },
+    "/automation_enrollments/{id}": {
+      "get": {
+        "description": "Retrieves a member's enrollment in an automation, with the step they're waiting on.",
+        "operationId": "retrieveAutomationEnrollment",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationEnrollment"
+                }
+              }
+            },
+            "description": "Automation enrollment details"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "automation enrollment not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:read"
+            ]
+          }
+        ],
+        "summary": "Retrieve Automation Enrollment",
+        "tags": [
+          "Automation Enrollments"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "Automation enrollment ID, prefixed `atoe_`.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "x-whop-surface": "native"
+    },
+    "/automation_enrollments/{id}/cancel": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "Automation enrollment ID, prefixed `atoe_`.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "description": "Cancels an `active` enrollment: the member gets none of the automation's remaining steps, and their enrollment becomes `canceled`. The member can enroll in the automation again later.",
+        "operationId": "cancelAutomationEnrollment",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationEnrollment"
+                }
+              }
+            },
+            "description": "Automation enrollment canceled"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "an enrollment that already ended"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "missing automation:manage"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "automation enrollment not found"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:manage"
+            ]
+          }
+        ],
+        "summary": "Cancel Automation Enrollment",
+        "tags": [
+          "Automation Enrollments"
+        ]
+      },
+      "x-whop-surface": "native"
+    },
+    "/automation_steps": {
+      "get": {
+        "description": "Lists automation steps. With `automation_id`, lists one version of that automation in the order its steps run: the draft version unless `version` names another. Without it, lists the steps of every version of every automation, newest first. Steps get new IDs at every publish, so list them again afterwards and match them up by `key`.",
+        "operationId": "listAutomationSteps",
+        "parameters": [
+          {
+            "description": "Only this automation's steps, in run order, prefixed `ato_`. `order` doesn't apply.",
+            "in": "query",
+            "name": "automation_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "With `automation_id`, the version to list, such as its `published_version`. Defaults to its `draft_version`.",
+            "in": "query",
+            "name": "version",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Without `automation_id`, only this account's steps, prefixed `biz_`. Defaults to the credential's account, or every account a user can read.",
+            "in": "query",
+            "name": "account_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Field to sort by.",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "enum": [
+                "created_at"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Sort direction.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the start of the range.",
+            "in": "query",
+            "name": "first",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results after this cursor. Use `page_info.end_cursor` from the previous response to fetch the next page.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the end of the range.",
+            "in": "query",
+            "name": "last",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results before this cursor. Use `page_info.start_cursor` from the previous response to fetch the previous page.",
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/AutomationStep"
+                      },
+                      "type": "array"
+                    },
+                    "page_info": {
+                      "properties": {
+                        "end_cursor": {
+                          "example": null,
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "has_next_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "has_previous_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "start_cursor": {
+                          "example": "MQ",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "start_cursor",
+                        "end_cursor",
+                        "has_next_page",
+                        "has_previous_page"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "page_info"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A published version"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "a version without an automation"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "unauthenticated"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:read"
+            ]
+          }
+        ],
+        "summary": "List Automation Steps",
+        "tags": [
+          "Automation Steps"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        }
+      ],
+      "post": {
+        "description": "Adds a step to an automation's draft version, directly after `previous_step_id`, or first when it's left out. The step that held that position now runs after the new one. Steps can't be moved, so add each one where it belongs. Setting `source_code` also needs every read permission listed for previewing a step, which the step's code reads the account with.",
+        "operationId": "createAutomationStep",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action_type": {
+                    "description": "What the step does: `wait` holds the member for `config.delay_seconds`, `email` emails them, and `message` sends them a message from a team member. A draft step can switch between `email` and `message`, which clears `config.sender_id`. A `wait` can't become a sending step, or the other way round.",
+                    "enum": [
+                      "wait",
+                      "email",
+                      "message"
+                    ],
+                    "example": "message",
+                    "type": "string"
+                  },
+                  "automation_id": {
+                    "description": "ID of the automation to add the step to, prefixed `ato_`.",
+                    "example": "ato_xxxxxxxxxxxxxx",
+                    "type": "string"
+                  },
+                  "config": {
+                    "$ref": "#/components/schemas/AutomationStepConfig"
+                  },
+                  "previous_step_id": {
+                    "description": "ID of the draft step the new one runs after, prefixed `atos_`. Leave it out to make the new step run first.",
+                    "example": "atos_xxxxxxxxxxxxxx",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "source_code": {
+                    "description": "An `email` or `message` step's code: a TSX module whose default export gets the member and returns `message.send()`, `message.skip()` or `message.exit()` from `whop:message`. An `email` step sends its `subject`, its `react` element as the body and its `text` as the plain-text part; a `message` step sends its `text`. The code can import `react` and `@react-email/components`, and reads the account through the `whop` client from `whop:message`, which can only read: it holds every account-level `:read` permission that both the admin role and Whop AI hold except `payout:account:read`, as listed for previewing a step. Setting it, or previewing the step, needs every one of those permissions. Up to 64,000 characters. `null` on a `wait`, and until it is written.",
+                    "example": "export default () => message.send({ subject: \"Thanks!\", text: \"Thanks for your order!\" });",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "automation_id",
+                  "action_type"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationStep"
+                }
+              }
+            },
+            "description": "Automation step created"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "a sender that doesn't fit the action type"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "code from a key that can't read what step code reads"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "a previous step of another automation"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:write"
+            ]
+          }
+        ],
+        "summary": "Create Automation Step",
+        "tags": [
+          "Automation Steps"
+        ]
+      },
+      "x-whop-surface": "native"
+    },
+    "/automation_steps/{id}": {
+      "delete": {
+        "description": "Deletes a step of the draft version. The step after it runs in its place. Members already in the automation aren't affected until the draft is published.",
+        "operationId": "deleteAutomationStep",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationStep"
+                }
+              }
+            },
+            "description": "Automation step deleted"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:write"
+            ]
+          }
+        ],
+        "summary": "Delete Automation Step",
+        "tags": [
+          "Automation Steps"
+        ]
+      },
+      "get": {
+        "description": "Retrieves an automation step, with how many members are waiting for it.",
+        "operationId": "retrieveAutomationStep",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationStep"
+                }
+              }
+            },
+            "description": "Automation step details"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "automation step not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:read"
+            ]
+          }
+        ],
+        "summary": "Retrieve Automation Step",
+        "tags": [
+          "Automation Steps"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "Automation step ID, prefixed `atos_`.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "patch": {
+        "description": "Edits a step of the draft version. A published version's steps never change; edit the same `key` in the draft instead. `previous_step_id` can't change. Setting `source_code` also needs every read permission listed for previewing a step, which the step's code reads the account with.",
+        "operationId": "updateAutomationStep",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "action_type": {
+                    "description": "What the step does: `wait` holds the member for `config.delay_seconds`, `email` emails them, and `message` sends them a message from a team member. A draft step can switch between `email` and `message`, which clears `config.sender_id`. A `wait` can't become a sending step, or the other way round.",
+                    "enum": [
+                      "wait",
+                      "email",
+                      "message"
+                    ],
+                    "example": "message",
+                    "type": "string"
+                  },
+                  "config": {
+                    "$ref": "#/components/schemas/AutomationStepConfig"
+                  },
+                  "source_code": {
+                    "description": "An `email` or `message` step's code: a TSX module whose default export gets the member and returns `message.send()`, `message.skip()` or `message.exit()` from `whop:message`. An `email` step sends its `subject`, its `react` element as the body and its `text` as the plain-text part; a `message` step sends its `text`. The code can import `react` and `@react-email/components`, and reads the account through the `whop` client from `whop:message`, which can only read: it holds every account-level `:read` permission that both the admin role and Whop AI hold except `payout:account:read`, as listed for previewing a step. Setting it, or previewing the step, needs every one of those permissions. Up to 64,000 characters. `null` on a `wait`, and until it is written.",
+                    "example": "export default () => message.send({ subject: \"Thanks!\", text: \"Thanks for your order!\" });",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationStep"
+                }
+              }
+            },
+            "description": "Automation step updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "a move"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:write"
+            ]
+          }
+        ],
+        "summary": "Update Automation Step",
+        "tags": [
+          "Automation Steps"
+        ]
+      },
+      "x-whop-surface": "native"
+    },
+    "/automation_steps/{id}/preview": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "Automation step ID, prefixed `atos_`.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "description": "Runs an `email` or `message` step's code for one member, as if they had reached it, and returns what it would send. Nothing is sent. The step's code reads the account with every account-level `:read` permission that both the admin role and Whop AI hold except `payout:account:read`, so previewing, like setting `source_code`, needs `automation:write` and every one of those permissions. OAuth apps can't be granted all of them, so they can't preview or set step code.",
+        "operationId": "previewAutomationStep",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "member_id": {
+                    "description": "The member to preview the step for, prefixed `mber_`.",
+                    "example": "mber_xxxxxxxxxxxxxx",
+                    "type": "string"
+                  },
+                  "trigger_resource_id": {
+                    "description": "ID of the record the automation's trigger event was about for this member, such as a `pay_` payment.",
+                    "example": "pay_xxxxxxxxxxxxxx",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "member_id"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AutomationStepPreview"
+                }
+              }
+            },
+            "description": "What the step would send"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "the step's code returned nothing it can send"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "a key that can edit steps but not read what step code reads"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "a member of another account"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:write",
+              "access_pass:basic:read",
+              "access_pass:stats:read",
+              "ad_campaign:basic:read",
+              "ad_campaign:read",
+              "ad_campaign:stats:read",
+              "ad_publisher:read",
+              "affiliate:basic:read",
+              "ai_chat:read",
+              "app_authorization:read",
+              "audience:basic:read",
+              "automation:read",
+              "bounty:basic:read",
+              "chat:read",
+              "checkout_configuration:basic:read",
+              "company:authorized_user:email:read",
+              "company:authorized_user:read",
+              "company:basic:read",
+              "company:log:read",
+              "company_token_transaction:read",
+              "course_analytics:read",
+              "course_lesson_interaction:read",
+              "courses:read",
+              "developer:logs:read",
+              "dms:read",
+              "domain:read",
+              "experience:hidden_experience:read",
+              "experiment:read",
+              "forum:read",
+              "identity:read",
+              "incorporation:read",
+              "invoice:basic:read",
+              "lead:basic:read",
+              "livestream:chat:read",
+              "media:read",
+              "member:basic:read",
+              "member:email:read",
+              "member:journey:read",
+              "member:payment_methods:read",
+              "member:phone:read",
+              "member:stats:read",
+              "partner:basic:read",
+              "partner:email:read",
+              "payment:basic:read",
+              "payment:dispute:read",
+              "payment:dispute_alert:read",
+              "payment:resolution_center_case:read",
+              "payment:setup_intent:read",
+              "plan:basic:read",
+              "plan:stats:read",
+              "plan:waitlist:read",
+              "promo_code:basic:read",
+              "referral:basic:read",
+              "shipment:basic:read",
+              "social_account:read",
+              "support_chat:read",
+              "tracking_link:basic:read",
+              "tracking_link:stats:read"
+            ]
+          }
+        ],
+        "summary": "Preview Automation Step",
+        "tags": [
+          "Automation Steps"
+        ],
+        "x-whop-credentials": [
+          "account_api_key",
+          "app_api_key",
+          "account_token",
+          "account_user_token"
+        ]
+      },
+      "x-whop-surface": "native"
+    },
+    "/automations": {
+      "get": {
+        "description": "Lists automations, newest first.",
+        "operationId": "listAutomations",
+        "parameters": [
+          {
+            "description": "Only this account's automations, prefixed `biz_`. Defaults to the credential's account, or every account a user can read.",
+            "in": "query",
+            "name": "account_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only automations with this status.",
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "enum": [
+                "active",
+                "closed",
+                "stopped"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only automations this webhook event enrolls into.",
+            "in": "query",
+            "name": "trigger_event",
+            "required": false,
+            "schema": {
+              "enum": [
+                "payment.succeeded",
+                "payment.failed",
+                "membership.activated",
+                "membership.trial_ending_soon",
+                "member.created",
+                "invoice.created",
+                "invoice.paid",
+                "invoice.past_due",
+                "refund.created",
+                "dispute.created",
+                "resolution_center_case.created",
+                "resolution_center_case.decided",
+                "course_lesson_interaction.completed"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Field to sort by.",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "enum": [
+                "created_at"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Sort direction.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the start of the range.",
+            "in": "query",
+            "name": "first",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results after this cursor. Use `page_info.end_cursor` from the previous response to fetch the next page.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the end of the range.",
+            "in": "query",
+            "name": "last",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results before this cursor. Use `page_info.start_cursor` from the previous response to fetch the previous page.",
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/Automation"
+                      },
+                      "type": "array"
+                    },
+                    "page_info": {
+                      "properties": {
+                        "end_cursor": {
+                          "example": null,
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "has_next_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "has_previous_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "start_cursor": {
+                          "example": "WyJjdXJzb3IiLDFd",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "start_cursor",
+                        "end_cursor",
+                        "has_next_page",
+                        "has_previous_page"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "page_info"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Automation list"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "unknown status"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "a partner, who only reads the account itself"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:read"
+            ]
+          }
+        ],
+        "summary": "List Automations",
+        "tags": [
+          "Automations"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        }
+      ],
+      "post": {
+        "description": "Creates an automation, `stopped`, with an empty draft version. Add steps with `POST /automation_steps`, then publish it with `POST /automations/{id}/publish`, which makes it `active`.",
+        "operationId": "createAutomation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "account_id": {
+                    "description": "Account ID, prefixed `biz_`. Required for user credentials; otherwise defaults to the credential's account.",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The automation's name, shown on the dashboard. Up to 255 characters.",
+                    "example": "Welcome",
+                    "type": "string"
+                  },
+                  "trigger_event": {
+                    "description": "The webhook event that enrolls the member it's about, such as `payment.succeeded`. `null` for an automation that only `POST /automations/{id}/trigger` enrolls into. Fixed once the automation has been published.",
+                    "enum": [
+                      "payment.succeeded",
+                      "payment.failed",
+                      "membership.activated",
+                      "membership.trial_ending_soon",
+                      "member.created",
+                      "invoice.created",
+                      "invoice.paid",
+                      "invoice.past_due",
+                      "refund.created",
+                      "dispute.created",
+                      "resolution_center_case.created",
+                      "resolution_center_case.decided",
+                      "course_lesson_interaction.completed",
+                      null
+                    ],
+                    "example": "membership.activated",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "name"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Automation"
+                }
+              }
+            },
+            "description": "Automation created"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "a trigger event outside the allowlist"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "missing automation:write"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:write"
+            ]
+          }
+        ],
+        "summary": "Create Automation",
+        "tags": [
+          "Automations"
+        ]
+      },
+      "x-whop-surface": "native"
+    },
+    "/automations/{id}": {
+      "delete": {
+        "description": "Deletes an automation. It stops enrolling members, and every member in it stops.",
+        "operationId": "deleteAutomation",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Automation"
+                }
+              }
+            },
+            "description": "Automation deleted"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "missing automation:manage"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:manage"
+            ]
+          }
+        ],
+        "summary": "Delete Automation",
+        "tags": [
+          "Automations"
+        ]
+      },
+      "get": {
+        "description": "Retrieves an automation, with how many members are in it now and how many times members have enrolled in it.",
+        "operationId": "retrieveAutomation",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Automation"
+                }
+              }
+            },
+            "description": "Automation details"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "automation not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:read"
+            ]
+          }
+        ],
+        "summary": "Retrieve Automation",
+        "tags": [
+          "Automations"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "Automation ID, prefixed `ato_`.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "patch": {
+        "description": "Renames an automation, changes its trigger event before its first publish, sets its secrets, or changes its status. Changing `secrets` or `status` also needs `automation:manage`. Use `POST /automations/{id}/publish` to publish the draft, and the steps endpoints to change what it does.",
+        "operationId": "updateAutomation",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "name": {
+                    "description": "The automation's name, shown on the dashboard. Up to 255 characters.",
+                    "example": "After a first order",
+                    "type": "string"
+                  },
+                  "secrets": {
+                    "additionalProperties": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "description": "Secrets to set, by name, merged into the automation's: a name set to `null` is removed. Step code reads them as environment variables, and no endpoint returns their values. Names are uppercase letters, digits and underscores, starting with a letter, up to 64 characters. Up to 50 secrets, each up to 4 KB.",
+                    "example": {
+                      "SHOP_TOKEN": "shpat_123"
+                    },
+                    "type": "object"
+                  },
+                  "status": {
+                    "description": "`active` enrolls members and runs their steps. `closed` stops new enrollments and lets members already in it finish. `stopped` stops new enrollments and ends every member's enrollment. `active` and `closed` need a published version.",
+                    "enum": [
+                      "active",
+                      "closed",
+                      "stopped"
+                    ],
+                    "example": "active",
+                    "type": "string"
+                  },
+                  "trigger_event": {
+                    "description": "The webhook event that enrolls the member it's about, such as `payment.succeeded`. `null` for an automation that only `POST /automations/{id}/trigger` enrolls into. Fixed once the automation has been published.",
+                    "enum": [
+                      "payment.succeeded",
+                      "payment.failed",
+                      "membership.activated",
+                      "membership.trial_ending_soon",
+                      "member.created",
+                      "invoice.created",
+                      "invoice.paid",
+                      "invoice.past_due",
+                      "refund.created",
+                      "dispute.created",
+                      "resolution_center_case.created",
+                      "resolution_center_case.decided",
+                      "course_lesson_interaction.completed",
+                      null
+                    ],
+                    "example": "payment.succeeded",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Automation"
+                }
+              }
+            },
+            "description": "Automation updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "a trigger event change after the first publish"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "secrets without automation:manage"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:write"
+            ]
+          }
+        ],
+        "summary": "Update Automation",
+        "tags": [
+          "Automations"
+        ]
+      },
+      "x-whop-surface": "native"
+    },
+    "/automations/{id}/publish": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "Automation ID, prefixed `ato_`.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "description": "Publishes the draft version: new members start on it, and the automation becomes `active`. Members already in the automation move onto it: onto the same step when it's still there, or, when the draft removed it, onto the step that now follows the nearest earlier step the draft kept. The draft is then copied into the next draft version, whose steps get new IDs and keep their `key`. Every draft step's `issues` must be empty. When the draft has no edits since the last publish, no new version is made, and this only makes a `closed` or `stopped` automation `active` again.",
+        "operationId": "publishAutomation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Automation"
+                }
+              }
+            },
+            "description": "Automation published"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "a draft with no steps"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "missing automation:manage"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:manage"
+            ]
+          }
+        ],
+        "summary": "Publish Automation",
+        "tags": [
+          "Automations"
+        ]
+      },
+      "x-whop-surface": "native"
+    },
+    "/automations/{id}/trigger": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "Automation ID, prefixed `ato_`.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "description": "Enrolls members into an active automation at the first step of its published version: the members you name, or every member `GET /members` lists with the filters you pass, as they match now. Members already in the automation are skipped. Enrolling runs in the background, so this returns the automation right away and `active_enrollments_count` grows as members enroll.",
+        "operationId": "triggerAutomation",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "members": {
+                    "description": "Who to enroll: up to 1,000 member IDs, or an object of `GET /members` filters. An empty object enrolls every member.",
+                    "oneOf": [
+                      {
+                        "description": "Member IDs, prefixed `mber_`.",
+                        "items": {
+                          "example": "mber_xxxxxxxxxxxxxx",
+                          "type": "string"
+                        },
+                        "maxItems": 1000,
+                        "minItems": 1,
+                        "type": "array"
+                      },
+                      {
+                        "description": "Filters with the names and meaning of `GET /members` query parameters: `access_level`, `status`, `most_recent_actions`, `membership_status`, `product_ids`, `variant_ids`, `promo_code_ids`, `user_ids`, `query`, `created_before`, and `created_after`.",
+                        "type": "object"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "members"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Automation"
+                }
+              }
+            },
+            "description": "Members are being enrolled"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "a filter GET /members doesn't take"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "missing automation:manage"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "automation:manage",
+              "member:basic:read"
+            ]
+          }
+        ],
+        "summary": "Trigger Automation",
+        "tags": [
+          "Automations"
+        ]
+      },
+      "x-whop-surface": "native"
     },
     "/bounties": {
       "get": {
@@ -178444,6 +180591,21 @@
       "x-whop-summary": "Mailboxes on an account's domains, for sending and receiving email."
     },
     {
+      "description": "An Automation is a chain of steps that members move through one at a time. A member enrolls when the automation's `trigger_event` happens to them, such as `payment.succeeded`, or when you enroll them with `POST /automations/{id}/trigger`. A `wait` step holds them for a set time, and an `email` or `message` step runs its `source_code`, a TSX module that reads the member's data through the API and decides whether to send and what to say.\n\nSteps are versioned. You edit the draft version, and `POST /automations/{id}/publish` makes it the version new members start on, then copies it into the next draft. Each publish moves members already in the automation onto the new version. Use the Automations API to create, publish and trigger automations, and to update them, including their status, and the Automation steps and Automation enrollments APIs for their steps and members.\n",
+      "name": "Automations",
+      "x-whop-summary": "Workflows that a webhook event or a trigger request starts for each member, running timed steps that message them."
+    },
+    {
+      "description": "An Automation step is one step in a version of an automation. A `wait` step holds a member for `config.delay_seconds`, and an `email` or `message` step runs its `source_code` to decide whether to send and what to say. Steps form a chain: each one names the step before it, and only the draft version can change.\n\nUse the Automation steps API to list a version's steps, add, update and remove steps in the draft, and preview what an `email` or `message` step would send a member. Nothing is sent by a preview.\n\nA step's code reads the account through the API with every account-level `:read` permission that both the admin role and Whop AI hold, except `payout:account:read`, so it can't read cards. Setting a step's `source_code`, or previewing a step, needs every one of those permissions, so a credential can't write code that reads more than it can.\n",
+      "name": "Automation Steps",
+      "x-whop-summary": "The wait, email and message steps of an automation's versions."
+    },
+    {
+      "description": "An Automation enrollment is one member's pass through an automation. It records the version the member is on, the step they reach next and when, and whether they are still going, finished, or canceled.\n\nUse the Automation enrollments API to list who is in an automation, or which automations a member is in, retrieve one enrollment, and cancel one to stop that member's remaining steps.\n",
+      "name": "Automation Enrollments",
+      "x-whop-summary": "The members going through an automation, and the step each one is waiting on."
+    },
+    {
       "description": "Get started at [whop.com/network](https://whop.com/network). A Partner is a user who refers people and businesses to Whop. The partner profile includes enrollment, active direct business referral counts, and default payout terms.\n\nRetrieve your profile with `/partners/me`. Use `/partner_referral_requests` to create and manage referral links and their rewards. You can also enroll in the partner program, review referred users and businesses, track earnings, and see the partner leaderboard.\n",
       "name": "Partners",
       "x-whop-summary": "Your partner profile, referral links, payout rates, and referred businesses."
@@ -199141,7 +201303,10 @@
         "Messages",
         "Livestreams",
         "Notifications",
-        "Email addresses"
+        "Email addresses",
+        "Automations",
+        "Automation Steps",
+        "Automation Enrollments"
       ]
     },
     {

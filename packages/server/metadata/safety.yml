@@ -560,6 +560,41 @@ rules:
       confirmation: true
       idempotency: supported
 
+  # ── Automations: a published or triggered automation messages the account's customers ──
+  - name: automation-publication
+    match:
+      operations:
+        - POST /automations/{id}/publish
+        - POST /automations/{id}/trigger
+    set:
+      classification: mutating
+      externalPublication: true
+      confirmation: true
+      idempotency: supported
+
+  # Canceling ends one member's enrollment: they get none of the automation's remaining steps.
+  - name: automation-enrollment-cancel
+    match:
+      operations:
+        - POST /automation_enrollments/{id}/cancel
+    set:
+      classification: mutating
+      confirmation: true
+      idempotency: supported
+
+  - name: automation-edits
+    match:
+      operations:
+        - POST /automations
+        - PATCH /automations/{id}
+        - POST /automation_steps
+        - PATCH /automation_steps/{id}
+        # Runs the step's code in the sandbox; nothing is sent.
+        - POST /automation_steps/{id}/preview
+    set:
+      classification: mutating
+      idempotency: supported
+
   # ── Exports produce files of data the credential can already read ─────────
   - name: data-exports
     match:
