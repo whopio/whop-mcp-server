@@ -132380,6 +132380,15 @@
             }
           },
           {
+            "description": "Set to `true` to return the number of matching results in `page_info.total_count`. Send `first=0` as well to return the count without any results.",
+            "in": "query",
+            "name": "include_total_count",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "description": "The field to sort partner businesses by.",
             "in": "query",
             "name": "order",
@@ -133008,13 +133017,26 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "total_count": {
+                          "description": "Number of results matching the filters, across every page. Counting stops at 10,000. `null` when `include_total_count` isn't `true`, or when the count ran out of time.",
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "total_count_capped": {
+                          "description": "Whether counting stopped at the limit. `true` means `total_count` is 10,000 or more.",
+                          "type": "boolean"
                         }
                       },
                       "required": [
                         "has_next_page",
                         "end_cursor",
                         "has_previous_page",
-                        "start_cursor"
+                        "start_cursor",
+                        "total_count",
+                        "total_count_capped"
                       ],
                       "type": "object"
                     }
