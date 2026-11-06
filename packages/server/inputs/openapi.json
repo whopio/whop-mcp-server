@@ -163082,23 +163082,24 @@
                           "breakdowns": {
                             "description": "Supported breakdown_by values when they differ from the filter properties.",
                             "items": {
+                              "example": "component",
                               "type": "string"
                             },
                             "type": "array"
                           },
                           "description": {
                             "description": "A short description of what the metric measures.",
-                            "example": "Ad platform delivery over time (spend, impressions, clicks) on the unified source language: source scopes by a whop:<campaign>:<group>:<ad> path, exact or with a trailing :* prefix (whop alone or no source = the whole account), and group_by=source groups one path segment deeper than the filter prefix. Only whop:* paths report delivery today; other roots return nothing. Requires breakdown_by=metric, which returns each delivery measure per bucket plus whole-window data.totals. Spend converts to convert_to (defaults to usd). Whole-account attribution numbers live in the events and people metrics.",
+                            "example": "A 0 to 100 campaign score at each interval since launch, read off the 15-minute ledger windows: half how charged spend moved window to window on average (steady spend scores 50), half the share of windows since launch it charged in. Several ad_xxxxxxxxxxxxxx_ids (up to 100) average their scores weighted by daily budget. breakdown_by=component, for one campaign, adds each part's score and weight and the counts behind them. A runner reads the campaigns they run; staff read any campaign with account_id=global.",
                             "type": "string"
                           },
                           "key": {
                             "description": "The metric's key. Pass it to GET /stats/time_series/{metric} to query its values.",
-                            "example": "ad_xxxxxxxxxxxxxx",
+                            "example": "ad_xxxxxxxxxxxxxx_score",
                             "type": "string"
                           },
                           "name": {
                             "description": "Human-readable display name for the metric.",
-                            "example": "Ad delivery",
+                            "example": "Ad campaign score",
                             "type": "string"
                           },
                           "properties": {
@@ -163116,7 +163117,7 @@
                               "currency",
                               "percent"
                             ],
-                            "example": "currency",
+                            "example": "count",
                             "type": "string"
                           },
                           "windows": {
@@ -163374,23 +163375,24 @@
                           "breakdowns": {
                             "description": "Supported breakdown_by values when they differ from the filter properties.",
                             "items": {
+                              "example": "component",
                               "type": "string"
                             },
                             "type": "array"
                           },
                           "description": {
                             "description": "A short description of what the metric measures.",
-                            "example": "Ad platform delivery over time (spend, impressions, clicks) on the unified source language: source scopes by a whop:<campaign>:<group>:<ad> path, exact or with a trailing :* prefix (whop alone or no source = the whole account), and group_by=source groups one path segment deeper than the filter prefix. Only whop:* paths report delivery today; other roots return nothing. Requires breakdown_by=metric, which returns each delivery measure per bucket plus whole-window data.totals. Spend converts to convert_to (defaults to usd). Whole-account attribution numbers live in the events and people metrics.",
+                            "example": "A 0 to 100 campaign score at each interval since launch, read off the 15-minute ledger windows: half how charged spend moved window to window on average (steady spend scores 50), half the share of windows since launch it charged in. Several ad_xxxxxxxxxxxxxx_ids (up to 100) average their scores weighted by daily budget. breakdown_by=component, for one campaign, adds each part's score and weight and the counts behind them. A runner reads the campaigns they run; staff read any campaign with account_id=global.",
                             "type": "string"
                           },
                           "key": {
                             "description": "The metric's key. Pass it to GET /stats/time_series/{metric} to query its values.",
-                            "example": "ad_xxxxxxxxxxxxxx",
+                            "example": "ad_xxxxxxxxxxxxxx_score",
                             "type": "string"
                           },
                           "name": {
                             "description": "Human-readable display name for the metric.",
-                            "example": "Ad delivery",
+                            "example": "Ad campaign score",
                             "type": "string"
                           },
                           "properties": {
@@ -163408,7 +163410,7 @@
                               "currency",
                               "percent"
                             ],
-                            "example": "currency",
+                            "example": "count",
                             "type": "string"
                           },
                           "windows": {
@@ -163514,6 +163516,7 @@
               "enum": [
                 "minute",
                 "five_minutes",
+                "fifteen_minutes",
                 "thirty_minutes",
                 "hour",
                 "day",
@@ -164469,6 +164472,7 @@
               "enum": [
                 "minute",
                 "five_minutes",
+                "fifteen_minutes",
                 "thirty_minutes",
                 "hour",
                 "day",
