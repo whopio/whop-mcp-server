@@ -28260,6 +28260,14 @@
                       "string",
                       "null"
                     ]
+                  },
+                  "security_answer": {
+                    "description": "The security answer the merchant set when adding this payout method (for example an Interac e-Transfer), needed to claim the payout. null when the destination has no custom answer. Requires payout:destination:read.",
+                    "example": null,
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   }
                 },
                 "type": [
@@ -199878,7 +199886,8 @@
                     },
                     "payout_destination": {
                       "icon_url": "https://whop-assets-example.s3.amazonaws.com/uploads/image/2026-01-01/ach-activity-icon",
-                      "payer_name": "ACH Bank Deposit"
+                      "payer_name": "ACH Bank Deposit",
+                      "security_answer": null
                     },
                     "payout_token_nickname": "Ops checking",
                     "reason": "bounty_payout",
