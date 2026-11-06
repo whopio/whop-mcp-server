@@ -49124,18 +49124,28 @@
         "properties": {
           "amount": {
             "$ref": "#/components/schemas/Money",
-            "description": "The payment's original total, before your price for this address."
+            "description": "The original total, before your price for this address."
+          },
+          "checkout_session_id": {
+            "description": "The checkout session being priced, prefixed `chs_`, when the buyer is paying through one. `null` for a payment.",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "line_items": {
             "items": {
               "$ref": "#/components/schemas/ShippingAddressChangedWebhookLineItem",
-              "description": "Every line on the payment, each at its original amount. Your reply prices every one of them."
+              "description": "Every line being bought, each at its original amount. Your reply prices every one of them."
             },
             "type": "array"
           },
           "payment_id": {
-            "description": "The payment being priced, prefixed `pay_`.",
-            "type": "string"
+            "description": "The payment being priced, prefixed `pay_`. `null` when the buyer is paying through a checkout session: the payment is created only after they approve, at your price.",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "shipping_address": {
             "$ref": "#/components/schemas/ShippingAddressChangedWebhookAddress",
@@ -49144,6 +49154,7 @@
         },
         "required": [
           "payment_id",
+          "checkout_session_id",
           "amount",
           "line_items",
           "shipping_address"
@@ -49154,10 +49165,10 @@
         "properties": {
           "amount": {
             "$ref": "#/components/schemas/Money",
-            "description": "The line's original total, the same on every call for this payment."
+            "description": "The line's original total, the same on every call for this purchase."
           },
           "id": {
-            "description": "The line item, prefixed `li_`. Your reply names each line by this id.",
+            "description": "Identifies the line. Your reply names each line by this id, so send it back unchanged.",
             "type": "string"
           },
           "quantity": {
@@ -49185,7 +49196,7 @@
           "line_items": {
             "items": {
               "$ref": "#/components/schemas/ShippingAddressChangedWebhookReplyLineItem",
-              "description": "A total for every line on the payment, and only those."
+              "description": "A total for every line in `data.line_items`, and only those."
             },
             "type": "array"
           }
@@ -49199,10 +49210,10 @@
         "properties": {
           "amount": {
             "$ref": "#/components/schemas/Money",
-            "description": "The line's total at this address, tax and shipping included, in the payment's currency."
+            "description": "The line's total at this address, tax and shipping included, in the currency of `data.amount`."
           },
           "id": {
-            "description": "The line item, prefixed `li_`, from `data.line_items`.",
+            "description": "The line's `id` from `data.line_items`, unchanged.",
             "type": "string"
           }
         },
@@ -197314,7 +197325,7 @@
     },
     "shipping_address.changed": {
       "post": {
-        "description": "Sent while a buyer picks a shipping address on PayPal's page, for a payment the seller prices. Whop calls the account's oldest enabled `https` webhook with this event and waits up to 4 seconds for the reply: a Money total for every line in `line_items`, tax and shipping included, or `{ \"decline\": true }`. A late, failed or invalid reply refuses the address, and the buyer picks another. The call isn't retried and has no test event",
+        "description": "Sent while a buyer picks a shipping address on PayPal's page, for a purchase the seller prices. Whop calls the account's oldest enabled `https` webhook with this event and waits up to 4 seconds for the reply: a Money total for every line in `line_items`, tax and shipping included, or `{ \"decline\": true }`. A late, failed or invalid reply refuses the address, and the buyer picks another. The call isn't retried and has no test event",
         "parameters": [
           {
             "in": "header",
@@ -197361,6 +197372,7 @@
                     "decimals": 2,
                     "display_decimals": 2
                   },
+                  "checkout_session_id": "some_string",
                   "line_items": [
                     {
                       "amount": {
