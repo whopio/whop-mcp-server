@@ -49073,6 +49073,137 @@
         ],
         "type": "string"
       },
+      "ShippingAddressChangedWebhookAddress": {
+        "properties": {
+          "city": {
+            "description": "The city.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "country": {
+            "description": "The two-letter ISO 3166-1 country code.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "postal_code": {
+            "description": "The postal code.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "state": {
+            "description": "The state, province or region code.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "city",
+          "state",
+          "postal_code",
+          "country"
+        ],
+        "type": "object"
+      },
+      "ShippingAddressChangedWebhookData": {
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Money",
+            "description": "The payment's original total, before your price for this address."
+          },
+          "line_items": {
+            "items": {
+              "$ref": "#/components/schemas/ShippingAddressChangedWebhookLineItem",
+              "description": "Every line on the payment, each at its original amount. Your reply prices every one of them."
+            },
+            "type": "array"
+          },
+          "payment_id": {
+            "description": "The payment being priced, prefixed `pay_`.",
+            "type": "string"
+          },
+          "shipping_address": {
+            "$ref": "#/components/schemas/ShippingAddressChangedWebhookAddress",
+            "description": "The address the buyer picked. PayPal shares only these fields until the buyer approves."
+          }
+        },
+        "required": [
+          "payment_id",
+          "amount",
+          "line_items",
+          "shipping_address"
+        ],
+        "type": "object"
+      },
+      "ShippingAddressChangedWebhookLineItem": {
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Money",
+            "description": "The line's original total, the same on every call for this payment."
+          },
+          "id": {
+            "description": "The line item, prefixed `li_`. Your reply names each line by this id.",
+            "type": "string"
+          },
+          "quantity": {
+            "description": "How many of the variant this line holds.",
+            "type": "number"
+          },
+          "variant_id": {
+            "description": "The variant bought on this line, prefixed `plan_`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "variant_id",
+          "quantity",
+          "amount"
+        ],
+        "type": "object"
+      },
+      "ShippingAddressChangedWebhookReply": {
+        "properties": {
+          "line_items": {
+            "items": {
+              "$ref": "#/components/schemas/ShippingAddressChangedWebhookReplyLineItem",
+              "description": "A total for every line on the payment, and only those."
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "line_items"
+        ],
+        "type": "object"
+      },
+      "ShippingAddressChangedWebhookReplyLineItem": {
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Money",
+            "description": "The line's total at this address, tax and shipping included, in the payment's currency."
+          },
+          "id": {
+            "description": "The line item, prefixed `li_`, from `data.line_items`.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "amount"
+        ],
+        "type": "object"
+      },
       "SocialAccount": {
         "properties": {
           "error": {
@@ -53587,7 +53718,8 @@
                 "app_payment.failed",
                 "app_payment.pending",
                 "app_payment.requires_action",
-                "app_membership.cancel_at_period_end_changed"
+                "app_membership.cancel_at_period_end_changed",
+                "shipping_address.changed"
               ],
               "example": "payment.succeeded",
               "type": "string"
@@ -53739,7 +53871,8 @@
                 "app_payment.failed",
                 "app_payment.pending",
                 "app_payment.requires_action",
-                "app_membership.cancel_at_period_end_changed"
+                "app_membership.cancel_at_period_end_changed",
+                "shipping_address.changed"
               ],
               "example": "account.updated",
               "type": "string"
@@ -53985,7 +54118,8 @@
           "refund.created",
           "refund.updated",
           "dispute_alert.created",
-          "membership.cancel_at_period_end_changed"
+          "membership.cancel_at_period_end_changed",
+          "shipping_address.changed"
         ],
         "type": "string"
       },
@@ -54168,7 +54302,8 @@
                 "app_payment.failed",
                 "app_payment.pending",
                 "app_payment.requires_action",
-                "app_membership.cancel_at_period_end_changed"
+                "app_membership.cancel_at_period_end_changed",
+                "shipping_address.changed"
               ],
               "example": "payment.succeeded",
               "type": "string"
@@ -176876,7 +177011,8 @@
                         "refund.created",
                         "refund.updated",
                         "dispute_alert.created",
-                        "membership.cancel_at_period_end_changed"
+                        "membership.cancel_at_period_end_changed",
+                        "shipping_address.changed"
                       ],
                       "example": "payment.succeeded",
                       "type": "string"
@@ -177214,7 +177350,8 @@
                         "refund.created",
                         "refund.updated",
                         "dispute_alert.created",
-                        "membership.cancel_at_period_end_changed"
+                        "membership.cancel_at_period_end_changed",
+                        "shipping_address.changed"
                       ],
                       "example": "payment.failed",
                       "type": "string"
@@ -177458,7 +177595,8 @@
                   "app_payment.failed",
                   "app_payment.pending",
                   "app_payment.requires_action",
-                  "app_membership.cancel_at_period_end_changed"
+                  "app_membership.cancel_at_period_end_changed",
+                  "shipping_address.changed"
                 ],
                 "example": "payment.succeeded",
                 "type": "string"
@@ -197156,6 +197294,191 @@
           "Shipments"
         ],
         "x-group-title": "CRM"
+      },
+      "x-whop-surface": "native"
+    },
+    "shipping_address.changed": {
+      "post": {
+        "description": "Sent while a buyer picks a shipping address on PayPal's page, for a payment the seller prices. Whop calls the account's oldest enabled `https` webhook with this event and waits up to 4 seconds for the reply: a Money total for every line in `line_items`, tax and shipping included, or `{ \"decline\": true }`. A late, failed or invalid reply refuses the address, and the buyer picks another. The call isn't retried and has no test event",
+        "parameters": [
+          {
+            "in": "header",
+            "name": "webhook-id",
+            "required": true,
+            "schema": {
+              "description": "A unique identifier for this webhook request",
+              "example": "msg_xxxxxxxxxxxxxxxxxxxxxxxx",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "webhook-signature",
+            "required": true,
+            "schema": {
+              "description": "The signature of the webhook request with the webhook version prepended",
+              "example": "v1,BASE64ENCODEDSIGNATURE",
+              "type": "string"
+            }
+          },
+          {
+            "in": "header",
+            "name": "webhook-timestamp",
+            "required": true,
+            "schema": {
+              "description": "The timestamp in seconds since the Unix epoch that the webhook was sent at on the server",
+              "example": "1727606400",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "example": {
+                "account_id": "biz_xxxxxxxxxxxxxx",
+                "api_version": "v1",
+                "api_version_date": "2026-11-04-1",
+                "data": {
+                  "amount": {
+                    "amount": "-1234.56",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "line_items": [
+                    {
+                      "amount": {
+                        "amount": "-1234.56",
+                        "currency": "usd",
+                        "decimals": 2,
+                        "display_decimals": 2
+                      },
+                      "id": "some_string",
+                      "quantity": 42.0,
+                      "variant_id": "some_string"
+                    },
+                    {
+                      "amount": {
+                        "amount": "-1234.56",
+                        "currency": "usd",
+                        "decimals": 2,
+                        "display_decimals": 2
+                      },
+                      "id": "some_string",
+                      "quantity": 42.0,
+                      "variant_id": "some_string"
+                    }
+                  ],
+                  "payment_id": "some_string",
+                  "shipping_address": {
+                    "city": "some_string",
+                    "country": "some_string",
+                    "postal_code": "some_string",
+                    "state": "some_string"
+                  }
+                },
+                "id": "msg_xxxxxxxxxxxxxxxxxxxxxxxx",
+                "timestamp": "2025-01-01T00:00:00.000Z",
+                "type": "shipping_address.changed"
+              },
+              "schema": {
+                "properties": {
+                  "account_id": {
+                    "description": "The account ID that this webhook event is associated with",
+                    "example": "biz_xxxxxxxxxxxxxx",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "api_version": {
+                    "const": "v1",
+                    "description": "The API version for this webhook",
+                    "example": "v1",
+                    "type": "string"
+                  },
+                  "api_version_date": {
+                    "description": "The dated API version (Api-Version-Date) the payload is serialized to",
+                    "example": "2026-07-20",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "data": {
+                    "$ref": "#/components/schemas/ShippingAddressChangedWebhookData"
+                  },
+                  "id": {
+                    "description": "A unique ID for every single webhook request",
+                    "example": "msg_xxxxxxxxxxxxxxxxxxxxxxxx",
+                    "type": "string"
+                  },
+                  "previous_attributes": {
+                    "description": "For some `.updated` events, the old values of the payload fields that changed, keyed by field name. Omitted when no capture is available for the event",
+                    "type": "object"
+                  },
+                  "timestamp": {
+                    "description": "The timestamp in ISO 8601 format that the webhook was sent at on the server",
+                    "example": "2025-01-01T00:00:00.000Z",
+                    "format": "date-time",
+                    "type": "string"
+                  },
+                  "type": {
+                    "const": "shipping_address.changed",
+                    "description": "The webhook event type",
+                    "example": "shipping_address.changed",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "api_version",
+                  "api_version_date",
+                  "timestamp",
+                  "type",
+                  "data"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "oneOf": [
+                    {
+                      "$ref": "#/components/schemas/ShippingAddressChangedWebhookReply"
+                    },
+                    {
+                      "properties": {
+                        "decline": {
+                          "description": "Refuses this address; the buyer picks another.",
+                          "enum": [
+                            true
+                          ],
+                          "type": "boolean"
+                        }
+                      },
+                      "required": [
+                        "decline"
+                      ],
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Your price for this address, or a decline."
+          }
+        },
+        "summary": "Shipping Address Changed",
+        "tags": [
+          "Payments"
+        ]
       },
       "x-whop-surface": "native"
     },
