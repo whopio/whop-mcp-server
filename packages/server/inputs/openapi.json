@@ -5808,7 +5808,7 @@
             ]
           },
           "customer_tracking": {
-            "description": "The saved customer tracking settings for the hosted tracking page and Element, exactly as saved. `null` until set; tracking is off unless `enabled` is `true`.",
+            "description": "Customer tracking settings for the hosted tracking page and Element, with defaults applied. `null` until set; tracking is off unless `enabled` is `true`.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/CustomerTrackingPreferences"
@@ -17642,32 +17642,20 @@
       "CustomerTrackingPreferences": {
         "properties": {
           "accent_color": {
-            "description": "Accent color, as a `#rrggbb` hex color. `null` uses the default.",
-            "type": [
-              "string",
-              "null"
-            ]
+            "description": "Accent color, as a `#rrggbb` hex color. Defaults to `#1d4ed8`.",
+            "type": "string"
           },
           "enabled": {
-            "description": "Whether the public tracking page and guest lookup are available. `null` is off.",
-            "type": [
-              "boolean",
-              "null"
-            ]
+            "description": "Whether the public tracking page and guest lookup are available. Defaults to false.",
+            "type": "boolean"
           },
           "show_business_name": {
-            "description": "Whether to display the business name on the tracking page and Element. `null` shows it.",
-            "type": [
-              "boolean",
-              "null"
-            ]
+            "description": "Whether to display the business name on the tracking page and Element. Defaults to true.",
+            "type": "boolean"
           },
           "show_logo": {
-            "description": "Whether to display the logo on the tracking page and Element. `null` shows it.",
-            "type": [
-              "boolean",
-              "null"
-            ]
+            "description": "Whether to display the logo on the tracking page and Element. Defaults to true.",
+            "type": "boolean"
           },
           "support_email": {
             "description": "Customer support email address.",
@@ -33439,6 +33427,14 @@
               "null"
             ]
           },
+          "missing_tracking": {
+            "description": "True for a paid payment with a shipping address, no shipment, and no full refund. Null without the shipment:basic:read permission.",
+            "example": false,
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
           "needs_tracking": {
             "description": "True when funds are held until the order ships and no tracking number has been added yet. Null without the shipment:basic:read permission.",
             "example": false,
@@ -33820,6 +33816,7 @@
           "billing_address",
           "shipping_address",
           "needs_tracking",
+          "missing_tracking",
           "payments_failed",
           "failure_message",
           "decline_code",
@@ -59005,7 +59002,7 @@
                       ]
                     },
                     "customer_tracking": {
-                      "description": "The saved customer tracking settings for the hosted tracking page and Element, exactly as saved. `null` until set; tracking is off unless `enabled` is `true`.",
+                      "description": "The saved customer tracking settings for the hosted tracking page and Element, with defaults applied. `null` until set; tracking is off unless `enabled` is `true`.",
                       "oneOf": [
                         {
                           "$ref": "#/components/schemas/CustomerTrackingPreferences"
@@ -59405,7 +59402,7 @@
                     "description": "Customer tracking settings for the hosted tracking page and Element, replaced as a whole: fields left out are reset to their defaults. Pass null to clear them, which turns tracking off. Requires the `company:manage_checkout` scope on your API key.",
                     "properties": {
                       "accent_color": {
-                        "description": "Accent color, as a `#rrggbb` hex color. Unset uses the default.",
+                        "description": "Accent color, as a `#rrggbb` hex color. Omitted or null resets to `#1d4ed8`.",
                         "pattern": "^#[0-9a-fA-F]{6}$",
                         "type": [
                           "string",
@@ -59413,21 +59410,21 @@
                         ]
                       },
                       "enabled": {
-                        "description": "Turns the public tracking page and guest lookup on. Unset is off.",
+                        "description": "Turns the public tracking page and guest lookup on. Omitted or null resets to false.",
                         "type": [
                           "boolean",
                           "null"
                         ]
                       },
                       "show_business_name": {
-                        "description": "Show the business name on the tracking page and Element. Unset shows it.",
+                        "description": "Show the business name on the tracking page and Element. Omitted or null resets to true.",
                         "type": [
                           "boolean",
                           "null"
                         ]
                       },
                       "show_logo": {
-                        "description": "Show the account logo on the tracking page and Element. Unset shows it.",
+                        "description": "Show the account logo on the tracking page and Element. Omitted or null resets to true.",
                         "type": [
                           "boolean",
                           "null"
@@ -59831,7 +59828,7 @@
                       ]
                     },
                     "customer_tracking": {
-                      "description": "The saved customer tracking settings for the hosted tracking page and Element, exactly as saved. `null` until set; tracking is off unless `enabled` is `true`.",
+                      "description": "The saved customer tracking settings for the hosted tracking page and Element, with defaults applied. `null` until set; tracking is off unless `enabled` is `true`.",
                       "oneOf": [
                         {
                           "$ref": "#/components/schemas/CustomerTrackingPreferences"
@@ -162183,7 +162180,7 @@
         }
       ],
       "post": {
-        "description": "Finds the delivery for a purchase from an account with customer tracking turned on, using exactly one order or tracking number plus the buyer's current receipt email. No authentication is required and no sign-in or session is created. Email matching ignores case and surrounding whitespace, but dots and +tags must match. Every miss returns the same 404: an unknown account, tracking turned off, a wrong number or email, an unpaid order or a purchase with nothing to ship. `shipment` is `null` while a paid physical purchase has no tracking yet. Limited to 30 attempts per five minutes per client IP. Responses are never cached or replayed with Idempotency-Key.",
+        "description": "Finds the delivery for a purchase from an account with customer tracking turned on, using exactly one order or tracking number plus the buyer's current receipt email. No authentication is required and no sign-in or session is created. Email matching ignores case and surrounding whitespace, but dots and +tags must match. Every miss returns the same 404: an unknown account, tracking turned off, a wrong number or email, an unpaid order or a purchase with nothing to ship. `shipment` is `null` while a paid physical purchase has no tracking yet, unless it has been fully refunded. Limited to 10 attempts per hour per order or tracking number within the account, and 30 attempts per five minutes per client IP and per email within the account. Responses are never cached or replayed with Idempotency-Key.",
         "operationId": "lookupShipment",
         "parameters": [
           {
@@ -191945,6 +191942,7 @@
                   "member_id": "mber_xxxxxxxxxxxxxx",
                   "membership_id": "mem_xxxxxxxxxxxxxx",
                   "metadata": {},
+                  "missing_tracking": false,
                   "needs_tracking": false,
                   "next_payment_attempt_at": null,
                   "paid_at": null,
@@ -192243,6 +192241,7 @@
                   "member_id": "mber_xxxxxxxxxxxxxx",
                   "membership_id": "mem_xxxxxxxxxxxxxx",
                   "metadata": {},
+                  "missing_tracking": false,
                   "needs_tracking": false,
                   "next_payment_attempt_at": null,
                   "paid_at": null,
@@ -192541,6 +192540,7 @@
                   "member_id": "mber_xxxxxxxxxxxxxx",
                   "membership_id": "mem_xxxxxxxxxxxxxx",
                   "metadata": {},
+                  "missing_tracking": false,
                   "needs_tracking": false,
                   "next_payment_attempt_at": null,
                   "paid_at": null,
@@ -192839,6 +192839,7 @@
                   "member_id": "mber_xxxxxxxxxxxxxx",
                   "membership_id": "mem_xxxxxxxxxxxxxx",
                   "metadata": {},
+                  "missing_tracking": false,
                   "needs_tracking": false,
                   "next_payment_attempt_at": "2026-01-01T12:00:00.000Z",
                   "paid_at": null,
@@ -193137,6 +193138,7 @@
                   "member_id": "mber_xxxxxxxxxxxxxx",
                   "membership_id": "mem_xxxxxxxxxxxxxx",
                   "metadata": {},
+                  "missing_tracking": false,
                   "needs_tracking": false,
                   "next_payment_attempt_at": null,
                   "paid_at": null,
@@ -193428,6 +193430,7 @@
                   "member_id": "mber_xxxxxxxxxxxxxx",
                   "membership_id": null,
                   "metadata": {},
+                  "missing_tracking": false,
                   "needs_tracking": false,
                   "next_payment_attempt_at": null,
                   "paid_at": null,
@@ -193726,6 +193729,7 @@
                   "member_id": "mber_xxxxxxxxxxxxxx",
                   "membership_id": "mem_xxxxxxxxxxxxxx",
                   "metadata": {},
+                  "missing_tracking": false,
                   "needs_tracking": false,
                   "next_payment_attempt_at": null,
                   "paid_at": "2026-01-01T12:00:00.000Z",
