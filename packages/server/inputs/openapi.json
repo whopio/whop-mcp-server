@@ -21687,6 +21687,14 @@
             "example": "expt_xxxxxxxxxxxxxx",
             "type": "string"
           },
+          "metadata": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Key-value pairs attached when the experiment was created. Empty when none were set.",
+            "example": {},
+            "type": "object"
+          },
           "name": {
             "description": "Human-readable display name.",
             "example": "Checkout Redesign V2",
@@ -110347,6 +110355,13 @@
                     "example": "If we send a blueprint nudge email 30 minutes after business creation, then GTV within 10 hours will increase among newly created businesses, resulting in more new business operators generating GTV within 10 hours, because operators currently land on an empty dashboard with no concrete next step. Created by Jane Doe.",
                     "nullable": true,
                     "type": "string"
+                  },
+                  "metadata": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Up to 20 key-value pairs you can attach to the experiment for your own use, such as which pages it changes. Keys are at most 40 characters and values at most 500.",
+                    "type": "object"
                   },
                   "name": {
                     "description": "Human-readable display name. Defaults to `flag_key` when omitted.",
