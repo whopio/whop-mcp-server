@@ -444,10 +444,6 @@
     "bot": true,
     "user": true
   },
-  "livestream:chat:write": {
-    "bot": true,
-    "user": true
-  },
   "livestream:moderate": {
     "bot": true,
     "user": true

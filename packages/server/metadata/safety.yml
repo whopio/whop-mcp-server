@@ -682,6 +682,8 @@ rules:
         - Authorized users
         - Bounties
         - Bounty Submissions
+        - Channel Members
+        - Channels
         - Chat channels
         - Checkout Configurations
         - Course chapters

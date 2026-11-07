@@ -156,23 +156,25 @@ describe("MCP contract", () => {
 		const client = await connect({
 			principal: principalFixture({
 				permissionProfile: "standard",
-				scopes: ["support_chat:message:create"],
+				scopes: ["support_chat:message:create", "dms:channel:manage"],
 			}),
 		});
 		const { tools } = await client.listTools();
 		expect(tools.map((tool) => tool.name)).toContain("messages_create");
-		expect(tools.map((tool) => tool.name)).not.toContain("messages_delete");
+		expect(tools.map((tool) => tool.name)).not.toContain(
+			"channel-members_delete",
+		);
 	});
 
 	it("requires every scope within an OpenAPI alternative", async () => {
 		const client = await connect({
 			principal: principalFixture({
 				permissionProfile: "standard",
-				scopes: ["support_chat:message:create", "support_chat:read"],
+				scopes: ["dms:channel:manage", "support_chat:read"],
 			}),
 		});
 		const { tools } = await client.listTools();
-		expect(tools.map((tool) => tool.name)).toContain("messages_delete");
+		expect(tools.map((tool) => tool.name)).toContain("channel-members_delete");
 	});
 
 	it("executes a read tool against the API", async () => {

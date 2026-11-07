@@ -18,14 +18,6 @@ describe("registry generation", () => {
 		expect(lookup?.profiles).toContain("read_only");
 	});
 
-	it("keeps preview channel controls out of the public registry", () => {
-		expect(
-			registry.operations.filter((operation) =>
-				operation.path.startsWith("/channels"),
-			),
-		).toEqual([]);
-	});
-
 	it("uses distinct CLI-compatible names for financing application reads", () => {
 		expect(findOperation(registry, "financing-applications_list").path).toBe(
 			"/financing_applications",
@@ -267,15 +259,14 @@ describe("registry generation", () => {
 		const byName = new Map(registry.operations.map((op) => [op.toolName, op]));
 		// The exact scope matrix is pinned once, in the backend's
 		// open_api_schema_spec.rb; this exemplar only guards the shape.
-		expect(byName.get("messages_delete")?.scopeAlternatives).toEqual([
-			["chat:message:create", "chat:read"],
-			["dms:message:manage", "dms:read"],
-			["livestream:chat:read", "livestream:chat:write"],
-			["support_chat:message:create", "support_chat:read"],
+		expect(byName.get("channel-members_delete")?.scopeAlternatives).toEqual([
+			["dms:channel:manage", "dms:read"],
+			["dms:channel:manage", "support_chat:read"],
 		]);
-		expect(byName.get("dm-channels_update")?.scopeAlternatives).toEqual([
-			["dms:channel:manage"],
-			["support_chat:create"],
+		expect(byName.get("messages_delete")?.scopeAlternatives).toEqual([
+			["dms:message:manage"],
+			["chat:message:create"],
+			["support_chat:message:create"],
 		]);
 	});
 
