@@ -162864,7 +162864,7 @@
             }
           },
           {
-            "description": "The account to search, prefixed `biz_`. Records other than accounts belong to it, or with `include_subaccounts` to its subaccounts. Your credential needs read access to it; an account you can't read is a 404.",
+            "description": "The account to search, prefixed `biz_`. Records other than accounts belong to it, or with `include_subaccounts` to its subaccounts. Your credential needs read access to at least one kind of record on it that search returns, or the account is a 404.",
             "in": "query",
             "name": "account_id",
             "required": true,
@@ -162959,13 +162959,38 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFound",
-            "description": "An account that doesn't exist, or one your credential can't read."
+            "description": "An account that doesn't exist, or one your credential can't read any kind of record on."
           }
         },
         "security": [
           {
             "bearerAuth": [
               "company:basic:read"
+            ]
+          },
+          {
+            "bearerAuth": [
+              "member:basic:read"
+            ]
+          },
+          {
+            "bearerAuth": [
+              "payment:basic:read"
+            ]
+          },
+          {
+            "bearerAuth": [
+              "affiliate:basic:read"
+            ]
+          },
+          {
+            "bearerAuth": [
+              "payment:resolution_center_case:read"
+            ]
+          },
+          {
+            "bearerAuth": [
+              "promo_code:basic:read"
             ]
           }
         ],
