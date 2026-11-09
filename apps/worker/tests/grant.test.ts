@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
 	attributionHeaders,
+	grantedScopes,
 	normalizeMcpClientName,
 	parseGrantProps,
+	principalFromProps,
 } from "../src/grant.ts";
 import type { Env, WhopGrantProps } from "../src/types.ts";
 
@@ -46,4 +48,25 @@ it("refuses pre-consent access tokens even before they expire", () => {
 	};
 	expect(parseGrantProps(legacy)).toBeNull();
 	expect(parseGrantProps({ ...legacy, consentVersion: 1 })).not.toBeNull();
+});
+
+describe("grantedScopes", () => {
+	it("splits, dedupes, and sorts the granted scope string", () => {
+		expect(
+			grantedScopes("  payment:basic:read openid\topenid  ai_chat:read "),
+		).toEqual(["ai_chat:read", "openid", "payment:basic:read"]);
+	});
+});
+
+describe("principalFromProps", () => {
+	it("carries the scopes Whop granted instead of a wildcard", () => {
+		const principal = principalFromProps({
+			...props,
+			userId: "user_1",
+			whopScope: "openid payment:basic:read",
+		} as WhopGrantProps);
+		expect(principal.scopes).toEqual(["openid", "payment:basic:read"]);
+		expect(principal.scopes).not.toContain("*");
+		expect(principal.accountId).toBeNull();
+	});
 });

@@ -46,6 +46,20 @@ describe("registry generation", () => {
 		expect(submit.safety.confirmationRequired).toBe(true);
 	});
 
+	it("keeps API-key-only operations off user tokens", () => {
+		for (const toolName of ["accounts_me", "account-links_create"]) {
+			const op = registry.operations.find((o) => o.toolName === toolName);
+			expect(op?.principals).toEqual(["business", "app"]);
+		}
+	});
+
+	it("declares ai_chat:read on the AI chat reads the backend enforces it on", () => {
+		for (const toolName of ["ai-chats_list", "ai-chats_get"]) {
+			const op = registry.operations.find((o) => o.toolName === toolName);
+			expect(op?.scopeAlternatives).toEqual([["ai_chat:read"]]);
+		}
+	});
+
 	it("exposes every experiment operation for user and business credentials", () => {
 		const experiments = registry.operations.filter((op) =>
 			op.path.startsWith("/experiments"),

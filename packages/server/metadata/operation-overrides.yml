@@ -25,6 +25,14 @@ overrides:
       use accounts_list instead. When you already know which account to act on,
       you do not need this call.
     requiresAccount: false
+    # Hosted connections are user OAuth tokens, which the endpoint always
+    # refuses ("User tokens do not have a requesting account").
+    principals: [business, app]
+
+  # Only an API key can mint an account link ("the actor must be an API Key"),
+  # so a user token was offered a tool that failed on every call.
+  "POST /account_links":
+    principals: [business, app]
 
   # The three filters read as combinable, so agents passed two and were
   # rejected. Stating the constraint on the operation covers all three at once.
@@ -56,6 +64,17 @@ overrides:
       'active'; status cannot be set at creation. To end up with a paused ad,
       either duplicate an existing paused ad with ads_duplicate, or create it
       here and then call ads_pause once its campaign is no longer a draft.
+
+  # Agents walked a list of failed payments and retried each one, so nearly every
+  # call was refused. The API already says which payments can be retried.
+  "POST /payments/{id}/retry":
+    description: >-
+      Charges an unpaid payment again with its original payment method and
+      variant. Only call this for a payment whose `retryable` field is true
+      (read it with payments_get or payments_list); any other payment returns
+      400, and calling again will not change that. A payment can be retried
+      manually once, so after one attempt `retryable` turns false. Do not retry
+      every failed payment in a list: filter to `retryable: true` first.
 
   "POST /ads/{id}/pause":
     description: >-

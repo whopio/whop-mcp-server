@@ -328,6 +328,71 @@ describe("MCP contract", () => {
 		});
 	});
 
+	it("records the upstream status when a call fails", async () => {
+		const { fetch } = fakeFetch(() => ({
+			status: 403,
+			body: { error: { type: "forbidden", message: "Not allowed" } },
+		}));
+		const auditSink = new InMemoryAuditSink();
+		const client = await connect({ fetch, auditSink });
+
+		const result = await client.callTool({
+			name: "payments_list",
+			arguments: {},
+		});
+		expect(result.isError).toBe(true);
+		expect(auditSink.events).toHaveLength(1);
+		expect(auditSink.events[0]).toMatchObject({
+			outcome: "failed",
+			toolName: "payments_list",
+			upstreamStatus: 403,
+		});
+		expect(auditSink.events[0].errorCode).toEqual(expect.any(String));
+	});
+
+	it("leaves upstreamStatus unset when the call fails before reaching the API", async () => {
+		const { fetch, requests } = fakeFetch();
+		const auditSink = new InMemoryAuditSink();
+		const client = await connect({ fetch, auditSink });
+
+		const result = await client.callTool({
+			name: "payments_get",
+			arguments: {},
+		});
+		expect(result.isError).toBe(true);
+		expect(requests).toHaveLength(0);
+		expect(auditSink.events[0]).toMatchObject({
+			outcome: "failed",
+			errorCode: "invalid_input",
+		});
+		expect(auditSink.events[0].upstreamStatus).toBeUndefined();
+	});
+
+	it("does not offer API-key-only tools to a user token", async () => {
+		const client = await connect({
+			principal: principalFixture({ principalType: "user", accountId: null }),
+		});
+		const names = (await client.listTools()).tools.map((t) => t.name);
+		expect(names).not.toContain("accounts_me");
+		expect(names).not.toContain("account-links_create");
+		expect(names).toContain("accounts_list");
+	});
+
+	it("hides tools whose scopes the user token was not granted", async () => {
+		const client = await connect({
+			principal: principalFixture({
+				principalType: "user",
+				accountId: null,
+				scopes: ["openid", "payment:basic:read"],
+			}),
+		});
+		const names = (await client.listTools()).tools.map((t) => t.name);
+		expect(names).toContain("payments_list");
+		expect(names).not.toContain("ad-pixels_list");
+		expect(names).not.toContain("payments_refund");
+		expect(names).toContain("connection_status");
+	});
+
 	it("executes a financial mutation in one call", async () => {
 		const { fetch, requests } = fakeFetch(() => ({
 			body: { id: "pay_1", status: "refunded" },

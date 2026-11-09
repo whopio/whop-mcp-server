@@ -10383,6 +10383,17 @@
             "example": 0,
             "type": "integer"
           },
+          "category": {
+            "description": "The app's App Store category, or `null` when none has been set. An app can show a category that `GET /apps/categories` does not list, if it was categorized before the current store categories.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AppCategory"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "creator": {
             "$ref": "#/components/schemas/AppCreator",
             "description": "The user who owns the publishing account."
@@ -10736,6 +10747,7 @@
           "businesses_created_logo_urls",
           "businesses_with_recent_sales_count",
           "product_category",
+          "category",
           "app_store_description",
           "requested_permissions",
           "api_key",
@@ -10981,6 +10993,31 @@
           "rejected"
         ],
         "type": "string"
+      },
+      "AppCategory": {
+        "properties": {
+          "id": {
+            "description": "App Store category ID, prefixed `mcat_`. Pass this as `category_id` when updating an app.",
+            "example": "mcat_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name of the App Store category, such as `Business & Productivity`.",
+            "example": "Business & Productivity",
+            "type": "string"
+          },
+          "route": {
+            "description": "Category slug, such as `business-productivity`. Pass this as `marketplace_category_route` when listing apps.",
+            "example": "business-productivity",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "route"
+        ],
+        "type": "object"
       },
       "AppCreator": {
         "properties": {
@@ -11336,6 +11373,17 @@
             "example": 0,
             "type": "integer"
           },
+          "category": {
+            "description": "The app's App Store category, or `null` when none has been set. An app can show a category that `GET /apps/categories` does not list, if it was categorized before the current store categories.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AppCategory"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "creator": {
             "$ref": "#/components/schemas/AppCreator",
             "description": "The user who owns the publishing account."
@@ -11489,7 +11537,8 @@
           "businesses_created_count",
           "businesses_created_logo_urls",
           "businesses_with_recent_sales_count",
-          "product_category"
+          "product_category",
+          "category"
         ],
         "type": "object"
       },
@@ -71802,7 +71851,7 @@
     },
     "/ai_chats": {
       "get": {
-        "description": "Returns a paginated list of AI chat threads for the current authenticated user.",
+        "description": "Returns a paginated list of AI chat threads for the current authenticated user.\n\nRequired permissions:\n - `ai_chat:read`",
         "operationId": "listAiChat",
         "parameters": [
           {
@@ -72263,7 +72312,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "ai_chat:read"
+            ]
           }
         ],
         "summary": "List ai chats",
@@ -73121,7 +73172,7 @@
         "x-group-title": "AI"
       },
       "get": {
-        "description": "Retrieves the details of an existing AI chat.",
+        "description": "Retrieves the details of an existing AI chat.\n\nRequired permissions:\n - `ai_chat:read`",
         "operationId": "retrieveAiChat",
         "parameters": [
           {
@@ -73495,7 +73546,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "ai_chat:read"
+            ]
           }
         ],
         "summary": "Retrieve ai chat",
@@ -76129,6 +76182,15 @@
             }
           },
           {
+            "description": "Only return apps in this app store category. Use a `route` from `GET /apps/categories`, such as `business-productivity`. An unknown route is rejected.",
+            "in": "query",
+            "name": "marketplace_category_route",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "The field to sort apps by. Defaults to discoverable_at, showing the most recently published apps first. `template_usage` ranks Whop-verified apps first, then by how many businesses created apps from each app as a template. `template_recent_sales` ranks them by how many of those businesses processed a payment in the last 24 hours, recounted hourly, breaking ties by `template_usage`.",
             "in": "query",
             "name": "order",
@@ -76427,6 +76489,144 @@
       },
       "x-whop-surface": "native"
     },
+    "/apps/categories": {
+      "get": {
+        "description": "Lists the App Store's categories. Pass `app_type` for one store's categories in the order that store shows them; without it, every category either store shows is listed. Use a business category's ID as an app's `category_id`, or any category's `route` to filter apps. This endpoint is public and does not require authentication.",
+        "operationId": "listAppCategories",
+        "parameters": [
+          {
+            "description": "Only return the categories of this app type's store, in that store's order: `b2b_app` for the business App Store, `b2c_app` for the community App Store.",
+            "in": "query",
+            "name": "app_type",
+            "required": false,
+            "schema": {
+              "enum": [
+                "b2b_app",
+                "b2c_app"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the start of the range.",
+            "in": "query",
+            "name": "first",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results after this cursor. Use `page_info.end_cursor` from the previous response to fetch the next page.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the end of the range.",
+            "in": "query",
+            "name": "last",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results before this cursor. Use `page_info.start_cursor` from the previous response to fetch the previous page.",
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/AppCategory"
+                      },
+                      "type": "array"
+                    },
+                    "page_info": {
+                      "properties": {
+                        "end_cursor": {
+                          "example": "Mg",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "has_next_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "has_previous_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "start_cursor": {
+                          "example": "MQ",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "start_cursor",
+                        "end_cursor",
+                        "has_next_page",
+                        "has_previous_page"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "page_info"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "app categories listed"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1ErrorResponse"
+                }
+              }
+            },
+            "description": "unknown app type"
+          }
+        },
+        "security": [],
+        "summary": "List App Categories",
+        "tags": [
+          "Apps"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        }
+      ],
+      "x-whop-surface": "native"
+    },
     "/apps/{id}": {
       "delete": {
         "description": "Deletes an app. The app stops resolving within seconds — a website's site stops serving, and any claimed subdomain is reserved for a month before it can be claimed again.",
@@ -76556,6 +76756,13 @@
                   "base_url": {
                     "description": "The base production URL where the app is hosted. Set to `null` to take the app proxy offline.",
                     "example": "https://shine-time-booking.whop.site",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "category_id": {
+                    "description": "The App Store category of a business app. Pass an `mcat_` ID from `GET /apps/categories?app_type=b2b_app`, or `null` to clear it. Omit it to keep the current category. Setting a category needs the app to have an App Store product.",
                     "type": [
                       "string",
                       "null"
@@ -149346,7 +149553,7 @@
                             "type": "string"
                           },
                           "trace_code": {
-                            "description": "ACH trace number the recipient's bank can use to locate this payout. Assigned when the payout is submitted to the bank, so it is `null` before then and on payouts not sent over ACH.",
+                            "description": "Payment network reference for this payout, such as an ACH trace number, an RTP or FedNow end-to-end ID, a wire IMAD, or a SWIFT UETR. `null` until the reference is available, and on payouts that have none.",
                             "example": "021000021234567",
                             "type": [
                               "string",
@@ -149915,7 +150122,7 @@
                       "type": "string"
                     },
                     "trace_code": {
-                      "description": "ACH trace number the recipient's bank can use to locate this payout. Always `null` here — it is assigned when the payout is submitted to the bank, and appears on the payout in GET /payouts once it has been sent; payouts not sent over ACH never get one.",
+                      "description": "Payment network reference for this payout, such as an ACH trace number, an RTP or FedNow end-to-end ID, a wire IMAD, or a SWIFT UETR. Always `null` here. It appears on the payout in GET /payouts once the reference is available, and stays `null` on payouts that have none.",
                       "example": null,
                       "type": [
                         "string",
@@ -153055,7 +153262,7 @@
                       "type": "array"
                     },
                     "trace_code": {
-                      "description": "ACH trace number the recipient's bank can use to locate this payout. Assigned when the payout is submitted to the bank, so it is `null` before then and on payouts not sent over ACH.",
+                      "description": "Payment network reference for this payout, such as an ACH trace number, an RTP or FedNow end-to-end ID, a wire IMAD, or a SWIFT UETR. `null` until the reference is available, and on payouts that have none.",
                       "example": "021000021234567",
                       "type": [
                         "string",
@@ -153475,7 +153682,7 @@
                       "type": "string"
                     },
                     "trace_code": {
-                      "description": "ACH trace number the recipient's bank can use to locate this payout. Assigned when the payout is submitted to the bank, so it is `null` before then and on payouts not sent over ACH.",
+                      "description": "Payment network reference for this payout, such as an ACH trace number, an RTP or FedNow end-to-end ID, a wire IMAD, or a SWIFT UETR. `null` until the reference is available, and on payouts that have none.",
                       "example": "021000021234567",
                       "type": [
                         "string",
@@ -153846,7 +154053,7 @@
                       "type": "string"
                     },
                     "trace_code": {
-                      "description": "ACH trace number the recipient's bank can use to locate this payout. Assigned when the payout is submitted to the bank, so it is `null` before then and on payouts not sent over ACH.",
+                      "description": "Payment network reference for this payout, such as an ACH trace number, an RTP or FedNow end-to-end ID, a wire IMAD, or a SWIFT UETR. `null` until the reference is available, and on payouts that have none.",
                       "example": "021000021234567",
                       "type": [
                         "string",
@@ -182528,7 +182735,7 @@
       "x-whop-summary": "Custom domains assigned to hosted apps."
     },
     {
-      "description": "An App is software you build on Whop. It can be a hosted web app served at its domains, such as a `whop.site` address or a custom domain, or an API integration installed as an experience, and it belongs to the account that owns its credentials, settings, builds, and runtime logs.\n\nUse the Apps API to manage app configuration, deploy an app's working copy and follow the run on the app's `deployment` field, and, for hosted apps, read server runtime logs for console output, uncaught exceptions, and failed requests.\n\nApps are also reusable blueprints. List official blueprints with `app_type=website&verified=true&order=template_usage`, or community blueprints with `app_type=website&verified=false&recommended=true&order=template_usage`. Pass the returned App `id` as `blueprint_id` when creating an Account.\n",
+      "description": "An App is software you build on Whop. It can be a hosted web app served at its domains, such as a `whop.site` address or a custom domain, or an API integration installed as an experience, and it belongs to the account that owns its credentials, settings, builds, and runtime logs.\n\nUse the Apps API to manage app configuration, deploy an app's working copy and follow the run on the app's `deployment` field, and, for hosted apps, read server runtime logs for console output, uncaught exceptions, and failed requests.\n\nBusiness apps have one App Store category. List the categories with `GET /apps/categories`, then set the app's `category_id` to the chosen category's ID. Use a category's `route` as `marketplace_category_route` when listing apps.\n\nApps are also reusable blueprints. List official blueprints with `app_type=website&verified=true&order=template_usage`, or community blueprints with `app_type=website&verified=false&recommended=true&order=template_usage`. Pass the returned App `id` as `blueprint_id` when creating an Account.\n",
       "name": "Apps",
       "x-whop-summary": "Apps you build on Whop: metadata, hosted builds, runtime logs."
     },
@@ -196387,7 +196594,7 @@
                         "type": "string"
                       },
                       "trace_code": {
-                        "description": "ACH trace number the recipient's bank can use to locate this payout. Assigned when the payout is submitted to the bank, so it is `null` before then and on payouts not sent over ACH.",
+                        "description": "Payment network reference for this payout, such as an ACH trace number, an RTP or FedNow end-to-end ID, a wire IMAD, or a SWIFT UETR. `null` until the reference is available, and on payouts that have none.",
                         "example": "021000021234567",
                         "type": [
                           "string",
@@ -196875,7 +197082,7 @@
                         "type": "string"
                       },
                       "trace_code": {
-                        "description": "ACH trace number the recipient's bank can use to locate this payout. Assigned when the payout is submitted to the bank, so it is `null` before then and on payouts not sent over ACH.",
+                        "description": "Payment network reference for this payout, such as an ACH trace number, an RTP or FedNow end-to-end ID, a wire IMAD, or a SWIFT UETR. `null` until the reference is available, and on payouts that have none.",
                         "example": "021000021234567",
                         "type": [
                           "string",
@@ -197359,7 +197566,7 @@
                         "type": "string"
                       },
                       "trace_code": {
-                        "description": "ACH trace number the recipient's bank can use to locate this payout. Assigned when the payout is submitted to the bank, so it is `null` before then and on payouts not sent over ACH.",
+                        "description": "Payment network reference for this payout, such as an ACH trace number, an RTP or FedNow end-to-end ID, a wire IMAD, or a SWIFT UETR. `null` until the reference is available, and on payouts that have none.",
                         "example": "021000021234567",
                         "type": [
                           "string",

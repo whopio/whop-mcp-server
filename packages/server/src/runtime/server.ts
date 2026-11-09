@@ -328,6 +328,7 @@ export function createWhopMcpServer(
 							clientName: options.clientName,
 							pluginSource: options.pluginSource,
 							errorCode: error.code,
+							upstreamStatus: error.status,
 						},
 					),
 				);

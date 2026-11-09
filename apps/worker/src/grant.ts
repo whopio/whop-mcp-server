@@ -68,6 +68,10 @@ export function parseGrantProps(value: unknown): WhopGrantProps | null {
 	return props as WhopGrantProps;
 }
 
+export function grantedScopes(whopScope: string): string[] {
+	return [...new Set(whopScope.split(/\s+/).filter(Boolean))].sort();
+}
+
 export function principalFromProps(props: WhopGrantProps): PrincipalContext {
 	return {
 		principalType: "user",
@@ -76,9 +80,11 @@ export function principalFromProps(props: WhopGrantProps): PrincipalContext {
 		// Never account-bound — context is the agent's per-call choice
 		// (see authorize.ts).
 		accountId: null,
-		// Tool exposure is narrowed by the permission profile; the Whop-side
-		// scope grant independently bounds what the downstream token can do.
-		scopes: ["*"],
+		// The scopes Whop actually granted, not the ones requested: a tool whose
+		// scope the token lacks would only ever return a 403. Grants issued before
+		// a scope joined WHOP_SCOPES, and scopes outside it (ad_pixel:manage), are
+		// hidden until the user reconnects.
+		scopes: grantedScopes(props.whopScope),
 		permissionProfile: props.profile,
 	};
 }

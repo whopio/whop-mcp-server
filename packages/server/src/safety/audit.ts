@@ -12,6 +12,7 @@ export interface AuditEvent {
 	requestId?: string;
 	outcome: "executed" | "failed";
 	errorCode?: string;
+	upstreamStatus?: number;
 }
 
 export interface AuditSink {
