@@ -30369,6 +30369,14 @@
               "null"
             ]
           },
+          "last_activity_at": {
+            "description": "When the member and the account last interacted, as an ISO 8601 timestamp. For example, a message in the member's support chat.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "most_recent_action": {
             "description": "The member's latest lifecycle state on the account, derived from their memberships, such as `paid_subscriber`, `canceling`, or `churned`. `null` until it is first computed.",
             "enum": [
@@ -30463,6 +30471,7 @@
           "phone_number",
           "joined_at",
           "last_accessed_at",
+          "last_activity_at",
           "created_at",
           "user"
         ],
@@ -131700,7 +131709,7 @@
             }
           },
           {
-            "description": "Sort field. `most_recent_action_at` places members without one first when ascending and last when descending.",
+            "description": "Sort field. `most_recent_action_at` and `last_activity_at` place members without one first when ascending and last when descending.",
             "in": "query",
             "name": "order",
             "required": false,
@@ -131710,6 +131719,7 @@
                 "created_at",
                 "joined_at",
                 "last_accessed_at",
+                "last_activity_at",
                 "most_recent_action_at",
                 "usd_total_spent"
               ],
@@ -193097,6 +193107,7 @@
                   "id": "mber_xxxxxxxxxxxxxx",
                   "joined_at": "2026-01-01T12:00:00.000Z",
                   "last_accessed_at": "2026-01-01T12:00:00.000Z",
+                  "last_activity_at": null,
                   "most_recent_action": "joined",
                   "most_recent_action_at": "2026-01-01T12:00:00.000Z",
                   "name": null,
@@ -193254,6 +193265,7 @@
                   "id": "mber_xxxxxxxxxxxxxx",
                   "joined_at": "2026-01-01T12:00:00.000Z",
                   "last_accessed_at": "2026-01-01T12:00:00.000Z",
+                  "last_activity_at": null,
                   "most_recent_action": null,
                   "most_recent_action_at": null,
                   "name": null,
