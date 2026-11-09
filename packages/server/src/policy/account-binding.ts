@@ -59,7 +59,7 @@ export function enforceAccountBinding(
 	) {
 		throw new WhopMcpError(
 			"account_required",
-			`${operation.toolName} requires an account, and this connection has no bound account to inject.`,
+			`${operation.toolName} requires ${operation.accountParam}. This connection is not bound to one account, so pass the business's biz_ ID (find it with accounts_list).`,
 		);
 	}
 

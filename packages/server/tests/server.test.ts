@@ -422,6 +422,19 @@ describe("MCP contract", () => {
 		}
 	});
 
+	it("requires the account param in the advertised schema only when no account is bound", async () => {
+		const requiredFor = async (accountId: string | null) => {
+			const client = await connect({
+				principal: principalFixture({ accountId }),
+			});
+			const { tools } = await client.listTools();
+			return tools.find((t) => t.name === "accounts_preferences")?.inputSchema
+				.required;
+		};
+		expect(await requiredFor(null)).toContain("account_id");
+		expect(await requiredFor("biz_boundAccount")).not.toContain("account_id");
+	});
+
 	it("reports safe connection diagnostics without credentials", async () => {
 		const client = await connect();
 		const status = parseResult(

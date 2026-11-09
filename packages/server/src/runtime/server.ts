@@ -127,16 +127,36 @@ function withIntentContext(inputSchema: JsonSchema): JsonSchema {
 	};
 }
 
-function toolInputSchema(operation: OperationDef): JsonSchema {
+function withAccountRequirement(
+	operation: OperationDef,
+	principal: PrincipalContext,
+): JsonSchema {
+	const { inputSchema, accountParam } = operation;
+	if (!accountParam || !operation.requiresAccount || principal.accountId) {
+		return inputSchema;
+	}
+	return {
+		...inputSchema,
+		required: [
+			...new Set([...(inputSchema.required ?? []), accountParam]),
+		].sort(),
+	};
+}
+
+function toolInputSchema(
+	operation: OperationDef,
+	principal: PrincipalContext,
+): JsonSchema {
+	const inputSchema = withAccountRequirement(operation, principal);
 	const offersIdempotencyKey =
 		operation.safety.confirmationRequired ||
 		operation.safety.idempotency !== "none";
-	if (!offersIdempotencyKey) return operation.inputSchema;
+	if (!offersIdempotencyKey) return inputSchema;
 
 	return {
-		...operation.inputSchema,
+		...inputSchema,
 		properties: {
-			...operation.inputSchema.properties,
+			...inputSchema.properties,
 			[IDEMPOTENCY_KEY_FIELD]: {
 				type: "string",
 				description: supportsUpstreamReplay(operation)
@@ -239,10 +259,9 @@ export function createWhopMcpServer(
 			...operations.map((op) => ({
 				name: op.toolName,
 				description: toolDescription(op),
-				inputSchema: withIntentContext(toolInputSchema(op)) as Record<
-					string,
-					unknown
-				>,
+				inputSchema: withIntentContext(
+					toolInputSchema(op, principal),
+				) as Record<string, unknown>,
 				annotations: {
 					readOnlyHint: op.annotations.readOnlyHint,
 					destructiveHint: op.annotations.destructiveHint,
