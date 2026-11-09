@@ -14325,6 +14325,14 @@
             "example": true,
             "type": "boolean"
           },
+          "levels_points": {
+            "description": "Whop Levels points this transaction earned for the business. Negative for a refund that takes them back. Null when it earns none: a transaction that hasn't settled, was declined, or was made on a personal card.",
+            "example": null,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
           "local_amount": {
             "description": "Amount the merchant charged in their own currency. Pair with `currency`.",
             "example": 22.5,
@@ -14417,6 +14425,7 @@
           "merchant_category_code",
           "declined_reason",
           "cashback_usd_amount",
+          "levels_points",
           "created_at",
           "posted_at"
         ],
@@ -28898,6 +28907,14 @@
                     "example": "citx_xxxxxxxxxxxxxx",
                     "type": "string"
                   },
+                  "levels_points": {
+                    "description": "Whop Levels points this transaction earned for the business, as a decimal string. Negative for a refund that takes them back. Null when it earns none: a transaction that hasn't settled, was declined, or was made on a personal card.",
+                    "example": null,
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
                   "local_amount": {
                     "description": "Amount the merchant charged in their local currency, as a decimal string. Pair with local_currency.",
                     "example": "64.97",
@@ -28983,6 +29000,7 @@
                   "local_amount",
                   "local_currency",
                   "cashback_usd",
+                  "levels_points",
                   "authorized_at",
                   "posted_at",
                   "declined_reason"
@@ -187995,6 +188013,7 @@
                   "declined_reason": null,
                   "id": "citx_xxxxxxxxxxxxxx",
                   "international": false,
+                  "levels_points": null,
                   "local_amount": 12.5,
                   "merchant_category": "Auto Parts & Accessories",
                   "merchant_category_code": "5533",
@@ -188135,6 +188154,7 @@
                   "declined_reason": null,
                   "id": "citx_xxxxxxxxxxxxxx",
                   "international": false,
+                  "levels_points": null,
                   "local_amount": 12.5,
                   "merchant_category": "Auto Parts & Accessories",
                   "merchant_category_code": "5533",
@@ -188275,6 +188295,7 @@
                   "declined_reason": "Insufficient funds",
                   "id": "citx_xxxxxxxxxxxxxx",
                   "international": false,
+                  "levels_points": null,
                   "local_amount": 12.5,
                   "merchant_category": "Auto Parts & Accessories",
                   "merchant_category_code": "5533",
@@ -188415,6 +188436,7 @@
                   "declined_reason": null,
                   "id": "citx_xxxxxxxxxxxxxx",
                   "international": false,
+                  "levels_points": null,
                   "local_amount": 12.5,
                   "merchant_category": "Auto Parts & Accessories",
                   "merchant_category_code": "5533",
@@ -188555,6 +188577,7 @@
                   "declined_reason": null,
                   "id": "citx_xxxxxxxxxxxxxx",
                   "international": false,
+                  "levels_points": null,
                   "local_amount": 12.5,
                   "merchant_category": "Auto Parts & Accessories",
                   "merchant_category_code": "5533",
