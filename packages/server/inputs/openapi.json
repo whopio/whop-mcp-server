@@ -30426,6 +30426,17 @@
               "null"
             ]
           },
+          "last_activity": {
+            "description": "What happened at `last_activity_at`. `object` says which kind of activity it is. `null` without `support_chat:read` on the account, or when `last_activity_at` is `null`.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MemberLastActivity"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "last_activity_at": {
             "description": "When the member and the account last interacted, as an ISO 8601 timestamp. For example, a message in the member's support chat.",
             "example": "2026-01-01T12:00:00.000Z",
@@ -30529,9 +30540,72 @@
           "joined_at",
           "last_accessed_at",
           "last_activity_at",
+          "last_activity",
           "created_at",
           "user"
         ],
+        "type": "object"
+      },
+      "MemberLastActivity": {
+        "$ref": "#/components/schemas/MemberLastActivityMessage",
+        "description": "What happened at the member's `last_activity_at`. `object` picks the shape: a `message` in their support chat.",
+        "discriminator": {
+          "mapping": {
+            "message": "#/components/schemas/MemberLastActivityMessage"
+          },
+          "propertyName": "object"
+        }
+      },
+      "MemberLastActivityMessage": {
+        "properties": {
+          "author": {
+            "description": "Who sent the message: the member, or someone on the account's team. `null` when the sender's account no longer exists.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UserSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "channel_id": {
+            "description": "The support chat the message was sent in.",
+            "type": "string"
+          },
+          "created_at": {
+            "description": "When the message was sent, as an ISO 8601 timestamp.",
+            "type": "string"
+          },
+          "id": {
+            "description": "The message ID.",
+            "type": "string"
+          },
+          "object": {
+            "description": "Always `message`.",
+            "enum": [
+              "message"
+            ],
+            "example": "message",
+            "type": "string"
+          },
+          "plain_content": {
+            "description": "The message text without formatting. `null` when the message has no text, such as an attachment on its own.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "channel_id",
+          "author",
+          "plain_content",
+          "created_at"
+        ],
+        "title": "Message",
         "type": "object"
       },
       "MemberLegacy": {
@@ -193325,6 +193399,7 @@
                   "id": "mber_xxxxxxxxxxxxxx",
                   "joined_at": "2026-01-01T12:00:00.000Z",
                   "last_accessed_at": "2026-01-01T12:00:00.000Z",
+                  "last_activity": null,
                   "last_activity_at": null,
                   "most_recent_action": "joined",
                   "most_recent_action_at": "2026-01-01T12:00:00.000Z",
@@ -193483,6 +193558,7 @@
                   "id": "mber_xxxxxxxxxxxxxx",
                   "joined_at": "2026-01-01T12:00:00.000Z",
                   "last_accessed_at": "2026-01-01T12:00:00.000Z",
+                  "last_activity": null,
                   "last_activity_at": null,
                   "most_recent_action": null,
                   "most_recent_action_at": null,
