@@ -5705,6 +5705,13 @@
             "example": 0,
             "type": "number"
           },
+          "payment_method_warnings": {
+            "items": {
+              "description": "Payment methods the account has been warned are nearing their dispute-rate line. Each entry carries `payment_method`, `measure` (`disputes`, `disputes_and_tc40s` or `fraud_disputes`), `warned_at` as an ISO 8601 timestamp, and the `rate`, `warning_rate` and `target_rate` as fractions where `0.01` is 1%. Empty when none are warned. A warned method is paused, and appears in `restricted_payment_methods`, if it is still over its target rate about four weeks later.",
+              "type": "object"
+            },
+            "type": "array"
+          },
           "pending_auto_topup_fee_percentage": {
             "description": "Percentage fee charged when pending, not-yet-settled balance is advanced to fund the account's cards balance, where `2` means 2%. `0` when the account is exempt.",
             "example": 2.0,
@@ -5810,7 +5817,8 @@
           "withdrawal_schedule",
           "undated_pending_reason",
           "enforce_3ds",
-          "restricted_payment_methods"
+          "restricted_payment_methods",
+          "payment_method_warnings"
         ],
         "type": "object"
       },
@@ -183035,6 +183043,7 @@
                     "enforce_3ds": false,
                     "financing_disabled": false,
                     "high_risk_processing_fee_percentage": 0,
+                    "payment_method_warnings": [],
                     "pending_auto_topup_fee_percentage": 2.0,
                     "pending_balance_delay_days": 0,
                     "reserve": {
@@ -183361,6 +183370,7 @@
                     "enforce_3ds": false,
                     "financing_disabled": false,
                     "high_risk_processing_fee_percentage": 0,
+                    "payment_method_warnings": [],
                     "pending_auto_topup_fee_percentage": 2.0,
                     "pending_balance_delay_days": 0,
                     "reserve": {
@@ -183820,6 +183830,7 @@
                     "enforce_3ds": false,
                     "financing_disabled": false,
                     "high_risk_processing_fee_percentage": 0,
+                    "payment_method_warnings": [],
                     "pending_auto_topup_fee_percentage": 2.0,
                     "pending_balance_delay_days": 0,
                     "reserve": {
