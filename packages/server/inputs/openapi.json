@@ -24814,6 +24814,57 @@
       "Forum": {
         "description": "A discussion forum where members can create posts, comment, and react, belonging to an experience.",
         "properties": {
+          "banned_words": {
+            "description": "A list of words that are automatically filtered from posts in this forum.",
+            "items": {
+              "description": "Represents textual data as UTF-8 character sequences. This type is most often used by GraphQL to represent free-form human-readable text.",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "banner_image": {
+            "description": "The banner image displayed at the top of the forum page. Null if no banner has been uploaded.",
+            "properties": {
+              "content_type": {
+                "description": "Uploaded file MIME type, such as image/jpeg, video/mp4, or audio/mpeg.",
+                "example": "image/jpeg",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "filename": {
+                "description": "The original filename of the uploaded attachment, including its file extension.",
+                "example": "document.pdf",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "id": {
+                "description": "Represents a unique identifier that is Base64 obfuscated. It is often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as `\"VXNlci0xMA==\"`) or integer (such as `4`) input value will be accepted as an ID.",
+                "type": "string"
+              },
+              "url": {
+                "description": "A pre-optimized URL for rendering this attachment on the client. This should be used for displaying attachments in apps.",
+                "example": "https://media.whop.com/abc123/optimized.jpg",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "filename",
+              "content_type",
+              "url"
+            ],
+            "type": [
+              "object",
+              "null"
+            ]
+          },
           "email_notification_preference": {
             "$ref": "#/components/schemas/ForumEmailNotificationPreferences",
             "description": "The email notification setting that controls which posts trigger email alerts. One of: all_admin_posts, only_weekly_summary, none."
@@ -24861,7 +24912,9 @@
           "experience",
           "who_can_post",
           "who_can_comment",
-          "email_notification_preference"
+          "email_notification_preference",
+          "banned_words",
+          "banner_image"
         ],
         "type": "object"
       },
