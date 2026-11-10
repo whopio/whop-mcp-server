@@ -34110,6 +34110,17 @@
             "$ref": "#/components/schemas/UserSummary",
             "description": "Public profile of the requesting partner."
           },
+          "referring_account": {
+            "description": "Business the partner sent this request on behalf of, when the referral belongs to their team. `null` for a personal referral.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AccountSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "request_type": {
             "description": "How the referral request was initiated.",
             "enum": [
@@ -34170,6 +34181,7 @@
           "created_at",
           "updated_at",
           "account",
+          "referring_account",
           "user",
           "partner",
           "rewards"
