@@ -15625,12 +15625,13 @@
           },
           "gifs": {
             "items": {
-              "$ref": "#/components/schemas/Gif"
+              "$ref": "#/components/schemas/Gif",
+              "description": "GIFs attached to the message. Empty for a deleted message."
             },
             "type": "array"
           },
           "id": {
-            "description": "Existing public message ID, preserved across REST and chat clients.",
+            "description": "Message ID, prefixed `post_`. Matches the `id` sent on create, when one was sent.",
             "example": "post_xxxxxxxxxxxxxxxxxxxxxx",
             "type": "string"
           },
@@ -25567,24 +25568,31 @@
       "Gif": {
         "properties": {
           "height": {
+            "description": "Height of `original_url`, in pixels.",
             "type": "integer"
           },
           "original_url": {
+            "description": "Full-size GIF. HTTPS on a Klipy media host.",
             "type": "string"
           },
           "preview_url": {
+            "description": "Smaller version for previews and placeholders. HTTPS on a Klipy media host.",
             "type": "string"
           },
           "slug": {
+            "description": "Identifier for the GIF.",
             "type": "string"
           },
           "title": {
+            "description": "GIF title.",
             "type": "string"
           },
           "url": {
+            "description": "URL the message renders the GIF from. HTTPS on a Klipy media host.",
             "type": "string"
           },
           "width": {
+            "description": "Width of `original_url`, in pixels.",
             "type": "integer"
           }
         },
@@ -134897,6 +134905,71 @@
                     "maxLength": 5000,
                     "type": "string"
                   },
+                  "gifs": {
+                    "description": "Up to 10 GIFs to attach. URLs must use HTTPS on static.klipy.com, static1.klipy.com, or static2.klipy.com. Omit to preserve on edit; an empty list clears them.",
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "height": {
+                          "description": "Height of `original_url`, in pixels.",
+                          "maximum": 2147483647,
+                          "minimum": 1,
+                          "type": "integer"
+                        },
+                        "original_url": {
+                          "description": "Full-size GIF. HTTPS on a Klipy media host.",
+                          "format": "uri",
+                          "maxLength": 255,
+                          "type": "string"
+                        },
+                        "preview_url": {
+                          "description": "Smaller version for previews and placeholders. HTTPS on a Klipy media host.",
+                          "format": "uri",
+                          "maxLength": 255,
+                          "type": "string"
+                        },
+                        "slug": {
+                          "description": "Client-provided GIF identifier. Whop generates the stored identifier from the GIF metadata.",
+                          "maxLength": 255,
+                          "type": "string"
+                        },
+                        "title": {
+                          "description": "GIF title.",
+                          "maxLength": 255,
+                          "type": "string"
+                        },
+                        "url": {
+                          "description": "URL the message renders the GIF from. HTTPS on a Klipy media host.",
+                          "format": "uri",
+                          "maxLength": 255,
+                          "type": "string"
+                        },
+                        "width": {
+                          "description": "Width of `original_url`, in pixels.",
+                          "maximum": 2147483647,
+                          "minimum": 1,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "slug",
+                        "title",
+                        "url",
+                        "original_url",
+                        "preview_url",
+                        "width",
+                        "height"
+                      ],
+                      "type": "object"
+                    },
+                    "maxItems": 10,
+                    "type": "array"
+                  },
+                  "id": {
+                    "description": "Optional, for clients that show a message before the server confirms it. Use `post_` followed by 22 Base58 characters. Omit to generate an ID. Reuse the same ID and `Idempotency-Key` when retrying a send.",
+                    "pattern": "^post_[1-9A-HJ-NP-Za-km-z]{22}$",
+                    "type": "string"
+                  },
                   "link_previews": {
                     "description": "Explicit URLs for the server to preview.",
                     "items": {
@@ -135144,6 +135217,66 @@
                     "example": "Edited **message**",
                     "maxLength": 5000,
                     "type": "string"
+                  },
+                  "gifs": {
+                    "description": "Up to 10 GIFs to attach. URLs must use HTTPS on static.klipy.com, static1.klipy.com, or static2.klipy.com. Omit to preserve on edit; an empty list clears them.",
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "height": {
+                          "description": "Height of `original_url`, in pixels.",
+                          "maximum": 2147483647,
+                          "minimum": 1,
+                          "type": "integer"
+                        },
+                        "original_url": {
+                          "description": "Full-size GIF. HTTPS on a Klipy media host.",
+                          "format": "uri",
+                          "maxLength": 255,
+                          "type": "string"
+                        },
+                        "preview_url": {
+                          "description": "Smaller version for previews and placeholders. HTTPS on a Klipy media host.",
+                          "format": "uri",
+                          "maxLength": 255,
+                          "type": "string"
+                        },
+                        "slug": {
+                          "description": "Client-provided GIF identifier. Whop generates the stored identifier from the GIF metadata.",
+                          "maxLength": 255,
+                          "type": "string"
+                        },
+                        "title": {
+                          "description": "GIF title.",
+                          "maxLength": 255,
+                          "type": "string"
+                        },
+                        "url": {
+                          "description": "URL the message renders the GIF from. HTTPS on a Klipy media host.",
+                          "format": "uri",
+                          "maxLength": 255,
+                          "type": "string"
+                        },
+                        "width": {
+                          "description": "Width of `original_url`, in pixels.",
+                          "maximum": 2147483647,
+                          "minimum": 1,
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "slug",
+                        "title",
+                        "url",
+                        "original_url",
+                        "preview_url",
+                        "width",
+                        "height"
+                      ],
+                      "type": "object"
+                    },
+                    "maxItems": 10,
+                    "type": "array"
                   },
                   "link_previews": {
                     "description": "Replacement preview URLs; pass an empty list to remove previews.",
