@@ -166589,7 +166589,7 @@
             }
           },
           {
-            "description": "Funnel only. Confidence level for whole-window final conversion intervals, for example 0.95. Requires mature_only=true. Exposure steps must each filter one user-randomized experiment.",
+            "description": "Funnel only. Confidence level for whole-window final conversion intervals, for example 0.95. Requires mature_only=true. Exposure steps must each filter one user- or visitor-randomized experiment.",
             "in": "query",
             "name": "confidence_level",
             "required": false,
@@ -167545,7 +167545,7 @@
             }
           },
           {
-            "description": "Funnel only. Confidence level for whole-window final conversion intervals, for example 0.95. Requires mature_only=true. Exposure steps must each filter one user-randomized experiment.",
+            "description": "Funnel only. Confidence level for whole-window final conversion intervals, for example 0.95. Requires mature_only=true. Exposure steps must each filter one user- or visitor-randomized experiment.",
             "in": "query",
             "name": "confidence_level",
             "required": false,
