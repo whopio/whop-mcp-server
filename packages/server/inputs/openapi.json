@@ -81014,6 +81014,7 @@
               "developer:logs:read",
               "dms:read",
               "domain:read",
+              "email:read",
               "experience:hidden_experience:read",
               "experiment:read",
               "forum:read",
