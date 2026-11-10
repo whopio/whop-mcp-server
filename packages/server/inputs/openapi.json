@@ -64078,6 +64078,65 @@
       },
       "x-whop-surface": "native"
     },
+    "/ad_campaigns/{id}/claim": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "The ad campaign ID.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "description": "Attributes the whole campaign and its daily budget to the calling user as its runner. One runner holds a campaign at a time. Takes the runner's Whop session, or a user API key with `ad_campaign:update`, plus active advertiser-supplier program access; everyone else gets a 404. Returns 403 until the caller has verified their identity and added a phone number and a social account, 409 when another user holds the campaign, and changes nothing when the caller already holds it.",
+        "operationId": "claimAdCampaign",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdCampaign"
+                }
+              }
+            },
+            "description": "ad campaign claimed"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "ad_campaign:update"
+            ]
+          }
+        ],
+        "summary": "Claim an Ad Campaign",
+        "tags": [
+          "Ad Campaigns"
+        ],
+        "x-whop-credentials": [
+          "user_api_key"
+        ],
+        "x-whop-docs": "gated",
+        "x-whop-docs-groups": [
+          "oasp"
+        ]
+      },
+      "x-whop-surface": "native"
+    },
     "/ad_campaigns/{id}/duplicate": {
       "parameters": [
         {
