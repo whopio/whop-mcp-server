@@ -30515,7 +30515,7 @@
             "description": "The user behind this member. `null` when the buyer is another business rather than a person.",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/UserSummary"
+                "$ref": "#/components/schemas/MemberUser"
               },
               {
                 "type": "null"
@@ -30958,6 +30958,66 @@
           "left"
         ],
         "type": "string"
+      },
+      "MemberUser": {
+        "properties": {
+          "city": {
+            "description": "The user's city, derived from their IP address. `null` when unknown or the user turned off location sharing.",
+            "example": "Austin",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "country": {
+            "description": "The user's country as an ISO 3166-1 alpha-2 code, like `US`, derived from their IP address. `null` when unknown or the user turned off location sharing.",
+            "example": "US",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "User ID, prefixed `user_`.",
+            "example": "user_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "name": {
+            "description": "Display name.",
+            "example": "Dana Whitfield",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "profile_picture": {
+            "$ref": "#/components/schemas/UserProfilePicture",
+            "description": "Avatar wrapper; its `url` is always present, using a generated placeholder when the user set no picture."
+          },
+          "state": {
+            "description": "The user's state or region code, like `CA`, derived from their IP address. `null` when unknown or the user turned off location sharing.",
+            "example": "TX",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "username": {
+            "description": "Public username.",
+            "example": "danawhitfield",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "name",
+          "profile_picture",
+          "city",
+          "state",
+          "country"
+        ],
+        "type": "object"
       },
       "MembersSortableColumns": {
         "description": "Which columns can be used to sort.",
@@ -193441,11 +193501,14 @@
                     "display_decimals": 2
                   },
                   "user": {
+                    "city": null,
+                    "country": null,
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
                       "url": "https://ui-avatars.com/api/"
                     },
+                    "state": null,
                     "username": "marcuswebb"
                   }
                 },
@@ -193600,11 +193663,14 @@
                     "display_decimals": 2
                   },
                   "user": {
+                    "city": null,
+                    "country": null,
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
                       "url": "https://ui-avatars.com/api/"
                     },
+                    "state": null,
                     "username": "marcuswebb"
                   }
                 },
