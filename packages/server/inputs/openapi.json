@@ -30140,8 +30140,16 @@
       },
       "Market": {
         "properties": {
+          "change_24h_percentage": {
+            "description": "How much the price moved over the last 24 hours, as a percentage where `2` means up 2%. Set for tokenized stocks; `null` when it is not available.",
+            "example": null,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
           "id": {
-            "description": "The market's name: a perpetual's Hyperliquid name such as `BTC` or `xyz:TSLA`, which you send as `market` when you create a trade, or a spot asset's symbol such as `BTC` or `XAUT`. A perpetual and a spot market can share an `id`, so `id` and `instrument_type` together identify a market.",
+            "description": "The market's name: a perpetual's Hyperliquid name such as `BTC` or `xyz:TSLA`, which you send as `market` when you create a trade, or a spot asset's symbol such as `BTC`, `XAUT`, or a tokenized stock's ticker such as `AAPL`. A perpetual and a spot market can share an `id`, so `id` and `instrument_type` together identify a market.",
             "example": "BTC",
             "type": "string"
           },
@@ -30154,6 +30162,14 @@
             "example": "perpetual",
             "type": "string"
           },
+          "logo_url": {
+            "description": "A logo image URL for the asset. Set for tokenized stocks; `null` when there is no logo.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "max_leverage": {
             "description": "The highest cross leverage an order on this perpetual can use. `null` for a spot market, which trades without leverage.",
             "example": 40,
@@ -30163,7 +30179,7 @@
             ]
           },
           "price": {
-            "description": "The current price in USD: the midpoint between the best bid and ask. `null` when no price is available.",
+            "description": "The current price in USD: the midpoint between the best bid and ask, or a tokenized stock's latest market price. `null` when no price is available.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/Money"
@@ -30184,7 +30200,9 @@
           "instrument_type",
           "max_leverage",
           "size_decimals",
-          "price"
+          "price",
+          "change_24h_percentage",
+          "logo_url"
         ],
         "type": "object"
       },
@@ -171040,7 +171058,7 @@
     },
     "/trades/markets": {
       "get": {
-        "description": "Returns every market you can trade on Whop.\n\n- **Spot:** listed by symbol: `BTC`, `SOL` and `XAUT` (gold).\n- **Perpetuals:** such as `BTC`, and stock and commodity perpetuals from Hyperliquid's `xyz` exchange, such as `xyz:TSLA`. Send the `id` as `market` when you create a trade.\n\nThe same symbol can appear twice, once as a perpetual and once as spot, so use `id` together with `instrument_type` to tell them apart. Results are sorted by `id`, then `instrument_type`.\n\nThis endpoint is public: no API key is needed, and each IP address can make up to 60 requests a minute.",
+        "description": "Returns every market you can trade on Whop.\n\n- **Spot:** listed by symbol: `BTC`, `SOL` and `XAUT` (gold), and tokenized stocks by ticker, such as `AAPL`, with their 24-hour change and logo.\n- **Perpetuals:** such as `BTC`, and stock and commodity perpetuals from Hyperliquid's `xyz` exchange, such as `xyz:TSLA`. Send the `id` as `market` when you create a trade.\n\nThe same symbol can appear twice, once as a perpetual and once as spot, so use `id` together with `instrument_type` to tell them apart. Results are sorted by `id`, then `instrument_type`.\n\nThis endpoint is public: no API key is needed, and each IP address can make up to 60 requests a minute.",
         "operationId": "listMarkets",
         "parameters": [
           {
@@ -171105,8 +171123,10 @@
                     "value": {
                       "data": [
                         {
+                          "change_24h_percentage": null,
                           "id": "BTC",
                           "instrument_type": "perpetual",
+                          "logo_url": null,
                           "max_leverage": 40,
                           "price": {
                             "amount": "80155.500000",
@@ -171117,8 +171137,10 @@
                           "size_decimals": 5
                         },
                         {
+                          "change_24h_percentage": null,
                           "id": "BTC",
                           "instrument_type": "spot",
+                          "logo_url": null,
                           "max_leverage": null,
                           "price": {
                             "amount": "80065.50000000",
@@ -171129,8 +171151,10 @@
                           "size_decimals": 5
                         },
                         {
+                          "change_24h_percentage": null,
                           "id": "ETH",
                           "instrument_type": "perpetual",
+                          "logo_url": null,
                           "max_leverage": 25,
                           "price": {
                             "amount": "2322.350000",
@@ -171141,8 +171165,24 @@
                           "size_decimals": 4
                         },
                         {
+                          "change_24h_percentage": 1.4235,
+                          "id": "NVDA",
+                          "instrument_type": "spot",
+                          "logo_url": "https://cdn.zerion.io/nvda.png",
+                          "max_leverage": null,
+                          "price": {
+                            "amount": "191.27000000",
+                            "currency": "usd",
+                            "decimals": 8,
+                            "display_decimals": 8
+                          },
+                          "size_decimals": 8
+                        },
+                        {
+                          "change_24h_percentage": null,
                           "id": "SOL",
                           "instrument_type": "perpetual",
+                          "logo_url": null,
                           "max_leverage": 20,
                           "price": {
                             "amount": "101.325000",
@@ -171153,8 +171193,10 @@
                           "size_decimals": 2
                         },
                         {
+                          "change_24h_percentage": null,
                           "id": "SOL",
                           "instrument_type": "spot",
+                          "logo_url": null,
                           "max_leverage": null,
                           "price": {
                             "amount": "101.23500000",
@@ -171165,8 +171207,10 @@
                           "size_decimals": 3
                         },
                         {
+                          "change_24h_percentage": null,
                           "id": "XAUT",
                           "instrument_type": "spot",
+                          "logo_url": null,
                           "max_leverage": null,
                           "price": {
                             "amount": "4012.85000000",
@@ -171177,8 +171221,10 @@
                           "size_decimals": 2
                         },
                         {
+                          "change_24h_percentage": null,
                           "id": "xyz:TSLA",
                           "instrument_type": "perpetual",
+                          "logo_url": null,
                           "max_leverage": 20,
                           "price": {
                             "amount": "441.500000",
