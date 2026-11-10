@@ -53221,6 +53221,22 @@
               }
             ]
           },
+          "city": {
+            "description": "The user's city, derived from their IP address. `null` when unknown or the user turned off location sharing.",
+            "example": "Austin",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "country": {
+            "description": "The user's country as an ISO 3166-1 alpha-2 code, derived from their IP address. `null` when unknown or the user turned off location sharing.",
+            "example": "US",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "created_at": {
             "description": "When the user was created, as an ISO 8601 timestamp",
             "example": "2026-01-01T12:00:00.000Z",
@@ -53287,6 +53303,14 @@
               "description": "The social accounts and websites on the user's public profile. Empty when the user has none."
             },
             "type": "array"
+          },
+          "state": {
+            "description": "The user's state or region, derived from their IP address. `null` when unknown or the user turned off location sharing.",
+            "example": "Texas",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "total_usd": {
             "description": "Total USD value of the user's personal holdings in `balances`, across those with known exchange rates. Computed only on the self view (retrieved with the reserved id `me`) for callers with balance-read scope; `null` otherwise, when `include_balance=false`, or when the balance source is unavailable.",
@@ -53367,7 +53391,10 @@
           "whop_partner_enabled_at",
           "whop_partner_verified_at",
           "whop_partner_onboarded_accounts_count",
-          "social_links"
+          "social_links",
+          "city",
+          "state",
+          "country"
         ],
         "type": "object"
       },
