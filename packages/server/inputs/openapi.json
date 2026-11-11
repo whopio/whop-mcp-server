@@ -28069,6 +28069,12 @@
               "withdrawal_reclassification",
               "clawback_receivable",
               "clawback_receivable_reversal",
+              "capital_withholding",
+              "capital_withholding_reversal",
+              "capital_hold",
+              "capital_hold_release",
+              "capital_remittance",
+              "capital_remittance_reversal",
               "treasury_payin",
               "treasury_payin_receivable",
               "onchain_deposit",
@@ -120251,6 +120257,8 @@
                   "balance_reservation_reversal",
                   "billing_percentage_fee",
                   "buyer_fee",
+                  "capital_withholding",
+                  "capital_withholding_reversal",
                   "card_interchange",
                   "card_load_deposit",
                   "card_load_transfer",
@@ -120741,6 +120749,8 @@
                   "balance_reservation_reversal",
                   "billing_percentage_fee",
                   "buyer_fee",
+                  "capital_withholding",
+                  "capital_withholding_reversal",
                   "card_interchange",
                   "card_load_deposit",
                   "card_load_transfer",
@@ -121054,6 +121064,7 @@
                               "airdrops",
                               "bad_debt",
                               "balance",
+                              "capital",
                               "clawbacks",
                               "crypto",
                               "disputes",
@@ -121121,6 +121132,12 @@
                               "balance_reservation_reversal",
                               "billing_percentage_fee",
                               "buyer_fee",
+                              "capital_hold",
+                              "capital_hold_release",
+                              "capital_remittance",
+                              "capital_remittance_reversal",
+                              "capital_withholding",
+                              "capital_withholding_reversal",
                               "card_interchange",
                               "card_interchange_receivable",
                               "card_load_deposit",
@@ -169821,7 +169838,7 @@
         }
       ],
       "post": {
-        "description": "Swaps one token for another in an account or user's wallet, or converts between their fiat balances at the mid-market rate. Crypto swaps finish in the background — retrieve the swap to follow its status.",
+        "description": "Swaps one token for another in an account or user's wallet, or converts between their fiat balances. Crypto swaps finish in the background — retrieve the swap to follow its status.",
         "operationId": "createSwap",
         "parameters": [
           {
@@ -169839,7 +169856,7 @@
                     "type": "string"
                   },
                   "amount": {
-                    "description": "Source token amount. Required for a crypto pair: a decimal amount, or `all` to swap the whole from_token balance in the account's wallet, read from the chain when the swap is created (any token but USDT). An amount above that balance is rejected when the balance can be read. For fiat pairs: the amount of from_token to convert at the mid-market rate; omit (along with to_amount) to repay the full negative to_token balance instead.",
+                    "description": "Source token amount. Required for a crypto pair: a decimal amount, or `all` to swap the whole from_token balance in the account's wallet, read from the chain when the swap is created (any token but USDT). An amount above that balance is rejected when the balance can be read. For fiat pairs: the amount of from_token to convert; omit (along with to_amount) to repay the full negative to_token balance instead.",
                     "example": "100",
                     "type": [
                       "string",
@@ -170080,7 +170097,7 @@
     },
     "/swaps/quote": {
       "post": {
-        "description": "Previews the price of a swap before you create it. Fiat pairs quote the mid-market rate — the same rate creating the swap fills at. No funds move, nothing is saved, and no authentication is required.",
+        "description": "Previews the price of a swap before you create it. A fiat pair quotes the same rate creating the swap fills at; name the account with `account_id` or `user_id` to quote the rate for that account. No funds move, nothing is saved, and no authentication is required unless you name an account.",
         "operationId": "createSwapQuote",
         "parameters": [
           {
@@ -170092,6 +170109,10 @@
             "application/json": {
               "schema": {
                 "properties": {
+                  "account_id": {
+                    "description": "Fiat pairs only: business account to quote the swap for, prefixed `biz_`. Requires a credential with `payout:transfer_funds` on that account. Provide this, `user_id`, or neither for a public quote.",
+                    "type": "string"
+                  },
                   "amount": {
                     "description": "Source token amount.",
                     "example": "100",
@@ -170167,6 +170188,10 @@
                   "to_token": {
                     "description": "Destination token contract address or ticker symbol, such as \"XAUT\".",
                     "example": "0x1b64b9025eebb9a6239575df9ea4b9ac46d4d193",
+                    "type": "string"
+                  },
+                  "user_id": {
+                    "description": "Fiat pairs only: the caller's own user ID, prefixed `user_`, to quote the swap for their personal account. Provide this or `account_id`.",
                     "type": "string"
                   }
                 },
@@ -170316,7 +170341,14 @@
             "$ref": "#/components/responses/Conflict"
           }
         },
-        "security": [],
+        "security": [
+          {},
+          {
+            "bearerAuth": [
+              "payout:transfer_funds"
+            ]
+          }
+        ],
         "summary": "Create Swap Quote",
         "tags": [
           "Swaps"
