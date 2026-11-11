@@ -152925,6 +152925,39 @@
                       "$ref": "#/components/schemas/Money",
                       "description": "Gross payout amount."
                     },
+                    "conversion": {
+                      "description": "How a USD balance pays a bank in another currency: it converts into the payout method's currency, and the payout leaves from the balance in that currency. Null when the payout is paid from the requested balance directly.",
+                      "properties": {
+                        "converted_amount": {
+                          "$ref": "#/components/schemas/Money",
+                          "description": "What the requested amount converts into, in the payout method's currency. When the account holds its USD in a stablecoin, this is an estimate: the payout is for what the conversion produces once that USD arrives, and `POST /payouts` answers with the payout request until that payout exists."
+                        },
+                        "estimated_savings": {
+                          "description": "How much more the recipient receives than if the same amount were paid out in USD and converted at the payout provider's rate. Null when the provider has no price for that route or converting first saves nothing.",
+                          "oneOf": [
+                            {
+                              "$ref": "#/components/schemas/Money"
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "payout_fee": {
+                          "$ref": "#/components/schemas/Money",
+                          "description": "The payout fee in the converted currency, taken from the converted amount."
+                        }
+                      },
+                      "required": [
+                        "converted_amount",
+                        "payout_fee",
+                        "estimated_savings"
+                      ],
+                      "type": [
+                        "object",
+                        "null"
+                      ]
+                    },
                     "destination_amount": {
                       "$ref": "#/components/schemas/Money",
                       "description": "Exact amount quoted for delivery."
@@ -153059,7 +153092,8 @@
                     "server_time",
                     "expires_at",
                     "quote_token",
-                    "recommended_method"
+                    "recommended_method",
+                    "conversion"
                   ],
                   "type": "object"
                 }
