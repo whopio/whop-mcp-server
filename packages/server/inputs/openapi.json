@@ -140803,7 +140803,7 @@
                             "type": "integer"
                           },
                           "total_earnings_usd": {
-                            "description": "The referrer's pending + completed earnings across all referred businesses, in USD.",
+                            "description": "The referrer's pending + completed earnings across all referred businesses, in USD, without commission advances. Whop Sales commission counts only the share that reaches its people.",
                             "example": "100.00",
                             "type": "string"
                           },
@@ -140900,7 +140900,7 @@
                           "type": "integer"
                         },
                         "total_earnings_usd": {
-                          "description": "The referrer's pending + completed earnings across all referred businesses, in USD.",
+                          "description": "The referrer's pending + completed earnings across all referred businesses, in USD, without commission advances. Whop Sales commission counts only the share that reaches its people.",
                           "example": "4.00",
                           "type": "string"
                         },
@@ -140999,7 +140999,7 @@
                             "type": "integer"
                           },
                           "total_earnings_usd": {
-                            "description": "The referrer's pending + completed earnings across all referred businesses, in USD.",
+                            "description": "The referrer's pending + completed earnings across all referred businesses, in USD, without commission advances. Whop Sales commission counts only the share that reaches its people.",
                             "example": "100.00",
                             "type": "string"
                           },
