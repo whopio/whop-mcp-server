@@ -166786,6 +166786,15 @@
             }
           },
           {
+            "description": "The webhook to count deliveries for, for example hook_AbC123. Required by webhook_deliveries, and must belong to account_id or one of its apps.",
+            "in": "query",
+            "name": "webhook_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Funnel only. Time allowed from the first event to the final event: integer minutes, hours, or days, up to 30d.",
             "in": "query",
             "name": "conversion_window",
@@ -167175,6 +167184,12 @@
                   "properties": {
                     "data": {
                       "properties": {
+                        "complete": {
+                          "description": "Present for webhook_deliveries. False while older deliveries are still being counted in the background: the points cover what is counted so far. Responses are cached for up to a minute, so wait a minute before requesting the same range again.",
+                          "example": false,
+                          "nullable": true,
+                          "type": "boolean"
+                        },
                         "currency": {
                           "description": "ISO currency the values are denominated in. Present for currency-unit metrics: the convert_to currency, or usd.",
                           "example": "usd",
@@ -167191,7 +167206,7 @@
                                   "properties": {
                                     "name": {
                                       "description": "The property value, for example usd or visa.",
-                                      "example": "spend",
+                                      "example": "success",
                                       "type": "string"
                                     },
                                     "steps": {
@@ -167203,7 +167218,7 @@
                                     },
                                     "value": {
                                       "description": "The metric's value for this entry.",
-                                      "example": 2.82,
+                                      "example": 5,
                                       "nullable": true,
                                       "type": "number"
                                     }
@@ -167742,6 +167757,15 @@
             }
           },
           {
+            "description": "The webhook to count deliveries for, for example hook_AbC123. Required by webhook_deliveries, and must belong to account_id or one of its apps.",
+            "in": "query",
+            "name": "webhook_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Funnel only. Time allowed from the first event to the final event: integer minutes, hours, or days, up to 30d.",
             "in": "query",
             "name": "conversion_window",
@@ -168131,6 +168155,11 @@
                   "properties": {
                     "data": {
                       "properties": {
+                        "complete": {
+                          "description": "Present for webhook_deliveries. False while older deliveries are still being counted in the background: the points cover what is counted so far. Responses are cached for up to a minute, so wait a minute before requesting the same range again.",
+                          "nullable": true,
+                          "type": "boolean"
+                        },
                         "currency": {
                           "description": "ISO currency the values are denominated in. Present for currency-unit metrics: the convert_to currency, or usd.",
                           "example": "usd",
