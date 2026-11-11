@@ -137675,6 +137675,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "Only the referrals this team member made, plus the ones they were added to as a deal participant. User ID, prefixed `user_`. Requires `referring_account_id`.",
+            "in": "query",
+            "name": "earning_partner_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
