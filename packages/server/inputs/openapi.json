@@ -2634,11 +2634,11 @@
           },
           "ach_dispute": {
             "$ref": "#/components/schemas/AccountFee",
-            "description": "Charged when the account holder disputes an ACH payment."
+            "description": "A flat fee in US dollars (USD), charged when the account holder disputes an ACH payment. Replaces the `dispute` fee for that payment."
           },
           "ach_return": {
             "$ref": "#/components/schemas/AccountFee",
-            "description": "Charged when an ACH payment is returned by the buyer's bank."
+            "description": "A flat fee in US dollars (USD), charged when the buyer's bank returns an ACH payment unpaid."
           },
           "bank_deposit": {
             "$ref": "#/components/schemas/AccountFee",
@@ -5319,11 +5319,11 @@
           },
           "sepa_dispute": {
             "$ref": "#/components/schemas/AccountFee",
-            "description": "Charged when the account holder disputes a SEPA Direct Debit payment."
+            "description": "A flat fee in euros (EUR), charged when the account holder disputes a SEPA Direct Debit payment. Replaces the `dispute` fee for that payment."
           },
           "sepa_return": {
             "$ref": "#/components/schemas/AccountFee",
-            "description": "Charged when a SEPA Direct Debit payment is returned by the buyer's bank."
+            "description": "A flat fee in euros (EUR), charged when the buyer's bank returns a SEPA Direct Debit payment unpaid."
           },
           "tax_calculation": {
             "$ref": "#/components/schemas/AccountFee",
@@ -58393,7 +58393,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -58412,7 +58412,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -58440,7 +58440,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -58459,7 +58459,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -58487,7 +58487,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -58506,7 +58506,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -58534,7 +58534,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -58553,7 +58553,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -58581,7 +58581,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -58600,7 +58600,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -58628,7 +58628,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -58647,7 +58647,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -58841,7 +58841,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -58860,7 +58860,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -58888,7 +58888,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -58907,7 +58907,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -58935,7 +58935,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -58954,7 +58954,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -58982,7 +58982,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59001,7 +59001,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -59029,7 +59029,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59048,7 +59048,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -59076,7 +59076,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59095,7 +59095,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -59123,7 +59123,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59142,7 +59142,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -59170,7 +59170,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59189,7 +59189,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -59217,7 +59217,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59236,7 +59236,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -59264,7 +59264,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59283,7 +59283,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -59311,7 +59311,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59330,7 +59330,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -59502,7 +59502,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59521,7 +59521,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -59550,7 +59550,7 @@
                       "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                       "properties": {
                         "fixed": {
-                          "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                          "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                           "example": 25,
                           "type": [
                             "number",
@@ -59569,7 +59569,7 @@
                           "additionalProperties": {
                             "properties": {
                               "fixed": {
-                                "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                                "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                                 "example": 25,
                                 "type": [
                                   "number",
@@ -59601,7 +59601,7 @@
                       "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                       "properties": {
                         "fixed": {
-                          "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                          "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                           "example": 25,
                           "type": [
                             "number",
@@ -59620,7 +59620,7 @@
                           "additionalProperties": {
                             "properties": {
                               "fixed": {
-                                "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                                "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                                 "example": 25,
                                 "type": [
                                   "number",
@@ -59651,7 +59651,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59670,7 +59670,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -59698,7 +59698,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59717,7 +59717,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -59745,7 +59745,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59764,7 +59764,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -59792,7 +59792,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59811,7 +59811,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -59839,8 +59839,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
-                        "example": 25,
+                        "description": "The new amount per event, in euros (EUR). `null` clears the custom amount.",
                         "type": [
                           "number",
                           "null"
@@ -59848,7 +59847,6 @@
                       },
                       "percentage": {
                         "description": "The new percentage, where `2` means 2%. `null` clears the custom rate so the fee returns to its default or inherited rate.",
-                        "example": 0.5,
                         "type": [
                           "number",
                           "null"
@@ -59858,8 +59856,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
-                              "example": 25,
+                              "description": "The new amount per event, in euros (EUR). `null` clears the custom amount.",
                               "type": [
                                 "number",
                                 "null"
@@ -59867,7 +59864,6 @@
                             },
                             "percentage": {
                               "description": "The new percentage, where `2` means 2%. `null` clears the custom rate so the fee returns to its default or inherited rate.",
-                              "example": 0.5,
                               "type": [
                                 "number",
                                 "null"
@@ -59886,8 +59882,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
-                        "example": 25,
+                        "description": "The new amount per event, in euros (EUR). `null` clears the custom amount.",
                         "type": [
                           "number",
                           "null"
@@ -59895,7 +59890,6 @@
                       },
                       "percentage": {
                         "description": "The new percentage, where `2` means 2%. `null` clears the custom rate so the fee returns to its default or inherited rate.",
-                        "example": 0.5,
                         "type": [
                           "number",
                           "null"
@@ -59905,8 +59899,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
-                              "example": 25,
+                              "description": "The new amount per event, in euros (EUR). `null` clears the custom amount.",
                               "type": [
                                 "number",
                                 "null"
@@ -59914,7 +59907,6 @@
                             },
                             "percentage": {
                               "description": "The new percentage, where `2` means 2%. `null` clears the custom rate so the fee returns to its default or inherited rate.",
-                              "example": 0.5,
                               "type": [
                                 "number",
                                 "null"
@@ -59933,7 +59925,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59952,7 +59944,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -59980,7 +59972,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -59999,7 +59991,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -60027,7 +60019,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -60046,7 +60038,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
@@ -60074,7 +60066,7 @@
                     "description": "The fields of a fee the caller may change. Only the keys sent are replaced.",
                     "properties": {
                       "fixed": {
-                        "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                        "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                         "example": 25,
                         "type": [
                           "number",
@@ -60093,7 +60085,7 @@
                         "additionalProperties": {
                           "properties": {
                             "fixed": {
-                              "description": "The new amount per event in US dollars. `null` clears the custom amount.",
+                              "description": "The new amount per event, in US dollars (USD). `null` clears the custom amount.",
                               "example": 25,
                               "type": [
                                 "number",
