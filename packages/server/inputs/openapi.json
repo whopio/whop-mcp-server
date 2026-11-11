@@ -5604,6 +5604,17 @@
             "$ref": "#/components/schemas/UserProfilePicture",
             "description": "Avatar wrapper; its `url` is always present, using a generated placeholder when the user set no picture."
           },
+          "referring_account": {
+            "description": "Business the partner referred this account on behalf of, when the referral belongs to their team. `null` for a personal referral.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/AccountSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "username": {
             "description": "Public username.",
             "type": "string"
@@ -5622,7 +5633,8 @@
           "name",
           "profile_picture",
           "email",
-          "whop_partner_verified_at"
+          "whop_partner_verified_at",
+          "referring_account"
         ],
         "type": "object"
       },
@@ -14950,7 +14962,7 @@
             ]
           },
           "icon": {
-            "description": "Experience logo, falling back to the app icon for community channels. Null for other channel kinds or when neither image exists.",
+            "description": "The channel icon. Community channels show the experience logo, falling back to the app icon. Support channels show the account logo. Group private channels show their own icon. Null for one-to-one private channels or when no image is set.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/File"
@@ -15077,7 +15089,7 @@
             ]
           },
           "icon": {
-            "description": "Experience logo, falling back to the app icon for community channels. Null for other channel kinds or when neither image exists.",
+            "description": "The channel icon. Community channels show the experience logo, falling back to the app icon. Support channels show the account logo. Group private channels show their own icon. Null for one-to-one private channels or when no image is set.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/File"
@@ -86974,6 +86986,21 @@
                     "pattern": "\\S",
                     "type": "string"
                   },
+                  "icon": {
+                    "additionalProperties": false,
+                    "description": "Channel icon as a file reference, for community channels and private channels with two or more participant IDs. Image files only. Group icons can be up to 5 MB. For community channels it sets the experience logo. Used only when a channel is created.",
+                    "properties": {
+                      "id": {
+                        "description": "File ID, prefixed `file_`.",
+                        "pattern": "\\S",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id"
+                    ],
+                    "type": "object"
+                  },
                   "kind": {
                     "description": "Channel kind. `private` is a one-to-one or group conversation, `community` creates a Chat experience on the account, and `support` opens a conversation between the account and a customer.",
                     "enum": [
@@ -87209,7 +87236,7 @@
         }
       ],
       "patch": {
-        "description": "Update a channel. Community icon changes update the experience logo and require `experience:update`. Support rename and notification changes require `support_chat:create`. Private and support writes require a user identity with channel management permission; account API keys can update community channels only.",
+        "description": "Update a channel. Community icon changes update the experience logo and require `experience:update`. Group private channel icon changes set the channel's own icon and require a group member. One-to-one private and support channels reject icon changes. Support rename and notification changes require `support_chat:create`. Private and support writes require a user identity with channel management permission. Account API keys can update community channels only.",
         "operationId": "updateChannel",
         "parameters": [],
         "requestBody": {
@@ -87219,9 +87246,10 @@
                 "properties": {
                   "icon": {
                     "additionalProperties": false,
-                    "description": "Community channels only. File reference for the experience logo; `null` clears it and restores the app icon fallback. Omit to preserve the current logo.",
+                    "description": "Channel icon as a file reference, for community channels and group private channels. Image files only. Group icons can be up to 5 MB. For community channels it sets the experience logo, and `null` restores the app icon. For group private channels it sets the channel's own icon, and `null` clears it. Omit to keep the current icon.",
                     "properties": {
                       "id": {
+                        "description": "File ID, prefixed `file_`.",
                         "pattern": "\\S",
                         "type": "string"
                       }
