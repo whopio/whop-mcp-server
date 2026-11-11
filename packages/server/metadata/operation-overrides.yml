@@ -6,6 +6,18 @@
 #   description:      replaces the public tool description
 #   principals:       restricts supported principal types (user | business | app)
 #   requiresAccount:  overrides whether a selected business account is required
+#   listedSchemaOmit: optional inputs that compact tool listings leave out;
+#                     describe_operation shows them and validation still uses
+#                     the full schema, so required inputs cannot be omitted
+#   listedSchemaOnly: the only optional inputs compact listings show, for an
+#                     operation with too many filters to omit one by one
+#
+# The top-level `core` list names the operations compact tool listings show
+# directly. Every other visible operation is reached through search_operations
+# and the call_read_operation / call_write_operation tools. Picked from MCP
+# usage between 2026-10-08 and 2026-11-06 and listed in that order, most used
+# first; deprecated compatibility endpoints (plans_*, stats_get) are left out
+# so agents learn their replacements.
 #
 # Example:
 #   "POST /payments":
@@ -33,14 +45,6 @@ overrides:
   # so a user token was offered a tool that failed on every call.
   "POST /account_links":
     principals: [business, app]
-
-  # The three filters read as combinable, so agents passed two and were
-  # rejected. Stating the constraint on the operation covers all three at once.
-  "GET /refunds":
-    description: >-
-      Returns a paginated list of refunds. Filter by exactly one of payment_id,
-      company_id, or user_id — these are mutually exclusive and cannot be
-      combined — with optional filtering by creation date.
 
   # An agent that could not upload stopped rather than attaching a pending file,
   # because the old wording only implied the ordering.
@@ -81,3 +85,462 @@ overrides:
       Pauses an active ad. An ad whose campaign is still a draft cannot be paused
       or unpaused and returns 400 — launch the campaign first, or duplicate an
       already-paused ad with ads_duplicate.
+
+  # Each of these properties alone is several KB of enum values or nested
+  # schema, which compact listings cannot afford for a core tool. The stats
+  # time series carries 75 optional filters, so it lists the common ones.
+  "GET /stats/time_series/{metric}":
+    description: >-
+      Chart a business metric over time for an account or user, as points
+      over a date range. Use it for trend questions. Find the metric names
+      with stats_time-series_list. For a single total that is not bucketed
+      over time, use a report from `GET /stats/reports`.
+    listedSchemaOnly:
+      - account_id
+      - breakdown_by
+      - breakdown_limit
+      - compare_to
+      - convert_to
+      - currency
+      - interval
+      - product
+      - time_zone
+      - user_id
+
+  "GET /payments":
+    description: >-
+      See sales and payments, newest first: who paid, how much, when, and
+      whether each one succeeded, failed or was refunded. Use it to check
+      revenue, find a customer's charge, or spot failed payments. By
+      default it covers every account you can read; set `mode` to
+      `user_sales` for sales the signed-in user received personally.
+    listedSchemaOmit: [payment_methods]
+
+  "POST /variants":
+    description: >-
+      Add a price to a product: the amount, one-time or recurring billing,
+      and when it is available to buy.
+    listedSchemaOmit: [payment_method_configuration]
+
+  "PATCH /variants/{id}":
+    description: >-
+      Change a price: amount, billing interval, visibility, stock or other
+      settings.
+    listedSchemaOmit: [payment_method_configuration]
+
+  # Descriptions written in the words people use for the task, so agents
+  # pick these tools instead of answering from memory. Every constraint from
+  # the API reference is kept, including the GET /refunds warning: agents read
+  # its three filters as combinable and were rejected.
+  "GET /memberships":
+    description: >-
+      See who has access to what: the memberships you can read, with their
+      status. Filter by account, product or user to answer "is this person
+      still a member?" `account_id` and `user_id` only narrow the list;
+      values outside your reach return fewer results, not an error.
+
+  "GET /messages":
+    description: >-
+      Read a chat: the messages in a community chat, DM, group chat or
+      support conversation, in the order they were sent.
+
+  "GET /members":
+    description: >-
+      See your customers: everyone who has bought from an account. A
+      member is one buyer's relationship with the account, however many
+      memberships they hold.
+
+  "GET /support_channels":
+    description: >-
+      See customer support conversations, most recently active first. Pass
+      `open=true` for the ones still waiting for a reply.
+
+  "GET /support_channels/{id}":
+    description: >-
+      Look up one customer support conversation.
+
+  "GET /course_lessons/{id}":
+    description: >-
+      Read one course lesson: its content, type and settings.
+
+  "GET /products":
+    description: >-
+      See the products (whops) a business sells. Leave out `account_id` to
+      search the public Whop marketplace instead.
+
+  "PATCH /course_lessons/{id}":
+    description: >-
+      Edit a course lesson: its content, type, visibility, quiz questions
+      or attached media.
+
+  "PATCH /products/{id}":
+    description: >-
+      Change a product's name, description, visibility or other settings.
+
+  "GET /payments/{id}":
+    description: >-
+      Look up one payment, including every item bought with its quantity
+      and subtotal. Related records come back as ids: look up the variant,
+      membership, member or shipment with their own tools, and list this
+      payment's refunds, disputes or resolution cases.
+
+  "GET /disputes":
+    description: >-
+      See chargebacks and disputes customers opened against payments,
+      across the accounts you can read.
+
+  "GET /products/{id}":
+    description: >-
+      Look up one product. Needs no sign-in.
+
+  "GET /accounts":
+    description: >-
+      See the businesses you can act on. Call this first to get the
+      `account_id` when the user names a business. A user token returns
+      the user's businesses; an account API key returns that account and
+      its subaccounts.
+
+  "GET /messages/{id}":
+    description: >-
+      Read one chat message.
+
+  "GET /accounts/{id}":
+    description: >-
+      Look up one business by its id or public route, including its crypto
+      wallet.
+
+  "POST /course_lessons":
+    description: >-
+      Add a lesson to a course chapter, with video, text or quiz content.
+
+  "GET /resolution_center_cases":
+    description: >-
+      See buyer complaints and refund requests in the Resolution Center.
+      Without `account_id` it returns every case you can read: the ones
+      you opened as a buyer and the ones on businesses you are on the team
+      of.
+
+  "GET /memberships/{id}":
+    description: >-
+      Check one membership by its id or license key.
+
+  "GET /experiences":
+    description: >-
+      See the apps set up in a business, such as chat, forums or courses,
+      optionally only those in one product or powered by one app.
+
+  "GET /refunds":
+    description: >-
+      See refunds you have issued. Filter by exactly one of `payment_id`,
+      `company_id` or `user_id`; they cannot be combined. Optionally
+      filter by date.
+
+  "POST /messages":
+    description: >-
+      Send a message in a community chat, DM, group chat or support
+      conversation, with optional attachments, a poll, or as a reply.
+
+  "POST /products":
+    description: >-
+      Set up something new to sell for a business. Add its prices with
+      variants_create afterwards.
+
+  "GET /course_lessons":
+    description: >-
+      See the lessons in a course or one of its chapters, in order.
+
+  "GET /financial_reports":
+    description: >-
+      Get a financial report for an account over a date range: balance
+      activity, an income statement, or a balance summary. Use it for
+      questions about earnings, fees and balance.
+
+  "GET /dispute_alerts":
+    description: >-
+      See dispute alerts and early fraud warnings across the accounts you
+      can read, so you can act before a chargeback lands.
+
+  "GET /payments/summary":
+    description: >-
+      Get totals for the same payments payments_list returns, such as
+      counts by status, without paging through them. Takes the same
+      filters.
+
+  "GET /variants":
+    description: >-
+      See the prices a product is sold at.
+
+  "GET /variants/{id}":
+    description: >-
+      Look up one price of a product.
+
+  "GET /courses":
+    description: >-
+      See the courses in a business or in one of its apps. Hidden courses
+      are included only for callers who can edit courses.
+
+  "GET /payouts":
+    description: >-
+      See money paid out of an account or to a user, newest first.
+      Read-only: it cannot start a payout.
+
+  "POST /checkout_configurations":
+    description: >-
+      Create a checkout link for an existing price or a new one. Send
+      customers to its `purchase_url` to buy. Nobody is charged until a
+      customer checks out.
+
+  "GET /disputes/summary":
+    description: >-
+      Get totals for the same disputes disputes_list returns, without
+      paging through them.
+
+  "GET /members/{id}":
+    description: >-
+      Look up one customer by their member id.
+
+  "GET /resolution_center_cases/{id}/events":
+    description: >-
+      Read a Resolution Center case's timeline, newest first. A merchant
+      sees the full timeline; a customer sees what is shown to customers.
+
+  "GET /promo_codes":
+    description: >-
+      See a business's promo codes and discounts.
+
+  "POST /promo_codes":
+    description: >-
+      Create a promo code (discount code) for a business.
+
+  "GET /resolution_center_cases/{id}":
+    description: >-
+      Look up one Resolution Center case with its full timeline.
+
+  "GET /course_chapters":
+    description: >-
+      See the chapters in a course, in order.
+
+  "GET /resolution_center_cases/summary":
+    description: >-
+      Get totals for the same cases resolution-center-cases_list returns,
+      with the same filters, without paging through them.
+
+  "GET /courses/{id}":
+    description: >-
+      Look up one course. A hidden course is returned only to callers who
+      can edit courses.
+
+  "GET /invoices":
+    description: >-
+      See invoices for the businesses you can read.
+
+  "GET /checkout_configurations":
+    description: >-
+      See a business's checkout links.
+
+  "GET /reviews":
+    description: >-
+      See published customer reviews for a product or business. Without
+      `account_id` or `product_id`, a user sees the reviews they wrote and
+      an account API key sees its account's reviews.
+
+  "GET /invoices/{id}":
+    description: >-
+      Look up one invoice by its `pay_` id.
+
+  "GET /checkout_configurations/{id}":
+    description: >-
+      Look up one checkout link. Needs no sign-in.
+
+  "GET /promo_codes/{id}":
+    description: >-
+      Look up one promo code.
+
+  "GET /disputes/{id}":
+    description: >-
+      Look up one chargeback or dispute.
+
+  "GET /payouts/{id}":
+    description: >-
+      Look up one payout by its `wdrl_` id, or by the `cofr_` conversion
+      request id it carries as `payout_request_id`. Anyone with the id can
+      see tracking details; accounting fields need payout read access on
+      the account.
+
+  "GET /stats/time_series":
+    description: >-
+      List the business metrics you can chart over time, with each one's
+      unit and the properties you can filter or break it down by.
+
+  "POST /memberships/{id}/cancel":
+    description: >-
+      Cancel a customer's membership, now or at the end of the billing
+      period. Buy-now-pay-later (`splitit`, `sezzle`) and non-trial
+      split-pay memberships cannot be cancelled by the buyer.
+
+  "POST /promo_codes/{id}/deactivate":
+    description: >-
+      Turn off a promo code so it can no longer be used at checkout.
+
+  "GET /shipments":
+    description: >-
+      See a business's shipments.
+
+  "GET /shipments/{id}":
+    description: >-
+      Look up one shipment by its id, or by the id of the payment it
+      fulfills.
+
+  "GET /refunds/{id}":
+    description: >-
+      Look up one refund.
+
+  "GET /financial_reports/breakdown":
+    description: >-
+      Explain a total from a financial report: break one bucket, such as
+      payments received or card spend, into the customers, accounts,
+      merchants or campaigns that contributed most, with the rest summed.
+
+  "GET /members/{member_id}/notes":
+    description: >-
+      Read a customer's notes, newest first. Notes are visible to the
+      business's team.
+
+  "POST /memberships/{id}/pause":
+    description: >-
+      Pause a customer's recurring payments. They keep access but are not
+      charged until the membership is resumed.
+
+  "POST /members/{member_id}/notes":
+    description: >-
+      Add a note to a customer. Notes are visible to the business's team.
+
+  "GET /reviews/{id}":
+    description: >-
+      Look up one published review. Unpublished reviews return 404.
+
+  "POST /resolution_center_cases/{id}/reply":
+    description: >-
+      Reply on a Resolution Center case that is waiting for information.
+      As the merchant this answers Whop's request; as the customer it
+      provides what was asked. Who is replying comes from the credential.
+
+  "POST /promo_codes/{id}/activate":
+    description: >-
+      Turn a promo code back on so customers can use it at checkout.
+
+  "POST /memberships/{id}/resume":
+    description: >-
+      Restart a paused membership's recurring payments. Billing resumes on
+      the next cycle.
+
+  "GET /files/{id}":
+    description: >-
+      Check a file you uploaded: poll it after uploading the bytes until
+      `upload_status` is `ready`, then attach its id. Only the uploader
+      can read a file this way; a file attached to something else is read
+      through that resource.
+
+  "GET /forum_posts":
+    description: >-
+      Read the posts in a forum, or the replies under one post, with an
+      option to show only pinned posts.
+
+  "GET /dm_channels":
+    description: >-
+      See your DM inbox, most recently active first.
+
+  "GET /bounties":
+    description: >-
+      Find paid clipping and content work: the bounties you can see and
+      work on. With an account API key, see that account's own bounties,
+      including scheduled drafts.
+
+  "GET /events":
+    description: >-
+      See what people did, such as visits, checkouts and purchases, most
+      recent first. Pass `identifier` for one person's journey, or leave
+      it out to list an account's events in a time range. Events have the
+      same shape as the `POST /events` intake: attribution in `context`,
+      identity in `user`.
+
+  "POST /accounts":
+    description: >-
+      Set up a new business on Whop. With a user token this creates a
+      business the user owns; with an account API key it creates a
+      subaccount. Tax details are added later with accounts_update, not at
+      creation.
+
+  "POST /experiences":
+    description: >-
+      Add an app to a business, such as a course, forum or chat, powered
+      by an app id. To give a product's customers access, attach it with
+      experiences_attach.
+
+  "POST /experiences/{id}/attach":
+    description: >-
+      Give a product's customers access to an app (experience), such as a
+      course, forum or chat.
+
+  "POST /courses":
+    description: >-
+      Create a course inside a course app (experience), with optional
+      chapters, lessons and a certificate.
+
+  "POST /course_chapters":
+    description: >-
+      Add a chapter to a course to group its lessons into sections.
+
+  "PATCH /course_chapters/{id}":
+    description: >-
+      Rename a course chapter.
+
+  "POST /forum_posts":
+    description: >-
+      Post in a community forum, or comment on a post, with optional
+      attachments, a poll, a paywall or pinning.
+
+core:
+  - "GET /payments"
+  - "GET /memberships"
+  - "GET /messages"
+  - "GET /members"
+  - "POST /files"
+  - "GET /stats/time_series/{metric}"
+  - "GET /support_channels"
+  - "GET /events"
+  - "GET /course_lessons/{id}"
+  - "GET /products"
+  - "PATCH /course_lessons/{id}"
+  - "PATCH /products/{id}"
+  - "GET /payments/{id}"
+  - "GET /disputes"
+  - "GET /forum_posts"
+  - "GET /products/{id}"
+  - "GET /accounts"
+  - "POST /variants"
+  - "GET /messages/{id}"
+  - "GET /dm_channels"
+  - "PATCH /variants/{id}"
+  - "GET /accounts/{id}"
+  - "POST /course_lessons"
+  - "GET /resolution_center_cases"
+  - "GET /memberships/{id}"
+  - "GET /files/{id}"
+  - "GET /experiences"
+  - "GET /bounties"
+  - "GET /refunds"
+  - "POST /messages"
+  - "POST /products"
+  - "POST /experiences/{id}/attach"
+  - "GET /variants"
+  - "GET /variants/{id}"
+  - "POST /experiences"
+  - "POST /forum_posts"
+  - "POST /course_chapters"
+  - "POST /courses"
+  - "POST /promo_codes"
+  - "PATCH /course_chapters/{id}"
+  - "POST /memberships/{id}/cancel"
+  - "POST /accounts"
+  - "POST /payments/{id}/refund"

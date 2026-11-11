@@ -14,7 +14,7 @@ import type {
 	SafetyClassification,
 } from "./types.ts";
 
-export const GENERATOR_VERSION = "2.2.0";
+export const GENERATOR_VERSION = "2.3.0";
 
 const HTTP_METHODS: HttpMethod[] = ["get", "post", "put", "patch", "delete"];
 
@@ -189,6 +189,8 @@ export interface OperationOverride {
 	description?: string;
 	principals?: PrincipalType[];
 	requiresAccount?: boolean;
+	listedSchemaOmit?: string[];
+	listedSchemaOnly?: string[];
 }
 
 export interface ScopeDefinition {
@@ -204,7 +206,10 @@ export interface GeneratorMetadata {
 	exclusions: {
 		exclusions: { operation: string; reason: string; owner: string }[];
 	};
-	overrides: { overrides: Record<string, OperationOverride> };
+	overrides: {
+		overrides: Record<string, OperationOverride>;
+		core?: string[];
+	};
 	/**
 	 * The configured scope capabilities record which credential kinds can hold
 	 * each scope. Principals are derived from them so tools a connection can
@@ -652,6 +657,15 @@ function buildOperation(
 		inputSchema,
 		accountParam,
 		requiresAccount: override?.requiresAccount ?? accountParamRequired,
+		...(override?.listedSchemaOmit?.length
+			? { listedSchemaOmit: [...override.listedSchemaOmit].sort() }
+			: {}),
+		...(override?.listedSchemaOnly?.length
+			? { listedSchemaOnly: [...override.listedSchemaOnly].sort() }
+			: {}),
+		...(metadata.overrides.core?.includes(key)
+			? { core: metadata.overrides.core.indexOf(key) + 1 }
+			: {}),
 		principals,
 		scopeAlternatives,
 		scopes,
@@ -709,6 +723,13 @@ export function buildRegistry(
 		if (!allKeys.has(key)) {
 			fail(
 				`operation-overrides.yml entry "${key}" matches no operation in the OpenAPI contract.`,
+			);
+		}
+	}
+	for (const key of metadata.overrides.core ?? []) {
+		if (!allKeys.has(key)) {
+			fail(
+				`operation-overrides.yml core entry "${key}" matches no operation in the OpenAPI contract.`,
 			);
 		}
 	}
@@ -790,6 +811,45 @@ export function buildRegistry(
 		}
 		seenToolNames.set(operation.toolName, key);
 		operations.push(operation);
+	}
+
+	const exposedKeys = new Set(
+		operations.map((op) => operationKey(op.method, op.path)),
+	);
+	for (const key of metadata.overrides.core ?? []) {
+		if (!exposedKeys.has(key)) {
+			fail(
+				`operation-overrides.yml core entry "${key}" is excluded or pending review, so it cannot be listed.`,
+			);
+		}
+	}
+	for (const operation of operations) {
+		const properties = operation.inputSchema.properties ?? {};
+		const key = operationKey(operation.method, operation.path);
+		if (operation.listedSchemaOmit && operation.listedSchemaOnly) {
+			fail(
+				`operation-overrides.yml ${key} sets both listedSchemaOmit and listedSchemaOnly; use one.`,
+			);
+		}
+		for (const name of operation.listedSchemaOnly ?? []) {
+			if (!(name in properties)) {
+				fail(
+					`operation-overrides.yml listedSchemaOnly "${name}" is not an input of ${key}.`,
+				);
+			}
+		}
+		for (const name of operation.listedSchemaOmit ?? []) {
+			if (!(name in properties)) {
+				fail(
+					`operation-overrides.yml listedSchemaOmit "${name}" is not an input of ${operationKey(operation.method, operation.path)}.`,
+				);
+			}
+			if (operation.inputSchema.required?.includes(name)) {
+				fail(
+					`operation-overrides.yml listedSchemaOmit "${name}" is required by ${operationKey(operation.method, operation.path)}, so it must stay in the listed schema.`,
+				);
+			}
+		}
 	}
 
 	// Code-point comparison, not localeCompare: ICU collation varies with the

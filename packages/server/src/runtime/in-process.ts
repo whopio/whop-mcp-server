@@ -17,6 +17,7 @@ export type { CredentialAdapter, PrincipalContext } from "../policy/types.ts";
 export {
 	CLAUDE_DIRECTORY_EXCLUSIONS,
 	DEFAULT_SURFACE,
+	isReadNamedScope,
 	isSurfaceName,
 	operationInSurface,
 	SURFACE_NAMES,

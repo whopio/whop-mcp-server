@@ -1,4 +1,5 @@
 import type { OperationDef } from "../registry/types.ts";
+import type { SurfaceName } from "../policy/surfaces.ts";
 import type { PrincipalContext } from "../policy/types.ts";
 import type { BuiltinTool, ToolDefinition } from "./builtin-tool.ts";
 import type { Dispatcher } from "./dispatcher.ts";
@@ -30,6 +31,10 @@ const SEARCH_SOURCES = [
 		titleFields: ["name", "username", "email"],
 	},
 ] as const;
+
+// search takes no business on the ChatGPT route, so it asks only the sources
+// that answer without one. Variants and members need a business.
+const CHATGPT_SEARCH_TOOLS = new Set(["products_list", "payments_list"]);
 
 const FETCH_SOURCES: Record<string, string> = {
 	prod: "products_get",
@@ -110,19 +115,28 @@ async function runSearch(
 	visibleOps: OperationDef[],
 	dispatcher: Dispatcher,
 	principal: PrincipalContext,
+	surface: SurfaceName | undefined,
 ): Promise<{ results: SearchResult[] }> {
 	const needle = query.trim().toLowerCase();
-	const sources = SEARCH_SOURCES.map((source) => ({
-		source,
-		operation: findOperation(visibleOps, source.toolName),
-	})).filter(
-		(
-			entry,
-		): entry is {
-			source: (typeof SEARCH_SOURCES)[number];
-			operation: OperationDef;
-		} => entry.operation !== undefined,
-	);
+	const pool =
+		surface === "chatgpt"
+			? SEARCH_SOURCES.filter((source) =>
+					CHATGPT_SEARCH_TOOLS.has(source.toolName),
+				)
+			: SEARCH_SOURCES;
+	const sources = pool
+		.map((source) => ({
+			source,
+			operation: findOperation(visibleOps, source.toolName),
+		}))
+		.filter(
+			(
+				entry,
+			): entry is {
+				source: (typeof SEARCH_SOURCES)[number];
+				operation: OperationDef;
+			} => entry.operation !== undefined,
+		);
 
 	const settled = await Promise.allSettled(
 		sources.map(({ operation }) =>
@@ -175,6 +189,7 @@ export function chatGptTools(
 	visibleOps: OperationDef[],
 	dispatcher: Dispatcher,
 	principal: PrincipalContext,
+	surface?: SurfaceName,
 ): BuiltinTool[] {
 	return [
 		{
@@ -182,7 +197,7 @@ export function chatGptTools(
 			call: async (args) => {
 				const query = typeof args.query === "string" ? args.query : "";
 				return JSON.stringify(
-					await runSearch(query, visibleOps, dispatcher, principal),
+					await runSearch(query, visibleOps, dispatcher, principal, surface),
 					null,
 					2,
 				);

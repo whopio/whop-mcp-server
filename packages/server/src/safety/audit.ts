@@ -13,6 +13,7 @@ export interface AuditEvent {
 	outcome: "executed" | "failed";
 	errorCode?: string;
 	upstreamStatus?: number;
+	via?: "call_read_operation" | "call_write_operation";
 }
 
 export interface AuditSink {

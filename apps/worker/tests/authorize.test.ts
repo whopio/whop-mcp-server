@@ -180,9 +180,11 @@ describe("defaultHandler error containment", () => {
 				expect(response.headers.get("Location")).toBe(redirectTo);
 				expect(completeAuthorization).toHaveBeenCalledWith(
 					expect.objectContaining({
+						scope: ["standard"],
 						props: expect.objectContaining({
 							consentVersion: 1,
 							whopScope: "openid profile",
+							profile: "standard",
 						}),
 					}),
 				);
@@ -244,6 +246,72 @@ describe("OAuth authorize", () => {
 		}>("test-state-key-16ch", pendingValue, state);
 		expect(pending?.profile).toBe("admin");
 		expect(pending?.clientName).toBe("Test agent");
+	});
+
+	async function authorizeForResource(resource: string | string[]) {
+		let pendingValue = "";
+		const response = await defaultHandler.fetch(
+			new Request("http://localhost:8788/authorize"),
+			envStub({
+				OAUTH_PROVIDER: {
+					parseAuthRequest: async () => ({ ...AUTH_REQUEST, resource }),
+					lookupClient: async () => ({ clientId: AUTH_REQUEST.clientId }),
+				},
+				OAUTH_KV: {
+					put: async (_key: string, value: string) => {
+						pendingValue = value;
+					},
+				},
+			}),
+		);
+		const location = new URL(response.headers.get("Location") ?? "");
+		const pending = await openJson<{ profile: string }>(
+			"test-state-key-16ch",
+			pendingValue,
+			location.searchParams.get("state") ?? "",
+		);
+		return {
+			profile: pending?.profile,
+			scopes: location.searchParams.get("scope")?.split(" "),
+		};
+	}
+
+	it.each([
+		"http://localhost:8788/muse/mcp",
+		"http://localhost:8788/muse/mcp/",
+	])("narrows a grant requested for the Muse route as %s", async (resource) => {
+		const { profile, scopes } = await authorizeForResource(resource);
+		expect(profile).toBe("muse");
+		expect(scopes).toContain("support_chat:message:create");
+		expect(scopes).not.toContain("payout:withdraw_funds");
+	});
+
+	it("narrows a grant requested for the ChatGPT route", async () => {
+		const { profile, scopes } = await authorizeForResource(
+			"http://localhost:8788/chatgpt/mcp",
+		);
+		expect(profile).toBe("chatgpt");
+		expect(scopes).toContain("media:generate");
+		expect(scopes).not.toContain("payment:charge");
+		expect(scopes).not.toContain("invoice:create");
+		expect(scopes).not.toContain("payout:withdraw_funds");
+	});
+
+	it("narrows when the ChatGPT route is one of several resources", async () => {
+		const { profile } = await authorizeForResource([
+			"http://localhost:8788/other",
+			"http://localhost:8788/chatgpt/mcp",
+		]);
+		expect(profile).toBe("chatgpt");
+	});
+
+	it("keeps the full grant for the Claude route", async () => {
+		const { profile, scopes } = await authorizeForResource(
+			"http://localhost:8788/claude/mcp",
+		);
+		expect(profile).toBe("admin");
+		expect(scopes).toContain("payment:charge");
+		expect(scopes).toContain("payout:withdraw_funds");
 	});
 
 	it("grants full access even when the client requests a narrower profile", async () => {

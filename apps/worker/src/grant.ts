@@ -8,6 +8,20 @@ import type { Env, WhopGrantProps } from "./types.ts";
 
 export const EXPIRY_SLACK_MS = 30_000;
 
+export const MUSE_ROUTE = "/muse/mcp";
+export const CHATGPT_ROUTE = "/chatgpt/mcp";
+
+/**
+ * Profiles on grants issued for one directory route. They run as admin, and
+ * their Whop credential holds only the scopes that route's tools declare.
+ */
+export const MUSE_PROFILE = "muse";
+export const CHATGPT_PROFILE = "chatgpt";
+const NARROWED_PROFILES: ReadonlySet<string> = new Set([
+	MUSE_PROFILE,
+	CHATGPT_PROFILE,
+]);
+
 export function normalizeMcpClientName(
 	clientName: string | undefined,
 ): string | undefined {
@@ -34,7 +48,11 @@ export class StructuredLogAuditSink implements AuditSink {
 	}
 }
 
-export function unauthorized(env: Env, message: string): Response {
+export function unauthorized(
+	env: Env,
+	message: string,
+	metadataPath = "",
+): Response {
 	return new Response(
 		JSON.stringify({ error: "invalid_token", error_description: message }),
 		{
@@ -43,7 +61,24 @@ export function unauthorized(env: Env, message: string): Response {
 				"Content-Type": "application/json",
 				// RFC 6750 clients read error="invalid_token" as "refresh, don't
 				// re-run the full login".
-				"WWW-Authenticate": `Bearer error="invalid_token", error_description="${message}", resource_metadata="${env.MCP_BASE_URL}/.well-known/oauth-protected-resource"`,
+				"WWW-Authenticate": `Bearer error="invalid_token", error_description="${message}", resource_metadata="${env.MCP_BASE_URL}/.well-known/oauth-protected-resource${metadataPath}"`,
+			},
+		},
+	);
+}
+
+// insufficient_scope sends the client through a new sign-in for this route;
+// invalid_token would only refresh the same grant, forever.
+export function wrongRoute(env: Env, path: string): Response {
+	const message =
+		"This connection was not authorized for this endpoint. Reconnect.";
+	return new Response(
+		JSON.stringify({ error: "insufficient_scope", error_description: message }),
+		{
+			status: 403,
+			headers: {
+				"Content-Type": "application/json",
+				"WWW-Authenticate": `Bearer error="insufficient_scope", error_description="${message}", resource_metadata="${env.MCP_BASE_URL}/.well-known/oauth-protected-resource${path}"`,
 			},
 		},
 	);
@@ -85,7 +120,9 @@ export function principalFromProps(props: WhopGrantProps): PrincipalContext {
 		// a scope joined WHOP_SCOPES, and scopes outside it (ad_pixel:manage), are
 		// hidden until the user reconnects.
 		scopes: grantedScopes(props.whopScope),
-		permissionProfile: props.profile,
+		permissionProfile: NARROWED_PROFILES.has(props.profile)
+			? "admin"
+			: props.profile,
 	};
 }
 

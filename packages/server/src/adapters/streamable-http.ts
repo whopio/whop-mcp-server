@@ -1,6 +1,7 @@
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import type { RegistryManifest } from "../registry/types.ts";
 import type { SurfaceName } from "../policy/surfaces.ts";
+import type { ToolListing } from "../runtime/server.ts";
 import type { CredentialAdapter, PrincipalContext } from "../policy/types.ts";
 import type { AuditSink } from "../safety/audit.ts";
 import { createWhopMcpServer } from "../runtime/server.ts";
@@ -60,6 +61,8 @@ export interface StreamableHttpAdapterOptions {
 	chatGptCompat?: boolean;
 	/** The fixed tool subset this endpoint serves (full by default). */
 	surface?: SurfaceName;
+	/** Which operations tools/list shows (see CreateWhopMcpServerOptions). */
+	toolListing?: ToolListing;
 }
 
 function jsonRpcError(status: number, code: number, message: string): Response {
@@ -150,6 +153,7 @@ export function createStreamableHttpHandler(
 			pluginSource: auth.pluginSource,
 			chatGptCompat: options.chatGptCompat,
 			surface: options.surface,
+			toolListing: options.toolListing,
 			extraHeaders: auth.extraHeaders,
 		});
 

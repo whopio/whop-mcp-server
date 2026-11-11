@@ -86,6 +86,12 @@ export interface OperationDef {
 	/** The account parameter this operation accepts, if any. */
 	accountParam: AccountParam | null;
 	requiresAccount: boolean;
+	/** Position in compact tool listings (1 = listed first); every other operation is reached through the operation tools. */
+	core?: number;
+	/** Optional inputs left out of compact listings; describe_operation shows them and validation still uses inputSchema. */
+	listedSchemaOmit?: string[];
+	/** The only optional inputs compact listings show; every other optional input is left out as with listedSchemaOmit. */
+	listedSchemaOnly?: string[];
 	principals: PrincipalType[];
 	scopeAlternatives: string[][];
 	scopes: string[];

@@ -7,12 +7,27 @@ import {
 	WhopOidcError,
 	type McpClient,
 } from "./whop-oidc.ts";
-import { expandProfileToWhopScopes } from "./profile-scopes.ts";
+import {
+	expandChatgptToWhopScopes,
+	expandMuseToWhopScopes,
+	expandProfileToWhopScopes,
+} from "./profile-scopes.ts";
 import { openJson, sealJson } from "./pending-state.ts";
 import { registry } from "./registry.ts";
 import { errorPage, escapeHtml, htmlResponse, whopLogoSvg } from "./html.ts";
-import { normalizeMcpClientName } from "./grant.ts";
+import {
+	CHATGPT_PROFILE,
+	CHATGPT_ROUTE,
+	MUSE_PROFILE,
+	MUSE_ROUTE,
+	normalizeMcpClientName,
+} from "./grant.ts";
 import type { Env, WhopGrantProps } from "./types.ts";
+
+const ROUTE_GRANT_SCOPES = new Map([
+	[CHATGPT_PROFILE, expandChatgptToWhopScopes],
+	[MUSE_PROFILE, expandMuseToWhopScopes],
+]);
 
 const PENDING_TTL_SECONDS = 600;
 const SESSION_COOKIE = "mcp_auth_session";
@@ -104,7 +119,9 @@ async function redirectUpstream(
 	const url = oidcClient(env).authorizeUrl({
 		state,
 		codeChallenge: await codeChallengeS256(codeVerifier),
-		scopes: expandProfileToWhopScopes(profile, registry.operations),
+		scopes:
+			ROUTE_GRANT_SCOPES.get(profile)?.(registry.operations) ??
+			expandProfileToWhopScopes(profile, registry.operations),
 		mcpClient,
 	});
 	return new Response(null, {
@@ -119,7 +136,9 @@ async function redirectUpstream(
 /**
  * The worker is the authorization server facing dynamically registered MCP
  * clients, while upstream Whop sees only the worker's fixed app identity.
- * Every grant is full access; the user approves on Whop's own OAuth screen.
+ * Every grant is full access, except one requested for the Muse or ChatGPT
+ * route, which the client names as its RFC 8707 resource and which holds only
+ * that route's scopes. The user approves on Whop's own OAuth screen.
  */
 async function handleAuthorize(request: Request, env: Env): Promise<Response> {
 	const authRequest = await env.OAUTH_PROVIDER.parseAuthRequest(request);
@@ -133,8 +152,22 @@ async function handleAuthorize(request: Request, env: Env): Promise<Response> {
 		env,
 		authRequest,
 		normalizeMcpClientName(client.clientName),
-		"admin",
+		profileForResources(env, [authRequest.resource].flat()),
 	);
+}
+
+function profileForResources(
+	env: Env,
+	resources: (string | undefined)[],
+): string {
+	const requested = new Set(
+		resources.map((resource) => resource?.replace(/\/+$/, "")),
+	);
+	if (requested.has(`${env.MCP_BASE_URL}${CHATGPT_ROUTE}`)) {
+		return CHATGPT_PROFILE;
+	}
+	if (requested.has(`${env.MCP_BASE_URL}${MUSE_ROUTE}`)) return MUSE_PROFILE;
+	return "admin";
 }
 
 async function handleCallback(request: Request, env: Env): Promise<Response> {

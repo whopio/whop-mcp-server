@@ -7,7 +7,11 @@ import { InMemoryAuditSink } from "../src/safety/audit.ts";
 import { WhopMcpError } from "../src/runtime/errors.ts";
 import { createWhopMcpServer } from "../src/runtime/server.ts";
 import {
+	CHATGPT_DESTRUCTIVE_WRITES,
+	CHATGPT_EXCLUSIONS,
+	CHATGPT_OPEN_WORLD_WRITES,
 	CLAUDE_DIRECTORY_EXCLUSIONS,
+	operationInSurface,
 	type SurfaceName,
 } from "../src/policy/surfaces.ts";
 import {
@@ -54,11 +58,13 @@ async function connect(
 		beforeCall?: Parameters<typeof createWhopMcpServer>[0]["beforeCall"];
 		includeIntent?: boolean;
 		surface?: SurfaceName;
+		chatGptCompat?: boolean;
 	} = {},
 ) {
 	const { server } = createWhopMcpServer({
 		registry,
 		surface: options.surface,
+		chatGptCompat: options.chatGptCompat,
 		credentialAdapter: staticCredential(),
 		principal: options.principal ?? principalFixture(),
 		fetch: options.fetch ?? fakeFetch().fetch,
@@ -526,7 +532,7 @@ describe("claude_directory surface", () => {
 
 	it("names only operations that exist in the registry", () => {
 		const keys = new Set(registry.operations.map(key));
-		for (const excluded of CLAUDE_DIRECTORY_EXCLUSIONS.keys()) {
+		for (const excluded of CLAUDE_DIRECTORY_EXCLUSIONS) {
 			expect(keys, excluded).toContain(excluded);
 		}
 	});
@@ -638,6 +644,421 @@ describe("claude_directory surface", () => {
 					!CLAUDE_DIRECTORY_EXCLUSIONS.has(key(op)),
 			).length,
 		);
+	});
+});
+
+describe("chatgpt surface", () => {
+	const key = (op: { method: string; path: string }) =>
+		`${op.method.toUpperCase()} ${op.path}`;
+
+	// A red row may be a rename: re-key it to the new path. Deleting it puts the tool back on this route.
+	it("names only operations that exist in the registry", () => {
+		const keys = new Set(registry.operations.map(key));
+		for (const excluded of CHATGPT_EXCLUSIONS) {
+			expect(keys, excluded).toContain(excluded);
+		}
+	});
+
+	it("lists as destructive only writes a signed-in user can reach here", () => {
+		const byKey = new Map(registry.operations.map((op) => [key(op), op]));
+		for (const listed of CHATGPT_DESTRUCTIVE_WRITES) {
+			const op = byKey.get(listed);
+			if (!op) throw new Error(`${listed} is not in the registry`);
+			expect(operationInSurface(op, "chatgpt"), listed).toBe(true);
+			expect(op.principals, listed).toContain("user");
+		}
+	});
+
+	it("marks the listed writes destructive here and leaves the older routes alone", async () => {
+		const hints = async (surface: SurfaceName) => {
+			const client = await connect({
+				surface,
+				principal: principalFixture({ principalType: "user", accountId: null }),
+			});
+			const { tools } = await client.listTools();
+			return new Map(
+				tools.map((tool) => [tool.name, tool.annotations?.destructiveHint]),
+			);
+		};
+		const listed = registry.operations.filter((op) =>
+			CHATGPT_DESTRUCTIVE_WRITES.has(key(op)),
+		);
+		expect(listed).toHaveLength(CHATGPT_DESTRUCTIVE_WRITES.size);
+
+		const chatgpt = await hints("chatgpt");
+		for (const op of listed) {
+			expect(chatgpt.get(op.toolName), op.toolName).toBe(true);
+		}
+		expect(chatgpt.get("members_notes_create")).toBe(false);
+		expect(chatgpt.get("products_create")).toBe(false);
+
+		for (const surface of ["full", "claude_directory"] as const) {
+			const older = await hints(surface);
+			const shown = listed.filter((op) => older.has(op.toolName));
+			expect(shown.length, surface).toBeGreaterThan(0);
+			for (const op of shown) {
+				expect(older.get(op.toolName), `${surface} ${op.toolName}`).toBe(
+					op.annotations.destructiveHint,
+				);
+			}
+		}
+	});
+
+	it("marks writes that reach the public as open world here only", async () => {
+		const hints = async (surface: SurfaceName) => {
+			const client = await connect({
+				surface,
+				principal: principalFixture({ principalType: "user", accountId: null }),
+			});
+			const { tools } = await client.listTools();
+			return new Map(
+				tools.map((tool) => [tool.name, tool.annotations?.openWorldHint]),
+			);
+		};
+		const listed = registry.operations.filter((op) =>
+			CHATGPT_OPEN_WORLD_WRITES.has(key(op)),
+		);
+		expect(listed).toHaveLength(CHATGPT_OPEN_WORLD_WRITES.size);
+
+		const chatgpt = await hints("chatgpt");
+		for (const op of listed) {
+			expect(chatgpt.get(op.toolName), op.toolName).toBe(true);
+		}
+		expect(chatgpt.get("products_create")).toBe(false);
+
+		const full = await hints("full");
+		for (const op of listed) {
+			expect(full.get(op.toolName), op.toolName).toBe(
+				op.annotations.openWorldHint,
+			);
+		}
+	});
+
+	const builtinTools = async (surface: SurfaceName) => {
+		const client = await connect({
+			surface,
+			chatGptCompat: true,
+			principal: principalFixture({ principalType: "user", accountId: null }),
+		});
+		return (await client.listTools()).tools;
+	};
+
+	it("gives every listed tool OpenAI's three hints as booleans", async () => {
+		const tools = await builtinTools("chatgpt");
+		expect(tools.map((tool) => tool.name)).toEqual(
+			expect.arrayContaining(["search", "fetch", "connection_status"]),
+		);
+		for (const tool of tools) {
+			for (const hint of [
+				"readOnlyHint",
+				"destructiveHint",
+				"openWorldHint",
+			] as const) {
+				expect(typeof tool.annotations?.[hint], `${tool.name} ${hint}`).toBe(
+					"boolean",
+				);
+			}
+		}
+	});
+
+	it("says what search can reach here and leaves the older routes alone", async () => {
+		const search = (await builtinTools("chatgpt")).find(
+			(tool) => tool.name === "search",
+		);
+		expect(search?.description).toContain("marketplace");
+		expect(search?.description).not.toContain("connected Whop account");
+
+		for (const surface of ["full", "claude_directory"] as const) {
+			const older = (await builtinTools(surface)).find(
+				(tool) => tool.name === "search",
+			);
+			expect(older?.description).toContain("connected Whop account");
+			expect(older?.annotations).toEqual({ readOnlyHint: true });
+		}
+	});
+
+	it("searches only what answers without a business on the ChatGPT route", async () => {
+		const queried = async (surface: SurfaceName) => {
+			const { fetch, requests } = fakeFetch(() => ({ body: { data: [] } }));
+			const client = await connect({
+				surface,
+				chatGptCompat: true,
+				fetch,
+				principal: principalFixture({ principalType: "user", accountId: null }),
+			});
+			await client.callTool({ name: "search", arguments: { query: "x" } });
+			return requests.map((request) => new URL(request.url).pathname);
+		};
+
+		const chatgpt = await queried("chatgpt");
+		expect(chatgpt).toHaveLength(2);
+		expect(chatgpt.some((path) => path.endsWith("/products"))).toBe(true);
+		expect(chatgpt.some((path) => path.endsWith("/payments"))).toBe(true);
+
+		const full = await queried("full");
+		expect(full.some((path) => path.endsWith("/members"))).toBe(true);
+	});
+
+	const userPrincipal = () =>
+		principalFixture({ principalType: "user", accountId: null });
+
+	// Holds whether or not this route collects intent, so that commit can revert.
+	const connectAsRoute = async (options: Parameters<typeof connect>[0]) => {
+		const client = await connect({ ...options, includeIntent: false });
+		const { tools } = await client.listTools();
+		const accountsGet = tools.find((tool) => tool.name === "accounts_get");
+		return accountsGet?.inputSchema.properties?.intent
+			? withTestIntent(client)
+			: client;
+	};
+
+	it("trims connection_status here and leaves the older routes alone", async () => {
+		const open = async (surface: SurfaceName) => {
+			const client = await connectAsRoute({
+				surface,
+				principal: userPrincipal(),
+			});
+			return {
+				status: parseResult(
+					await client.callTool({ name: "connection_status", arguments: {} }),
+				),
+				description: (await client.listTools()).tools.find(
+					(tool) => tool.name === "connection_status",
+				)?.description,
+				instructions: client.getInstructions(),
+			};
+		};
+
+		const chatgpt = await open("chatgpt");
+		expect(Object.keys(chatgpt.status).sort()).toEqual([
+			"account_id",
+			"account_title",
+			"permission_profile",
+			"tool_categories",
+			"tool_count",
+			"user_name",
+		]);
+		for (const word of ["diagnostics", "build metadata", "scopes"]) {
+			expect(chatgpt.description).not.toContain(word);
+		}
+		expect(chatgpt.instructions).toContain(
+			"Call connection_status to see the signed-in user",
+		);
+
+		for (const surface of ["full", "claude_directory"] as const) {
+			const older = await open(surface);
+			expect(Object.keys(older.status)).toEqual(
+				expect.arrayContaining([
+					"granted_scopes",
+					"server_version",
+					"openapi_sha256",
+				]),
+			);
+			expect(older.description).toContain("build metadata");
+			expect(older.instructions).toContain(
+				"Call connection_status to see the authenticated identity",
+			);
+		}
+	});
+
+	it("leaves tax IDs out of accounts_list here, and nowhere else", async () => {
+		const row = {
+			id: "biz_1",
+			title: "Acme",
+			tax_identifiers: [{ tax_id_type: "br_cpf", tax_id_value: "000" }],
+		};
+		const read = async (surface: SurfaceName) => {
+			const { fetch } = fakeFetch((request) => ({
+				body: request.url.includes("/accounts/biz_1")
+					? row
+					: { data: [row], page_info: { has_next_page: false } },
+			}));
+			const client = await connectAsRoute({
+				surface,
+				fetch,
+				principal: userPrincipal(),
+			});
+			return {
+				list: parseResult(
+					await client.callTool({ name: "accounts_list", arguments: {} }),
+				),
+				get: parseResult(
+					await client.callTool({
+						name: "accounts_get",
+						arguments: { id: "biz_1" },
+					}),
+				),
+			};
+		};
+
+		const chatgpt = await read("chatgpt");
+		expect(chatgpt.list).toEqual({
+			data: [{ id: "biz_1", title: "Acme" }],
+			page_info: { has_next_page: false },
+		});
+		expect(chatgpt.get).toEqual(row);
+
+		for (const surface of ["full", "claude_directory"] as const) {
+			const older = await read(surface);
+			expect(older.list.data).toEqual([row]);
+			expect(older.get).toEqual(row);
+		}
+	});
+
+	it("keeps request IDs out of error replies here, and in the audit log", async () => {
+		const fail = async (surface: SurfaceName) => {
+			const auditSink = new InMemoryAuditSink();
+			const { fetch } = fakeFetch(() => ({
+				status: 404,
+				body: { error: { message: "Not found" } },
+				headers: { "x-request-id": "req_1" },
+			}));
+			const client = await connectAsRoute({
+				surface,
+				fetch,
+				auditSink,
+				principal: userPrincipal(),
+			});
+			const reply = parseResult(
+				await client.callTool({
+					name: "accounts_get",
+					arguments: { id: "biz_1" },
+				}),
+			);
+			return {
+				error: reply.error as Record<string, unknown>,
+				audit: auditSink.events.at(-1),
+			};
+		};
+
+		const chatgpt = await fail("chatgpt");
+		expect(chatgpt.error.code).toBeDefined();
+		expect(chatgpt.error).not.toHaveProperty("request_id");
+		expect(chatgpt.audit?.requestId).toBe("req_1");
+
+		for (const surface of ["full", "claude_directory"] as const) {
+			const older = await fail(surface);
+			expect(older.error.request_id).toBe("req_1");
+			expect(older.audit?.requestId).toBeFalsy();
+		}
+	});
+
+	it("asks for a yes before consequential calls, on this route only", async () => {
+		const text = async (surface: SurfaceName) => {
+			const client = await connect({
+				surface,
+				fetch: fakeFetch().fetch,
+				principal: principalFixture({ principalType: "user", accountId: null }),
+			});
+			const { tools } = await client.listTools();
+			return {
+				instructions: client.getInstructions(),
+				tools,
+			};
+		};
+		const chatgpt = await text("chatgpt");
+		expect(chatgpt.instructions).toContain(
+			"Consequential tools (anything that costs money, goes live, affects other people, or can't be undone) act on the first call, so never call one just to see a preview. Tell the user what will happen, get their explicit yes, then call it.",
+		);
+		// OpenAI says to keep the most important details in the first 512 characters.
+		expect(chatgpt.instructions?.slice(0, 512)).toContain(
+			"get their explicit yes",
+		);
+		const consequential = new Set(
+			registry.operations
+				.filter((op) => op.safety.confirmationRequired)
+				.map((op) => op.toolName),
+		);
+		const asks = chatgpt.tools.filter((tool) =>
+			tool.description?.includes("get their explicit yes before calling it"),
+		);
+		expect(asks.length).toBeGreaterThan(0);
+		expect(asks.map((tool) => tool.name).sort()).toEqual(
+			chatgpt.tools
+				.map((tool) => tool.name)
+				.filter((name) => consequential.has(name))
+				.sort(),
+		);
+
+		for (const surface of ["full", "claude_directory"] as const) {
+			const older = await text(surface);
+			expect(older.instructions).toContain("intent_id");
+			expect(older.instructions).not.toContain("explicit yes");
+			expect(JSON.stringify(older.tools)).not.toContain("explicit yes");
+			expect(JSON.stringify(older.tools)).toContain("intent_id");
+		}
+	});
+
+	it("keeps only the chosen financial and credential operations", () => {
+		const flagged = registry.operations
+			.filter(
+				(op) =>
+					operationInSurface(op, "chatgpt") &&
+					(op.safety.financial || op.safety.credential),
+			)
+			.map(key)
+			.sort();
+		expect(flagged).toEqual([
+			"PATCH /domains/{id}",
+			"POST /domains",
+			"POST /media/generate",
+		]);
+	});
+
+	it("drops a newly flagged operation on this surface only", () => {
+		const unexcluded = registry.operations.find(
+			(op) => key(op) === "POST /products",
+		);
+		expect(unexcluded).toBeDefined();
+		const flagged = {
+			...unexcluded!,
+			safety: { ...unexcluded!.safety, financial: true },
+		};
+		expect(operationInSurface(unexcluded!, "chatgpt")).toBe(true);
+		expect(operationInSurface(flagged, "chatgpt")).toBe(false);
+		expect(operationInSurface(flagged, "claude_directory")).toBe(true);
+	});
+
+	it("takes calls without intent fields", async () => {
+		const { fetch, requests } = fakeFetch();
+		const client = await connect({
+			surface: "chatgpt",
+			fetch,
+			includeIntent: false,
+			principal: principalFixture({ principalType: "user", accountId: null }),
+		});
+		const { tools } = await client.listTools();
+		expect(JSON.stringify(tools)).not.toContain("intent_id");
+		expect(client.getInstructions()).not.toContain("intent_id");
+
+		const result = await client.callTool({
+			name: "products_list",
+			arguments: { account_id: "biz_1" },
+		});
+		expect(result.isError).toBeFalsy();
+		expect(requests).toHaveLength(1);
+		expect(requests[0].url).toContain("account_id=biz_1");
+		expect(requests[0].headers["x-whop-mcp-context"]).toBeUndefined();
+	});
+
+	it("runs a consequential tool without intent fields", async () => {
+		const { fetch, requests } = fakeFetch(() => ({ body: { id: "x" } }));
+		const client = await connect({
+			surface: "chatgpt",
+			fetch,
+			includeIntent: false,
+			principal: principalFixture({ principalType: "user", accountId: null }),
+		});
+		const args = { account_id: "biz_1", type: "image", prompt: "a cat" };
+
+		const first = await client.callTool({
+			name: "media_generate",
+			arguments: args,
+		});
+		expect(first.isError).toBeFalsy();
+		expect(requests).toHaveLength(1);
+		expect(requests[0].body).toMatchObject({ prompt: "a cat" });
+		expect(requests[0].headers["x-whop-mcp-context"]).toBeUndefined();
 	});
 });
 

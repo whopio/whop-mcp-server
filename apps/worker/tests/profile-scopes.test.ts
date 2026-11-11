@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+	expandChatgptToWhopScopes,
+	expandMuseToWhopScopes,
 	expandProfileToWhopScopes,
 	isProfileName,
 	PROFILE_NAMES,
@@ -7,6 +9,48 @@ import {
 import { registry } from "../src/registry.ts";
 
 const operations = registry.operations;
+
+describe("muse scopes", () => {
+	it("holds the scopes of non-financial operations but none that move money", () => {
+		const scopes = expandMuseToWhopScopes(operations);
+		expect(scopes).toContain("payment:basic:read");
+		expect(scopes).toContain("payment:dispute:read");
+		expect(scopes).toContain("payment:resolution_center_case:read");
+		expect(scopes).toContain("courses:update");
+		expect(scopes).toContain("member:manage");
+		for (const excluded of [
+			"payment:charge",
+			"payment:dispute",
+			"payment:resolution_center",
+			"payout:withdraw_funds",
+			"payout:update_destination",
+			"payout:transfer_funds",
+			"crypto_wallet:swap",
+			"invoice:create",
+			"media:generate",
+		]) {
+			expect(scopes).not.toContain(excluded);
+		}
+	});
+});
+
+describe("chatgpt scopes", () => {
+	it("requests the route's declared scopes and none of these money-moving ones", () => {
+		const scopes = expandChatgptToWhopScopes(operations);
+		for (const expected of ["media:generate", "domain:manage", "plan:create"]) {
+			expect(scopes).toContain(expected);
+		}
+		for (const excluded of [
+			"payment:charge",
+			"invoice:create",
+			"payout:withdraw_funds",
+			"payout:transfer_funds",
+			"developer:manage_api_key",
+		]) {
+			expect(scopes).not.toContain(excluded);
+		}
+	});
+});
 
 describe("profile scopes", () => {
 	it("bounds each profile to the scopes its visible operations declare", () => {

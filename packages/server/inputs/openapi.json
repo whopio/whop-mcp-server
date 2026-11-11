@@ -9496,8 +9496,8 @@
             "type": "string"
           },
           "clicks": {
-            "description": "The ad's clicks in the hour.",
-            "example": 150,
+            "description": "Always 0. Whop stores no clicks for a runner's hour: an ad's clicks are its Whop pixel page views, counted when its stats are shown.",
+            "example": 0,
             "type": "integer"
           },
           "hour_started_at": {
@@ -66463,7 +66463,7 @@
                     "type": "string"
                   },
                   "clicks": {
-                    "description": "The ad's clicks in the hour so far, at most `impressions`. Zero when left out.",
+                    "description": "Ignored. An ad's clicks are its Whop pixel page views, which Whop counts when it shows the ad's stats.",
                     "example": 150,
                     "type": [
                       "integer",
@@ -66514,16 +66514,6 @@
               }
             },
             "description": "stats recorded"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V1ErrorResponse"
-                }
-              }
-            },
-            "description": "more clicks than impressions"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized",

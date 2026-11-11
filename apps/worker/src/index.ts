@@ -52,6 +52,11 @@ const providerOptions: OAuthProviderOptions<Env> = {
 		// money-out tools. Tokens issued for this route are audience-bound to
 		// it, so they cannot be replayed against the full /mcp surface.
 		"/claude/mcp": createMcpApiHandler("claude_directory"),
+		// The OpenAI plugin directory listing (see policy/surfaces.ts).
+		"/chatgpt/mcp": createMcpApiHandler("chatgpt"),
+		// The Muse listing: /mcp's core tools minus money movement plus read-only
+		// search, on a grant narrowed at sign-in.
+		"/muse/mcp": createMcpApiHandler("muse"),
 	},
 	defaultHandler,
 	authorizeEndpoint: "/authorize",

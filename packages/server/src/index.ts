@@ -8,6 +8,7 @@ export {
 export {
 	createWhopMcpServer,
 	type CreateWhopMcpServerOptions,
+	type ToolListing,
 	type WhopMcpServer,
 } from "./runtime/server.ts";
 export type { AuditEvent, AuditSink } from "./safety/audit.ts";

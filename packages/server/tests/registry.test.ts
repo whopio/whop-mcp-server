@@ -610,6 +610,95 @@ describe("registry generation", () => {
 		).toThrow(/unknown operation/);
 	});
 
+	it("marks core operations and records listed-schema omissions", () => {
+		const core = registry.operations.filter((op) => op.core);
+		expect(core.map((op) => op.toolName)).toContain("payments_list");
+		expect(core.map((op) => op.toolName)).not.toContain("plans_create");
+		expect(findOperation(registry, "payments_list").listedSchemaOmit).toEqual([
+			"payment_methods",
+		]);
+		expect(
+			findOperation(registry, "stats_time-series_get").listedSchemaOnly,
+		).toContain("interval");
+	});
+
+	it("fails when listedSchemaOnly names an input the operation does not have", () => {
+		const metadata = loadMetadata();
+		metadata.overrides.overrides["GET /payouts"] = {
+			listedSchemaOnly: ["not_a_field"],
+		};
+		expect(() =>
+			buildRegistry(JSON.parse(loadOpenApiRaw()), metadata, {
+				openapiSha256: "x",
+			}),
+		).toThrow(/listedSchemaOnly "not_a_field" is not an input/);
+	});
+
+	it("fails when an operation sets both listedSchemaOmit and listedSchemaOnly", () => {
+		const metadata = loadMetadata();
+		metadata.overrides.overrides["GET /payments"] = {
+			listedSchemaOmit: ["payment_methods"],
+			listedSchemaOnly: ["statuses"],
+		};
+		expect(() =>
+			buildRegistry(JSON.parse(loadOpenApiRaw()), metadata, {
+				openapiSha256: "x",
+			}),
+		).toThrow(/sets both listedSchemaOmit and listedSchemaOnly/);
+	});
+
+	it("fails when a core entry no longer matches the contract", () => {
+		const metadata = loadMetadata();
+		metadata.overrides.core = [
+			...(metadata.overrides.core ?? []),
+			"GET /does_not_exist",
+		];
+		expect(() =>
+			buildRegistry(JSON.parse(loadOpenApiRaw()), metadata, {
+				openapiSha256: "x",
+			}),
+		).toThrow(/core entry "GET \/does_not_exist" matches no operation/);
+	});
+
+	it("fails when a core entry is excluded from the registry", () => {
+		const metadata = loadMetadata();
+		const excluded = metadata.exclusions.exclusions[0]?.operation;
+		expect(excluded).toBeDefined();
+		metadata.overrides.core = [
+			...(metadata.overrides.core ?? []),
+			excluded as string,
+		];
+		expect(() =>
+			buildRegistry(JSON.parse(loadOpenApiRaw()), metadata, {
+				openapiSha256: "x",
+			}),
+		).toThrow(/excluded or pending review/);
+	});
+
+	it("fails when listedSchemaOmit names an input the operation does not have", () => {
+		const metadata = loadMetadata();
+		metadata.overrides.overrides["GET /payouts"] = {
+			listedSchemaOmit: ["not_a_field"],
+		};
+		expect(() =>
+			buildRegistry(JSON.parse(loadOpenApiRaw()), metadata, {
+				openapiSha256: "x",
+			}),
+		).toThrow(/"not_a_field" is not an input/);
+	});
+
+	it("fails when listedSchemaOmit names a required input", () => {
+		const metadata = loadMetadata();
+		metadata.overrides.overrides["POST /promo_codes"] = {
+			listedSchemaOmit: ["code"],
+		};
+		expect(() =>
+			buildRegistry(JSON.parse(loadOpenApiRaw()), metadata, {
+				openapiSha256: "x",
+			}),
+		).toThrow(/"code" is required/);
+	});
+
 	it("drops an unclassified write into pendingReview instead of exposing it", () => {
 		const doc = JSON.parse(loadOpenApiRaw());
 		doc.paths["/accounts/new_unreviewed_thing"] = {

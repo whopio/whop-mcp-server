@@ -1,3 +1,9 @@
+import {
+	isReadNamedScope as isReadOnlyScope,
+	operationInSurface,
+	type OperationDef,
+} from "@whop/mcp-server";
+
 // Vendored from developer-platform/packages/cli/src/auth/scopes.ts — the
 // vetted user-grantable scope list for Whop's OAuth apps. Keep in sync when
 // that file changes; requesting a name the OAuth server doesn't recognize
@@ -187,7 +193,7 @@ interface ScopedOperation {
 }
 
 function isReadNamedScope(scope: string): boolean {
-	return /(:read|:export)$/.test(scope) || IDENTITY_SCOPES.includes(scope);
+	return isReadOnlyScope(scope) || IDENTITY_SCOPES.includes(scope);
 }
 
 /**
@@ -273,6 +279,69 @@ export function expandProfileToWhopScopes(
 		}
 	}
 	return [...requested].sort();
+}
+
+/**
+ * Capabilities that move money, which a Muse credential never holds however
+ * the registry classifies the operations that declare them. Some operations
+ * that are not marked financial still declare one (POST /payouts/quotes needs
+ * payout:withdraw_funds), so the surface filter alone would leak it.
+ */
+const MUSE_DENIED_WHOP_SCOPES = new Set([
+	"payment:charge",
+	"payment:manage",
+	"payment:dispute",
+	"payment:resolution_center",
+	"payment:setup_intent:manage",
+	"payout:withdraw_funds",
+	"payout:transfer_funds",
+	"payout:create_destination",
+	"payout:delete_destination",
+	"payout:update_destination",
+	"payout:account:update",
+	"member:payment_methods:manage",
+	"member:payment_methods:use",
+	"invoice:create",
+	"invoice:update",
+	"company_token_transaction:create",
+	"company:transfer_ownership",
+	"company:update_child_fees",
+	"crypto_wallet:manage",
+	"crypto_wallet:swap",
+	"crypto_wallet:trade",
+	"airdrop_link:manage",
+	"media:generate",
+	"domain:manage",
+	"partner:handoff",
+]);
+
+/**
+ * Muse grants hold the scopes of the operations its route serves, minus money
+ * capabilities. Reads outside the listed core only contribute read-named
+ * scopes: some reads declare write scopes (API key listings need
+ * developer:manage_api_key), and those must not reach a read-only path.
+ */
+export function expandMuseToWhopScopes(operations: OperationDef[]): string[] {
+	const requested = new Set<string>(IDENTITY_SCOPES);
+	for (const operation of operations) {
+		if (!operationInSurface(operation, "muse")) continue;
+		const listed = operation.core !== undefined;
+		for (const scope of operation.scopes) {
+			if (!GRANTABLE.has(scope) || MUSE_DENIED_WHOP_SCOPES.has(scope)) continue;
+			if (listed || isReadNamedScope(scope)) requested.add(scope);
+		}
+	}
+	return [...requested].sort();
+}
+
+/** ChatGPT grants hold only what that route's operations declare. */
+export function expandChatgptToWhopScopes(
+	operations: OperationDef[],
+): string[] {
+	return expandProfileToWhopScopes(
+		"admin",
+		operations.filter((operation) => operationInSurface(operation, "chatgpt")),
+	);
 }
 
 export { isProfileName, PROFILE_NAMES } from "@whop/mcp-server";

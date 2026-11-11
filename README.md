@@ -36,6 +36,31 @@ use, the MCP client discovers the server's OAuth metadata and opens Whop in the
 browser for sign-in and authorization. Credentials are kept server-side rather
 than placed in the client configuration or exposed to the model.
 
+## Tools
+
+The hosted endpoint lists about 40 of the most-used Whop operations as their
+own tools, such as payments, memberships, products, prices, files, courses,
+chat, and bounties. Every other operation your connection can use is reached
+through four tools:
+
+- `search_operations` takes a task in plain words, such as "create a promo
+  code", and returns matching operations. The top three include their full
+  input schema.
+- `describe_operation` returns one operation's description, input schema, and
+  safety hints.
+- `call_read_operation` runs a read-only operation.
+- `call_write_operation` runs an operation that creates, changes, or deletes
+  something. It carries `destructiveHint`, so hosts ask before running it.
+
+Unlisted operations can also be called directly by name. Some listed tools
+leave optional inputs out of their listed schema to keep the listing small;
+`describe_operation` shows them, and the server accepts and validates them.
+
+The core list and those schema trims live in
+`packages/server/metadata/operation-overrides.yml`. A test keeps the hosted
+`tools/list` response under 175 KB for every permission profile. The local
+stdio adapter lists every operation.
+
 ## Access and safety
 
 ### Full-admin scope
@@ -73,8 +98,11 @@ Whop API arguments. A bounded copy is attached to the downstream request so
 Whop can analyze API request intent. The MCP protocol does not expose the host
 conversation, so both values are client-supplied attribution rather than
 server-verified chat history. ChatGPT's fixed-schema `search` and `fetch`
-compatibility tools and the local `connection_status` diagnostic do not use
-these fields.
+compatibility tools, `search_operations`, `describe_operation`, and the local
+`connection_status` diagnostic do not use these fields. `call_read_operation`
+and `call_write_operation` take them at the top level, beside the operation
+`name` and its `arguments`. The `/chatgpt/mcp` and `/muse/mcp` routes do not
+collect them on any tool.
 
 ### Feedback and unanswered questions
 

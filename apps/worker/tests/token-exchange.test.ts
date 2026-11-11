@@ -93,6 +93,15 @@ describe("reconcileGrantOnTokenExchange", () => {
 		expect(result?.newProps).toMatchObject({ mcpClientName: "Cursor" });
 	});
 
+	it("keeps a ChatGPT grant's profile through rotation", async () => {
+		const result = await reconcileGrantOnTokenExchange(
+			options({ ...APPROVED_PROPS, profile: "chatgpt" }),
+			dependencies(),
+		);
+
+		expect(result?.newProps).toMatchObject({ profile: "chatgpt" });
+	});
+
 	it("does no work before the Whop credential needs rotation", async () => {
 		const deps = dependencies();
 		const result = await reconcileGrantOnTokenExchange(
