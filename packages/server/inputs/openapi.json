@@ -54339,11 +54339,6 @@
             "example": false,
             "type": "boolean"
           },
-          "investigation_enabled": {
-            "description": "Whether investigation mode is enabled for the user. Only meaningful for staff users with investigation access.",
-            "example": true,
-            "type": "boolean"
-          },
           "terms_accepted": {
             "description": "Whether the user has accepted Whop's terms and policies. `false` until recorded via `PATCH` with `terms_accepted: true`.",
             "example": true,
@@ -54359,7 +54354,6 @@
           }
         },
         "required": [
-          "investigation_enabled",
           "bounty_worker_onboarding_dismissed",
           "terms_accepted",
           "terms_accepted_at",
@@ -56157,7 +56151,7 @@
             "type": "string"
           },
           "webhook_secret": {
-            "description": "Secret key used to sign webhook payloads for verification. Include this in your HMAC validation logic. Returned on the create response and to interactive dashboard sessions; `null` for API-key and OAuth callers on later reads.",
+            "description": "Secret key used to sign webhook payloads. Use it to verify the HMAC signature of each delivery. Returned in the create response. `null` on later reads by API keys and OAuth apps.",
             "example": "ws_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
             "type": [
               "string",
@@ -56620,7 +56614,7 @@
             "type": "string"
           },
           "webhook_secret": {
-            "description": "Secret key used to sign webhook payloads for verification. Include this in your HMAC validation logic. Returned on the create response and to interactive dashboard sessions; `null` for API-key and OAuth callers on later reads.",
+            "description": "Secret key used to sign webhook payloads. Use it to verify the HMAC signature of each delivery. Returned in the create response. `null` on later reads by API keys and OAuth apps.",
             "example": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
             "type": [
               "string",
@@ -120635,7 +120629,7 @@
             "$ref": "#/components/parameters/ApiVersionDate"
           },
           {
-            "description": "The owning account ID (a biz_ identifier), or `global` for a platform-wide report across all ledger accounts (requires internal admin access).",
+            "description": "The account that owns the report, prefixed `biz_`.",
             "in": "query",
             "name": "account_id",
             "required": true,
@@ -120676,7 +120670,7 @@
             }
           },
           {
-            "description": "Start of the report window as an ISO 8601 timestamp. Required for platform-wide (global) reports.",
+            "description": "Start of the report window as an ISO 8601 timestamp.",
             "in": "query",
             "name": "from",
             "required": false,
@@ -120686,7 +120680,7 @@
             }
           },
           {
-            "description": "Exclusive end of the report window as an ISO 8601 timestamp. Required for platform-wide (global) reports.",
+            "description": "Exclusive end of the report window as an ISO 8601 timestamp.",
             "in": "query",
             "name": "to",
             "required": false,
@@ -120893,25 +120887,6 @@
                 "money_in",
                 "money_out"
               ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "Platform-wide (global) reports only: when true, return cumulative balances as of to (all history, no lower bound) instead of activity within the period.",
-            "in": "query",
-            "name": "cumulative",
-            "required": false,
-            "schema": {
-              "default": false,
-              "type": "boolean"
-            }
-          },
-          {
-            "description": "Platform-wide (global) reports only: narrow the report to ledger lines on the ledger account owned by this account ID (a biz_ identifier). Ignored unless account_id is `global`.",
-            "in": "query",
-            "name": "scope_account_id",
-            "required": false,
-            "schema": {
               "type": "string"
             }
           },
@@ -149927,7 +149902,7 @@
             }
           },
           {
-            "description": "Filter by how the payout was created. Payouts created before source tracking or through internal tooling carry no source and never match.",
+            "description": "Filter by how the payout was created. A payout with no recorded source never matches.",
             "in": "query",
             "name": "source",
             "required": false,
@@ -150264,7 +150239,7 @@
                             ]
                           },
                           "source": {
-                            "description": "How the payout was created. `automatic` means a scheduled auto-payout; `null` on payouts created before source tracking or through internal tooling.",
+                            "description": "How the payout was created. `automatic` means a scheduled auto-payout. `null` when the payout has no recorded source.",
                             "enum": [
                               "api",
                               "dashboard",
@@ -150833,7 +150808,7 @@
                       ]
                     },
                     "source": {
-                      "description": "How the payout was created. `automatic` means a scheduled auto-payout; `null` on payouts created before source tracking or through internal tooling.",
+                      "description": "How the payout was created. `automatic` means a scheduled auto-payout. `null` when the payout has no recorded source.",
                       "enum": [
                         "api",
                         "dashboard",
@@ -153946,7 +153921,7 @@
                       ]
                     },
                     "source": {
-                      "description": "How the payout was created. `automatic` means a scheduled auto-payout; `null` on payouts created before source tracking or through internal tooling. Only returned to callers with payout:withdrawal:read on the owning ledger.",
+                      "description": "How the payout was created. `automatic` means a scheduled auto-payout. `null` when the payout has no recorded source. Only returned to callers with payout:withdrawal:read on the owning ledger.",
                       "enum": [
                         "api",
                         "dashboard",
@@ -154427,7 +154402,7 @@
                       ]
                     },
                     "source": {
-                      "description": "How the payout was created. `automatic` means a scheduled auto-payout; `null` on payouts created before source tracking or through internal tooling.",
+                      "description": "How the payout was created. `automatic` means a scheduled auto-payout. `null` when the payout has no recorded source.",
                       "enum": [
                         "api",
                         "dashboard",
@@ -154798,7 +154773,7 @@
                       ]
                     },
                     "source": {
-                      "description": "How the payout was created. `automatic` means a scheduled auto-payout; `null` on payouts created before source tracking or through internal tooling.",
+                      "description": "How the payout was created. `automatic` means a scheduled auto-payout. `null` when the payout has no recorded source.",
                       "enum": [
                         "api",
                         "dashboard",
@@ -170529,7 +170504,7 @@
         "operationId": "listTeamMembers",
         "parameters": [
           {
-            "description": "Account ID, prefixed `biz_`. A global admin query passes `global` to list the joined members of every partner account, in `created_at` order; of the reporting line filters, only `team_lead_id` and `has_referred_businesses` apply.",
+            "description": "Account ID, prefixed `biz_`.",
             "in": "query",
             "name": "account_id",
             "required": true,
@@ -174740,11 +174715,6 @@
                   },
                   "cards_auto_top_up": {
                     "description": "Whether incoming funds, including pending balance, are automatically moved to the user's personal cards balance. Requires a cards balance and the `payout:account:update` permission.",
-                    "type": "boolean"
-                  },
-                  "investigation_enabled": {
-                    "description": "Whether investigation mode is enabled for the user. Only meaningful for staff users with investigation access.",
-                    "example": false,
                     "type": "boolean"
                   },
                   "terms_accepted": {
@@ -183799,7 +183769,7 @@
       "x-whop-summary": "Issues and unanswered questions sent to Whop for review."
     },
     {
-      "description": "First-party course video captions and direct video uploads, authorized against the lesson experience.",
+      "description": "Caption languages, caption processing, and direct video uploads for course lesson videos.",
       "name": "Course Captions",
       "x-whop-summary": "Manage caption languages and processing for lesson videos."
     }
@@ -197438,7 +197408,7 @@
                         ]
                       },
                       "source": {
-                        "description": "How the payout was created. `automatic` means a scheduled auto-payout; `null` on payouts created before source tracking or through internal tooling.",
+                        "description": "How the payout was created. `automatic` means a scheduled auto-payout. `null` when the payout has no recorded source.",
                         "enum": [
                           "api",
                           "dashboard",
@@ -197926,7 +197896,7 @@
                         ]
                       },
                       "source": {
-                        "description": "How the payout was created. `automatic` means a scheduled auto-payout; `null` on payouts created before source tracking or through internal tooling.",
+                        "description": "How the payout was created. `automatic` means a scheduled auto-payout. `null` when the payout has no recorded source.",
                         "enum": [
                           "api",
                           "dashboard",
@@ -198410,7 +198380,7 @@
                         ]
                       },
                       "source": {
-                        "description": "How the payout was created. `automatic` means a scheduled auto-payout; `null` on payouts created before source tracking or through internal tooling.",
+                        "description": "How the payout was created. `automatic` means a scheduled auto-payout. `null` when the payout has no recorded source.",
                         "enum": [
                           "api",
                           "dashboard",
@@ -204502,7 +204472,7 @@
       ]
     },
     {
-      "description": "Course video editing in the first-party Whop application.",
+      "description": "Captions and video uploads for course lessons.",
       "name": "Courses",
       "tags": [
         "Course Captions"
