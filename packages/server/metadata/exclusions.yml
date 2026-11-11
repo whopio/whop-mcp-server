@@ -31,3 +31,6 @@ exclusions:
   - operation: "POST /feedback_submissions"
     reason: The server already ships the report_feedback and ask_question tools, which call this endpoint with their own mcp_* sources and credential redaction.
     owner: Ryan-Ouyang
+  - operation: "POST /members/{id}/unsubscribe"
+    reason: Called from a member's own inbox or the whop.com unsubscribe page with the token from that member's unsubscribe link; an agent acting for a business never holds one.
+    owner: g-delmo
