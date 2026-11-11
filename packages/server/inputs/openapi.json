@@ -7,7 +7,7 @@
         "name": "Api-Version-Date",
         "required": false,
         "schema": {
-          "example": "2026-11-10",
+          "example": "2026-11-10-1",
           "type": "string"
         }
       },
@@ -290,7 +290,7 @@
             "type": "boolean"
           },
           "economic_intelligence": {
-            "description": "Whether Economic Intelligence is on for the account. It turns off automatically when its committed period ends.",
+            "description": "Whether Economic Intelligence is on for the account. It turns off automatically when its committed period ends. While it is off, the account can't activate an experiment or run a recommendation.",
             "example": false,
             "type": "boolean"
           },
@@ -1431,7 +1431,7 @@
             "type": "boolean"
           },
           "duration": {
-            "description": "What period of time Economic Intelligence stays on. For an auto-renew offer, the length of each period it renews for.",
+            "description": "The length of each period Economic Intelligence renews for, in `duration_unit`, such as `3` for 3 days.",
             "type": "integer"
           },
           "duration_unit": {
@@ -1444,18 +1444,19 @@
             "type": "string"
           },
           "fee_percentage": {
-            "description": "Percentage of volume charged while Economic Intelligence is on, such as `1.5` for 1.5%.",
+            "description": "Percentage of payment volume charged while Economic Intelligence is on, such as `3` for 3%.",
             "type": "number"
           },
           "key": {
-            "description": "The unique identifier for this offer. Pass this value as `economic_intelligence_duration_key` to turn it on.",
+            "description": "The unique identifier for this offer. Pass this value as `economic_intelligence_duration_key` to turn it on. Only `3_days`, the auto-renew offer, is offered. The other keys identify periods bought before it became the only plan.",
             "enum": [
+              "3_days",
               "weekly",
               "7_days",
               "1_day",
               "1_hour"
             ],
-            "example": "weekly",
+            "example": "3_days",
             "type": "string"
           },
           "recommended": {
@@ -5878,29 +5879,29 @@
             "type": "boolean"
           },
           "economic_intelligence": {
-            "description": "Whether Economic Intelligence is on for the account. It turns off automatically at `economic_intelligence_ends_at`.",
+            "description": "Whether Economic Intelligence is on for the account. It turns off automatically at `economic_intelligence_ends_at`. While it is off, the account can't activate an experiment or run a recommendation.",
             "type": "boolean"
           },
           "economic_intelligence_auto_renew": {
-            "description": "Whether Economic Intelligence renews itself every week, with no end date. Turn it on with the `weekly` offer. Set it to `false` to stop renewing, which keeps Economic Intelligence on until the end of the current week, shown in `economic_intelligence_ends_at`; stopping before the first renewal charges the rest of that week at the `7_days` offer's fee. Set it back to `true` before then to keep renewing at the weekly fee.",
+            "description": "Whether Economic Intelligence renews itself every period, with no end date. Set it to `true` to turn Economic Intelligence on. Set it to `false` to stop renewing: Economic Intelligence stays on, and its fee is charged, until the end of the current period, shown in `economic_intelligence_ends_at`. Set it back to `true` before then to keep renewing.",
             "type": "boolean"
           },
           "economic_intelligence_ends_at": {
-            "description": "When the account's committed Economic Intelligence period ends, as an ISO 8601 timestamp. Economic Intelligence can't be turned off before then. `null` when Economic Intelligence is off or renews automatically.",
+            "description": "When Economic Intelligence turns off, as an ISO 8601 timestamp: the end of the current period once auto-renew is turned off. `null` when Economic Intelligence is off or renews automatically.",
             "type": [
               "string",
               "null"
             ]
           },
           "economic_intelligence_fee_percentage": {
-            "description": "Percentage of volume charged while Economic Intelligence is on, such as `1.5` for 1.5%. `null` when Economic Intelligence is off.",
+            "description": "Percentage of payment volume charged while Economic Intelligence is on, such as `3` for 3%. `null` when Economic Intelligence is off.",
             "type": [
               "number",
               "null"
             ]
           },
           "economic_intelligence_first_renewal_at": {
-            "description": "When auto-renew first renews, as an ISO 8601 timestamp. Turning auto-renew off before then charges the rest of that week at the `7_days` offer's fee. `null` when auto-renew is off.",
+            "description": "When auto-renew first renews, as an ISO 8601 timestamp: one period after it was turned on. `null` when auto-renew is off.",
             "type": [
               "string",
               "null"
@@ -5909,7 +5910,7 @@
           "economic_intelligence_offers": {
             "items": {
               "$ref": "#/components/schemas/AccountEconomicIntelligenceOffer",
-              "description": "What the account can choose now to turn on Economic Intelligence, each with its fee. Every offer while Economic Intelligence is off; only the `weekly` auto-renew offer while a committed period is running, as an upgrade; empty while it renews automatically."
+              "description": "What the account can choose now to turn on Economic Intelligence. Auto-renew is the only plan: one offer, with its fee and the length of each period, while auto-renew is off, and empty while Economic Intelligence renews automatically."
             },
             "type": "array"
           },
@@ -10163,9 +10164,10 @@
               "2026-11-05-1",
               "2026-11-06",
               "2026-11-07",
-              "2026-11-10"
+              "2026-11-10",
+              "2026-11-10-1"
             ],
-            "example": "2026-11-10",
+            "example": "2026-11-10-1",
             "type": "string"
           },
           "created_at": {
@@ -55809,7 +55811,7 @@
           },
           "api_version_date": {
             "description": "The dated API version (Api-Version-Date) that v1 payloads for this endpoint are pinned to: events serialize exactly like a REST read at this version (the native serializer where the resource has one). Null when unpinned — legacy (v2/v5) webhooks, and v1 webhooks on the legacy payload shape.",
-            "example": "2026-01-01",
+            "example": "2026-11-10-1",
             "type": [
               "string",
               "null"
@@ -56402,7 +56404,7 @@
           },
           "api_version_date": {
             "description": "The dated API version (Api-Version-Date) that v1 payloads for this endpoint are pinned to: events serialize exactly like a REST read at this version (the native serializer where the resource has one). Null when unpinned — legacy (v2/v5) webhooks, and v1 webhooks on the legacy payload shape.",
-            "example": "2026-01-01",
+            "example": "2026-11-10-1",
             "type": [
               "string",
               "null"
@@ -56825,7 +56827,7 @@
     "termsOfService": "https://whop.com/tos-developer-api/",
     "title": "Whop API",
     "version": "1.0.0",
-    "x-api-version-date": "2026-11-10"
+    "x-api-version-date": "2026-11-10-1"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -60650,12 +60652,12 @@
                       "type": "boolean"
                     },
                     "economic_intelligence_auto_renew": {
-                      "description": "Whether Economic Intelligence renews itself every week, with no end date. Turn it on with the `weekly` offer. Set it to `false` to stop renewing, which keeps Economic Intelligence on until the end of the current week, shown in `economic_intelligence_ends_at`; stopping before the first renewal charges the rest of that week at the `7_days` offer's fee. Set it back to `true` before then to keep renewing at the weekly fee.",
+                      "description": "Whether Economic Intelligence renews itself every period, with no end date. Turn it on by setting this to `true`, or by passing the `3_days` offer's key as `economic_intelligence_duration_key`. Set it to `false` to stop renewing: Economic Intelligence stays on until the end of the current period, shown in `economic_intelligence_ends_at`, and the fee is charged until then. Set it back to `true` before then to keep renewing.",
                       "example": false,
                       "type": "boolean"
                     },
                     "economic_intelligence_ends_at": {
-                      "description": "When the account's committed Economic Intelligence period ends, as an ISO 8601 timestamp. Economic Intelligence can't be turned off before then. `null` when Economic Intelligence is off or renews automatically.",
+                      "description": "When Economic Intelligence turns off, as an ISO 8601 timestamp: the end of the current period once auto-renew is turned off. `null` when Economic Intelligence is off or renews automatically.",
                       "example": null,
                       "type": [
                         "string",
@@ -60663,7 +60665,7 @@
                       ]
                     },
                     "economic_intelligence_fee_percentage": {
-                      "description": "Percentage of volume charged while Economic Intelligence is on, such as `1.5` for 1.5%. `null` when Economic Intelligence is off.",
+                      "description": "Percentage of payment volume charged while Economic Intelligence is on, such as `3` for 3%. `null` when Economic Intelligence is off.",
                       "example": null,
                       "type": [
                         "number",
@@ -60671,7 +60673,7 @@
                       ]
                     },
                     "economic_intelligence_first_renewal_at": {
-                      "description": "When auto-renew first renews, as an ISO 8601 timestamp. Turning auto-renew off before then charges the rest of that week at the `7_days` offer's fee. `null` when auto-renew is off.",
+                      "description": "When auto-renew first renews, as an ISO 8601 timestamp: one period after it was turned on. `null` when auto-renew is off.",
                       "example": null,
                       "type": [
                         "string",
@@ -60679,7 +60681,7 @@
                       ]
                     },
                     "economic_intelligence_offers": {
-                      "description": "What the account can choose now to turn on Economic Intelligence, each with its fee. Every offer while Economic Intelligence is off; only the `weekly` auto-renew offer while a committed period is running, as an upgrade; empty while it renews automatically.",
+                      "description": "What the account can choose now to turn on Economic Intelligence. Auto-renew is the only plan: one offer, with its fee and the length of each period, while auto-renew is off, and empty while Economic Intelligence renews automatically.",
                       "items": {
                         "properties": {
                           "auto_renew": {
@@ -60688,8 +60690,8 @@
                             "type": "boolean"
                           },
                           "duration": {
-                            "description": "What period of time Economic Intelligence stays on. For an auto-renew offer, the length of each period it renews for.",
-                            "example": 7,
+                            "description": "The length of each period Economic Intelligence renews for, in `duration_unit`, such as `3` for 3 days.",
+                            "example": 3,
                             "type": "integer"
                           },
                           "duration_unit": {
@@ -60702,19 +60704,20 @@
                             "type": "string"
                           },
                           "fee_percentage": {
-                            "description": "Percentage of volume charged while Economic Intelligence is on, such as `1.5` for 1.5%.",
-                            "example": 1.0,
+                            "description": "Percentage of payment volume charged while Economic Intelligence is on, such as `3` for 3%.",
+                            "example": 3.0,
                             "type": "number"
                           },
                           "key": {
-                            "description": "The unique identifier for this offer. Pass this value as `economic_intelligence_duration_key` to turn it on.",
+                            "description": "The unique identifier for this offer. Pass this value as `economic_intelligence_duration_key` to turn it on. Only `3_days`, the auto-renew offer, is offered. The other keys identify periods bought before it became the only plan.",
                             "enum": [
+                              "3_days",
                               "weekly",
                               "7_days",
                               "1_day",
                               "1_hour"
                             ],
-                            "example": "weekly",
+                            "example": "3_days",
                             "type": "string"
                           },
                           "recommended": {
@@ -61084,19 +61087,20 @@
                     "type": "boolean"
                   },
                   "economic_intelligence_auto_renew": {
-                    "description": "`false` stops renewing: Economic Intelligence stays on until the end of the current week, and stopping before the first renewal charges the rest of that week at the `7_days` offer's fee. `true` keeps it renewing again before then, or turns it on like the `weekly` offer. Can't be combined with `economic_intelligence_duration_key`. Requires the `company:update` scope on your API key.",
+                    "description": "`false` stops renewing: Economic Intelligence stays on until the end of the current period, and the fee is charged until then. `true` keeps it renewing again before then, or turns it on like the `3_days` offer. Can't be combined with `economic_intelligence_duration_key`. Requires the `company:update` scope on your API key.",
                     "example": false,
                     "type": "boolean"
                   },
                   "economic_intelligence_duration_key": {
-                    "description": "Turns on Economic Intelligence with the offer that has this `key` in `economic_intelligence_offers`, at that offer's fee. A committed duration can't be changed or turned off until `economic_intelligence_ends_at`, except to upgrade to `weekly`, which switches to auto-renew right away. Requires the `company:update` scope on your API key.",
+                    "description": "Turns on Economic Intelligence with the offer that has this `key` in `economic_intelligence_offers`, at that offer's fee. Only `3_days`, the auto-renew offer, is accepted; any other key is rejected. Requires the `company:update` scope on your API key.",
                     "enum": [
+                      "3_days",
                       "weekly",
                       "7_days",
                       "1_day",
                       "1_hour"
                     ],
-                    "example": "weekly",
+                    "example": "3_days",
                     "type": "string"
                   },
                   "feedback_options": {
@@ -61476,12 +61480,12 @@
                       "type": "boolean"
                     },
                     "economic_intelligence_auto_renew": {
-                      "description": "Whether Economic Intelligence renews itself every week, with no end date. Turn it on with the `weekly` offer. Set it to `false` to stop renewing, which keeps Economic Intelligence on until the end of the current week, shown in `economic_intelligence_ends_at`; stopping before the first renewal charges the rest of that week at the `7_days` offer's fee. Set it back to `true` before then to keep renewing at the weekly fee.",
+                      "description": "Whether Economic Intelligence renews itself every period, with no end date. Turn it on by setting this to `true`, or by passing the `3_days` offer's key as `economic_intelligence_duration_key`. Set it to `false` to stop renewing: Economic Intelligence stays on until the end of the current period, shown in `economic_intelligence_ends_at`, and the fee is charged until then. Set it back to `true` before then to keep renewing.",
                       "example": false,
                       "type": "boolean"
                     },
                     "economic_intelligence_ends_at": {
-                      "description": "When the account's committed Economic Intelligence period ends, as an ISO 8601 timestamp. Economic Intelligence can't be turned off before then. `null` when Economic Intelligence is off or renews automatically.",
+                      "description": "When Economic Intelligence turns off, as an ISO 8601 timestamp: the end of the current period once auto-renew is turned off. `null` when Economic Intelligence is off or renews automatically.",
                       "example": "2026-01-01T12:00:00.000Z",
                       "type": [
                         "string",
@@ -61489,7 +61493,7 @@
                       ]
                     },
                     "economic_intelligence_fee_percentage": {
-                      "description": "Percentage of volume charged while Economic Intelligence is on, such as `1.5` for 1.5%. `null` when Economic Intelligence is off.",
+                      "description": "Percentage of payment volume charged while Economic Intelligence is on, such as `3` for 3%. `null` when Economic Intelligence is off.",
                       "example": 1.5,
                       "type": [
                         "number",
@@ -61497,7 +61501,7 @@
                       ]
                     },
                     "economic_intelligence_first_renewal_at": {
-                      "description": "When auto-renew first renews, as an ISO 8601 timestamp. Turning auto-renew off before then charges the rest of that week at the `7_days` offer's fee. `null` when auto-renew is off.",
+                      "description": "When auto-renew first renews, as an ISO 8601 timestamp: one period after it was turned on. `null` when auto-renew is off.",
                       "example": null,
                       "type": [
                         "string",
@@ -61505,7 +61509,7 @@
                       ]
                     },
                     "economic_intelligence_offers": {
-                      "description": "What the account can choose now to turn on Economic Intelligence, each with its fee. Every offer while Economic Intelligence is off; only the `weekly` auto-renew offer while a committed period is running, as an upgrade; empty while it renews automatically.",
+                      "description": "What the account can choose now to turn on Economic Intelligence. Auto-renew is the only plan: one offer, with its fee and the length of each period, while auto-renew is off, and empty while Economic Intelligence renews automatically.",
                       "items": {
                         "properties": {
                           "auto_renew": {
@@ -61514,8 +61518,8 @@
                             "type": "boolean"
                           },
                           "duration": {
-                            "description": "What period of time Economic Intelligence stays on. For an auto-renew offer, the length of each period it renews for.",
-                            "example": 7,
+                            "description": "The length of each period Economic Intelligence renews for, in `duration_unit`, such as `3` for 3 days.",
+                            "example": 3,
                             "type": "integer"
                           },
                           "duration_unit": {
@@ -61528,19 +61532,20 @@
                             "type": "string"
                           },
                           "fee_percentage": {
-                            "description": "Percentage of volume charged while Economic Intelligence is on, such as `1.5` for 1.5%.",
-                            "example": 1.0,
+                            "description": "Percentage of payment volume charged while Economic Intelligence is on, such as `3` for 3%.",
+                            "example": 3.0,
                             "type": "number"
                           },
                           "key": {
-                            "description": "The unique identifier for this offer. Pass this value as `economic_intelligence_duration_key` to turn it on.",
+                            "description": "The unique identifier for this offer. Pass this value as `economic_intelligence_duration_key` to turn it on. Only `3_days`, the auto-renew offer, is offered. The other keys identify periods bought before it became the only plan.",
                             "enum": [
+                              "3_days",
                               "weekly",
                               "7_days",
                               "1_day",
                               "1_hour"
                             ],
-                            "example": "weekly",
+                            "example": "3_days",
                             "type": "string"
                           },
                           "recommended": {
@@ -74754,9 +74759,10 @@
                       "2026-11-05-1",
                       "2026-11-06",
                       "2026-11-07",
-                      "2026-11-10"
+                      "2026-11-10",
+                      "2026-11-10-1"
                     ],
-                    "example": "2026-11-10",
+                    "example": "2026-11-10-1",
                     "type": "string"
                   },
                   "expires_at": {
@@ -75213,9 +75219,10 @@
                       "2026-11-05-1",
                       "2026-11-06",
                       "2026-11-07",
-                      "2026-11-10"
+                      "2026-11-10",
+                      "2026-11-10-1"
                     ],
-                    "example": "2026-11-10",
+                    "example": "2026-11-10-1",
                     "type": "string"
                   },
                   "expires_at": {
@@ -116086,7 +116093,7 @@
         }
       ],
       "post": {
-        "description": "Creates an experiment or feature flag in `draft` status for an account. Nothing is served until you activate it with `POST /experiments/:id/activate`. Requires `experiment:manage` on the account.",
+        "description": "Creates an experiment or feature flag in `draft` status for an account. Nothing is served until you activate it with `POST /experiments/:id/activate`, which needs Economic Intelligence on for the account. Requires `experiment:manage` on the account.",
         "operationId": "createExperiment",
         "parameters": [
           {
@@ -116649,7 +116656,7 @@
         }
       ],
       "post": {
-        "description": "Starts (or resumes) an experiment or feature flag so evaluation begins serving it. Activating a draft stamps `started_at`; resuming a paused experiment keeps the original start. Only drafts and paused experiments can be activated. Requires `experiment:manage` on the owning account.",
+        "description": "Starts (or resumes) an experiment or feature flag so evaluation begins serving it. Activating a draft stamps `started_at`; resuming a paused experiment keeps the original start. Only drafts and paused experiments can be activated. Requires `experiment:manage` on the owning account. Activating needs Economic Intelligence on for the owning account: while the account's `economic_intelligence` is `false`, this returns a `403` and the experiment keeps its status. Turn it on with `PATCH /accounts/:account_id/preferences`. Creating, editing, pausing and ending an experiment don't need it.",
         "operationId": "activateExperiment",
         "parameters": [
           {
@@ -182149,7 +182156,7 @@
                 "properties": {
                   "api_version_date": {
                     "description": "The dated API version (Api-Version-Date) to pin this webhook's payloads to. Omit to leave the webhook unpinned, tracking the current payload shape.",
-                    "example": "2026-01-01",
+                    "example": "2026-11-10-1",
                     "type": [
                       "string",
                       "null"
@@ -182491,7 +182498,7 @@
                 "properties": {
                   "api_version_date": {
                     "description": "The dated API version (Api-Version-Date) to pin this webhook's payloads to. Only valid for `v1` webhooks. Omit to leave the current pin unchanged, or pass `null` to unpin and track the current payload shape.",
-                    "example": "2026-01-01",
+                    "example": "2026-11-10-1",
                     "type": [
                       "string",
                       "null"
@@ -183813,7 +183820,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -184140,7 +184147,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -184467,7 +184474,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "disabled_at": "2026-01-01T12:00:00.000Z",
@@ -184600,7 +184607,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -184933,7 +184940,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "ad_campaign": {
                     "id": "adcamp_xxxxxxxxxxxxxx"
@@ -185266,7 +185273,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -185637,7 +185644,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -186014,7 +186021,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "ad_campaign": {
                     "id": "adcamp_xxxxxxxxxxxxxx"
@@ -186422,7 +186429,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxx2",
@@ -186568,7 +186575,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxx2",
@@ -186714,7 +186721,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -187135,7 +187142,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -187556,7 +187563,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -187977,7 +187984,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -188398,7 +188405,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -188567,7 +188574,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -188736,7 +188743,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -188905,7 +188912,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -189074,7 +189081,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -189215,7 +189222,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -189356,7 +189363,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -189497,7 +189504,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -189638,7 +189645,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -189779,7 +189786,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "audience": {
                     "type": "channel",
@@ -190036,7 +190043,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "audience": {
                     "type": "channel",
@@ -190307,7 +190314,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "completed": true,
                   "course": {
@@ -190451,7 +190458,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "amount": "75000000000",
                   "available_at": null,
@@ -190592,7 +190599,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "acceptable": true,
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -190784,7 +190791,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "acceptable": false,
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -190976,7 +190983,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": null,
                   "amount": 25.0,
@@ -191117,7 +191124,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -191262,7 +191269,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -191407,7 +191414,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -191552,7 +191559,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -191697,7 +191704,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -191842,7 +191849,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -191987,7 +191994,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -192132,7 +192139,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "events": [
                     {
@@ -192555,7 +192562,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "download_url": "https://s3.amazonaws.com/uploads/exports/members-export.csv",
@@ -192685,7 +192692,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "download_url": null,
@@ -192815,7 +192822,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "amount": "512345000000",
                   "available_at": "2026-01-01T12:00:00.000Z",
@@ -192955,7 +192962,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "id": "idpf_xxxxxxxxxxxxxx"
                 },
@@ -193088,7 +193095,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -193272,7 +193279,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -193456,7 +193463,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -193640,7 +193647,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -193824,7 +193831,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -194008,7 +194015,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "balances": [
                     {
@@ -194152,7 +194159,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -194315,7 +194322,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -194478,7 +194485,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -194654,7 +194661,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -194830,7 +194837,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -195006,7 +195013,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -195305,7 +195312,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -195604,7 +195611,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -195903,7 +195910,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -196202,7 +196209,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -196494,7 +196501,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -196793,7 +196800,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -197092,7 +197099,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -197584,7 +197591,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -198072,7 +198079,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -198556,7 +198563,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "address": {
                     "city": "Austin",
@@ -198698,7 +198705,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_reference": "4483",
                   "bank_verification_state": null,
@@ -199289,7 +199296,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -199602,7 +199609,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -199915,7 +199922,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -200228,7 +200235,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -200391,7 +200398,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -200554,7 +200561,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -200717,7 +200724,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -200880,7 +200887,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -201043,7 +201050,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "amount": 50.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -201213,7 +201220,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "amount": 50.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -201383,7 +201390,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -201556,7 +201563,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -201725,7 +201732,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -201894,7 +201901,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -202044,7 +202051,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -202191,7 +202198,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -202380,7 +202387,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "carrier": "ups",
@@ -202513,7 +202520,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "carrier": "ups",
@@ -202646,7 +202653,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "amount": {
                     "amount": "-1234.56",
@@ -202832,7 +202839,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -203074,7 +203081,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "amount": {
                     "amount": "250.00",
@@ -203464,7 +203471,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "amount": {
                     "amount": "250.00",
@@ -203854,7 +203861,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "amount": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -204232,7 +204239,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-10",
+                "api_version_date": "2026-11-10-1",
                 "data": {
                   "id": "verf_xxxxxxxxxxxxxx",
                   "last_error_code": null,
