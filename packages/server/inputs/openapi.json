@@ -170583,6 +170583,20 @@
             }
           },
           {
+            "description": "Only return the memberships of these users, prefixed `user_`, at most 100. IDs that match no user are ignored. With `account_id=global`, a user can have one in each partner account. Can't be combined with `user_id`.",
+            "explode": true,
+            "in": "query",
+            "name": "user_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "style": "form"
+          },
+          {
             "description": "Only return members with this role. `custom` matches members on a dashboard-managed custom role.",
             "in": "query",
             "name": "role",
