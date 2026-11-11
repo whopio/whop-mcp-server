@@ -14954,6 +14954,14 @@
             "example": "2026-01-01T12:00:00.000Z",
             "type": "string"
           },
+          "deleted_at": {
+            "description": "When the channel was deleted or removed from your channel list, as an ISO 8601 timestamp. Null for a live channel.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "experience_id": {
             "example": null,
             "type": [
@@ -15059,6 +15067,7 @@
           "experience_id",
           "created_at",
           "updated_at",
+          "deleted_at",
           "last_message_id",
           "last_message_at",
           "membership",
@@ -15080,6 +15089,14 @@
             "description": "Creation time as an ISO 8601 timestamp.",
             "example": "2026-01-01T12:00:00.000Z",
             "type": "string"
+          },
+          "deleted_at": {
+            "description": "When the channel was deleted or removed from your channel list, as an ISO 8601 timestamp. Null for a live channel.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "experience_id": {
             "example": null,
@@ -15188,6 +15205,11 @@
               }
             ]
           },
+          "synchronized_at": {
+            "description": "Latest change to the channel or your membership, as an ISO 8601 timestamp. Use this value as updated_after for synchronization.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
           "updated_at": {
             "description": "Last channel change as an ISO 8601 timestamp.",
             "example": "2026-01-01T12:00:00.000Z",
@@ -15204,6 +15226,7 @@
           "experience_id",
           "created_at",
           "updated_at",
+          "deleted_at",
           "last_message_id",
           "last_message_at",
           "membership",
@@ -86810,7 +86833,7 @@
             }
           },
           {
-            "description": "The field to sort by. Defaults to `last_viewed_at` for community channels and `last_message_at` for private and support channels. Ties sort in a stable order.",
+            "description": "The field to sort by. Defaults to `last_viewed_at` for community channels and `last_message_at` for private and support channels. Ties sort in a stable order. Cannot be supplied with updated_after.",
             "in": "query",
             "name": "order",
             "required": false,
@@ -86842,7 +86865,7 @@
             }
           },
           {
-            "description": "The sort direction. Defaults to `desc`.",
+            "description": "The sort direction. Defaults to `desc`. Cannot be supplied with updated_after.",
             "in": "query",
             "name": "direction",
             "required": false,
@@ -86851,6 +86874,25 @@
                 "asc",
                 "desc"
               ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Include redacted entries for deleted channels and your removed memberships. Use deleted_at to remove these channels from your cache.",
+            "in": "query",
+            "name": "include_deleted",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
+            "description": "Return channels where the channel or your membership changed at or after this ISO 8601 timestamp. Cannot be more than one hour old, including on subsequent pages. For older changes, reload channels without updated_after. Results use ascending synchronized_at order. Cannot be combined with order, direction, query, status, awaiting_reply, unread, pinned, viewed, requested, created_before, or created_after.",
+            "in": "query",
+            "name": "updated_after",
+            "required": false,
+            "schema": {
               "type": "string"
             }
           },
