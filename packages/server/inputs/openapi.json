@@ -313,6 +313,14 @@
               }
             ]
           },
+          "external_id": {
+            "description": "The parent platform's own identifier for this subaccount, unique among the platform's subaccounts. `null` when unset.",
+            "example": "connected_account_123",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "financing": {
             "description": "The account's most recent financing application. Computed only on `retrieve` and `me` for callers with `company:balance:read` scope; `null` otherwise, or when the account has never applied for financing.",
             "oneOf": [
@@ -837,6 +845,7 @@
           "show_user_directory",
           "store_page_config",
           "metadata",
+          "external_id",
           "created_at",
           "use_logo_as_opengraph_image_fallback",
           "total_earned_usd",
@@ -58008,6 +58017,15 @@
             }
           },
           {
+            "description": "Return only the subaccount with this `external_id`, matched exactly and case-sensitively. End it with `%` to return every subaccount whose `external_id` starts with the text before it, such as `shopline:%`. `%` is accepted only at the end, because anywhere else it would scan all your subaccounts. `_` always matches literally.",
+            "in": "query",
+            "name": "external_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "description": "Return only accounts whose lifetime USD volume is at least this value. Requires `stats:read` on the parent account.",
             "in": "query",
             "name": "volume_min",
@@ -58184,16 +58202,32 @@
                     "example": "marcus@shinetime.example",
                     "type": "string"
                   },
+                  "external_id": {
+                    "description": "Your platform's own identifier for this subaccount, such as your user or store ID. Unique among your subaccounts: creating a second account with the same `external_id` and a different `email` returns a 409, unless `reassign_external_id` is `true`. Retrying with the same `email` and `external_id` returns the existing account. Subaccounts only.",
+                    "example": "user_12345",
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
                   "metadata": {
                     "additionalProperties": true,
-                    "description": "Arbitrary key/value metadata to store on the account.",
+                    "description": "Arbitrary key/value metadata to store on the account. When `external_id` is not sent, an `external_id` key here sets `external_id` and follows its rules. It must be unique among your subaccounts unless `reassign_external_id` is `true`. It stays in `metadata` as sent. Changing it later does not change `external_id`.",
                     "example": {
-                      "external_id": "user_12345"
+                      "seller_tier": "gold"
                     },
                     "type": "object"
                   },
                   "orchestration_enabled": {
                     "description": "Whether payment orchestration is enabled for this account. Requires payout:account:update. Omit to preserve the existing setting or creation default.",
+                    "type": "boolean"
+                  },
+                  "reassign_external_id": {
+                    "default": false,
+                    "description": "Pass `true` to move `external_id` to the new subaccount when another of your subaccounts already has it. Without it, that request returns a 409. The subaccount that had it is not deleted. It stays active with `external_id` set to `null`, and its `metadata` is unchanged. Requires `external_id`. Also requires the `company:update` permission on your platform account, in addition to `company:create_child`. Ignored when the same `email` already has the `external_id`, which returns that account.",
+                    "example": false,
                     "type": "boolean"
                   },
                   "send_customer_emails": {
@@ -58203,7 +58237,7 @@
                     "type": "boolean"
                   },
                   "title": {
-                    "description": "The display name of the account. Defaults to `metadata.external_id` or the owner's email when omitted.",
+                    "description": "The display name of the account. Defaults to `external_id` or the owner's email when omitted.",
                     "example": "Referred Studio",
                     "type": "string"
                   },
@@ -58246,7 +58280,8 @@
             "description": "credential lacks the required subaccount creation scope"
           },
           "409": {
-            "$ref": "#/components/responses/Conflict"
+            "$ref": "#/components/responses/Conflict",
+            "description": "another subaccount of this platform already has the external_id"
           }
         },
         "security": [
@@ -62394,6 +62429,16 @@
                       "null"
                     ]
                   },
+                  "external_id": {
+                    "description": "Your platform's own identifier for this subaccount. It must be unique among your subaccounts, and a duplicate returns a 409. Only the parent account can set it. Pass `null` to clear.",
+                    "example": "shop_4417",
+                    "maxLength": 255,
+                    "minLength": 1,
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
                   "featured_affiliate_product_id": {
                     "description": "The ID of the product to feature for affiliates. Pass `null` to clear.",
                     "example": "prod_xxxxxxxxxxxxxx",
@@ -62441,7 +62486,6 @@
                     "additionalProperties": true,
                     "description": "Arbitrary key/value metadata to store on the account.",
                     "example": {
-                      "external_id": "shop_4417",
                       "region": "austin"
                     },
                     "type": "object"
@@ -62995,6 +63039,10 @@
           "404": {
             "$ref": "#/components/responses/NotFound",
             "description": "no account with that ID is visible to the credential"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict",
+            "description": "another subaccount of this platform already has the external_id"
           }
         },
         "security": [
@@ -184660,6 +184708,7 @@
                   "economic_intelligence": false,
                   "email": "marcus@shinetime.example",
                   "eula": null,
+                  "external_id": null,
                   "financing": null,
                   "funds_release_at": null,
                   "home_preferences": [],
@@ -184987,6 +185036,7 @@
                   "economic_intelligence": false,
                   "email": "marcus@shinetime.example",
                   "eula": null,
+                  "external_id": null,
                   "financing": null,
                   "funds_release_at": null,
                   "home_preferences": [],
@@ -185447,6 +185497,7 @@
                   "economic_intelligence": false,
                   "email": "marcus@shinetime.example",
                   "eula": null,
+                  "external_id": null,
                   "financing": null,
                   "funds_release_at": null,
                   "home_preferences": [],
