@@ -5595,7 +5595,7 @@
           },
           "profile_picture": {
             "$ref": "#/components/schemas/UserProfilePicture",
-            "description": "Avatar wrapper; its `url` is always present, using a generated placeholder when the user set no picture."
+            "description": "Avatar wrapper. Its `url` is always present, and is a generated placeholder when the user set no picture."
           },
           "referring_account": {
             "description": "Business the partner referred this account on behalf of, when the referral belongs to their team. `null` for a personal referral.",
@@ -12462,7 +12462,7 @@
             ]
           },
           "status": {
-            "description": "`active` while the member moves through the automation, `completed` after its last step, `canceled` when the account canceled the enrollment or stopped or deleted the automation.",
+            "description": "`active` while the member moves through the automation. `completed` after its last step. `canceled` when the account canceled the enrollment, or stopped or deleted the automation.",
             "enum": [
               "active",
               "completed",
@@ -12568,7 +12568,7 @@
             "type": "string"
           },
           "id": {
-            "description": "Automation step ID, prefixed `atos_`. A step gets a new ID in every version; `key` stays the same.",
+            "description": "Automation step ID, prefixed `atos_`. A step gets a new ID in every version. Its `key` stays the same.",
             "example": "atos_xxxxxxxxxxxxxx",
             "type": "string"
           },
@@ -12604,7 +12604,7 @@
             ]
           },
           "source_code": {
-            "description": "An `email` or `message` step's code: a TSX module whose default export gets the member and returns `message.send()`, `message.skip()` or `message.exit()` from `whop:message`. An `email` step sends its `subject`, its `react` element as the body and its `text` as the plain-text part; a `message` step sends its `text`. The code can import `react` and `@react-email/components`, and reads the account through the `whop` client from `whop:message`, which can only read: it holds every account-level `:read` permission that both the admin role and Whop AI hold except `payout:account:read`, as listed for previewing a step. Setting it, or previewing the step, needs every one of those permissions. Up to 64,000 characters. `null` on a `wait`, and until it is written.",
+            "description": "An `email` or `message` step's code: a TSX module whose default export gets the member and returns `message.send()`, `message.skip()` or `message.exit()` from `whop:message`. An `email` step sends its `subject`, its `react` element as the body and its `text` as the plain-text part. A `message` step sends its `text`. The code can import `react` and `@react-email/components`. It reads the account through the `whop` client from `whop:message`, which can only read. That client holds every account-level `:read` permission that both the admin role and Whop AI hold, except `payout:account:read`, as listed for previewing a step. Setting it, or previewing the step, needs every one of those permissions. Up to 64,000 characters. `null` on a `wait`, and until it is written.",
             "example": "export default () => message.send({ subject: \"Thanks!\", text: \"Thanks for your order!\" });",
             "type": [
               "string",
@@ -15354,7 +15354,7 @@
             ]
           },
           "inbox_status": {
-            "description": "Your private-channel inbox state; null for other users or channel kinds.",
+            "description": "Your inbox state for a private channel. `null` for other users and other channel kinds.",
             "enum": [
               "requested",
               "accepted",
@@ -15396,7 +15396,7 @@
             ]
           },
           "unread": {
-            "description": "Personal unread state; null for other users.",
+            "description": "Your unread state for the channel. `null` for other users.",
             "example": false,
             "type": [
               "boolean",
@@ -15718,7 +15718,7 @@
             "type": "string"
           },
           "content": {
-            "description": "Markdown content; null for a deleted message.",
+            "description": "Markdown content. `null` for a deleted message.",
             "example": "Content 1",
             "type": [
               "string",
@@ -15840,7 +15840,7 @@
             "type": "string"
           },
           "view_count": {
-            "description": "Experience view count; null for DM-backed channels.",
+            "description": "Experience view count. `null` for DM-backed channels.",
             "example": null,
             "type": [
               "integer",
@@ -19840,7 +19840,7 @@
             "type": "string"
           },
           "removed_by_moderation": {
-            "description": "Whether moderation removed the file. When true, `url` serves a replacement image; filename, size, and content type still describe the original file.",
+            "description": "Whether moderation removed the file. When `true`, `url` serves a replacement image. `filename`, `size` and `content_type` still describe the original file.",
             "example": false,
             "type": "boolean"
           },
@@ -19875,7 +19875,7 @@
             ]
           },
           "url": {
-            "description": "A URL to download the file: a permanent CDN URL for public files, a signed expiring URL for private ones. Null until the upload has finished; a replacement image URL when removed by moderation.",
+            "description": "A URL to download the file. Public files get a permanent CDN URL, and private files get a signed URL that expires. `null` until the upload has finished. When moderation removes the file, a replacement image URL.",
             "example": "https://whop-assets-example.s3.amazonaws.com/uploads/image/2026-01-01/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
             "type": [
               "string",
@@ -19883,7 +19883,7 @@
             ]
           },
           "visibility": {
-            "description": "`public` files are served via an unsigned CDN URL; `private` files via a signed, expiring URL.",
+            "description": "`public` files are served from an unsigned CDN URL. `private` files are served from a signed URL that expires.",
             "enum": [
               "public",
               "private"
@@ -22730,6 +22730,7 @@
             "type": "array"
           },
           "footer": {
+            "description": "Footer shown at the bottom of the embed. Null when the embed has no footer.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/EmbedFooter"
@@ -22814,6 +22815,7 @@
       "EmbedFooter": {
         "properties": {
           "icon": {
+            "description": "Small image shown beside the footer text. Null when the footer has no icon.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/EmbedImage"
@@ -23079,7 +23081,7 @@
                 "type": "string"
               },
               "route": {
-                "description": "URL slug for the account's store page, e.g. `pickaxe` in whop.com/pickaxe.",
+                "description": "URL slug for the account's store page. For example, `pickaxe` in whop.com/pickaxe.",
                 "example": "pickaxe",
                 "type": "string"
               },
@@ -23249,7 +23251,7 @@
                 "type": "string"
               },
               "route": {
-                "description": "URL slug for the account's store page, e.g. `pickaxe` in whop.com/pickaxe.",
+                "description": "URL slug for the account's store page. For example, `pickaxe` in whop.com/pickaxe.",
                 "example": "pickaxe",
                 "type": "string"
               },
@@ -24176,7 +24178,7 @@
             ]
           },
           "content_type": {
-            "description": "The original file's MIME type, preserved when removed by moderation, e.g. `application/pdf`.",
+            "description": "The original file's MIME type, for example `application/pdf`. It is kept when moderation removes the file.",
             "example": "application/pdf",
             "type": [
               "string",
@@ -24249,7 +24251,7 @@
             "type": "string"
           },
           "removed_by_moderation": {
-            "description": "Whether moderation removed the file. When true, `url` serves a replacement image; filename, size, and content type still describe the original file.",
+            "description": "Whether moderation removed the file. When `true`, `url` serves a replacement image. `filename`, `size` and `content_type` still describe the original file.",
             "example": false,
             "type": "boolean"
           },
@@ -24286,7 +24288,7 @@
             ]
           },
           "url": {
-            "description": "A URL to download the file: a permanent CDN URL for public files, a signed expiring URL for private ones. Null until the upload has finished; a replacement image URL when removed by moderation.",
+            "description": "A URL to download the file. Public files get a permanent CDN URL, and private files get a signed URL that expires. `null` until the upload has finished. When moderation removes the file, a replacement image URL.",
             "example": "https://whop-assets-example.s3.amazonaws.com/uploads/audio/2026-01-01/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
             "type": [
               "string",
@@ -24294,7 +24296,7 @@
             ]
           },
           "visibility": {
-            "description": "`public` files are served via an unsigned CDN URL; `private` files via a signed, expiring URL.",
+            "description": "`public` files are served from an unsigned CDN URL. `private` files are served from a signed URL that expires.",
             "enum": [
               "public",
               "private"
@@ -24883,7 +24885,7 @@
           },
           "values": {
             "items": {
-              "description": "Saved text answers. Empty for money requirements; read money instead.",
+              "description": "Saved text answers. Empty for money requirements. Read `money` for those.",
               "example": "https://shop.example.com/shop",
               "type": "string"
             },
@@ -26451,7 +26453,7 @@
             "type": "number"
           },
           "checkout_link": {
-            "description": "A signed link that opens this invoice in a checkout session so the buyer can pay it: pass it as `link` to `POST /checkout_sessions`. Present while the invoice is open; null in any other status, for an invoice billed to a business buyer or whose membership was canceled, and unless you have `payment:charge`, or `invoice:create` or `invoice:update` on an invoice with no `payment_method_id`.",
+            "description": "A signed link that opens this invoice in a checkout session so the buyer can pay it. Pass it as `link` to `POST /checkout_sessions`. Present while the invoice is open. `null` in any other status, for an invoice billed to a business buyer, and for an invoice whose membership was canceled. Also `null` unless you have `payment:charge`, or `invoice:create` or `invoice:update` on an invoice with no `payment_method_id`.",
             "example": "pay_xxxxxxxxxxxxxx.eyJfcmFpbHMiOnsiZGF0YSI6WzEsZmFsc2VdLCJwdXIiOiJSZWNlaXB0XG5jaGVja291dF9tb3VudFxuIn19--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
             "type": [
               "string",
@@ -26520,7 +26522,7 @@
             ]
           },
           "membership_id": {
-            "description": "The membership this invoice bills, prefixed `mem_`: the subscription a renewal invoice renews, or the one created when an invoice with a recurring item is issued. Null for one-off invoices, for a draft not yet issued, and without the member:basic:read permission.",
+            "description": "The membership this invoice bills, prefixed `mem_`. For a renewal invoice, it is the subscription that renews. For an invoice with a recurring item, it is the membership created when the invoice is issued. Null for one-off invoices, for a draft not yet issued, and without the member:basic:read permission.",
             "example": "mem_xxxxxxxxxxxxxx",
             "type": [
               "string",
@@ -26591,7 +26593,7 @@
             "type": "array"
           },
           "scheduled_charge_at": {
-            "description": "When the invoice's saved payment method will be charged, as an ISO 8601 timestamp: the `charge_at` it was sent or issued with, or `due_at` when an invoice with a `payment_method_id` is sent or issued before it is due without one. On a draft, the `charge_at` of its scheduled send. `null` otherwise, once the charge starts, and once the invoice is paid, void, or uncollectible.",
+            "description": "When the invoice's saved payment method will be charged, as an ISO 8601 timestamp. It is the `charge_at` the invoice was sent or issued with. Without one, it is `due_at` when an invoice with a `payment_method_id` is sent or issued before it is due. On a draft, it is the `charge_at` of its scheduled send. `null` otherwise, once the charge starts, and once the invoice is paid, void, or uncollectible.",
             "example": null,
             "type": [
               "string",
@@ -27156,7 +27158,7 @@
       "InvoiceLineItem": {
         "properties": {
           "description": {
-            "description": "Text shown under the item on the invoice, its email, and its PDF, read from the variant's `description`. A custom charge sets it with the item's `description`; a product variant keeps its own. Null when the variant has none or has since been deleted.",
+            "description": "Text shown under the item on the invoice, its email, and its PDF, read from the variant's `description`. A custom charge sets it with the item's `description`. A product variant keeps its own. Null when the variant has none or has since been deleted.",
             "example": null,
             "type": [
               "string",
@@ -27733,7 +27735,7 @@
                     "type": "string"
                   },
                   "route": {
-                    "description": "URL slug for the account's store page, e.g. `pickaxe` in whop.com/pickaxe.",
+                    "description": "URL slug for the account's store page. For example, `pickaxe` in whop.com/pickaxe.",
                     "example": "pickaxe",
                     "type": "string"
                   },
@@ -31302,7 +31304,7 @@
           },
           "profile_picture": {
             "$ref": "#/components/schemas/UserProfilePicture",
-            "description": "Avatar wrapper; its `url` is always present, using a generated placeholder when the user set no picture."
+            "description": "Avatar wrapper. Its `url` is always present, and is a generated placeholder when the user set no picture."
           },
           "state": {
             "description": "The user's state or region code, like `CA`, derived from their IP address. `null` when unknown or the user turned off location sharing.",
@@ -33244,7 +33246,7 @@
             "type": "integer"
           },
           "value": {
-            "description": "The Unicode emoji for emoji reactions; otherwise the reaction's value.",
+            "description": "The Unicode emoji for an emoji reaction. For other reaction kinds, the reaction's value.",
             "example": "❤️",
             "type": [
               "string",
@@ -33264,7 +33266,7 @@
       "Money": {
         "properties": {
           "amount": {
-            "description": "The amount in major units, as an exact decimal string — `\"10.00\"` is ten dollars. A string so no float rounds it in transit.",
+            "description": "The amount in major units, as an exact decimal string. For example, `\"10.00\"` is ten dollars. It is a string so that no float rounds it in transit.",
             "example": "-1234.56",
             "type": "string"
           },
@@ -33274,7 +33276,7 @@
             "type": "string"
           },
           "decimals": {
-            "description": "How many decimal places the amount CARRIES — the precision the charge itself runs at.",
+            "description": "How many decimal places the amount carries. This is the precision the charge itself runs at.",
             "example": 2,
             "type": "integer"
           },
@@ -45842,7 +45844,7 @@
           },
           "profile_picture": {
             "$ref": "#/components/schemas/UserProfilePicture",
-            "description": "Avatar wrapper; its `url` is always present, using a generated placeholder when the user set no picture."
+            "description": "Avatar wrapper. Its `url` is always present, and is a generated placeholder when the user set no picture."
           },
           "username": {
             "description": "Public username.",
@@ -45959,7 +45961,7 @@
                 "type": "string"
               },
               "route": {
-                "description": "URL slug for the account's store page, e.g. `pickaxe` in whop.com/pickaxe.",
+                "description": "URL slug for the account's store page. For example, `pickaxe` in whop.com/pickaxe.",
                 "example": "pickaxe",
                 "type": "string"
               },
@@ -49193,7 +49195,7 @@
             "type": "string"
           },
           "route": {
-            "description": "URL slug for the account's store page, e.g. `pickaxe` in whop.com/pickaxe.",
+            "description": "URL slug for the account's store page. For example, `pickaxe` in whop.com/pickaxe.",
             "example": "shine-time-auto-detailing",
             "type": "string"
           },
@@ -53886,7 +53888,7 @@
           },
           "profile_picture": {
             "$ref": "#/components/schemas/UserProfilePicture",
-            "description": "Avatar wrapper; its `url` is always present, using a generated placeholder when the user set no picture."
+            "description": "Avatar wrapper. Its `url` is always present, and is a generated placeholder when the user set no picture."
           },
           "social_links": {
             "items": {
@@ -54665,7 +54667,7 @@
       "UserProfilePicture": {
         "properties": {
           "url": {
-            "description": "Avatar image URL. Always present — a generated placeholder when the user set no picture.",
+            "description": "Avatar image URL. Always present. It is a generated placeholder when the user set no picture.",
             "example": "https://ui-avatars.com/api/",
             "type": "string"
           }
@@ -54860,7 +54862,7 @@
           },
           "profile_picture": {
             "$ref": "#/components/schemas/UserProfilePicture",
-            "description": "Avatar wrapper; its `url` is always present, using a generated placeholder when the user set no picture."
+            "description": "Avatar wrapper. Its `url` is always present, and is a generated placeholder when the user set no picture."
           },
           "username": {
             "description": "Public username.",
@@ -81145,7 +81147,7 @@
                     ]
                   },
                   "source_code": {
-                    "description": "An `email` or `message` step's code: a TSX module whose default export gets the member and returns `message.send()`, `message.skip()` or `message.exit()` from `whop:message`. An `email` step sends its `subject`, its `react` element as the body and its `text` as the plain-text part; a `message` step sends its `text`. The code can import `react` and `@react-email/components`, and reads the account through the `whop` client from `whop:message`, which can only read: it holds every account-level `:read` permission that both the admin role and Whop AI hold except `payout:account:read`, as listed for previewing a step. Setting it, or previewing the step, needs every one of those permissions. Up to 64,000 characters. `null` on a `wait`, and until it is written.",
+                    "description": "An `email` or `message` step's code: a TSX module whose default export gets the member and returns `message.send()`, `message.skip()` or `message.exit()` from `whop:message`. An `email` step sends its `subject`, its `react` element as the body and its `text` as the plain-text part. A `message` step sends its `text`. The code can import `react` and `@react-email/components`. It reads the account through the `whop` client from `whop:message`, which can only read. That client holds every account-level `:read` permission that both the admin role and Whop AI hold, except `payout:account:read`, as listed for previewing a step. Setting it, or previewing the step, needs every one of those permissions. Up to 64,000 characters. `null` on a `wait`, and until it is written.",
                     "example": "export default () => message.send({ subject: \"Thanks!\", text: \"Thanks for your order!\" });",
                     "type": [
                       "string",
@@ -81300,7 +81302,7 @@
                     "$ref": "#/components/schemas/AutomationStepConfig"
                   },
                   "source_code": {
-                    "description": "An `email` or `message` step's code: a TSX module whose default export gets the member and returns `message.send()`, `message.skip()` or `message.exit()` from `whop:message`. An `email` step sends its `subject`, its `react` element as the body and its `text` as the plain-text part; a `message` step sends its `text`. The code can import `react` and `@react-email/components`, and reads the account through the `whop` client from `whop:message`, which can only read: it holds every account-level `:read` permission that both the admin role and Whop AI hold except `payout:account:read`, as listed for previewing a step. Setting it, or previewing the step, needs every one of those permissions. Up to 64,000 characters. `null` on a `wait`, and until it is written.",
+                    "description": "An `email` or `message` step's code: a TSX module whose default export gets the member and returns `message.send()`, `message.skip()` or `message.exit()` from `whop:message`. An `email` step sends its `subject`, its `react` element as the body and its `text` as the plain-text part. A `message` step sends its `text`. The code can import `react` and `@react-email/components`. It reads the account through the `whop` client from `whop:message`, which can only read. That client holds every account-level `:read` permission that both the admin role and Whop AI hold, except `payout:account:read`, as listed for previewing a step. Setting it, or previewing the step, needs every one of those permissions. Up to 64,000 characters. `null` on a `wait`, and until it is written.",
                     "example": "export default () => message.send({ subject: \"Thanks!\", text: \"Thanks for your order!\" });",
                     "type": [
                       "string",
@@ -184511,7 +184513,7 @@
       "x-whop-summary": "A charge against a buyer, and the step they still owe."
     },
     {
-      "description": "An Invoice is a receipt with an invoice number. Create a draft from variant-backed items, set its recipient and due date, and edit it until it is sent. Its `pay_` ID is also the payment ID when collected.\n\nDraft creation does not create access or charge the buyer. The recipient's contact details live on the account's member. Financial fields and caller metadata can only be edited in draft.\n",
+      "description": "An Invoice is a receipt with an invoice number. Create a draft from variant-backed items, set its recipient and due date, and edit it until it is sent. Its `pay_` ID is also the payment ID when collected.\n\nUse the Invoices API to [create](/api-reference/invoices/create-invoice) and edit drafts, then [issue](/api-reference/invoices/issue-invoice) or [send](/api-reference/invoices/send-invoice) them. You can [charge](/api-reference/invoices/charge-invoice) an open invoice to a saved payment method, or [void](/api-reference/invoices/void-invoice) an invoice the buyer will not pay.\n\nDraft creation does not create access or charge the buyer. The recipient's contact details live on the account's member. Financial fields and caller metadata can only be edited in draft.\n",
       "name": "Invoices",
       "x-whop-summary": "A payment request that keeps the same receipt from draft through collection."
     },
@@ -184556,7 +184558,7 @@
       "x-whop-summary": "Rules an account writes to decide its own payments."
     },
     {
-      "description": "To accept payment-financing methods, an account applies through a financing application: a request to review the account for payment financing, not a loan or business capital. Create an application, save answers to its requirements, then submit it for review. You can manage applications for your own account and its direct subaccounts.\n",
+      "description": "A Financing Application is an account's request to accept payment-financing methods, such as buy now, pay later. Whop reviews the account before it can offer them. It is not a loan or business capital.\n\nUse the Financing Applications API to [create](/api-reference/financing-applications/create-financing-application) an application, [save answers](/api-reference/financing-applications/update-financing-application) to its requirements, and [submit](/api-reference/financing-applications/submit-financing-application) it for review. You can manage applications for your own account and its direct subaccounts.\n",
       "name": "Financing Applications",
       "x-whop-summary": "An account's request to accept buy-now-pay-later payment methods."
     },
@@ -184652,7 +184654,7 @@
       "x-whop-summary": "Customer star ratings and written feedback on a product."
     },
     {
-      "description": "A Review Report is a request from an account's admins for Whop staff to review a customer's review. Staff remove the review if it breaks the guidelines.\n\nUse the Review Reports API to list the reports filed on an account's reviews, narrowed by review, status, or creation date, and check whether a report is still pending.\n",
+      "description": "A Review Report is a request from an account's admins for Whop staff to review a customer's review. Staff remove the review if it breaks the guidelines.\n\nUse the Review Reports API to list the reports filed on an account's reviews, narrowed by review, status, or creation date. Check `status` to see whether a report is still pending.\n",
       "name": "Review reports",
       "x-whop-summary": "Reports an account's admins filed against customer reviews."
     },
@@ -184757,17 +184759,17 @@
       "x-whop-summary": "What an account should do next to grow, generated from its own data."
     },
     {
-      "description": "A Channel contains chat messages. Its kind determines access, membership and delivery. Retrieve a channel by its existing public ID, or use an experience ID for its chat.\n",
+      "description": "A Channel is a conversation on Whop that holds chat messages. A `private` channel is a one-to-one or group conversation. A `community` channel is the chat in one of an account's Chat experiences. A `support` channel is a conversation between an account and one customer.\n\nUse the Channels API to [create](/api-reference/channels/create-channel) and [list](/api-reference/channels/list-channels) channels, and to [retrieve](/api-reference/channels/retrieve-channel) one by its own ID or its Chat experience's ID. You can also [accept](/api-reference/channels/accept-dm-request) or [decline](/api-reference/channels/decline-dm-request) direct-message requests, [mark a channel read](/api-reference/channels/mark-channel-read), and [resolve](/api-reference/channels/resolve-support-channel) or [reopen](/api-reference/channels/reopen-support-channel) support conversations.\n",
       "name": "Channels",
       "x-whop-summary": "Private, community and support chat channels."
     },
     {
-      "description": "Channel members include explicit participants and access-derived experience or support users. Direct participants include read positions; access-derived users do not create memberships or expose reading activity.\n",
+      "description": "A Channel Member is a person in a channel. A person added to a private or support channel has a stored membership, with a read position and a notification preference. A person who reads a channel through their access to its experience or support inbox has no stored membership. Their `id` is `null`, and their read position is not shown.\n\nUse the Channel Members API to [list or search](/api-reference/channel-members/list-channel-members) the people in a channel and [add](/api-reference/channel-members/add-channel-member) someone to a private or support channel. You can also [change your notification preference](/api-reference/channel-members/update-channel-member). [Remove](/api-reference/channel-members/remove-channel-member) a member, or remove yourself to leave a channel.\n",
       "name": "Channel Members",
       "x-whop-summary": "Channel participants and personal membership state."
     },
     {
-      "description": "A Message contains Markdown and optional attachments, a poll or a reply. Read history, synchronize edits and deletions, or fetch a window around a message. Existing permissions govern sending, editing, pinning and deletion.\n\nAdd or remove an emoji reaction, list who reacted, and vote once on a message poll. Messages include aggregate reaction and vote counts and whether you reacted or voted, without exposing other voters.\n",
+      "description": "A Message is one post in a channel. It holds Markdown content and can carry attachments, a poll, or a reply to another message.\n\nUse the Messages API to [send](/api-reference/messages/send-message), [edit](/api-reference/messages/update-message), [delete](/api-reference/messages/delete-message) and [pin](/api-reference/messages/pin-message) messages. [List a channel's messages](/api-reference/messages/list-messages) to read its history and to sync edits and deletions. You can also [react](/api-reference/messages/react-to-message) with an emoji, [list who reacted](/api-reference/messages/list-message-reactions), and [vote](/api-reference/messages/vote-on-message) once on a poll. Each message shows its reaction and vote counts and whether you reacted or voted, but not who else voted.\n",
       "name": "Messages",
       "x-whop-summary": "Chat messages, attachments, reactions and polls."
     },
@@ -184782,22 +184784,22 @@
       "x-whop-summary": "The user's notification feed: unread badges, mark-read, app sends, and the topic catalog."
     },
     {
-      "description": "An Email address is a mailbox on one of the account's domains, such as support@example.com. The domain needs the `email` capability in the `ready` state first. A mailbox either belongs to one team member, who alone can read it and send from it, or is shared by the account, where `email:read` and `email:send` decide who can use it.\n\nUse the Email addresses API to create, list, reassign and delete mailboxes, read the password mail apps sign in with, and download a configuration profile that adds the mailbox to Mail on Apple devices. Deleting an address keeps its mail, and creating it again in the same account brings the mailbox back.\n",
+      "description": "An Email address is a mailbox on one of the account's domains, such as support@example.com. The domain needs the `email` capability in the `ready` state first. A mailbox can belong to one team member, who alone can read it and send from it. Or the account can share it, and then `email:read` and `email:send` decide who can use it.\n\nUse the Email addresses API to create, list, reassign and delete mailboxes. You can read the password that mail apps sign in with. You can also download a configuration profile that adds the mailbox to Mail on Apple devices. Deleting an address keeps its mail, and creating it again in the same account brings the mailbox back.\n",
       "name": "Email addresses",
       "x-whop-summary": "Mailboxes on an account's domains, for sending and receiving email."
     },
     {
-      "description": "An Automation is a chain of steps that members move through one at a time. A member enrolls when the automation's `trigger_event` happens to them, such as `payment.succeeded`, or when you enroll them with `POST /automations/{id}/trigger`. A `wait` step holds them for a set time, and an `email` or `message` step runs its `source_code`, a TSX module that reads the member's data through the API and decides whether to send and what to say.\n\nSteps are versioned. You edit the draft version, and `POST /automations/{id}/publish` makes it the version new members start on, then copies it into the next draft. Each publish moves members already in the automation onto the new version. Use the Automations API to create, publish and trigger automations, and to update them, including their status, and the Automation steps and Automation enrollments APIs for their steps and members.\n",
+      "description": "An Automation is a chain of steps that members move through one at a time. A member enrolls when the automation's `trigger_event` happens to them, such as `payment.succeeded`. You can also enroll a member with `POST /automations/{id}/trigger`. A `wait` step holds them for a set time. An `email` or `message` step runs its `source_code`, a TSX module that reads the member's data through the API. The module decides whether to send and what to say.\n\nSteps are versioned. You edit the draft version. `POST /automations/{id}/publish` makes it the version new members start on, then copies it into the next draft. Each publish moves members already in the automation onto the new version. Use the Automations API to create, publish and trigger automations, and to update them, including their status. Use the Automation steps and Automation enrollments APIs for their steps and members.\n",
       "name": "Automations",
       "x-whop-summary": "Workflows that a webhook event or a trigger request starts for each member, running timed steps that message them."
     },
     {
-      "description": "An Automation step is one step in a version of an automation. A `wait` step holds a member for `config.delay_seconds`, and an `email` or `message` step runs its `source_code` to decide whether to send and what to say. Steps form a chain: each one names the step before it, and only the draft version can change.\n\nUse the Automation steps API to list a version's steps, add, update and remove steps in the draft, and preview what an `email` or `message` step would send a member. Nothing is sent by a preview.\n\nA step's code reads the account through the API with every account-level `:read` permission that both the admin role and Whop AI hold, except `payout:account:read`, so it can't read cards. Setting a step's `source_code`, or previewing a step, needs every one of those permissions, so a credential can't write code that reads more than it can.\n",
+      "description": "An Automation step is one step in a version of an automation. A `wait` step holds a member for `config.delay_seconds`. An `email` or `message` step runs its `source_code` to decide whether to send and what to say. Steps form a chain, and each step names the step before it. Only the draft version can change.\n\nUse the Automation steps API to list a version's steps, and to add, update and remove steps in the draft. You can also preview what an `email` or `message` step would send a member. A preview sends nothing.\n\nA step's code reads the account through the API. It holds every account-level `:read` permission that both the admin role and Whop AI hold, except `payout:account:read`. So it can't read cards. Setting a step's `source_code`, or previewing a step, needs every one of those permissions. So a credential can't write code that reads more than it can.\n",
       "name": "Automation Steps",
       "x-whop-summary": "The wait, email and message steps of an automation's versions."
     },
     {
-      "description": "An Automation enrollment is one member's pass through an automation. It records the version the member is on, the step they reach next and when, and whether they are still going, finished, or canceled.\n\nUse the Automation enrollments API to list who is in an automation, or which automations a member is in, retrieve one enrollment, and cancel one to stop that member's remaining steps.\n",
+      "description": "An Automation enrollment is one member's pass through an automation. It records the version the member is on, the step they reach next and when, and whether they are still going, finished, or canceled.\n\nUse the Automation enrollments API to list who is in an automation, or which automations a member is in. You can also retrieve one enrollment, and cancel one to stop that member's remaining steps.\n",
       "name": "Automation Enrollments",
       "x-whop-summary": "The members going through an automation, and the step each one is waiting on."
     },
