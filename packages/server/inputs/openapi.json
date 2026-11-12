@@ -5853,6 +5853,10 @@
             "description": "The account's Triple Whale integration, which pushes Whop ad spend to Triple Whale's Data-In API so it reports as a `whop` channel, and tags ad click-through URLs with `tw_source`/`tw_adid` so Triple Whale's pixel attributes conversions back to the right ad. `status` is `connected`, `not_connected`, or `requires_shop_domain` (Triple Whale keys records by shop, so spend only flows once `shop_domain` is set). `masked_api_key` shows the leading characters of the stored key; the full key is never returned. `shop_domain` is the shop spend is reported for.",
             "type": "object"
           },
+          "cancellation_emails": {
+            "description": "Whether Whop emails members when their membership is canceled or terminated. `true` by default. Set it to `false` to stop these emails while keeping the account's other customer emails. They also stop while the account's `send_customer_emails` is `false`.",
+            "type": "boolean"
+          },
           "cards_auto_top_up": {
             "description": "Whether incoming funds are automatically moved to the account's cards balance. `false` when the account has no cards balance.",
             "type": "boolean"
@@ -5930,6 +5934,10 @@
               }
             ]
           },
+          "failed_payment_emails": {
+            "description": "Whether Whop emails members when a renewal payment fails or needs them to verify it. `true` by default. Set it to `false` to stop these emails while keeping the account's other customer emails. Subscriptions billed by invoice still get the invoice and its past-due reminders, since that is how the member pays. These emails also stop while the account's `send_customer_emails` is `false`.",
+            "type": "boolean"
+          },
           "feedback_options": {
             "items": {
               "$ref": "#/components/schemas/FeedbackOption",
@@ -5959,6 +5967,10 @@
               "string",
               "null"
             ]
+          },
+          "renewal_reminder_emails": {
+            "description": "Whether Whop emails members the day before their membership renews or their free trial converts. `true` by default. Set it to `false` to stop that reminder. Members still get the reminders card networks require. They go out 7 days before a trial over 7 days converts, and 30 days before a 6-month or longer plan renews. All stop while `send_customer_emails` is `false`.",
+            "type": "boolean"
           },
           "review_request_emails": {
             "description": "Whether Whop emails customers after a purchase asking them to leave a review. `true` by default. Set it to `false` to stop these emails, including ones already scheduled. They also stop while the account's `send_customer_emails` is `false`.",
@@ -6009,6 +6021,9 @@
           "preferred_settlement_currency",
           "preferred_settlement_currency_changeable_at",
           "review_request_emails",
+          "cancellation_emails",
+          "renewal_reminder_emails",
+          "failed_payment_emails",
           "subaccount_notifications",
           "subaccount_team_view_only",
           "subscription_failure_behavior",
@@ -60934,6 +60949,11 @@
                       ],
                       "type": "object"
                     },
+                    "cancellation_emails": {
+                      "description": "Whether Whop emails members when their membership is canceled or terminated. `true` by default. Set it to `false` to stop these emails while keeping the account's other customer emails. They also stop while the account's `send_customer_emails` is `false`.",
+                      "example": true,
+                      "type": "boolean"
+                    },
                     "cards_auto_top_up": {
                       "description": "Whether incoming funds are automatically moved to the account's cards balance. `false` when the account has no cards balance.",
                       "example": false,
@@ -61084,6 +61104,11 @@
                         "null"
                       ]
                     },
+                    "failed_payment_emails": {
+                      "description": "Whether Whop emails members when a renewal payment fails or needs them to verify it. `true` by default. Set it to `false` to stop these emails while keeping the account's other customer emails. Subscriptions billed by invoice still get the invoice and its past-due reminders, since that is how the member pays. These emails also stop while the account's `send_customer_emails` is `false`.",
+                      "example": true,
+                      "type": "boolean"
+                    },
                     "feedback_options": {
                       "description": "The account's own cancel reasons, in the order members see them when they cancel. Each is filed under a standard category, saved as the membership's `cancel_option`, so reports keep grouping cancellations. Empty when the account uses Whop's default reasons.",
                       "items": {
@@ -61146,6 +61171,11 @@
                         "null"
                       ]
                     },
+                    "renewal_reminder_emails": {
+                      "description": "Whether Whop emails members the day before their membership renews or their free trial converts. `true` by default. Set it to `false` to stop that reminder. Members still get the reminders card networks require. They go out 7 days before a trial over 7 days converts, and 30 days before a 6-month or longer plan renews. All stop while `send_customer_emails` is `false`.",
+                      "example": true,
+                      "type": "boolean"
+                    },
                     "review_request_emails": {
                       "description": "Whether Whop emails customers after a purchase asking them to leave a review. `true` by default. Set it to `false` to stop these emails, including ones already scheduled. They also stop while the account's `send_customer_emails` is `false`.",
                       "example": true,
@@ -61198,6 +61228,9 @@
                     "preferred_settlement_currency",
                     "preferred_settlement_currency_changeable_at",
                     "review_request_emails",
+                    "cancellation_emails",
+                    "renewal_reminder_emails",
+                    "failed_payment_emails",
                     "subaccount_notifications",
                     "subaccount_team_view_only",
                     "subscription_failure_behavior",
@@ -61257,7 +61290,7 @@
         }
       ],
       "patch": {
-        "description": "Updates the account's preferences. Each top-level key in the body replaces its stored value as a whole. Keys left out keep their current values.\n\nThe required scope depends on which preferences you update.\n\n- `ad_campaign:create`: `ads_payment_methods`, `ads_reporting_currency`, `ads_scheduling_timezone`, `ads_triple_whale_integration`.\n- `payout:account:update`: `cards_auto_top_up`, `cards_notifications`, `covers_subaccount_negative_balances`.\n- `payment:dispute`: `dispute_fighter_enabled`.\n- `company:update`: `economic_intelligence_duration_key`, `economic_intelligence_auto_renew`, `review_request_emails`, `subaccount_notifications`, `subaccount_team_view_only`.\n- `company:manage_checkout`: `feedback_options`, `customer_tracking`.\n\nTo update keys under more than one scope, the API key needs all of those scopes.\n",
+        "description": "Updates the account's preferences. Each top-level key in the body replaces its stored value as a whole. Keys left out keep their current values.\n\nThe required scope depends on which preferences you update.\n\n- `ad_campaign:create`: `ads_payment_methods`, `ads_reporting_currency`, `ads_scheduling_timezone`, `ads_triple_whale_integration`.\n- `payout:account:update`: `cards_auto_top_up`, `cards_notifications`, `covers_subaccount_negative_balances`.\n- `payment:dispute`: `dispute_fighter_enabled`.\n- `company:update`: `economic_intelligence_duration_key`, `economic_intelligence_auto_renew`, `review_request_emails`, `cancellation_emails`, `renewal_reminder_emails`, `failed_payment_emails`, `subaccount_notifications`, `subaccount_team_view_only`.\n- `company:manage_checkout`: `feedback_options`, `customer_tracking`.\n\nTo update keys under more than one scope, the API key needs all of those scopes.\n",
         "operationId": "updateAccountPreferences",
         "parameters": [
           {
@@ -61352,6 +61385,11 @@
                     },
                     "type": "object"
                   },
+                  "cancellation_emails": {
+                    "description": "Whether Whop emails members when their membership is canceled or terminated. Set it to `false` to stop these emails while keeping the account's other customer emails. Requires the `company:update` scope on your API key.",
+                    "example": true,
+                    "type": "boolean"
+                  },
                   "cards_auto_top_up": {
                     "description": "Whether incoming funds are automatically moved to the account's cards balance. Requires a cards balance on the account and the `payout:account:update` scope on your API key.",
                     "example": true,
@@ -61444,6 +61482,11 @@
                     "example": "3_days",
                     "type": "string"
                   },
+                  "failed_payment_emails": {
+                    "description": "Whether Whop emails members when a renewal payment fails or needs them to verify it. Set it to `false` to stop these emails while keeping the account's other customer emails. Subscriptions billed by invoice still get their invoice emails. Requires the `company:update` scope on your API key.",
+                    "example": false,
+                    "type": "boolean"
+                  },
                   "feedback_options": {
                     "description": "Replaces the account's own cancel reasons, shown to members in this order when they cancel. Pass an option's `id` to keep it, for example when renaming it; options without an `id` are added, and options left out are removed. Pass an empty array to go back to Whop's default reasons. Members who already picked an option keep the label they saw. Requires the `company:manage_checkout` scope on your API key.",
                     "items": {
@@ -61498,6 +61541,11 @@
                       "string",
                       "null"
                     ]
+                  },
+                  "renewal_reminder_emails": {
+                    "description": "Whether Whop emails members the day before their membership renews or their free trial converts. Set it to `false` to stop that reminder. Members still get the reminders card networks require. Requires the `company:update` scope on your API key.",
+                    "example": false,
+                    "type": "boolean"
                   },
                   "review_request_emails": {
                     "description": "Whether Whop emails customers after a purchase asking them to leave a review. Set it to `false` to stop these emails, including ones already scheduled. Requires the `company:update` scope on your API key.",
@@ -61790,6 +61838,11 @@
                       ],
                       "type": "object"
                     },
+                    "cancellation_emails": {
+                      "description": "Whether Whop emails members when their membership is canceled or terminated. `true` by default. Set it to `false` to stop these emails while keeping the account's other customer emails. They also stop while the account's `send_customer_emails` is `false`.",
+                      "example": true,
+                      "type": "boolean"
+                    },
                     "cards_auto_top_up": {
                       "description": "Whether incoming funds are automatically moved to the account's cards balance. `false` when the account has no cards balance.",
                       "example": false,
@@ -61938,6 +61991,11 @@
                         "null"
                       ]
                     },
+                    "failed_payment_emails": {
+                      "description": "Whether Whop emails members when a renewal payment fails or needs them to verify it. `true` by default. Set it to `false` to stop these emails while keeping the account's other customer emails. Subscriptions billed by invoice still get the invoice and its past-due reminders, since that is how the member pays. These emails also stop while the account's `send_customer_emails` is `false`.",
+                      "example": true,
+                      "type": "boolean"
+                    },
                     "feedback_options": {
                       "description": "The account's own cancel reasons, in the order members see them when they cancel. Each is filed under a standard category, saved as the membership's `cancel_option`, so reports keep grouping cancellations. Empty when the account uses Whop's default reasons.",
                       "items": {
@@ -62000,6 +62058,11 @@
                         "null"
                       ]
                     },
+                    "renewal_reminder_emails": {
+                      "description": "Whether Whop emails members the day before their membership renews or their free trial converts. `true` by default. Set it to `false` to stop that reminder. Members still get the reminders card networks require. They go out 7 days before a trial over 7 days converts, and 30 days before a 6-month or longer plan renews. All stop while `send_customer_emails` is `false`.",
+                      "example": true,
+                      "type": "boolean"
+                    },
                     "review_request_emails": {
                       "description": "Whether Whop emails customers after a purchase asking them to leave a review. `true` by default. Set it to `false` to stop these emails, including ones already scheduled. They also stop while the account's `send_customer_emails` is `false`.",
                       "example": true,
@@ -62052,6 +62115,9 @@
                     "preferred_settlement_currency",
                     "preferred_settlement_currency_changeable_at",
                     "review_request_emails",
+                    "cancellation_emails",
+                    "renewal_reminder_emails",
+                    "failed_payment_emails",
                     "subaccount_notifications",
                     "subaccount_team_view_only",
                     "subscription_failure_behavior",
