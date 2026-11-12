@@ -69887,7 +69887,7 @@
                             "description": "The type of override (standard or rev_share)."
                           },
                           "plan_id": {
-                            "description": "The plan ID (for standard overrides).",
+                            "description": "The plan ID (for standard overrides). Null for a product-wide override, which sets the terms for plans added to the product later.",
                             "example": "plan_xxxxxxxxxxxxx",
                             "type": [
                               "string",
@@ -69902,7 +69902,7 @@
                             ]
                           },
                           "product_id": {
-                            "description": "The product ID (for rev-share overrides).",
+                            "description": "The product ID (for rev-share overrides, and for product-wide overrides that set the terms for plans added to the product later).",
                             "type": [
                               "string",
                               "null"
@@ -70509,7 +70509,7 @@
                       "description": "The type of override (standard or rev_share)."
                     },
                     "plan_id": {
-                      "description": "The plan ID (for standard overrides).",
+                      "description": "The plan ID (for standard overrides). Null for a product-wide override, which sets the terms for plans added to the product later.",
                       "example": "plan_xxxxxxxxxxxxx",
                       "type": [
                         "string",
@@ -70524,7 +70524,7 @@
                       ]
                     },
                     "product_id": {
-                      "description": "The product ID (for rev-share overrides).",
+                      "description": "The product ID (for rev-share overrides, and for product-wide overrides that set the terms for plans added to the product later).",
                       "type": [
                         "string",
                         "null"
@@ -71404,7 +71404,7 @@
                       "description": "The type of override (standard or rev_share)."
                     },
                     "plan_id": {
-                      "description": "The plan ID (for standard overrides).",
+                      "description": "The plan ID (for standard overrides). Null for a product-wide override, which sets the terms for plans added to the product later.",
                       "example": "plan_xxxxxxxxxxxxx",
                       "type": [
                         "string",
@@ -71419,7 +71419,7 @@
                       ]
                     },
                     "product_id": {
-                      "description": "The product ID (for rev-share overrides).",
+                      "description": "The product ID (for rev-share overrides, and for product-wide overrides that set the terms for plans added to the product later).",
                       "type": [
                         "string",
                         "null"
@@ -71956,7 +71956,7 @@
                       "description": "The type of override (standard or rev_share)."
                     },
                     "plan_id": {
-                      "description": "The plan ID (for standard overrides).",
+                      "description": "The plan ID (for standard overrides). Null for a product-wide override, which sets the terms for plans added to the product later.",
                       "example": "plan_xxxxxxxxxxxxx",
                       "type": [
                         "string",
@@ -71971,7 +71971,7 @@
                       ]
                     },
                     "product_id": {
-                      "description": "The product ID (for rev-share overrides).",
+                      "description": "The product ID (for rev-share overrides, and for product-wide overrides that set the terms for plans added to the product later).",
                       "type": [
                         "string",
                         "null"
