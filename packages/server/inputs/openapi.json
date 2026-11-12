@@ -5434,11 +5434,11 @@
           },
           "monthly_qualifying_spend": {
             "$ref": "#/components/schemas/Money",
-            "description": "Qualifying spend this calendar month across every account the owner owns, plus the owner's partner points, in USD: `points` divided by 10."
+            "description": "Qualifying spend this calendar month across every account the owner owns, plus the owner's personal trading and partner points, in USD: `points` divided by 10."
           },
           "monthly_trading_volume": {
             "$ref": "#/components/schemas/Money",
-            "description": "Perpetual trading volume filled through Whop this calendar month across every account the owner owns, in USD. An account whose month nets to zero or below is left out."
+            "description": "Perpetual trading volume filled through Whop this calendar month across every account the owner owns and their personal wallet, in USD. An account whose month nets to zero or below is left out."
           },
           "points": {
             "description": "Points earned this month across every account the owner owns, plus the owner's partner points, rounded down. An account whose month nets below zero counts as zero.",
@@ -33881,11 +33881,11 @@
           },
           "monthly_qualifying_spend": {
             "$ref": "#/components/schemas/Money",
-            "description": "Qualifying spend this calendar month across every account the owner owns, plus the owner's partner points, in USD: `points` divided by 10."
+            "description": "Qualifying spend this calendar month across every account the owner owns, plus the owner's personal trading and partner points, in USD: `points` divided by 10."
           },
           "monthly_trading_volume": {
             "$ref": "#/components/schemas/Money",
-            "description": "Perpetual trading volume filled through Whop this calendar month across every account the owner owns, in USD. An account whose month nets to zero or below is left out."
+            "description": "Perpetual trading volume filled through Whop this calendar month across every account the owner owns and their personal wallet, in USD. An account whose month nets to zero or below is left out."
           },
           "points": {
             "description": "Points earned this month across every account the owner owns, plus the owner's partner points, rounded down. An account whose month nets below zero counts as zero.",
