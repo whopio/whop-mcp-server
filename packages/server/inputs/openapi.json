@@ -14065,6 +14065,51 @@
         ],
         "type": "string"
       },
+      "Candle": {
+        "properties": {
+          "close": {
+            "$ref": "#/components/schemas/Money",
+            "description": "The last price in the candle, in USD."
+          },
+          "high": {
+            "$ref": "#/components/schemas/Money",
+            "description": "The highest price in the candle, in USD."
+          },
+          "low": {
+            "$ref": "#/components/schemas/Money",
+            "description": "The lowest price in the candle, in USD."
+          },
+          "open": {
+            "$ref": "#/components/schemas/Money",
+            "description": "The first price in the candle, in USD."
+          },
+          "started_at": {
+            "description": "When the candle starts, as an ISO 8601 timestamp. The candle covers one `interval` from this time.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
+          "volume": {
+            "description": "The traded volume in the candle, in USD. `null` when no volume is reported.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "started_at",
+          "open",
+          "high",
+          "low",
+          "close",
+          "volume"
+        ],
+        "type": "object"
+      },
       "CaptureSpec": {
         "properties": {
           "filename_pattern": {
@@ -172015,6 +172060,252 @@
           "oauth_token"
         ]
       },
+      "x-whop-surface": "native"
+    },
+    "/trades/candles": {
+      "get": {
+        "description": "Returns price candles for a tokenized stock, oldest first.\n\n- **Intervals:** `1h`, `2h`, `4h`, `6h` and `12h` candles cover the last 30 days. `1d` and `1w` candles cover the full history.\n- **Weeks** start on Monday at 00:00 UTC.\n\nThis endpoint is public: no API key is needed, and each IP address can make up to 60 requests a minute.",
+        "operationId": "listCandles",
+        "parameters": [
+          {
+            "description": "The tokenized stock's ticker, such as `NVDA`. This is the `id` of a spot market from List Markets.",
+            "in": "query",
+            "name": "market",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "How much time each candle covers.",
+            "in": "query",
+            "name": "interval",
+            "required": true,
+            "schema": {
+              "enum": [
+                "1h",
+                "2h",
+                "4h",
+                "6h",
+                "12h",
+                "1d",
+                "1w"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Return candles that start at or after this time, as an ISO 8601 timestamp.",
+            "in": "query",
+            "name": "from",
+            "required": true,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Return candles that start before this time, as an ISO 8601 timestamp. Defaults to now.",
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "format": "date-time",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the start of the range.",
+            "in": "query",
+            "name": "first",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results after this cursor. Use `page_info.end_cursor` from the previous response to fetch the next page.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the end of the range.",
+            "in": "query",
+            "name": "last",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results before this cursor. Use `page_info.start_cursor` from the previous response to fetch the previous page.",
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "candles": {
+                    "value": {
+                      "data": [
+                        {
+                          "close": {
+                            "amount": "161.00000000",
+                            "currency": "usd",
+                            "decimals": 8,
+                            "display_decimals": 8
+                          },
+                          "high": {
+                            "amount": "161.40000000",
+                            "currency": "usd",
+                            "decimals": 8,
+                            "display_decimals": 8
+                          },
+                          "low": {
+                            "amount": "159.60000000",
+                            "currency": "usd",
+                            "decimals": 8,
+                            "display_decimals": 8
+                          },
+                          "open": {
+                            "amount": "160.00000000",
+                            "currency": "usd",
+                            "decimals": 8,
+                            "display_decimals": 8
+                          },
+                          "started_at": "2026-11-12T00:00:00.000Z",
+                          "volume": {
+                            "amount": "900.00",
+                            "currency": "usd",
+                            "decimals": 2,
+                            "display_decimals": 2
+                          }
+                        },
+                        {
+                          "close": {
+                            "amount": "161.80000000",
+                            "currency": "usd",
+                            "decimals": 8,
+                            "display_decimals": 8
+                          },
+                          "high": {
+                            "amount": "162.50000000",
+                            "currency": "usd",
+                            "decimals": 8,
+                            "display_decimals": 8
+                          },
+                          "low": {
+                            "amount": "160.20000000",
+                            "currency": "usd",
+                            "decimals": 8,
+                            "display_decimals": 8
+                          },
+                          "open": {
+                            "amount": "161.00000000",
+                            "currency": "usd",
+                            "decimals": 8,
+                            "display_decimals": 8
+                          },
+                          "started_at": "2026-11-12T01:00:00.000Z",
+                          "volume": {
+                            "amount": "1200.00",
+                            "currency": "usd",
+                            "decimals": 2,
+                            "display_decimals": 2
+                          }
+                        }
+                      ],
+                      "page_info": {
+                        "end_cursor": "Mg",
+                        "has_next_page": false,
+                        "has_previous_page": false,
+                        "start_cursor": "MQ"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/Candle"
+                      },
+                      "type": "array"
+                    },
+                    "page_info": {
+                      "properties": {
+                        "end_cursor": {
+                          "example": null,
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "has_next_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "has_previous_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "start_cursor": {
+                          "example": "MQ",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "start_cursor",
+                        "end_cursor",
+                        "has_next_page",
+                        "has_previous_page"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "page_info"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "candles listed"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "interval is invalid"
+          }
+        },
+        "security": [],
+        "summary": "List Candles",
+        "tags": [
+          "Trades"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        }
+      ],
       "x-whop-surface": "native"
     },
     "/trades/markets": {

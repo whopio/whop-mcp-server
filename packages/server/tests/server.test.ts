@@ -989,6 +989,43 @@ describe("chatgpt surface", () => {
 		}
 	});
 
+	it("says what it leaves out, on this route only", async () => {
+		const open = async (surface: SurfaceName) => {
+			const client = await connect({
+				surface,
+				fetch: fakeFetch().fetch,
+				principal: principalFixture({ principalType: "user", accountId: null }),
+			});
+			const { tools } = await client.listTools();
+			return {
+				instructions: client.getInstructions(),
+				names: tools.map((tool) => tool.name),
+			};
+		};
+		const chatgpt = await open("chatgpt");
+		expect(chatgpt.instructions).toContain(
+			"This connection cannot issue refunds, charge saved cards, create invoices or send payouts: say so, offer no workaround. Tell the user they can do it in their Whop dashboard.",
+		);
+		// Both rules have to land in the first 512 characters.
+		const head = chatgpt.instructions?.slice(0, 512);
+		expect(head).toContain("get their explicit yes");
+		expect(head).toContain("say so, offer no workaround.");
+		// The sentence is only true while these stay off the route. The payment
+		// and invoice names are exact, so a read such as invoices_sends, which
+		// lists the emails sent for an invoice, is not caught.
+		const leftOut =
+			/^(payments_(refund|create|retry|capture)$|invoices_(create|charge|issue|send)$|payouts_|transfers_)/;
+		expect(chatgpt.names.filter((name) => leftOut.test(name))).toEqual([]);
+
+		for (const surface of ["full", "claude_directory"] as const) {
+			const older = await open(surface);
+			expect(older.instructions).not.toContain("offer no workaround");
+		}
+		expect(
+			(await open("full")).names.filter((name) => leftOut.test(name)).length,
+		).toBeGreaterThan(0);
+	});
+
 	it("keeps only the chosen financial and credential operations", () => {
 		const flagged = registry.operations
 			.filter(

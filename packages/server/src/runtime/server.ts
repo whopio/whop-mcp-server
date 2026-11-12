@@ -685,6 +685,13 @@ function connectionStatus(
 const CHATGPT_CONFIRMATION_INSTRUCTION =
 	"Consequential tools (anything that costs money, goes live, affects other people, or can't be undone) act on the first call, so never call one just to see a preview. Tell the user what will happen, get their explicit yes, then call it.";
 
+// This route leaves these out on purpose (see policy/surfaces.ts). Without this
+// line the model offers a substitute, such as an invoice in place of a charge.
+// The first sentence is kept short so it still ends inside the first 512
+// characters.
+const CHATGPT_UNAVAILABLE_INSTRUCTION =
+	"This connection cannot issue refunds, charge saved cards, create invoices or send payouts: say so, offer no workaround. Tell the user they can do it in their Whop dashboard.";
+
 function buildInstructions(
 	principal: PrincipalContext,
 	surface: SurfaceName | undefined,
@@ -703,7 +710,9 @@ function buildInstructions(
 				? `account ${principal.accountId}`
 				: "the user, across every business they can act on"
 		} with the "${principal.permissionProfile}" permission profile (${toolCount}).`,
-		...(surface === "chatgpt" ? [CHATGPT_CONFIRMATION_INSTRUCTION] : []),
+		...(surface === "chatgpt"
+			? [CHATGPT_CONFIRMATION_INSTRUCTION, CHATGPT_UNAVAILABLE_INSTRUCTION]
+			: []),
 		principal.accountId
 			? "Account binding is enforced server-side: input referencing a different account is rejected. Switching accounts requires the user to reconnect."
 			: "Pick the context per call from what the user asks for: pass account_id/company_id when they mean a specific business (find it with accounts_list if they name it), and pass no account or user filter for questions about the user themselves, like the memberships they own across all of Whop.",
