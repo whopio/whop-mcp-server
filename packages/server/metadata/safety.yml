@@ -582,11 +582,20 @@ rules:
       confirmation: true
       idempotency: supported
 
+  # An update can pause or stop an automation, and stopping ends every member's enrollment.
+  - name: automation-updates
+    match:
+      operations:
+        - PATCH /automations/{id}
+    set:
+      classification: mutating
+      confirmation: true
+      idempotency: supported
+
   - name: automation-edits
     match:
       operations:
         - POST /automations
-        - PATCH /automations/{id}
         - POST /automation_steps
         - PATCH /automation_steps/{id}
         # Runs the step's code in the sandbox; nothing is sent.
