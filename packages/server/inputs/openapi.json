@@ -732,7 +732,7 @@
             ]
           },
           "trading": {
-            "description": "The trading account address and its WebSocket subscriptions. Opt in with `include_trading=true` on single-account reads. `null` otherwise, without trading permission, or without an Ethereum wallet.",
+            "description": "The trading account address, a snapshot of its margin and open positions, and its WebSocket subscriptions. Opt in with `include_trading=true` on single-account reads. `null` otherwise, without trading permission, or without an Ethereum wallet.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/TradingAccount"
@@ -53175,6 +53175,27 @@
               "null"
             ]
           },
+          "margin_summary": {
+            "description": "Account value and margin across the main exchange and the `xyz` markets, read from Hyperliquid at most once a second. `null` when Hyperliquid could not be read. Use `websocket_subscriptions` for live updates.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TradingMarginSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "positions": {
+            "items": {
+              "$ref": "#/components/schemas/TradingPosition",
+              "description": "Open perpetual positions across the main exchange and the `xyz` markets, read from Hyperliquid at most once a second. `null` when Hyperliquid could not be read. Use `websocket_subscriptions` for live updates."
+            },
+            "type": [
+              "array",
+              "null"
+            ]
+          },
           "websocket_subscriptions": {
             "items": {
               "$ref": "#/components/schemas/TradingWebsocketSubscription",
@@ -53191,7 +53212,9 @@
           "address",
           "websocket_url",
           "websocket_subscriptions",
-          "depositable"
+          "depositable",
+          "margin_summary",
+          "positions"
         ],
         "type": "object"
       },
@@ -53275,10 +53298,6 @@
             "$ref": "#/components/schemas/Money",
             "description": "Combined notional value of open positions, in USD."
           },
-          "total_raw_usd": {
-            "$ref": "#/components/schemas/Money",
-            "description": "Raw USD balance as Hyperliquid reports it, excluding position value."
-          },
           "withdrawable": {
             "$ref": "#/components/schemas/Money",
             "description": "USD that can be withdrawn now without closing positions."
@@ -53287,7 +53306,6 @@
         "required": [
           "account_value",
           "total_position_notional",
-          "total_raw_usd",
           "total_margin_used",
           "withdrawable"
         ],
@@ -53503,7 +53521,7 @@
       "TradingPositionLeverage": {
         "properties": {
           "type": {
-            "description": "`cross` shares margin across positions; `isolated` limits margin to this position.",
+            "description": "`cross` shares margin across positions. `isolated` limits margin to this position.",
             "enum": [
               "cross",
               "isolated"
@@ -53780,7 +53798,7 @@
             ]
           },
           "trading": {
-            "description": "The trading account address and its WebSocket subscriptions. Opt in with `include_trading=true` when retrieving `me`. `null` otherwise, without trading permission, or without an Ethereum wallet.",
+            "description": "The trading account address, a snapshot of its margin and open positions, and its WebSocket subscriptions. Opt in with `include_trading=true` when retrieving `me`. `null` otherwise, without trading permission, or without an Ethereum wallet.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/TradingAccount"
@@ -58215,7 +58233,7 @@
         "operationId": "retrieveRequestingAccount",
         "parameters": [
           {
-            "description": "Also return the trading account under `trading`: its address and its Hyperliquid WebSocket subscriptions. Requires crypto_wallet:trade:read, crypto_wallet:trade, or crypto_wallet:manage permission and an Ethereum wallet; null otherwise.",
+            "description": "Also return the trading account under `trading`: its address, a snapshot of its margin and open positions, and its Hyperliquid WebSocket subscriptions. Requires crypto_wallet:trade:read, crypto_wallet:trade, or crypto_wallet:manage permission and an Ethereum wallet. Otherwise `trading` is `null`.",
             "in": "query",
             "name": "include_trading",
             "required": false,
@@ -62101,7 +62119,7 @@
         "operationId": "retrieveAccount",
         "parameters": [
           {
-            "description": "Also return the trading account under `trading`: its address and its Hyperliquid WebSocket subscriptions. Requires crypto_wallet:trade:read, crypto_wallet:trade, or crypto_wallet:manage permission and an Ethereum wallet; null otherwise.",
+            "description": "Also return the trading account under `trading`: its address, a snapshot of its margin and open positions, and its Hyperliquid WebSocket subscriptions. Requires crypto_wallet:trade:read, crypto_wallet:trade, or crypto_wallet:manage permission and an Ethereum wallet. Otherwise `trading` is `null`.",
             "in": "query",
             "name": "include_trading",
             "required": false,
@@ -174160,7 +174178,7 @@
         "operationId": "retrieveCurrentUser",
         "parameters": [
           {
-            "description": "Also return the trading account under `trading`: its address and its Hyperliquid WebSocket subscriptions. Only honored on the self view (me) with crypto_wallet:trade:read, crypto_wallet:trade, or crypto_wallet:manage permission and an Ethereum wallet.",
+            "description": "Also return the trading account under `trading`: its address, a snapshot of its margin and open positions, and its Hyperliquid WebSocket subscriptions. Only honored on the self view (me) with crypto_wallet:trade:read, crypto_wallet:trade, or crypto_wallet:manage permission and an Ethereum wallet.",
             "in": "query",
             "name": "include_trading",
             "required": false,
@@ -175694,7 +175712,7 @@
         "operationId": "retrieveUser",
         "parameters": [
           {
-            "description": "Also return the trading account under `trading`: its address and its Hyperliquid WebSocket subscriptions. Only honored on the self view (me) with crypto_wallet:trade:read, crypto_wallet:trade, or crypto_wallet:manage permission and an Ethereum wallet.",
+            "description": "Also return the trading account under `trading`: its address, a snapshot of its margin and open positions, and its Hyperliquid WebSocket subscriptions. Only honored on the self view (me) with crypto_wallet:trade:read, crypto_wallet:trade, or crypto_wallet:manage permission and an Ethereum wallet.",
             "in": "query",
             "name": "include_trading",
             "required": false,
