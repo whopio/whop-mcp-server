@@ -10379,6 +10379,11 @@
             "example": "b2c_app",
             "type": "string"
           },
+          "average_review_rating": {
+            "description": "Average star rating across published reviews for this app, from `1.0` to `5.0`. Returns `0.0` when no published-review rating is available.",
+            "example": 0.0,
+            "type": "number"
+          },
           "banner_image": {
             "description": "Banner image from the app's product listing, or `null` when none is uploaded.",
             "oneOf": [
@@ -10568,6 +10573,16 @@
               "null"
             ]
           },
+          "is_app_store_listed": {
+            "description": "Whether the app is published, approved, and visible in the public app store.",
+            "example": false,
+            "type": "boolean"
+          },
+          "is_whop_app": {
+            "description": "Whether Whop publishes this app.",
+            "example": false,
+            "type": "boolean"
+          },
           "marketplace_status": {
             "description": "Approval status of the app's product listing on the Whop app store, or `null` when the app has no associated product.",
             "enum": [
@@ -10677,6 +10692,11 @@
               }
             ]
           },
+          "published_reviews_count": {
+            "description": "Published customer reviews for this app.",
+            "example": 0,
+            "type": "integer"
+          },
           "redirect_uris": {
             "items": {
               "description": "Whitelisted OAuth callback URLs users are redirected to after authorizing the app.",
@@ -10781,6 +10801,9 @@
           "businesses_with_recent_sales_count",
           "product_category",
           "category",
+          "published_reviews_count",
+          "average_review_rating",
+          "is_whop_app",
           "app_store_description",
           "requested_permissions",
           "api_key",
@@ -10793,6 +10816,7 @@
           "secrets",
           "product_id",
           "marketplace_status",
+          "is_app_store_listed",
           "oauth_client_type",
           "schedule",
           "per_install_schedule",
@@ -11369,6 +11393,11 @@
             "example": "b2c_app",
             "type": "string"
           },
+          "average_review_rating": {
+            "description": "Average star rating across published reviews for this app, from `1.0` to `5.0`. Returns `0.0` when no published-review rating is available.",
+            "example": 0.0,
+            "type": "number"
+          },
           "banner_image": {
             "description": "Banner image from the app's product listing, or `null` when none is uploaded.",
             "oneOf": [
@@ -11483,6 +11512,11 @@
             "example": "app_xxxxxxxxxxxxxx",
             "type": "string"
           },
+          "is_whop_app": {
+            "description": "Whether Whop publishes this app.",
+            "example": false,
+            "type": "boolean"
+          },
           "name": {
             "description": "Display name shown on the app store and in experience navigation.",
             "example": "Shine Time Booking",
@@ -11511,6 +11545,11 @@
               "string",
               "null"
             ]
+          },
+          "published_reviews_count": {
+            "description": "Published customer reviews for this app.",
+            "example": 0,
+            "type": "integer"
           },
           "route": {
             "deprecated": true,
@@ -11571,7 +11610,10 @@
           "businesses_created_logo_urls",
           "businesses_with_recent_sales_count",
           "product_category",
-          "category"
+          "category",
+          "published_reviews_count",
+          "average_review_rating",
+          "is_whop_app"
         ],
         "type": "object"
       },
@@ -76885,7 +76927,7 @@
     },
     "/apps": {
       "get": {
-        "description": "Lists apps on the Whop platform: the app store's live apps, or — with `account_id` and developer access to that account — every app the account owns. Requires authentication except for Whop's public app and website discovery lists. Public website discovery includes built official blueprints (verified apps with a product) and built, live community blueprints that Whop recommends.",
+        "description": "Lists published apps approved for the app store without authentication. With `account_id` and developer access, also includes unpublished apps that the account owns. Public website discovery includes built official blueprints and built, live community blueprints that Whop recommends.",
         "operationId": "listApps",
         "parameters": [
           {
@@ -77074,6 +77116,15 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "Set to `true` to return the number of matching results in `page_info.total_count`. Send `first=0` as well to return the count without any results.",
+            "in": "query",
+            "name": "include_total_count",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -77091,7 +77142,7 @@
                     "page_info": {
                       "properties": {
                         "end_cursor": {
-                          "example": "Mg",
+                          "example": "WyJjdXJzb3IiLDFd",
                           "type": [
                             "string",
                             "null"
@@ -77111,13 +77162,26 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "total_count": {
+                          "description": "Number of results matching the filters, across every page. Counting stops at 10,000. `null` when `include_total_count` isn't `true`, or when the count ran out of time.",
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "total_count_capped": {
+                          "description": "Whether counting stopped at the limit. `true` means `total_count` is 10,000 or more.",
+                          "type": "boolean"
                         }
                       },
                       "required": [
                         "end_cursor",
                         "start_cursor",
                         "has_next_page",
-                        "has_previous_page"
+                        "has_previous_page",
+                        "total_count",
+                        "total_count_capped"
                       ],
                       "type": "object"
                     }
@@ -77142,6 +77206,7 @@
           }
         },
         "security": [
+          {},
           {
             "bearerAuth": []
           }
