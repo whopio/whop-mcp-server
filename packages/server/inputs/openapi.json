@@ -26517,6 +26517,17 @@
               "null"
             ]
           },
+          "payment_method_configuration": {
+            "description": "The payment methods the customer can choose from when paying through the invoice's checkout link. It takes precedence over the invoice's variants and the account. `null` when the invoice uses its variants' payment methods.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/CheckoutSessionPaymentMethodConfiguration"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "payment_method_id": {
             "example": "payt_xxxxxxxxxxxxxx",
             "type": [
@@ -26632,6 +26643,7 @@
           "amount_due",
           "checkout_link",
           "line_items",
+          "payment_method_configuration",
           "memo",
           "metadata",
           "created_at",
@@ -128604,6 +128616,45 @@
                     },
                     "type": "object"
                   },
+                  "payment_method_configuration": {
+                    "additionalProperties": false,
+                    "description": "The payment methods the customer can choose from when paying through the invoice's checkout link, in the shape a variant or checkout configuration takes. It takes precedence over the invoice's variants and the account, and changes neither. Send both lists. `null` uses its variants' payment methods. Can be updated on drafts.",
+                    "properties": {
+                      "disabled": {
+                        "description": "Payment method types explicitly disabled for this invoice. Use the `type` values from the payment method types catalogue. Types Whop no longer offers, and the read-only `unknown` placeholder, are dropped.",
+                        "example": [
+                          "klarna"
+                        ],
+                        "items": {
+                          "$ref": "#/components/schemas/PaymentMethodTypes"
+                        },
+                        "type": "array"
+                      },
+                      "enabled": {
+                        "description": "Payment method types explicitly enabled for this invoice. Use the `type` values from the payment method types catalogue. Types Whop no longer offers, and the read-only `unknown` placeholder, are dropped.",
+                        "example": [
+                          "card"
+                        ],
+                        "items": {
+                          "$ref": "#/components/schemas/PaymentMethodTypes"
+                        },
+                        "type": "array"
+                      },
+                      "include_platform_defaults": {
+                        "description": "Whether Whop's default set is the starting point. When `false`, only `enabled` is offered. Defaults to `true`.",
+                        "example": true,
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "enabled",
+                      "disabled"
+                    ],
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                  },
                   "payment_method_id": {
                     "description": "A saved payment method belonging to the member, prefixed `payt_`. Sending or issuing the invoice charges this method at the `charge_at` passed to that call, otherwise on `due_at`, or right away when there is no `due_at` or it has passed. Sending also emails the invoice now when the charge is later; issuing does not. Setting it needs `payment:charge`.",
                     "example": "payt_xxxxxxxxxxxxxx",
@@ -129245,6 +129296,45 @@
                       "purchase_order": "PO-42"
                     },
                     "type": "object"
+                  },
+                  "payment_method_configuration": {
+                    "additionalProperties": false,
+                    "description": "The payment methods the customer can choose from when paying through the invoice's checkout link, in the shape a variant or checkout configuration takes. It takes precedence over the invoice's variants and the account, and changes neither. Send both lists. `null` uses its variants' payment methods. Can be updated on drafts.",
+                    "properties": {
+                      "disabled": {
+                        "description": "Payment method types explicitly disabled for this invoice. Use the `type` values from the payment method types catalogue. Types Whop no longer offers, and the read-only `unknown` placeholder, are dropped.",
+                        "example": [
+                          "klarna"
+                        ],
+                        "items": {
+                          "$ref": "#/components/schemas/PaymentMethodTypes"
+                        },
+                        "type": "array"
+                      },
+                      "enabled": {
+                        "description": "Payment method types explicitly enabled for this invoice. Use the `type` values from the payment method types catalogue. Types Whop no longer offers, and the read-only `unknown` placeholder, are dropped.",
+                        "example": [
+                          "card"
+                        ],
+                        "items": {
+                          "$ref": "#/components/schemas/PaymentMethodTypes"
+                        },
+                        "type": "array"
+                      },
+                      "include_platform_defaults": {
+                        "description": "Whether Whop's default set is the starting point. When `false`, only `enabled` is offered. Defaults to `true`.",
+                        "example": true,
+                        "type": "boolean"
+                      }
+                    },
+                    "required": [
+                      "enabled",
+                      "disabled"
+                    ],
+                    "type": [
+                      "object",
+                      "null"
+                    ]
                   },
                   "payment_method_id": {
                     "description": "A saved payment method belonging to the member, prefixed `payt_`. Sending or issuing the invoice charges this method at the `charge_at` passed to that call, otherwise on `due_at`, or right away when there is no `due_at` or it has passed. Sending also emails the invoice now when the charge is later; issuing does not. Setting it needs `payment:charge`.",
