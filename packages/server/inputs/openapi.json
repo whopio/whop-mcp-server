@@ -53083,6 +53083,17 @@
             "example": "hyperliquid",
             "type": "string"
           },
+          "spot": {
+            "description": "Spot holdings in the Whop wallet with their entry price and profit and loss. `null` when it could not be read.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/TradingSpotAccount"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "user_id": {
             "description": "The user who owns this trading account, prefixed `user_`. `null` when an account owns it.",
             "type": [
@@ -53097,7 +53108,8 @@
           "account_id",
           "user_id",
           "provider",
-          "hyperliquid"
+          "hyperliquid",
+          "spot"
         ],
         "type": "object"
       },
@@ -53501,6 +53513,68 @@
         "required": [
           "type",
           "value"
+        ],
+        "type": "object"
+      },
+      "TradingSpotAccount": {
+        "properties": {
+          "holdings": {
+            "items": {
+              "$ref": "#/components/schemas/TradingSpotHolding",
+              "description": "Each spot asset the wallet still holds, with its average entry price and profit and loss. Cost basis counts the oldest units as sold first and includes assets that arrived from outside Whop."
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "holdings"
+        ],
+        "type": "object"
+      },
+      "TradingSpotHolding": {
+        "properties": {
+          "average_entry_price": {
+            "description": "The average price paid per unit of what is still held, in USD, counting the oldest units as sold first. `null` when it is not known.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "cost_basis": {
+            "$ref": "#/components/schemas/Money",
+            "description": "What was paid in USD for the units still held."
+          },
+          "market": {
+            "description": "The spot market's `id` from `GET /trades/markets`, such as `BTC`, `XAUT`, or a tokenized stock's ticker such as `AAPL`.",
+            "type": "string"
+          },
+          "realized_pnl": {
+            "$ref": "#/components/schemas/Money",
+            "description": "Gains and losses already locked in by selling, in USD."
+          },
+          "unrealized_pnl": {
+            "$ref": "#/components/schemas/Money",
+            "description": "The value of the units still held minus their `cost_basis`, in USD."
+          },
+          "unrealized_pnl_percentage": {
+            "description": "`unrealized_pnl` as a percentage of `cost_basis`, where `2` means up 2%. `null` when it is not known.",
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "market",
+          "average_entry_price",
+          "cost_basis",
+          "unrealized_pnl",
+          "unrealized_pnl_percentage",
+          "realized_pnl"
         ],
         "type": "object"
       },
