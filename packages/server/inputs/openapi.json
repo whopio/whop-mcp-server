@@ -5971,6 +5971,13 @@
             "description": "Whether Whop emails customers after a purchase asking them to leave a review. `true` by default. Set it to `false` to stop these emails, including ones already scheduled. They also stop while the account's `send_customer_emails` is `false`.",
             "type": "boolean"
           },
+          "subaccount_notifications": {
+            "description": "Whether Whop emails and notifies the teams of this account's subaccounts. `true` by default. Set it to `false` to stop Whop's emails, push, and in-app notifications to them. These include payout, verification, dispute, and card alerts about their accounts. `null` when the account has no subaccounts.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
           "subscription_failure_behavior": {
             "description": "What happens to a subscription once every retry of a renewal payment has failed. `cancel` (the default) cancels it. `none` leaves it past due and keeps billing it each period; access follows the account's past-due access setting.",
             "enum": [
@@ -6002,6 +6009,7 @@
           "preferred_settlement_currency",
           "preferred_settlement_currency_changeable_at",
           "review_request_emails",
+          "subaccount_notifications",
           "subscription_failure_behavior",
           "customer_tracking"
         ],
@@ -60905,6 +60913,14 @@
                       "example": true,
                       "type": "boolean"
                     },
+                    "subaccount_notifications": {
+                      "description": "Whether Whop emails and notifies the teams of this account's subaccounts. `true` by default. Set it to `false` to stop Whop's emails, push, and in-app notifications to them. These include payout, verification, dispute, and card alerts about their accounts. `null` when the account has no subaccounts.",
+                      "example": null,
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
                     "subscription_failure_behavior": {
                       "description": "What happens to a subscription once every retry of a renewal payment has failed. `cancel` (the default) cancels it. `none` leaves it past due and keeps billing it each period; access follows the account's past-due access setting.",
                       "enum": [
@@ -60936,6 +60952,7 @@
                     "preferred_settlement_currency",
                     "preferred_settlement_currency_changeable_at",
                     "review_request_emails",
+                    "subaccount_notifications",
                     "subscription_failure_behavior",
                     "customer_tracking"
                   ],
@@ -60993,7 +61010,7 @@
         }
       ],
       "patch": {
-        "description": "Updates the account's preferences. Each top-level key present in the body is replaced as a whole; omitted keys are left untouched.\n\nRequired scopes depend on the preferences being updated:\n\n| Preferences | Required scope |\n| --- | --- |\n| `ads_payment_methods`, `ads_reporting_currency`, `ads_scheduling_timezone`, `ads_triple_whale_integration` | `ad_campaign:create` |\n| `cards_auto_top_up`, `cards_notifications`, `covers_subaccount_negative_balances` | `payout:account:update` |\n| `dispute_fighter_enabled` | `payment:dispute` |\n| `economic_intelligence_duration_key`, `economic_intelligence_auto_renew` | `company:update` |\n| `feedback_options`, `customer_tracking` | `company:manage_checkout` |\n| `review_request_emails` | `company:update` |\n\nWhen updating preferences from multiple rows, all corresponding scopes are required for the account.\n",
+        "description": "Updates the account's preferences. Each top-level key in the body replaces its stored value as a whole. Keys left out keep their current values.\n\nThe required scope depends on which preferences you update.\n\n- `ad_campaign:create`: `ads_payment_methods`, `ads_reporting_currency`, `ads_scheduling_timezone`, `ads_triple_whale_integration`.\n- `payout:account:update`: `cards_auto_top_up`, `cards_notifications`, `covers_subaccount_negative_balances`.\n- `payment:dispute`: `dispute_fighter_enabled`.\n- `company:update`: `economic_intelligence_duration_key`, `economic_intelligence_auto_renew`, `review_request_emails`, `subaccount_notifications`.\n- `company:manage_checkout`: `feedback_options`, `customer_tracking`.\n\nTo update keys under more than one scope, the API key needs all of those scopes.\n",
         "operationId": "updateAccountPreferences",
         "parameters": [
           {
@@ -61237,6 +61254,11 @@
                   },
                   "review_request_emails": {
                     "description": "Whether Whop emails customers after a purchase asking them to leave a review. Set it to `false` to stop these emails, including ones already scheduled. Requires the `company:update` scope on your API key.",
+                    "example": true,
+                    "type": "boolean"
+                  },
+                  "subaccount_notifications": {
+                    "description": "Whether Whop emails and notifies the teams of this account's subaccounts. Set it to `false` to stop Whop's emails, push, and in-app notifications to them. These include payout, verification, dispute, and card alerts about their accounts. Only accounts with subaccounts can set it. Requires the `company:update` scope on your API key.",
                     "example": true,
                     "type": "boolean"
                   },
@@ -61528,7 +61550,7 @@
                     },
                     "covers_subaccount_negative_balances": {
                       "description": "Whether this account covers its subaccounts' negative balances. When a subaccount's balance drops below zero (from refunds, disputes, or fees), this account's available balance in the same currency pays it back, up to what is available. Refunds on its subaccounts may also take them negative by up to this account's available balance. `null` when the account has no subaccounts.",
-                      "example": true,
+                      "example": false,
                       "type": [
                         "boolean",
                         "null"
@@ -61731,6 +61753,14 @@
                       "example": true,
                       "type": "boolean"
                     },
+                    "subaccount_notifications": {
+                      "description": "Whether Whop emails and notifies the teams of this account's subaccounts. `true` by default. Set it to `false` to stop Whop's emails, push, and in-app notifications to them. These include payout, verification, dispute, and card alerts about their accounts. `null` when the account has no subaccounts.",
+                      "example": true,
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
                     "subscription_failure_behavior": {
                       "description": "What happens to a subscription once every retry of a renewal payment has failed. `cancel` (the default) cancels it. `none` leaves it past due and keeps billing it each period; access follows the account's past-due access setting.",
                       "enum": [
@@ -61762,6 +61792,7 @@
                     "preferred_settlement_currency",
                     "preferred_settlement_currency_changeable_at",
                     "review_request_emails",
+                    "subaccount_notifications",
                     "subscription_failure_behavior",
                     "customer_tracking"
                   ],
