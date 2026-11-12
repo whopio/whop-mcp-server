@@ -57972,7 +57972,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "company:basic:read"
+            ]
           },
           {
             "bearerAuth": [
@@ -62012,6 +62014,11 @@
           }
         },
         "security": [
+          {
+            "bearerAuth": [
+              "company:basic:read"
+            ]
+          },
           {
             "bearerAuth": [
               "company:balance:read"
@@ -138537,6 +138544,11 @@
             "bearerAuth": [
               "referral:basic:read"
             ]
+          },
+          {
+            "bearerAuth": [
+              "company:basic:read"
+            ]
           }
         ],
         "summary": "List referred businesses",
@@ -141708,6 +141720,11 @@
           {
             "bearerAuth": [
               "referral:basic:read"
+            ]
+          },
+          {
+            "bearerAuth": [
+              "company:basic:read"
             ]
           }
         ],
@@ -166706,7 +166723,7 @@
     },
     "/stats/time_series/{metric}": {
       "get": {
-        "description": "Retrieves a metric as a series of points over a time range for an account or user. For an aggregate that is not bucketed over time, use a report from `GET /stats/reports`. The `market_prices` metric is public and requires no authentication.",
+        "description": "Retrieves a metric as a series of points over a time range for an account or user. For an aggregate that is not bucketed over time, use a report from `GET /stats/reports`. The `market_prices` metric is public and requires no authentication. Each metric takes its own scope: most need `stats:read`, the earnings, markup revenue and `platform_markup_amount` metrics need `company:balance:read`, `markup_earning_estimate` needs `company:update_child_fees`, and `ad_delivery`, `ad_campaign_score`, `people` and `events` also accept `ad_campaign:read`.",
         "operationId": "retrieveMetricTimeSeries",
         "parameters": [
           {
@@ -167649,6 +167666,16 @@
           {
             "bearerAuth": [
               "ad_campaign:read"
+            ]
+          },
+          {
+            "bearerAuth": [
+              "company:balance:read"
+            ]
+          },
+          {
+            "bearerAuth": [
+              "company:update_child_fees"
             ]
           }
         ],
@@ -170768,6 +170795,16 @@
           {
             "bearerAuth": [
               "crypto_wallet:manage"
+            ]
+          },
+          {
+            "bearerAuth": [
+              "payout:transfer_funds"
+            ]
+          },
+          {
+            "bearerAuth": [
+              "payout:withdraw_funds"
             ]
           }
         ],
