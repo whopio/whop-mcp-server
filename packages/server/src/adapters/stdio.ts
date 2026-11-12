@@ -20,7 +20,7 @@ export interface ServeStdioOptions extends Omit<
 /**
  * Runs the shared runtime over stdio. Protocol traffic is the only thing that
  * touches stdout; logs and audit events go to stderr. Credentials come from an
- * injected adapter (the public CLI passes its keychain/profile resolution) or
+ * injected adapter (for example one that reads the public CLI's saved profiles) or
  * the WHOP_API_KEY environment fallback — never from MCP client config values.
  */
 export async function serveStdio(options: ServeStdioOptions): Promise<void> {
