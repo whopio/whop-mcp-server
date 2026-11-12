@@ -128242,7 +128242,10 @@
                               ]
                             },
                             "billing_period": {
-                              "description": "Recurring billing interval in days.",
+                              "description": "A recurring variant's billing period in days, from 2 to 365, such as `45`.",
+                              "example": 45,
+                              "maximum": 365,
+                              "minimum": 2,
                               "type": [
                                 "integer",
                                 "null"
@@ -128522,6 +128525,7 @@
                             },
                             "renewal_price": {
                               "description": "Recurring price in the variant currency.",
+                              "example": 45,
                               "type": [
                                 "number",
                                 "null"
@@ -128558,7 +128562,7 @@
                                 "archived",
                                 "quick_link"
                               ],
-                              "example": "visible",
+                              "example": "hidden",
                               "type": [
                                 "string",
                                 "null"
@@ -128923,7 +128927,10 @@
                               ]
                             },
                             "billing_period": {
-                              "description": "Recurring billing interval in days.",
+                              "description": "A recurring variant's billing period in days, from 2 to 365, such as `45`.",
+                              "example": 45,
+                              "maximum": 365,
+                              "minimum": 2,
                               "type": [
                                 "integer",
                                 "null"
@@ -129203,6 +129210,7 @@
                             },
                             "renewal_price": {
                               "description": "Recurring price in the variant currency.",
+                              "example": 45,
                               "type": [
                                 "number",
                                 "null"
@@ -129239,7 +129247,7 @@
                                 "archived",
                                 "quick_link"
                               ],
-                              "example": "visible",
+                              "example": "hidden",
                               "type": [
                                 "string",
                                 "null"
