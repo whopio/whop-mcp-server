@@ -5978,6 +5978,13 @@
               "null"
             ]
           },
+          "subaccount_team_view_only": {
+            "description": "Whether this account's subaccounts are view-only for their own team members. When `true`, a subaccount's team can still see everything their role allows but every change is refused with a view-only error. `false` by default. `null` when the account has no subaccounts.",
+            "type": [
+              "boolean",
+              "null"
+            ]
+          },
           "subscription_failure_behavior": {
             "description": "What happens to a subscription once every retry of a renewal payment has failed. `cancel` (the default) cancels it. `none` leaves it past due and keeps billing it each period; access follows the account's past-due access setting.",
             "enum": [
@@ -6010,6 +6017,7 @@
           "preferred_settlement_currency_changeable_at",
           "review_request_emails",
           "subaccount_notifications",
+          "subaccount_team_view_only",
           "subscription_failure_behavior",
           "customer_tracking"
         ],
@@ -60921,6 +60929,14 @@
                         "null"
                       ]
                     },
+                    "subaccount_team_view_only": {
+                      "description": "Whether this account's subaccounts are view-only for their own team members. When `true`, a subaccount's team can still see everything their role allows but every change is refused with a view-only error. `false` by default. `null` when the account has no subaccounts.",
+                      "example": null,
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
                     "subscription_failure_behavior": {
                       "description": "What happens to a subscription once every retry of a renewal payment has failed. `cancel` (the default) cancels it. `none` leaves it past due and keeps billing it each period; access follows the account's past-due access setting.",
                       "enum": [
@@ -60953,6 +60969,7 @@
                     "preferred_settlement_currency_changeable_at",
                     "review_request_emails",
                     "subaccount_notifications",
+                    "subaccount_team_view_only",
                     "subscription_failure_behavior",
                     "customer_tracking"
                   ],
@@ -61010,7 +61027,7 @@
         }
       ],
       "patch": {
-        "description": "Updates the account's preferences. Each top-level key in the body replaces its stored value as a whole. Keys left out keep their current values.\n\nThe required scope depends on which preferences you update.\n\n- `ad_campaign:create`: `ads_payment_methods`, `ads_reporting_currency`, `ads_scheduling_timezone`, `ads_triple_whale_integration`.\n- `payout:account:update`: `cards_auto_top_up`, `cards_notifications`, `covers_subaccount_negative_balances`.\n- `payment:dispute`: `dispute_fighter_enabled`.\n- `company:update`: `economic_intelligence_duration_key`, `economic_intelligence_auto_renew`, `review_request_emails`, `subaccount_notifications`.\n- `company:manage_checkout`: `feedback_options`, `customer_tracking`.\n\nTo update keys under more than one scope, the API key needs all of those scopes.\n",
+        "description": "Updates the account's preferences. Each top-level key in the body replaces its stored value as a whole. Keys left out keep their current values.\n\nThe required scope depends on which preferences you update.\n\n- `ad_campaign:create`: `ads_payment_methods`, `ads_reporting_currency`, `ads_scheduling_timezone`, `ads_triple_whale_integration`.\n- `payout:account:update`: `cards_auto_top_up`, `cards_notifications`, `covers_subaccount_negative_balances`.\n- `payment:dispute`: `dispute_fighter_enabled`.\n- `company:update`: `economic_intelligence_duration_key`, `economic_intelligence_auto_renew`, `review_request_emails`, `subaccount_notifications`, `subaccount_team_view_only`.\n- `company:manage_checkout`: `feedback_options`, `customer_tracking`.\n\nTo update keys under more than one scope, the API key needs all of those scopes.\n",
         "operationId": "updateAccountPreferences",
         "parameters": [
           {
@@ -61260,6 +61277,11 @@
                   "subaccount_notifications": {
                     "description": "Whether Whop emails and notifies the teams of this account's subaccounts. Set it to `false` to stop Whop's emails, push, and in-app notifications to them. These include payout, verification, dispute, and card alerts about their accounts. Only accounts with subaccounts can set it. Requires the `company:update` scope on your API key.",
                     "example": true,
+                    "type": "boolean"
+                  },
+                  "subaccount_team_view_only": {
+                    "description": "Whether this account's subaccounts are view-only for their own team members. Set it to `true` to refuse every change a subaccount's team tries to make while still letting them see what their role allows. Only accounts with subaccounts can set it. Requires the `company:update` scope on your API key.",
+                    "example": false,
                     "type": "boolean"
                   },
                   "subscription_failure_behavior": {
@@ -61761,6 +61783,14 @@
                         "null"
                       ]
                     },
+                    "subaccount_team_view_only": {
+                      "description": "Whether this account's subaccounts are view-only for their own team members. When `true`, a subaccount's team can still see everything their role allows but every change is refused with a view-only error. `false` by default. `null` when the account has no subaccounts.",
+                      "example": false,
+                      "type": [
+                        "boolean",
+                        "null"
+                      ]
+                    },
                     "subscription_failure_behavior": {
                       "description": "What happens to a subscription once every retry of a renewal payment has failed. `cancel` (the default) cancels it. `none` leaves it past due and keeps billing it each period; access follows the account's past-due access setting.",
                       "enum": [
@@ -61793,6 +61823,7 @@
                     "preferred_settlement_currency_changeable_at",
                     "review_request_emails",
                     "subaccount_notifications",
+                    "subaccount_team_view_only",
                     "subscription_failure_behavior",
                     "customer_tracking"
                   ],
