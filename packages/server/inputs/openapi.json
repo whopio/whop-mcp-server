@@ -4707,24 +4707,8 @@
                 "maximum": null,
                 "minimum": null,
                 "percentage": 15.0,
-                "region": "usa",
-                "regions": {
-                  "eu": {
-                    "default": {
-                      "fixed": null,
-                      "percentage": 15.0
-                    },
-                    "fixed": null,
-                    "maximum": null,
-                    "minimum": null,
-                    "percentage": 15.0,
-                    "reset": {
-                      "fixed": null,
-                      "percentage": 15.0
-                    },
-                    "source": "default"
-                  }
-                },
+                "region": "eu",
+                "regions": {},
                 "reset": {
                   "fixed": null,
                   "percentage": 15.0
@@ -59695,6 +59679,11 @@
                       "type": "object"
                     },
                     "description": "Changes to non-card payment method fees, keyed by payment method type.",
+                    "example": {
+                      "addi": {
+                        "percentage": 20
+                      }
+                    },
                     "type": "object"
                   },
                   "payouts": {
