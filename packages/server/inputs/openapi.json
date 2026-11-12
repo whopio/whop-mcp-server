@@ -27063,7 +27063,7 @@
             ]
           },
           "label": {
-            "description": "The item's name as shown at checkout — the product title, else the variant title.",
+            "description": "The item's name as shown at checkout (the product title, else the variant title).",
             "example": "Ceramic Coating Package",
             "type": [
               "string",
@@ -27155,6 +27155,59 @@
         "required": [
           "url",
           "expires_at"
+        ],
+        "type": "object"
+      },
+      "InvoiceSend": {
+        "properties": {
+          "actor": {
+            "description": "The user who requested the send, when you have `company:authorized_user:read`. `null` for automatic sends, account API keys, apps, or when the caller cannot read team members. Whop employee identities are shown as Whop Team to external viewers.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/UserSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "kind": {
+            "description": "How batches are classified: manual batches use `send` when no earlier completed email history exists and `resend` otherwise. Classification happens when history is recorded. Earlier unrecorded emails are unknown. Automatic sends use `scheduled_send` for a scheduled send and `reminder` for a reminder after the due date. They use `payment_follow_up` for the payment link after a charge to the saved payment method failed or needed the customer to act.",
+            "enum": [
+              "send",
+              "resend",
+              "scheduled_send",
+              "reminder",
+              "payment_follow_up"
+            ],
+            "example": "send",
+            "type": "string"
+          },
+          "recipient_count": {
+            "description": "How many addresses were submitted for delivery, each separately.",
+            "example": 2,
+            "type": "integer"
+          },
+          "recipients": {
+            "items": {
+              "description": "The addresses submitted for delivery: a snapshot of the customer email and the invoice's `recipient_emails` when the send was requested. Empty unless you have `member:email:read`.",
+              "example": "marcus@shinetime.example",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "sent_at": {
+            "description": "When the worker finished submitting this batch for delivery, as an ISO 8601 timestamp. Partial batches are not recorded until a retry completes them. This does not confirm delivery to an inbox.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "sent_at",
+          "recipient_count",
+          "recipients",
+          "actor"
         ],
         "type": "object"
       },
@@ -47179,7 +47232,7 @@
             ]
           },
           "label": {
-            "description": "The item's name as shown at checkout — the product title, else the variant title.",
+            "description": "The item's name as shown at checkout (the product title, else the variant title).",
             "example": "Ceramic Coating Package",
             "type": [
               "string",
@@ -129449,6 +129502,148 @@
           "Invoices"
         ]
       },
+      "x-whop-surface": "native"
+    },
+    "/invoices/{id}/sends": {
+      "get": {
+        "description": "Lists recorded invoice emails, most recent first. Each entry is a send, send again, scheduled send, reminder, or payment link after a failed charge. Each entry includes the addresses it went to and who sent it. Issuing without sending adds nothing. Entries appear after queuing. Addresses need `member:email:read`, and the sender needs `company:authorized_user:read`. History starts when recording is enabled and does not confirm inbox delivery.",
+        "operationId": "listInvoiceSends",
+        "parameters": [
+          {
+            "description": "Number of results to return from the start of the range.",
+            "in": "query",
+            "name": "first",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results after this cursor. Use `page_info.end_cursor` from the previous response to fetch the next page.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the end of the range.",
+            "in": "query",
+            "name": "last",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results before this cursor. Use `page_info.start_cursor` from the previous response to fetch the previous page.",
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/InvoiceSend"
+                      },
+                      "type": "array"
+                    },
+                    "page_info": {
+                      "properties": {
+                        "end_cursor": {
+                          "example": null,
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "has_next_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "has_previous_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "start_cursor": {
+                          "example": "WyJjdXJzb3IiLDFd",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "start_cursor",
+                        "end_cursor",
+                        "has_next_page",
+                        "has_previous_page"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "page_info"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "invoice sends"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "missing permission"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "invoice not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "payment:basic:read"
+            ]
+          }
+        ],
+        "summary": "List Invoice Sends",
+        "tags": [
+          "Invoices"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "The invoice's pay_ ID.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
       "x-whop-surface": "native"
     },
     "/invoices/{id}/unschedule": {
