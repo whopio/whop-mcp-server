@@ -23432,6 +23432,12 @@
                   },
                   "type": "array"
                 },
+                "pass_percentage": {
+                  "description": "Percentage of matching subjects that this rule lets in, from 0 to 100. Absent when the rule lets in every matching subject. Raising it keeps every subject that the rule already lets in.",
+                  "maximum": 100,
+                  "minimum": 0,
+                  "type": "number"
+                },
                 "type": {
                   "description": "`include` — users matching this rule qualify; `exclude` — users matching this rule are always excluded, overriding any include rule.",
                   "enum": [
@@ -116473,6 +116479,12 @@
                           },
                           "type": "array"
                         },
+                        "pass_percentage": {
+                          "description": "Percentage of matching subjects that this rule lets in, from 0 to 100. Omit it to let in every matching subject. Only `include` rules accept it. Raising it keeps every subject that the rule already lets in.",
+                          "maximum": 100,
+                          "minimum": 0,
+                          "type": "number"
+                        },
                         "type": {
                           "description": "`include` — users matching this rule qualify; `exclude` — users matching this rule are always excluded, overriding any include rule. Defaults to `include`.",
                           "enum": [
@@ -116813,6 +116825,12 @@
                             "type": "object"
                           },
                           "type": "array"
+                        },
+                        "pass_percentage": {
+                          "description": "Percentage of matching subjects that this rule lets in, from 0 to 100. Omit it to let in every matching subject. Only `include` rules accept it. Raising it keeps every subject that the rule already lets in.",
+                          "maximum": 100,
+                          "minimum": 0,
+                          "type": "number"
                         },
                         "type": {
                           "description": "`include` — users matching this rule qualify; `exclude` — users matching this rule are always excluded, overriding any include rule. Defaults to `include`.",
