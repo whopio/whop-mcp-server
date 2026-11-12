@@ -26469,6 +26469,11 @@
               "null"
             ]
           },
+          "deletable": {
+            "description": "True when `DELETE /invoices/{id}` can delete this invoice. A draft qualifies unless it is scheduled or bills a subscription. A void invoice qualifies unless it collected money or still awaits a bank wire.",
+            "example": false,
+            "type": "boolean"
+          },
           "due_at": {
             "example": null,
             "type": [
@@ -26666,6 +26671,7 @@
           "invoice_prefix",
           "status",
           "overdue",
+          "deletable",
           "due_at",
           "scheduled_send_at",
           "scheduled_charge_at",
@@ -128799,6 +128805,70 @@
       "x-whop-surface": "native"
     },
     "/invoices/{id}": {
+      "delete": {
+        "description": "Deletes a draft or void invoice. A deleted invoice no longer appears in invoice or payment lists, and its ID returns a `404`. Deleting can't be undone. Void an open invoice before you delete it. A draft with a scheduled send or charge must be unscheduled first. A draft renewal invoice can't be deleted, and neither can a void invoice that collected money or still awaits a bank wire. The invoice's `deletable` field is `true` when this call can delete it.",
+        "operationId": "deleteInvoice",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "deleted": {
+                      "description": "Always `true`.",
+                      "example": true,
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "description": "The ID of the deleted invoice, prefixed `pay_`.",
+                      "example": "pay_xxxxxxxxxxxxxx",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "deleted"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "invoice deleted"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "open invoice"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "missing permission"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "invoice not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "invoice:update"
+            ]
+          },
+          {
+            "bearerAuth": [
+              "payment:charge"
+            ]
+          }
+        ],
+        "summary": "Delete Invoice",
+        "tags": [
+          "Invoices"
+        ]
+      },
       "get": {
         "description": "Retrieves a receipt-backed invoice by its pay_ ID.",
         "operationId": "retrieveInvoice",

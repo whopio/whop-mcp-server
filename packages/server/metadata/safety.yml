@@ -300,6 +300,7 @@ rules:
     match:
       operations:
         - DELETE /fee_markups/{id}
+        - DELETE /invoices/{id}
     set:
       classification: destructive
       financial: true

@@ -554,6 +554,7 @@ describe("claude_directory surface", () => {
 		expect(remaining).toEqual(
 			[
 				"DELETE /fee_markups/{id}",
+				"DELETE /invoices/{id}",
 				"PATCH /cashback_rules/{id}",
 				"PATCH /domains/{id}",
 				"PATCH /invoices/{id}",
