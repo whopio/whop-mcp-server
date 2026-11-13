@@ -133417,6 +133417,84 @@
           "$ref": "#/components/parameters/ApiVersionDate"
         }
       ],
+      "post": {
+        "description": "Adds a person to an account as a member. If the person is already a member of the account, that member is returned unchanged.",
+        "operationId": "createMember",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "account_id": {
+                    "description": "The account to add the member to (`biz_` tag). Defaults to the account the credential acts as.",
+                    "example": "biz_xxxxxxxxxxxxxx",
+                    "type": "string"
+                  },
+                  "email": {
+                    "description": "The email address of the person to add. If no Whop user has it, one is created.",
+                    "example": "jane@example.com",
+                    "format": "email",
+                    "type": "string"
+                  },
+                  "name": {
+                    "description": "The name of the person to add. Ignored when a user on Whop already exists for this email address.",
+                    "example": "Jane Doe",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "email"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Member"
+                }
+              }
+            },
+            "description": "member created for an email with no Whop user"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "missing email"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "credential lacks member:manage on the account"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "member:manage"
+            ]
+          }
+        ],
+        "summary": "Create Member",
+        "tags": [
+          "Members"
+        ]
+      },
       "x-whop-surface": "native"
     },
     "/members/{id}": {
