@@ -140297,6 +140297,7 @@
                   "transfer",
                   "card_interchange",
                   "withdrawal",
+                  "business_referral",
                   "onboarding_reward",
                   "partner_reward",
                   "verified_partner_referral_payback",
@@ -140545,6 +140546,7 @@
                               "transfer",
                               "card_interchange",
                               "withdrawal",
+                              "business_referral",
                               "onboarding_reward",
                               "partner_reward",
                               "verified_partner_referral_payback",
@@ -140887,10 +140889,55 @@
                                 "type": "object"
                               },
                               {
+                                "properties": {
+                                  "created_at": {
+                                    "example": "2026-01-01T12:00:00.000Z",
+                                    "format": "date-time",
+                                    "type": "string"
+                                  },
+                                  "id": {
+                                    "description": "The referred partner business's own commission the share was paid on, prefixed `afpy_`.",
+                                    "example": "afpy_xxxxxxxxxxxxxx",
+                                    "type": "string"
+                                  },
+                                  "income_source": {
+                                    "description": "Which income source that commission is on.",
+                                    "enum": [
+                                      "sales",
+                                      "ad_spend",
+                                      "transfer",
+                                      "card_interchange",
+                                      "withdrawal",
+                                      "business_referral",
+                                      "onboarding_reward",
+                                      "partner_reward",
+                                      "verified_partner_referral_payback",
+                                      "commission_advance"
+                                    ],
+                                    "example": "sales",
+                                    "type": "string"
+                                  },
+                                  "object": {
+                                    "enum": [
+                                      "commission"
+                                    ],
+                                    "example": "commission",
+                                    "type": "string"
+                                  }
+                                },
+                                "required": [
+                                  "object",
+                                  "id",
+                                  "income_source",
+                                  "created_at"
+                                ],
+                                "type": "object"
+                              },
+                              {
                                 "type": "null"
                               }
                             ],
-                            "description": "The resource that generated the earning: the customer payment receipt for sales and ad spend earnings, the balance transfer for transfer earnings, the withdrawal for withdrawal earnings, the card transaction for card interchange earnings, or the qualifying reward for fixed reward earnings."
+                            "description": "The resource that generated the earning. For sales and ad spend earnings, it is the customer payment receipt. For transfer earnings, it is the balance transfer. For withdrawal earnings, it is the withdrawal. For card interchange earnings, it is the card transaction. For fixed reward earnings, it is the qualifying reward. For business referral earnings, it is the referred partner business's own commission."
                           },
                           "second_tier": {
                             "description": "Whether this earning is a second-tier (grandparent) commission.",
