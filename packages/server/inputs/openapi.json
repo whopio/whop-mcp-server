@@ -30876,6 +30876,14 @@
               "null"
             ]
           },
+          "metadata": {
+            "description": "Your own key-value data stored on this member. `null` when none is set.",
+            "example": null,
+            "type": [
+              "object",
+              "null"
+            ]
+          },
           "most_recent_action": {
             "description": "The member's latest lifecycle state on the account, derived from their memberships, such as `paid_subscriber`, `canceling`, or `churned`. `null` until it is first computed.",
             "enum": [
@@ -30985,6 +30993,7 @@
           "last_activity_at",
           "last_activity",
           "unsubscribe_status",
+          "metadata",
           "created_at",
           "user"
         ],
@@ -133736,7 +133745,7 @@
         }
       ],
       "patch": {
-        "description": "Updates a member. The account can update `name`, the customer name its invoices show for this member; it doesn't change the user's Whop profile. The member can update `unsubscribe_status`, with a credential for their own user that holds `user:notifications:update`, to unsubscribe from the account's marketing communications or resubscribe. Each sends only its own field.",
+        "description": "Updates a member.",
         "operationId": "updateMember",
         "parameters": [],
         "requestBody": {
@@ -133745,8 +133754,26 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "metadata": {
+                    "additionalProperties": {
+                      "type": [
+                        "string",
+                        "number",
+                        "boolean",
+                        "null"
+                      ]
+                    },
+                    "description": "Your own key-value data on this member. Up to 50 keys of at most 100 characters. Values are strings of at most 500 characters, numbers, `true`, `false`, or `null`. At most 200 KB. Replaces existing metadata, and `null` clears it. Requires `member:manage`.",
+                    "example": {
+                      "crm_owner": "jordan"
+                    },
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                  },
                   "name": {
-                    "description": "The customer name to show on this member's invoices, at most 255 bytes. Leading and trailing spaces are trimmed. `null` or a blank string clears it, so invoices show the user's own name again.",
+                    "description": "The name invoices show for this member, in place of the user's own. `null` clears it. Requires `member:manage`.",
                     "example": "Northwind Legal LLP",
                     "maxLength": 255,
                     "type": [
@@ -133755,7 +133782,7 @@
                     ]
                   },
                   "unsubscribe_status": {
-                    "description": "`unsubscribed` to stop the account's marketing communications, or `null` to resubscribe. Only the member can set it.",
+                    "description": "`unsubscribed` to opt out of the account's marketing, `null` to opt back in. Only the member can set it, with `user:notifications:update`.",
                     "enum": [
                       "unsubscribed",
                       null
@@ -195778,6 +195805,7 @@
                   "last_accessed_at": "2026-01-01T12:00:00.000Z",
                   "last_activity": null,
                   "last_activity_at": null,
+                  "metadata": null,
                   "most_recent_action": "joined",
                   "most_recent_action_at": "2026-01-01T12:00:00.000Z",
                   "name": null,
@@ -195941,6 +195969,7 @@
                   "last_accessed_at": "2026-01-01T12:00:00.000Z",
                   "last_activity": null,
                   "last_activity_at": null,
+                  "metadata": null,
                   "most_recent_action": null,
                   "most_recent_action_at": null,
                   "name": null,
