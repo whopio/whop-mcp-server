@@ -2352,9 +2352,108 @@
             },
             "type": "object"
           },
+          "payment_methods": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AccountFeeMarkup"
+            },
+            "description": "Markups on payments, keyed by payment method: `card` (including Apple Pay and Google Pay), `ach` (US bank account and US bank transfer), and `wire`. A payment method without its own markup uses `payments`.",
+            "example": {
+              "ach": {
+                "adjustable": false,
+                "default": {
+                  "fixed": {
+                    "amount": "0.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 0.0
+                },
+                "fixed": {
+                  "amount": "0.00",
+                  "currency": "usd",
+                  "decimals": 2,
+                  "display_decimals": 2
+                },
+                "maximum": {
+                  "fixed": {
+                    "amount": "100.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 100.0
+                },
+                "percentage": 0.0,
+                "source": "default",
+                "unadjustable_reason": "not_permitted"
+              },
+              "card": {
+                "adjustable": false,
+                "default": {
+                  "fixed": {
+                    "amount": "0.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 0.0
+                },
+                "fixed": {
+                  "amount": "0.00",
+                  "currency": "usd",
+                  "decimals": 2,
+                  "display_decimals": 2
+                },
+                "maximum": {
+                  "fixed": {
+                    "amount": "100.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 100.0
+                },
+                "percentage": 0.0,
+                "source": "default",
+                "unadjustable_reason": "not_permitted"
+              },
+              "wire": {
+                "adjustable": false,
+                "default": {
+                  "fixed": {
+                    "amount": "0.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 0.0
+                },
+                "fixed": {
+                  "amount": "0.00",
+                  "currency": "usd",
+                  "decimals": 2,
+                  "display_decimals": 2
+                },
+                "maximum": {
+                  "fixed": {
+                    "amount": "100.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 100.0
+                },
+                "percentage": 0.0,
+                "source": "default",
+                "unadjustable_reason": "not_permitted"
+              }
+            },
+            "type": "object"
+          },
           "payments": {
             "$ref": "#/components/schemas/AccountFeeMarkup",
-            "description": "The markup on payments the subaccount collects without a checkout application fee."
+            "description": "The markup on payments the subaccount collects without a checkout application fee, for every payment method without its own markup under `payment_methods`."
           },
           "payouts": {
             "additionalProperties": {
@@ -2523,6 +2622,7 @@
         "required": [
           "payouts",
           "deposits",
+          "payment_methods",
           "transfers",
           "crypto_swaps",
           "payments",
@@ -59076,7 +59176,7 @@
                         ]
                       },
                       "crypto_swaps": {
-                        "description": "The new markup. Fields left out keep their current value; `null` clears the row so the markup returns to its default.",
+                        "description": "The new markup. Fields left out keep their current value. `null` clears the row so the markup returns to its default.",
                         "properties": {
                           "fixed": {
                             "description": "The amount the platform adds per event, in US dollars.",
@@ -59096,7 +59196,7 @@
                       },
                       "deposits": {
                         "additionalProperties": {
-                          "description": "The new markup. Fields left out keep their current value; `null` clears the row so the markup returns to its default.",
+                          "description": "The new markup. Fields left out keep their current value. `null` clears the row so the markup returns to its default.",
                           "properties": {
                             "fixed": {
                               "description": "The amount the platform adds per event, in US dollars.",
@@ -59122,8 +59222,36 @@
                         },
                         "type": "object"
                       },
+                      "payment_methods": {
+                        "additionalProperties": {
+                          "description": "The new markup. Fields left out keep their current value. `null` clears the row so the markup returns to its default.",
+                          "properties": {
+                            "fixed": {
+                              "description": "The amount the platform adds per event, in US dollars.",
+                              "example": 0.25,
+                              "type": "number"
+                            },
+                            "percentage": {
+                              "description": "The percentage of the transaction the platform adds, where `2` means 2%.",
+                              "example": 1,
+                              "type": "number"
+                            }
+                          },
+                          "type": [
+                            "object",
+                            "null"
+                          ]
+                        },
+                        "description": "Markups on payments, keyed by payment method: `card`, `ach`, or `wire`. `null` clears a method's markup so it uses `payments`.",
+                        "example": {
+                          "wire": {
+                            "percentage": 4
+                          }
+                        },
+                        "type": "object"
+                      },
                       "payments": {
-                        "description": "The new markup. Fields left out keep their current value; `null` clears the row so the markup returns to its default.",
+                        "description": "The new markup. Fields left out keep their current value. `null` clears the row so the markup returns to its default.",
                         "properties": {
                           "fixed": {
                             "description": "The amount the platform adds per event, in US dollars.",
@@ -59143,7 +59271,7 @@
                       },
                       "payouts": {
                         "additionalProperties": {
-                          "description": "The new markup. Fields left out keep their current value; `null` clears the row so the markup returns to its default.",
+                          "description": "The new markup. Fields left out keep their current value. `null` clears the row so the markup returns to its default.",
                           "properties": {
                             "fixed": {
                               "description": "The amount the platform adds per event, in US dollars.",
@@ -59171,7 +59299,7 @@
                         "type": "object"
                       },
                       "transfers": {
-                        "description": "The new markup. Fields left out keep their current value; `null` clears the row so the markup returns to its default.",
+                        "description": "The new markup. Fields left out keep their current value. `null` clears the row so the markup returns to its default.",
                         "properties": {
                           "fixed": {
                             "description": "The amount the platform adds per event, in US dollars.",
@@ -59759,7 +59887,7 @@
                         ]
                       },
                       "crypto_swaps": {
-                        "description": "The new markup. Fields left out keep their current value; `null` clears the row so the markup returns to its default.",
+                        "description": "The new markup. Fields left out keep their current value. `null` clears the row so the markup returns to its default.",
                         "properties": {
                           "fixed": {
                             "description": "The amount the platform adds per event, in US dollars.",
@@ -59779,7 +59907,7 @@
                       },
                       "deposits": {
                         "additionalProperties": {
-                          "description": "The new markup. Fields left out keep their current value; `null` clears the row so the markup returns to its default.",
+                          "description": "The new markup. Fields left out keep their current value. `null` clears the row so the markup returns to its default.",
                           "properties": {
                             "fixed": {
                               "description": "The amount the platform adds per event, in US dollars.",
@@ -59805,8 +59933,36 @@
                         },
                         "type": "object"
                       },
+                      "payment_methods": {
+                        "additionalProperties": {
+                          "description": "The new markup. Fields left out keep their current value. `null` clears the row so the markup returns to its default.",
+                          "properties": {
+                            "fixed": {
+                              "description": "The amount the platform adds per event, in US dollars.",
+                              "example": 0.25,
+                              "type": "number"
+                            },
+                            "percentage": {
+                              "description": "The percentage of the transaction the platform adds, where `2` means 2%.",
+                              "example": 1,
+                              "type": "number"
+                            }
+                          },
+                          "type": [
+                            "object",
+                            "null"
+                          ]
+                        },
+                        "description": "Markups on payments, keyed by payment method: `card`, `ach`, or `wire`. `null` clears a method's markup so it uses `payments`.",
+                        "example": {
+                          "wire": {
+                            "percentage": 4
+                          }
+                        },
+                        "type": "object"
+                      },
                       "payments": {
-                        "description": "The new markup. Fields left out keep their current value; `null` clears the row so the markup returns to its default.",
+                        "description": "The new markup. Fields left out keep their current value. `null` clears the row so the markup returns to its default.",
                         "properties": {
                           "fixed": {
                             "description": "The amount the platform adds per event, in US dollars.",
@@ -59826,7 +59982,7 @@
                       },
                       "payouts": {
                         "additionalProperties": {
-                          "description": "The new markup. Fields left out keep their current value; `null` clears the row so the markup returns to its default.",
+                          "description": "The new markup. Fields left out keep their current value. `null` clears the row so the markup returns to its default.",
                           "properties": {
                             "fixed": {
                               "description": "The amount the platform adds per event, in US dollars.",
@@ -59854,7 +60010,7 @@
                         "type": "object"
                       },
                       "transfers": {
-                        "description": "The new markup. Fields left out keep their current value; `null` clears the row so the markup returns to its default.",
+                        "description": "The new markup. Fields left out keep their current value. `null` clears the row so the markup returns to its default.",
                         "properties": {
                           "fixed": {
                             "description": "The amount the platform adds per event, in US dollars.",
