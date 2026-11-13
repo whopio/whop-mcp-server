@@ -25,4 +25,7 @@ export interface Env {
 	MCP_WHOP_OAUTH_CLIENT_SECRET: string;
 	MCP_STATE_ENCRYPTION_KEY: string;
 	CF_VERSION_METADATA: { id: string };
+	// OpenAI's domain verification value for this host. Unset outside Whop's
+	// own production deployment.
+	OPENAI_APPS_CHALLENGE_TOKEN?: string;
 }

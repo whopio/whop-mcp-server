@@ -244,9 +244,23 @@ async function handleCallback(request: Request, env: Env): Promise<Response> {
 	return redirectResponse(redirectTo);
 }
 
+// OpenAI confirms Whop controls this host before it lists the ChatGPT plugin:
+// it fetches this path and expects the token shown on the plugin's page at
+// platform.openai.com, as plain text. The token is set per deployment
+// (internal/wrangler.jsonc), so a deployment without one answers 404.
+const OPENAI_APPS_CHALLENGE_PATH = "/.well-known/openai-apps-challenge";
+
 export const defaultHandler = {
 	async fetch(request: Request, env: Env): Promise<Response> {
 		const url = new URL(request.url);
+		if (
+			url.pathname === OPENAI_APPS_CHALLENGE_PATH &&
+			env.OPENAI_APPS_CHALLENGE_TOKEN
+		) {
+			return new Response(env.OPENAI_APPS_CHALLENGE_TOKEN, {
+				headers: { "Content-Type": "text/plain; charset=utf-8" },
+			});
+		}
 		try {
 			// Awaited so rejections reach the catch instead of unhandled 500s.
 			if (url.pathname === "/authorize") {

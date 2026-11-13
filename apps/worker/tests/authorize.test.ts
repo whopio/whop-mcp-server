@@ -196,6 +196,40 @@ describe("defaultHandler error containment", () => {
 	);
 });
 
+describe("OpenAI domain verification", () => {
+	// The path is spelled out here, not imported, so a typo in the source
+	// fails this test instead of passing against itself.
+	const challengeUrl = "https://mcp.whop.com/.well-known/openai-apps-challenge";
+	const configured = () =>
+		envStub({ OPENAI_APPS_CHALLENGE_TOKEN: "challenge" });
+
+	it("serves the deployment's value as plain text, with nothing around it", async () => {
+		const response = await defaultHandler.fetch(
+			new Request(challengeUrl),
+			configured(),
+		);
+		expect(response.status).toBe(200);
+		expect(response.headers.get("Content-Type")).toContain("text/plain");
+		expect(await response.text()).toBe("challenge");
+	});
+
+	it("answers 404 on a deployment that has no value set", async () => {
+		const response = await defaultHandler.fetch(
+			new Request(challengeUrl),
+			envStub(),
+		);
+		expect(response.status).toBe(404);
+	});
+
+	it("still answers 404 for other well-known paths", async () => {
+		const response = await defaultHandler.fetch(
+			new Request("https://mcp.whop.com/.well-known/openai-apps-other"),
+			configured(),
+		);
+		expect(response.status).toBe(404);
+	});
+});
+
 describe("OAuth authorize", () => {
 	it("redirects straight upstream with a full-access grant", async () => {
 		let pendingKey = "";
