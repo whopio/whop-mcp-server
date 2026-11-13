@@ -153962,7 +153962,6 @@
                   "amount": {
                     "description": "The amount to pay out in the specified currency, fees included. Provide exactly one of `amount` or `recipient_amount`.",
                     "example": 6762.41,
-                    "format": "float",
                     "type": "number"
                   },
                   "currency": {
@@ -153985,7 +153984,6 @@
                   },
                   "recipient_amount": {
                     "description": "The amount the recipient should receive, with fees added on top. When the payout method pays out in `currency`, the quote's `destination_amount` covers it; otherwise its `net_amount` does. With `payment_method_id`, the card charge is set so the quote's `net_amount` is exactly this amount, or the quote is refused. Provide exactly one of `amount` or `recipient_amount`.",
-                    "format": "float",
                     "type": "number"
                   },
                   "speed": {
@@ -154073,7 +154071,6 @@
                     "exchange_rate": {
                       "description": "Quoted exchange rate from the source currency to the destination currency.",
                       "example": 4.13978443,
-                      "format": "float",
                       "type": "number"
                     },
                     "expires_at": {
@@ -154094,7 +154091,6 @@
                     "market_exchange_rate": {
                       "description": "Interbank mid-market rate, with no spread, for the same conversion as `exchange_rate`. The gap between the two is the cost of the conversion. `null` when the payout provider does no foreign exchange, such as USD to a USD bank account. Also `null` when no market rate from the last 15 minutes is available, and on card-funded quotes.",
                       "example": 4.14226979,
-                      "format": "float",
                       "type": [
                         "number",
                         "null"
