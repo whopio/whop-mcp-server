@@ -14614,7 +14614,7 @@
             "type": "boolean"
           },
           "levels_points": {
-            "description": "Whop Levels points this transaction earned for the business. Negative for a refund that takes them back. Null when it earns none: a transaction that hasn't settled, was declined, or was made on a personal card.",
+            "description": "Whop Levels points this transaction earned for the business. Negative for a refund that takes them back. Null when it earns none: a transaction that hasn't settled or was declined.",
             "example": null,
             "type": [
               "number",
