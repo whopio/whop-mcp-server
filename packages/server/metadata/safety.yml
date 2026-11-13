@@ -706,7 +706,6 @@ rules:
         - Files
         - Identity profiles
         - Invoices
-        - Leads
         - Livestreams
         - Media
         - Members

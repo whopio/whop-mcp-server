@@ -7,7 +7,7 @@
         "name": "Api-Version-Date",
         "required": false,
         "schema": {
-          "example": "2026-11-12",
+          "example": "2026-11-13",
           "type": "string"
         }
       },
@@ -10304,9 +10304,10 @@
               "2026-11-10",
               "2026-11-10-1",
               "2026-11-11",
-              "2026-11-12"
+              "2026-11-12",
+              "2026-11-13"
             ],
-            "example": "2026-11-12",
+            "example": "2026-11-13",
             "type": "string"
           },
           "created_at": {
@@ -27499,258 +27500,6 @@
           "bg"
         ],
         "type": "string"
-      },
-      "Lead": {
-        "description": "A prospective customer who has expressed interest in a company or product but has not yet purchased.",
-        "properties": {
-          "created_at": {
-            "description": "The datetime the lead was created.",
-            "example": "2023-12-01T05:00:00.401Z",
-            "format": "date-time",
-            "type": "string"
-          },
-          "id": {
-            "description": "The unique identifier for the lead.",
-            "example": "lead_xxxxxxxxxxxxx",
-            "type": "string"
-          },
-          "member": {
-            "description": "The company member record if this lead has converted into a paying customer. Null if the lead has not converted.",
-            "properties": {
-              "id": {
-                "description": "The unique identifier for the company member.",
-                "type": "string"
-              }
-            },
-            "required": [
-              "id"
-            ],
-            "type": [
-              "object",
-              "null"
-            ]
-          },
-          "metadata": {
-            "additionalProperties": true,
-            "description": "Custom key-value pairs attached to this lead. Null if no metadata was provided.",
-            "type": [
-              "object",
-              "null"
-            ]
-          },
-          "product": {
-            "description": "The product the lead expressed interest in. Null if the lead is not associated with a specific product.",
-            "properties": {
-              "id": {
-                "description": "The unique identifier for the product.",
-                "example": "prod_xxxxxxxxxxxxx",
-                "type": "string"
-              },
-              "title": {
-                "description": "The display name of the product shown to customers on the product page and in search results.",
-                "example": "Pickaxe Analytics",
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "title"
-            ],
-            "type": [
-              "object",
-              "null"
-            ]
-          },
-          "referrer": {
-            "description": "The URL of the page that referred this lead to the company. Null if no referrer was captured.",
-            "example": "https://twitter.com/whabormarket",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "updated_at": {
-            "description": "The datetime the lead was last updated.",
-            "example": "2023-12-01T05:00:00.401Z",
-            "format": "date-time",
-            "type": "string"
-          },
-          "user": {
-            "description": "The user account associated with this lead.",
-            "properties": {
-              "email": {
-                "description": "The user's email address. Requires the member:email:read permission to access. Null if not authorized.",
-                "example": "john.doe@example.com",
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "id": {
-                "description": "The unique identifier for the user.",
-                "example": "user_xxxxxxxxxxxxx",
-                "type": "string"
-              },
-              "name": {
-                "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "username": {
-                "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "email",
-              "name",
-              "username"
-            ],
-            "type": "object"
-          }
-        },
-        "required": [
-          "id",
-          "created_at",
-          "updated_at",
-          "referrer",
-          "metadata",
-          "user",
-          "product",
-          "member"
-        ],
-        "type": "object"
-      },
-      "LeadListItem": {
-        "description": "A prospective customer who has expressed interest in a company or product but has not yet purchased.",
-        "properties": {
-          "created_at": {
-            "description": "The datetime the lead was created.",
-            "example": "2023-12-01T05:00:00.401Z",
-            "format": "date-time",
-            "type": "string"
-          },
-          "id": {
-            "description": "The unique identifier for the lead.",
-            "example": "lead_xxxxxxxxxxxxx",
-            "type": "string"
-          },
-          "member": {
-            "description": "The company member record if this lead has converted into a paying customer. Null if the lead has not converted.",
-            "properties": {
-              "id": {
-                "description": "The unique identifier for the company member.",
-                "type": "string"
-              }
-            },
-            "required": [
-              "id"
-            ],
-            "type": [
-              "object",
-              "null"
-            ]
-          },
-          "metadata": {
-            "additionalProperties": true,
-            "description": "Custom key-value pairs attached to this lead. Null if no metadata was provided.",
-            "type": [
-              "object",
-              "null"
-            ]
-          },
-          "product": {
-            "description": "The product the lead expressed interest in. Null if the lead is not associated with a specific product.",
-            "properties": {
-              "id": {
-                "description": "The unique identifier for the product.",
-                "example": "prod_xxxxxxxxxxxxx",
-                "type": "string"
-              },
-              "title": {
-                "description": "The display name of the product shown to customers on the product page and in search results.",
-                "example": "Pickaxe Analytics",
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "title"
-            ],
-            "type": [
-              "object",
-              "null"
-            ]
-          },
-          "referrer": {
-            "description": "The URL of the page that referred this lead to the company. Null if no referrer was captured.",
-            "example": "https://twitter.com/whabormarket",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "updated_at": {
-            "description": "The datetime the lead was last updated.",
-            "example": "2023-12-01T05:00:00.401Z",
-            "format": "date-time",
-            "type": "string"
-          },
-          "user": {
-            "description": "The user account associated with this lead.",
-            "properties": {
-              "email": {
-                "description": "The user's email address. Requires the member:email:read permission to access. Null if not authorized.",
-                "example": "john.doe@example.com",
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "id": {
-                "description": "The unique identifier for the user.",
-                "example": "user_xxxxxxxxxxxxx",
-                "type": "string"
-              },
-              "name": {
-                "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
-                "type": [
-                  "string",
-                  "null"
-                ]
-              },
-              "username": {
-                "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
-                "type": "string"
-              }
-            },
-            "required": [
-              "id",
-              "email",
-              "name",
-              "username"
-            ],
-            "type": "object"
-          }
-        },
-        "required": [
-          "id",
-          "created_at",
-          "updated_at",
-          "referrer",
-          "metadata",
-          "user",
-          "product",
-          "member"
-        ],
-        "type": "object"
       },
       "LedgerAccount": {
         "description": "A ledger account represents a financial account on Whop that can hold many balances.",
@@ -57304,7 +57053,7 @@
     "termsOfService": "https://whop.com/tos-developer-api/",
     "title": "Whop API",
     "version": "1.0.0",
-    "x-api-version-date": "2026-11-12"
+    "x-api-version-date": "2026-11-13"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -75436,9 +75185,10 @@
                       "2026-11-10",
                       "2026-11-10-1",
                       "2026-11-11",
-                      "2026-11-12"
+                      "2026-11-12",
+                      "2026-11-13"
                     ],
-                    "example": "2026-11-12",
+                    "example": "2026-11-13",
                     "type": "string"
                   },
                   "expires_at": {
@@ -75898,9 +75648,10 @@
                       "2026-11-10",
                       "2026-11-10-1",
                       "2026-11-11",
-                      "2026-11-12"
+                      "2026-11-12",
+                      "2026-11-13"
                     ],
-                    "example": "2026-11-12",
+                    "example": "2026-11-13",
                     "type": "string"
                   },
                   "expires_at": {
@@ -130572,1743 +130323,6 @@
       },
       "x-whop-surface": "native"
     },
-    "/leads": {
-      "get": {
-        "description": "Lists an account's leads, newest first.\n\nRequired permissions:\n - `lead:basic:read`\n - `member:email:read`\n - `access_pass:basic:read`\n - `member:basic:read`",
-        "operationId": "listLead",
-        "parameters": [
-          {
-            "explode": true,
-            "in": "query",
-            "name": "after",
-            "required": false,
-            "schema": {
-              "description": "Returns the elements in the list that come after the specified cursor.",
-              "type": "string"
-            },
-            "style": "form"
-          },
-          {
-            "explode": true,
-            "in": "query",
-            "name": "before",
-            "required": false,
-            "schema": {
-              "description": "Returns the elements in the list that come before the specified cursor.",
-              "type": "string"
-            },
-            "style": "form"
-          },
-          {
-            "explode": true,
-            "in": "query",
-            "name": "first",
-            "required": false,
-            "schema": {
-              "description": "Returns the first _n_ elements from the list.",
-              "example": 42,
-              "type": "integer"
-            },
-            "style": "form"
-          },
-          {
-            "explode": true,
-            "in": "query",
-            "name": "last",
-            "required": false,
-            "schema": {
-              "description": "Returns the last _n_ elements from the list.",
-              "example": 42,
-              "type": "integer"
-            },
-            "style": "form"
-          },
-          {
-            "explode": true,
-            "in": "query",
-            "name": "created_after",
-            "required": false,
-            "schema": {
-              "description": "Only return leads created after this timestamp.",
-              "example": "2023-12-01T05:00:00.401Z",
-              "format": "date-time",
-              "type": "string"
-            },
-            "style": "form"
-          },
-          {
-            "explode": true,
-            "in": "query",
-            "name": "created_before",
-            "required": false,
-            "schema": {
-              "description": "Only return leads created before this timestamp.",
-              "example": "2023-12-01T05:00:00.401Z",
-              "format": "date-time",
-              "type": "string"
-            },
-            "style": "form"
-          },
-          {
-            "explode": true,
-            "in": "query",
-            "name": "product_ids",
-            "required": false,
-            "schema": {
-              "description": "Filter leads to only those associated with these specific product identifiers.",
-              "items": {
-                "description": "Represents a unique identifier that is Base64 obfuscated. It is often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as `\"VXNlci0xMA==\"`) or integer (such as `4`) input value will be accepted as an ID.",
-                "type": "string"
-              },
-              "type": "array"
-            },
-            "style": "form"
-          },
-          {
-            "explode": true,
-            "in": "query",
-            "name": "account_id",
-            "required": true,
-            "schema": {
-              "description": "The unique identifier of the company to list leads for.",
-              "example": "biz_xxxxxxxxxxxxxx",
-              "type": "string"
-            },
-            "style": "form"
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "description": "The connection type for Lead.",
-                  "properties": {
-                    "data": {
-                      "description": "A list of nodes.",
-                      "items": {
-                        "$ref": "#/components/schemas/LeadListItem"
-                      },
-                      "type": "array"
-                    },
-                    "page_info": {
-                      "$ref": "#/components/schemas/PageInfo",
-                      "description": "Information to aid in pagination."
-                    }
-                  },
-                  "required": [
-                    "data",
-                    "page_info"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "A successful response"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "code": "parameter_missing",
-                    "message": "Missing required parameter: amount.",
-                    "param": "amount",
-                    "type": "invalid_request_error"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Bad request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "Invalid or missing API key",
-                    "type": "unauthorized"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "You do not have permission to access this resource",
-                    "type": "forbidden"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "Resource not found",
-                    "type": "not_found"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": null
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Verification required"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": null
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Too many requests"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "An unexpected error occurred",
-                    "type": "internal_server_error"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Internal server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": [
-              "lead:basic:read",
-              "member:email:read",
-              "access_pass:basic:read",
-              "member:basic:read"
-            ]
-          }
-        ],
-        "summary": "List leads",
-        "tags": [
-          "Leads"
-        ],
-        "x-group-title": "CRM"
-      },
-      "post": {
-        "description": "Records a lead: a potential customer's interest in an account or one of its products.\n\nRequired permissions:\n - `lead:manage`\n - `member:email:read`\n - `access_pass:basic:read`\n - `member:basic:read`",
-        "operationId": "createLead",
-        "parameters": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "description": "Parameters for CreateLeadV2",
-                "properties": {
-                  "account_id": {
-                    "description": "The unique identifier of the company to create the lead for, starting with 'biz_'.",
-                    "example": "biz_xxxxxxxxxxxxxx",
-                    "type": "string"
-                  },
-                  "metadata": {
-                    "additionalProperties": true,
-                    "description": "A JSON object of custom metadata to attach to the lead for tracking purposes.",
-                    "type": [
-                      "object",
-                      "null"
-                    ]
-                  },
-                  "product_id": {
-                    "description": "The unique identifier of the product the lead is interested in, starting with 'prod_'.",
-                    "example": "prod_xxxxxxxxxxxxx",
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "referrer": {
-                    "description": "The referral URL that brought the lead to the company, such as 'https://example.com/landing'.",
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "user_id": {
-                    "description": "The unique identifier of the user to record as the lead. If authenticated as a user, that user is used automatically.",
-                    "example": "user_xxxxxxxxxxxxx",
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  }
-                },
-                "required": [
-                  "account_id"
-                ],
-                "type": "object"
-              }
-            }
-          },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Lead"
-                }
-              }
-            },
-            "description": "A successful response"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "code": "parameter_missing",
-                    "message": "Missing required parameter: amount.",
-                    "param": "amount",
-                    "type": "invalid_request_error"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Bad request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "Invalid or missing API key",
-                    "type": "unauthorized"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "You do not have permission to access this resource",
-                    "type": "forbidden"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "Resource not found",
-                    "type": "not_found"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": null
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Verification required"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": null
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Too many requests"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "An unexpected error occurred",
-                    "type": "internal_server_error"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Internal server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": [
-              "lead:manage",
-              "member:email:read",
-              "access_pass:basic:read",
-              "member:basic:read"
-            ]
-          }
-        ],
-        "summary": "Create lead",
-        "tags": [
-          "Leads"
-        ],
-        "x-group-title": "CRM"
-      }
-    },
-    "/leads/{id}": {
-      "get": {
-        "description": "Retrieves the details of an existing lead.\n\nRequired permissions:\n - `lead:basic:read`\n - `member:email:read`\n - `access_pass:basic:read`\n - `member:basic:read`",
-        "operationId": "retrieveLead",
-        "parameters": [
-          {
-            "description": "The unique identifier of the lead to retrieve.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "example": "lead_xxxxxxxxxxxxx",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Lead"
-                }
-              }
-            },
-            "description": "A successful response"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "code": "parameter_missing",
-                    "message": "Missing required parameter: amount.",
-                    "param": "amount",
-                    "type": "invalid_request_error"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Bad request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "Invalid or missing API key",
-                    "type": "unauthorized"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "You do not have permission to access this resource",
-                    "type": "forbidden"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "Resource not found",
-                    "type": "not_found"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": null
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Verification required"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": null
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Too many requests"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "An unexpected error occurred",
-                    "type": "internal_server_error"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Internal server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": [
-              "lead:basic:read",
-              "member:email:read",
-              "access_pass:basic:read",
-              "member:basic:read"
-            ]
-          }
-        ],
-        "summary": "Retrieve lead",
-        "tags": [
-          "Leads"
-        ],
-        "x-group-title": "CRM"
-      },
-      "patch": {
-        "description": "Updates a lead's `metadata` or `referrer`.\n\nRequired permissions:\n - `lead:manage`\n - `member:email:read`\n - `access_pass:basic:read`\n - `member:basic:read`",
-        "operationId": "updateLead",
-        "parameters": [
-          {
-            "description": "The unique identifier of the lead to update, starting with 'lead_'.",
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "example": "lead_xxxxxxxxxxxxx",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "description": "Parameters for UpdateLead",
-                "properties": {
-                  "metadata": {
-                    "additionalProperties": true,
-                    "description": "A JSON object of custom metadata to set on the lead, replacing any existing metadata.",
-                    "type": [
-                      "object",
-                      "null"
-                    ]
-                  },
-                  "referrer": {
-                    "description": "The updated referral URL for the lead, such as 'https://example.com/landing'.",
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  }
-                },
-                "required": [],
-                "type": "object"
-              }
-            }
-          },
-          "required": false
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Lead"
-                }
-              }
-            },
-            "description": "A successful response"
-          },
-          "400": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "code": "parameter_missing",
-                    "message": "Missing required parameter: amount.",
-                    "param": "amount",
-                    "type": "invalid_request_error"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Bad request"
-          },
-          "401": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "Invalid or missing API key",
-                    "type": "unauthorized"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Unauthorized"
-          },
-          "403": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "You do not have permission to access this resource",
-                    "type": "forbidden"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Forbidden"
-          },
-          "404": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "Resource not found",
-                    "type": "not_found"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Not found"
-          },
-          "422": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": null
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Verification required"
-          },
-          "429": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": null
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Too many requests"
-          },
-          "500": {
-            "content": {
-              "application/json": {
-                "example": {
-                  "error": {
-                    "message": "An unexpected error occurred",
-                    "type": "internal_server_error"
-                  }
-                },
-                "schema": {
-                  "properties": {
-                    "error": {
-                      "properties": {
-                        "code": {
-                          "description": "A short string indicating the specific error code, e.g. 'parameter_missing', 'parameter_invalid', 'invalid_json'",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "message": {
-                          "type": "string"
-                        },
-                        "param": {
-                          "description": "The parameter that caused the error, if applicable",
-                          "type": [
-                            "string",
-                            "null"
-                          ]
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "type",
-                        "message"
-                      ],
-                      "type": "object"
-                    }
-                  },
-                  "required": [
-                    "error"
-                  ],
-                  "type": "object"
-                }
-              }
-            },
-            "description": "Internal server error"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": [
-              "lead:manage",
-              "member:email:read",
-              "access_pass:basic:read",
-              "member:basic:read"
-            ]
-          }
-        ],
-        "summary": "Update lead",
-        "tags": [
-          "Leads"
-        ],
-        "x-group-title": "CRM"
-      }
-    },
     "/ledger_accounts/{id}": {
       "get": {
         "description": "Retrieves the details of an existing ledger account.\n\nRequired permissions:\n - `company:balance:read`\n - `payout:account:read`",
@@ -185445,7 +183459,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -185773,7 +183787,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -186101,7 +184115,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "disabled_at": "2026-01-01T12:00:00.000Z",
@@ -186234,7 +184248,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -186568,7 +184582,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "ad_campaign": {
                     "id": "adcamp_xxxxxxxxxxxxxx"
@@ -186901,7 +184915,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -187272,7 +185286,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -187649,7 +185663,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "ad_campaign": {
                     "id": "adcamp_xxxxxxxxxxxxxx"
@@ -188057,7 +186071,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxx2",
@@ -188203,7 +186217,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxx2",
@@ -188349,7 +186363,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -188770,7 +186784,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -189191,7 +187205,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -189612,7 +187626,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -190033,7 +188047,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -190202,7 +188216,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -190371,7 +188385,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -190540,7 +188554,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -190709,7 +188723,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -190850,7 +188864,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -190991,7 +189005,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -191132,7 +189146,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -191273,7 +189287,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -191414,7 +189428,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "audience": {
                     "type": "channel",
@@ -191671,7 +189685,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "audience": {
                     "type": "channel",
@@ -191942,7 +189956,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "completed": true,
                   "course": {
@@ -192086,7 +190100,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "amount": "75000000000",
                   "available_at": null,
@@ -192227,7 +190241,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "acceptable": true,
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -192419,7 +190433,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "acceptable": false,
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -192611,7 +190625,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": null,
                   "amount": 25.0,
@@ -192752,7 +190766,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -192897,7 +190911,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -193042,7 +191056,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -193187,7 +191201,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -193332,7 +191346,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -193477,7 +191491,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -193622,7 +191636,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -193767,7 +191781,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "events": [
                     {
@@ -194190,7 +192204,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "download_url": "https://s3.amazonaws.com/uploads/exports/members-export.csv",
@@ -194320,7 +192334,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "download_url": null,
@@ -194450,7 +192464,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "amount": "512345000000",
                   "available_at": "2026-01-01T12:00:00.000Z",
@@ -194590,7 +192604,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "id": "idpf_xxxxxxxxxxxxxx"
                 },
@@ -194723,7 +192737,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -194907,7 +192921,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -195091,7 +193105,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -195275,7 +193289,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -195459,7 +193473,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -195643,7 +193657,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "balances": [
                     {
@@ -195787,7 +193801,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -195951,7 +193965,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -196115,7 +194129,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -196291,7 +194305,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -196467,7 +194481,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -196643,7 +194657,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -196942,7 +194956,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -197241,7 +195255,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -197540,7 +195554,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -197839,7 +195853,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -198131,7 +196145,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -198430,7 +196444,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -198729,7 +196743,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -199221,7 +197235,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -199709,7 +197723,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -200193,7 +198207,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "address": {
                     "city": "Austin",
@@ -200335,7 +198349,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_reference": "4483",
                   "bank_verification_state": null,
@@ -200926,7 +198940,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -201239,7 +199253,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -201552,7 +199566,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -201865,7 +199879,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -202028,7 +200042,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -202191,7 +200205,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -202354,7 +200368,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -202517,7 +200531,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -202680,7 +200694,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "amount": 50.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -202850,7 +200864,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "amount": 50.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -203020,7 +201034,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -203193,7 +201207,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -203362,7 +201376,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -203531,7 +201545,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -203681,7 +201695,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -203828,7 +201842,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -204017,7 +202031,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "carrier": "ups",
@@ -204150,7 +202164,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "carrier": "ups",
@@ -204283,7 +202297,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "amount": {
                     "amount": "-1234.56",
@@ -204469,7 +202483,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -204711,7 +202725,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "amount": {
                     "amount": "250.00",
@@ -205101,7 +203115,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "amount": {
                     "amount": "250.00",
@@ -205491,7 +203505,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "amount": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -205869,7 +203883,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-12",
+                "api_version_date": "2026-11-13",
                 "data": {
                   "id": "verf_xxxxxxxxxxxxxx",
                   "last_error_code": null,

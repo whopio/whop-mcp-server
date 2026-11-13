@@ -259,7 +259,6 @@ export const CHATGPT_DESTRUCTIVE_WRITES: ReadonlySet<string> = new Set([
 	"PATCH /experiences/{id}",
 	"PATCH /forum_posts/{id}",
 	"PATCH /forums/{id}",
-	"PATCH /leads/{id}",
 	"PATCH /members/{id}",
 	"PATCH /messages/{id}",
 	"PATCH /payment_rules/{id}",

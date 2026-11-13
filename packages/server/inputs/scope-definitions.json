@@ -436,10 +436,6 @@
     "bot": true,
     "user": true
   },
-  "lead:manage": {
-    "bot": true,
-    "user": true
-  },
   "livestream:chat:read": {
     "bot": true,
     "user": true
