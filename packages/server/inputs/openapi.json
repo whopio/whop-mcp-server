@@ -51646,6 +51646,17 @@
               "description": "A total for every line in `data.line_items`, and only those."
             },
             "type": "array"
+          },
+          "shipping_options": {
+            "items": {
+              "$ref": "#/components/schemas/ShippingAddressChangedWebhookReplyShippingOption",
+              "description": "Up to 10 ways to ship to this address. PayPal shows them on their own Shipping line and selects the first. The buyer pays the line totals plus the option they pick. Leave it out to keep shipping inside the line totals."
+            },
+            "type": "array"
+          },
+          "tax": {
+            "$ref": "#/components/schemas/Money",
+            "description": "The tax you charge at this address, in the currency of `data.amount`. PayPal shows it on its own Tax line, and the buyer pays it on top of the line totals. Leave it out to keep tax inside the line totals."
           }
         },
         "required": [
@@ -51657,7 +51668,7 @@
         "properties": {
           "amount": {
             "$ref": "#/components/schemas/Money",
-            "description": "The line's total at this address, tax and shipping included, in the currency of `data.amount`."
+            "description": "The line's total at this address, in the currency of `data.amount`. It includes tax unless you send `tax`, and shipping unless you send `shipping_options`."
           },
           "id": {
             "description": "The line's `id` from `data.line_items`, unchanged.",
@@ -51666,6 +51677,28 @@
         },
         "required": [
           "id",
+          "amount"
+        ],
+        "type": "object"
+      },
+      "ShippingAddressChangedWebhookReplyShippingOption": {
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Money",
+            "description": "What this option costs at this address, in the currency of `data.amount`. Zero for free shipping."
+          },
+          "description": {
+            "description": "What the buyer sees for this option in PayPal, up to 127 characters.",
+            "type": "string"
+          },
+          "external_identifier": {
+            "description": "Your identifier for this option, unique within `shipping_options` and up to 127 characters. PayPal returns it to Whop when the buyer picks this option.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "external_identifier",
+          "description",
           "amount"
         ],
         "type": "object"

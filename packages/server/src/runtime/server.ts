@@ -17,6 +17,7 @@ import {
 import {
 	CHATGPT_DESTRUCTIVE_WRITES,
 	CHATGPT_OPEN_WORLD_WRITES,
+	CHATGPT_SIDE_EFFECT_READS,
 	DEFAULT_SURFACE,
 	type SurfaceName,
 } from "../policy/surfaces.ts";
@@ -446,11 +447,15 @@ export function createWhopMcpServer(
 						: toolInputSchema(op, principal),
 				) as Record<string, unknown>,
 				annotations: {
-					readOnlyHint: op.annotations.readOnlyHint,
+					readOnlyHint:
+						op.annotations.readOnlyHint &&
+						!onChatgptList(op, options.surface, CHATGPT_SIDE_EFFECT_READS),
 					destructiveHint:
 						op.annotations.destructiveHint ||
 						onChatgptList(op, options.surface, CHATGPT_DESTRUCTIVE_WRITES),
-					idempotentHint: op.annotations.idempotentHint,
+					idempotentHint:
+						op.annotations.idempotentHint &&
+						!onChatgptList(op, options.surface, CHATGPT_SIDE_EFFECT_READS),
 					openWorldHint:
 						op.annotations.openWorldHint ||
 						onChatgptList(op, options.surface, CHATGPT_OPEN_WORLD_WRITES),
@@ -692,6 +697,11 @@ const CHATGPT_CONFIRMATION_INSTRUCTION =
 const CHATGPT_UNAVAILABLE_INSTRUCTION =
 	"This connection cannot issue refunds, charge saved cards, create invoices or send payouts: say so, offer no workaround. Tell the user they can do it in their Whop dashboard.";
 
+// OpenAI's review turns down answers that echo personal data nobody asked
+// for. The tools still return these fields, so a user who asks for one gets it.
+const CHATGPT_PERSONAL_DATA_INSTRUCTION =
+	"Do not volunteer customers' email addresses, phone numbers, postal addresses, IP addresses or card or bank details. Include one when the user asks for it or needs it to tell two customers apart.";
+
 function buildInstructions(
 	principal: PrincipalContext,
 	surface: SurfaceName | undefined,
@@ -711,7 +721,11 @@ function buildInstructions(
 				: "the user, across every business they can act on"
 		} with the "${principal.permissionProfile}" permission profile (${toolCount}).`,
 		...(surface === "chatgpt"
-			? [CHATGPT_CONFIRMATION_INSTRUCTION, CHATGPT_UNAVAILABLE_INSTRUCTION]
+			? [
+					CHATGPT_CONFIRMATION_INSTRUCTION,
+					CHATGPT_UNAVAILABLE_INSTRUCTION,
+					CHATGPT_PERSONAL_DATA_INSTRUCTION,
+				]
 			: []),
 		principal.accountId
 			? "Account binding is enforced server-side: input referencing a different account is rejected. Switching accounts requires the user to reconnect."

@@ -325,15 +325,49 @@ export const CHATGPT_DESTRUCTIVE_WRITES: ReadonlySet<string> = new Set([
 ]);
 
 /**
- * Writes that put something in front of the public although the shared safety
- * rules report them as staying inside the account. OpenAI asks for
- * openWorldHint true on public or open-ended entities. Kept out of safety.yml
- * so the other routes don't change.
+ * Writes this route reports as open world although the shared safety rules
+ * report them as staying inside the account. OpenAI asks for openWorldHint
+ * true on public or open-ended entities. Most of these can put something in
+ * front of the public (ads, products, prices, apps, checkout links) or fetch
+ * an outside URL. OpenAI's scan of this route flagged every entry except the
+ * three publish and deploy calls, which were already here; `POST /accounts`
+ * and `POST /files/{id}/complete` are listed only because the scan asked.
+ * Kept out of safety.yml so the other routes don't change.
  */
 export const CHATGPT_OPEN_WORLD_WRITES: ReadonlySet<string> = new Set([
+	"PATCH /ad_campaigns/{id}",
+	"PATCH /ad_groups/{id}",
+	"PATCH /ads/{id}",
+	"PATCH /experiences/{id}",
+	"PATCH /products/{id}",
+	"PATCH /variants/{id}",
+	"POST /accounts",
+	"POST /ad_campaigns/{id}/unpause",
+	"POST /ad_groups/{id}/unpause",
+	"POST /ads",
+	"POST /ads/{id}/duplicate",
+	"POST /ads/{id}/unpause",
 	"POST /app_builds/{id}/promote",
 	"POST /apps/{id}/deploy",
+	"POST /checkout_configurations",
+	"POST /events/validate_pixel",
+	"POST /experiences",
+	"POST /files/{id}/complete",
+	"POST /products",
 	"POST /products/{id}/publish",
+	"POST /variants",
+]);
+
+/**
+ * Reads that leave a record behind, so this route reports them as writes, and
+ * as not idempotent, since every call adds another record.
+ * OpenAI's scan flags readOnlyHint true on a tool with a visible side effect.
+ * Kept out of safety.yml so the other routes don't change. Only the full tool
+ * listing reads this set; the compact listing's search and call tools still
+ * follow the registry, and this route does not use them.
+ */
+export const CHATGPT_SIDE_EFFECT_READS: ReadonlySet<string> = new Set([
+	"GET /experiments/exposures", // records an exposure each time it evaluates
 ]);
 
 const EXCLUSIONS: Record<SurfaceName, ReadonlySet<string>> = {

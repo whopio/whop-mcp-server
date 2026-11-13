@@ -10,6 +10,7 @@ import {
 	CHATGPT_DESTRUCTIVE_WRITES,
 	CHATGPT_EXCLUSIONS,
 	CHATGPT_OPEN_WORLD_WRITES,
+	CHATGPT_SIDE_EFFECT_READS,
 	CLAUDE_DIRECTORY_EXCLUSIONS,
 	operationInSurface,
 	type SurfaceName,
@@ -725,13 +726,57 @@ describe("chatgpt surface", () => {
 		for (const op of listed) {
 			expect(chatgpt.get(op.toolName), op.toolName).toBe(true);
 		}
-		expect(chatgpt.get("products_create")).toBe(false);
+		expect(chatgpt.get("members_notes_create")).toBe(false);
 
 		const full = await hints("full");
 		for (const op of listed) {
 			expect(full.get(op.toolName), op.toolName).toBe(
 				op.annotations.openWorldHint,
 			);
+		}
+	});
+
+	it("reports a read that leaves a record as a write here only", async () => {
+		const hints = async (surface: SurfaceName) => {
+			const client = await connect({
+				surface,
+				principal: principalFixture({ principalType: "user", accountId: null }),
+			});
+			const { tools } = await client.listTools();
+			return new Map(
+				tools.map((tool) => [
+					tool.name,
+					{
+						readOnly: tool.annotations?.readOnlyHint,
+						idempotent: tool.annotations?.idempotentHint,
+					},
+				]),
+			);
+		};
+		const listed = registry.operations.filter((op) =>
+			CHATGPT_SIDE_EFFECT_READS.has(key(op)),
+		);
+		expect(listed).toHaveLength(CHATGPT_SIDE_EFFECT_READS.size);
+
+		// Each call adds a record, so a repeat is not a no-op either.
+		const chatgpt = await hints("chatgpt");
+		for (const op of listed) {
+			expect(chatgpt.get(op.toolName), op.toolName).toEqual({
+				readOnly: false,
+				idempotent: false,
+			});
+		}
+		expect(chatgpt.get("members_list")).toEqual({
+			readOnly: true,
+			idempotent: true,
+		});
+
+		const full = await hints("full");
+		for (const op of listed) {
+			expect(full.get(op.toolName), op.toolName).toEqual({
+				readOnly: true,
+				idempotent: op.annotations.idempotentHint,
+			});
 		}
 	});
 
@@ -1025,6 +1070,32 @@ describe("chatgpt surface", () => {
 		expect(
 			(await open("full")).names.filter((name) => leftOut.test(name)).length,
 		).toBeGreaterThan(0);
+	});
+
+	it("keeps customer contact details out of answers unless asked, on this route only", async () => {
+		const instructions = async (surface: SurfaceName) => {
+			const client = await connect({
+				surface,
+				fetch: fakeFetch().fetch,
+				principal: principalFixture({ principalType: "user", accountId: null }),
+			});
+			return client.getInstructions();
+		};
+		const chatgpt = await instructions("chatgpt");
+		expect(chatgpt).toContain(
+			"Do not volunteer customers' email addresses, phone numbers, postal addresses, IP addresses or card or bank details. Include one when the user asks for it or needs it to tell two customers apart.",
+		);
+		// It comes after the two rules that have to land in the first 512
+		// characters, so it must not push either of them out.
+		const head = chatgpt?.slice(0, 512);
+		expect(head).toContain("get their explicit yes");
+		expect(head).toContain("say so, offer no workaround.");
+
+		for (const surface of ["full", "claude_directory"] as const) {
+			expect(await instructions(surface)).not.toContain(
+				"Do not volunteer customers'",
+			);
+		}
 	});
 
 	it("keeps only the chosen financial and credential operations", () => {
