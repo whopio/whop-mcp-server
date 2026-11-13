@@ -35618,6 +35618,10 @@
       },
       "PaymentBankTransfer": {
         "properties": {
+          "accepts_split_transfers": {
+            "description": "Whether the buyer can complete this payment with more than one transfer. When false, only one transfer for the full amount completes it.",
+            "type": "boolean"
+          },
           "account_number": {
             "description": "The account to send to, in the local scheme's format — `account_number_label` says what to call it.",
             "example": "4411 0902 33",
