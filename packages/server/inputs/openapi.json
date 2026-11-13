@@ -153788,7 +153788,7 @@
                       "properties": {
                         "converted_amount": {
                           "$ref": "#/components/schemas/Money",
-                          "description": "What the requested amount converts into, in the payout method's currency. When the account holds its USD in a stablecoin, this is an estimate: the payout is for what the conversion produces once that USD arrives, and `POST /payouts` answers with the payout request until that payout exists."
+                          "description": "What the requested amount converts into, in the payout method's currency. This is an estimate when the account's USD has to settle before payout. The payout is then for what the conversion produces. `POST /payouts` answers with the payout request until that payout exists."
                         },
                         "estimated_savings": {
                           "description": "How much more the recipient receives than if the same amount were paid out in USD and converted at the payout provider's rate. Null when the provider has no price for that route or converting first saves nothing.",
@@ -153842,7 +153842,7 @@
                       "type": "string"
                     },
                     "market_exchange_rate": {
-                      "description": "Interbank mid-market rate, with no spread, for the same conversion as `exchange_rate`. The gap between the two is the cost of the conversion. `null` when the payout provider does no foreign exchange for this payout, such as USD to a USD bank account or to a USD stablecoin, when no market rate from the last 15 minutes is available, and on card-funded quotes.",
+                      "description": "Interbank mid-market rate, with no spread, for the same conversion as `exchange_rate`. The gap between the two is the cost of the conversion. `null` when the payout provider does no foreign exchange, such as USD to a USD bank account. Also `null` when no market rate from the last 15 minutes is available, and on card-funded quotes.",
                       "example": 4.14226979,
                       "format": "float",
                       "type": [
@@ -170882,7 +170882,7 @@
                       ]
                     },
                     "amount_in": {
-                      "description": "Fiat pairs only: amount of the source currency converted. Null while a stablecoin repayment is processing.",
+                      "description": "Fiat pairs only: amount of the source currency converted. Null while the conversion is settling.",
                       "example": 131.4,
                       "type": [
                         "number",
@@ -170890,7 +170890,7 @@
                       ]
                     },
                     "amount_out": {
-                      "description": "Fiat pairs only: amount credited in the destination currency. Null while a stablecoin repayment is processing.",
+                      "description": "Fiat pairs only: amount credited in the destination currency. Null while the conversion is settling.",
                       "example": 180.0,
                       "type": [
                         "number",
@@ -170938,7 +170938,7 @@
                       "type": "string"
                     },
                     "status": {
-                      "description": "Swap status. Crypto swaps start `queued`; fiat conversions return `complete`, or `working` while a stablecoin repayment settles.",
+                      "description": "Swap status. Crypto swaps start `queued`. Fiat conversions return `complete`, or `working` while the conversion settles.",
                       "enum": [
                         "queued",
                         "working",
