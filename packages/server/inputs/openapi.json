@@ -128046,7 +128046,8 @@
             "schema": {
               "enum": [
                 "created_at",
-                "due_at"
+                "due_at",
+                "status"
               ],
               "type": "string"
             }
