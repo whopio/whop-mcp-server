@@ -540,36 +540,23 @@ describe("dispatcher", () => {
 	});
 
 	for (const toolName of ["stats_get", "stats_time-series_get"]) {
-		it(`passes the platform stats sentinel through ${toolName} when an account is bound`, async () => {
-			const { fetch, requests } = fakeFetch();
-			await makeDispatcher(fetch).dispatch(
-				findOperation(registry, toolName),
-				{
-					metric: "businesses",
-					account_id: "platform",
-					from: "2017-01-01",
-					to: "2026-10-18",
-				},
-				principal,
-			);
-			expect(requests[0].url).toContain("account_id=platform");
-		});
+		for (const metric of ["businesses", "gmv_usd", "gross_revenue"]) {
+			it(`passes the platform stats sentinel through ${toolName} for ${metric} when an account is bound`, async () => {
+				const { fetch, requests } = fakeFetch();
+				await makeDispatcher(fetch).dispatch(
+					findOperation(registry, toolName),
+					{
+						metric,
+						account_id: "platform",
+						from: "2026-10-01",
+						to: "2026-10-18",
+					},
+					principal,
+				);
+				expect(requests[0].url).toContain("account_id=platform");
+			});
+		}
 	}
-
-	it("rejects the platform sentinel for other stats metrics", async () => {
-		await expect(
-			makeDispatcher(fakeFetch().fetch).dispatch(
-				findOperation(registry, "stats_get"),
-				{
-					metric: "gross_revenue",
-					account_id: "platform",
-					from: "2026-10-01",
-					to: "2026-10-18",
-				},
-				principal,
-			),
-		).rejects.toMatchObject({ code: "invalid_input" });
-	});
 
 	it("rejects the platform sentinel outside stats_get", async () => {
 		const op = findOperation(registry, "products_list");
