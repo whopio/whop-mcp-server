@@ -61535,7 +61535,7 @@
                   },
                   "subaccount_team_view_only": {
                     "description": "Whether this account's subaccounts are view-only for their own team members. Set it to `true` to refuse every change a subaccount's team tries to make while still letting them see what their role allows. Only accounts with subaccounts can set it. Requires the `company:update` scope on your API key.",
-                    "example": false,
+                    "example": true,
                     "type": "boolean"
                   },
                   "subscription_failure_behavior": {
