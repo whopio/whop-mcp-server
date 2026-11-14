@@ -184565,7 +184565,7 @@
     },
     "ad.updated": {
       "post": {
-        "description": "Sent when an ad's status or delivery_status changes, including the in_review and rejected verdicts from ad review. previous_attributes carries the values they changed from; the payload carries no performance stats\n\nRequired permissions:\n - `webhook_receive:ads`",
+        "description": "Sent when an ad's status, delivery_status, or content_review changes. A content_review change can leave the status as it was, such as new rules broken on a rejected ad. When Whop's content policy changes, Whop stops recommending ads reviewed under the old policy without an event. Each such ad sends ad.updated when Whop reviews it again. previous_attributes holds only the fields that changed, with the values they changed from. The payload carries no performance stats\n\nRequired permissions:\n - `webhook_receive:ads`",
         "parameters": [
           {
             "in": "header",
