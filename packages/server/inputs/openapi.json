@@ -30357,6 +30357,17 @@
             "description": "The most decimals an order's `size` can have on this market.",
             "example": 5,
             "type": "integer"
+          },
+          "volume_24h": {
+            "description": "The value of the asset traded on all exchanges in the last 24 hours, in USD. For a tokenized stock, this counts trades of the token. `null` for a perpetual. `null` when the volume is not available.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
           }
         },
         "required": [
@@ -30366,6 +30377,7 @@
           "size_decimals",
           "price",
           "change_24h_percentage",
+          "volume_24h",
           "logo_url"
         ],
         "type": "object"
@@ -171935,7 +171947,7 @@
     },
     "/trades/markets": {
       "get": {
-        "description": "Returns every market you can trade on Whop.\n\n- **Spot:** listed by symbol: `BTC`, `SOL` and `XAUT` (gold), and tokenized stocks by ticker, such as `AAPL`, with their 24-hour change and logo.\n- **Perpetuals:** such as `BTC`, and stock and commodity perpetuals from Hyperliquid's `xyz` exchange, such as `xyz:TSLA`. Send the `id` as `market` when you create a trade.\n\nThe same symbol can appear twice, once as a perpetual and once as spot, so use `id` together with `instrument_type` to tell them apart. Results are sorted by `id`, then `instrument_type`.\n\nThis endpoint is public: no API key is needed, and each IP address can make up to 60 requests a minute.",
+        "description": "Returns every market you can trade on Whop.\n\n- **Spot:** listed by symbol: `BTC`, `SOL` and `XAUT` (gold), and tokenized stocks by ticker, such as `AAPL`, with their 24-hour change and logo. Spot markets also carry `volume_24h`, the value traded across exchanges over the last 24 hours.\n- **Perpetuals:** such as `BTC`, and stock and commodity perpetuals from Hyperliquid's `xyz` exchange, such as `xyz:TSLA`. Send the `id` as `market` when you create a trade.\n\nThe same symbol can appear twice, once as a perpetual and once as spot, so use `id` together with `instrument_type` to tell them apart. Results are sorted by `id`, then `instrument_type`.\n\nThis endpoint is public: no API key is needed, and each IP address can make up to 60 requests a minute.",
         "operationId": "listMarkets",
         "parameters": [
           {
@@ -172011,7 +172023,8 @@
                             "decimals": 6,
                             "display_decimals": 6
                           },
-                          "size_decimals": 5
+                          "size_decimals": 5,
+                          "volume_24h": null
                         },
                         {
                           "change_24h_percentage": null,
@@ -172025,7 +172038,13 @@
                             "decimals": 8,
                             "display_decimals": 8
                           },
-                          "size_decimals": 5
+                          "size_decimals": 5,
+                          "volume_24h": {
+                            "amount": "21622161986.44",
+                            "currency": "usd",
+                            "decimals": 2,
+                            "display_decimals": 2
+                          }
                         },
                         {
                           "change_24h_percentage": null,
@@ -172039,7 +172058,8 @@
                             "decimals": 6,
                             "display_decimals": 6
                           },
-                          "size_decimals": 4
+                          "size_decimals": 4,
+                          "volume_24h": null
                         },
                         {
                           "change_24h_percentage": 1.4235,
@@ -172053,7 +172073,13 @@
                             "decimals": 8,
                             "display_decimals": 8
                           },
-                          "size_decimals": 8
+                          "size_decimals": 8,
+                          "volume_24h": {
+                            "amount": "34341055.48",
+                            "currency": "usd",
+                            "decimals": 2,
+                            "display_decimals": 2
+                          }
                         },
                         {
                           "change_24h_percentage": null,
@@ -172067,7 +172093,8 @@
                             "decimals": 6,
                             "display_decimals": 6
                           },
-                          "size_decimals": 2
+                          "size_decimals": 2,
+                          "volume_24h": null
                         },
                         {
                           "change_24h_percentage": null,
@@ -172081,7 +172108,8 @@
                             "decimals": 8,
                             "display_decimals": 8
                           },
-                          "size_decimals": 3
+                          "size_decimals": 3,
+                          "volume_24h": null
                         },
                         {
                           "change_24h_percentage": null,
@@ -172095,7 +172123,8 @@
                             "decimals": 8,
                             "display_decimals": 8
                           },
-                          "size_decimals": 2
+                          "size_decimals": 2,
+                          "volume_24h": null
                         },
                         {
                           "change_24h_percentage": null,
@@ -172109,7 +172138,8 @@
                             "decimals": 6,
                             "display_decimals": 6
                           },
-                          "size_decimals": 3
+                          "size_decimals": 3,
+                          "volume_24h": null
                         }
                       ],
                       "page_info": {
