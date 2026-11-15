@@ -156570,6 +156570,14 @@
           },
           {
             "in": "query",
+            "name": "sku",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
             "name": "created_before",
             "required": false,
             "schema": {
@@ -176287,6 +176295,16 @@
                 "type": "string"
               },
               "type": "array"
+            }
+          },
+          {
+            "description": "Filter to only variants with this stock keeping unit. The match is on the full value and is not case-sensitive.",
+            "in": "query",
+            "name": "sku",
+            "required": false,
+            "schema": {
+              "example": "TEE-LARGE-BLUE",
+              "type": "string"
             }
           },
           {
