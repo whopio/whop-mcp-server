@@ -36246,6 +36246,13 @@
                   "null"
                 ]
               },
+              "redirect_url": {
+                "description": "Where the customer is sent after paying for this variant. Must be a valid URL that is not another Whop checkout link.",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
               "renewal_price": {
                 "description": "Recurring price in the variant currency.",
                 "type": [
@@ -44788,6 +44795,14 @@
             "example": "https://whop.com/checkout/plan_xxxxxxxxxxxxxx",
             "type": "string"
           },
+          "redirect_url": {
+            "description": "Where the customer is sent after paying for this variant. `null` when none is set, or unless the actor has the `plan:basic:read` scope on the variant's account.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "release_method": {
             "description": "Sales method for this variant.",
             "enum": [
@@ -44928,6 +44943,7 @@
           "three_ds_level",
           "member_count",
           "internal_notes",
+          "redirect_url",
           "metadata",
           "sku",
           "attributes",
@@ -45203,6 +45219,14 @@
             "example": "https://whop.com/checkout/plan_xxxxxxxxxxxxxx",
             "type": "string"
           },
+          "redirect_url": {
+            "description": "Where the customer is sent after paying for this variant. `null` when none is set, or unless the actor has the `plan:basic:read` scope on the variant's account.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "release_method": {
             "description": "Sales method for this variant.",
             "enum": [
@@ -45333,6 +45357,7 @@
           "three_ds_level",
           "member_count",
           "internal_notes",
+          "redirect_url",
           "metadata",
           "sku",
           "attributes",
@@ -55115,6 +55140,14 @@
             "example": "https://whop.com/checkout/plan_xxxxxxxxxxxxxx",
             "type": "string"
           },
+          "redirect_url": {
+            "description": "Where the customer is sent after paying for this variant. `null` when none is set, or unless the actor has the `plan:basic:read` scope on the variant's account.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "release_method": {
             "description": "Sales method for this variant.",
             "enum": [
@@ -55255,6 +55288,7 @@
           "three_ds_level",
           "member_count",
           "internal_notes",
+          "redirect_url",
           "metadata",
           "sku",
           "attributes",
@@ -55500,6 +55534,14 @@
             "example": "https://whop.com/checkout/plan_xxxxxxxxxxxxxx",
             "type": "string"
           },
+          "redirect_url": {
+            "description": "Where the customer is sent after paying for this variant. `null` when none is set, or unless the actor has the `plan:basic:read` scope on the variant's account.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "release_method": {
             "description": "Sales method for this variant.",
             "enum": [
@@ -55630,6 +55672,7 @@
           "three_ds_level",
           "member_count",
           "internal_notes",
+          "redirect_url",
           "metadata",
           "sku",
           "attributes",
@@ -128701,6 +128744,14 @@
                                 "null"
                               ]
                             },
+                            "redirect_url": {
+                              "description": "Where the customer is sent after paying for this variant. Must be a valid URL that is not another Whop checkout link.",
+                              "example": " https://example.com/thanks ",
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
                             "renewal_price": {
                               "description": "Recurring price in the variant currency.",
                               "example": 45,
@@ -129445,6 +129496,14 @@
                             "product_id": {
                               "description": "Existing product ID belonging to the account, prefixed `prod_`. Mutually exclusive with `product`.",
                               "example": "prod_xxxxxxxxxxxxxx",
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "redirect_url": {
+                              "description": "Where the customer is sent after paying for this variant. Must be a valid URL that is not another Whop checkout link.",
+                              "example": " https://example.com/thanks ",
                               "type": [
                                 "string",
                                 "null"
@@ -145267,6 +145326,13 @@
                                     "null"
                                   ]
                                 },
+                                "redirect_url": {
+                                  "description": "Where the customer is sent after paying for this variant. Must be a valid URL that is not another Whop checkout link.",
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
                                 "renewal_price": {
                                   "description": "Recurring price in the variant currency.",
                                   "type": [
@@ -146138,6 +146204,13 @@
                           },
                           "product_id": {
                             "description": "Existing product ID belonging to the account, prefixed `prod_`. Mutually exclusive with `product`.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "redirect_url": {
+                            "description": "Where the customer is sent after paying for this variant. Must be a valid URL that is not another Whop checkout link.",
                             "type": [
                               "string",
                               "null"
@@ -200221,6 +200294,7 @@
                     "title": "Ceramic Coating Package"
                   },
                   "purchase_url": "https://whop.com/checkout/plan_xxxxxxxxxxxxxx",
+                  "redirect_url": null,
                   "release_method": "buy_now",
                   "renewal_price": 50.0,
                   "sku": null,
@@ -200534,6 +200608,7 @@
                     "title": "Ceramic Coating Package"
                   },
                   "purchase_url": "https://whop.com/checkout/plan_xxxxxxxxxxxxxx",
+                  "redirect_url": null,
                   "release_method": "buy_now",
                   "renewal_price": 50.0,
                   "sku": null,
@@ -200847,6 +200922,7 @@
                     "title": "Ceramic Coating Package"
                   },
                   "purchase_url": "https://whop.com/checkout/plan_xxxxxxxxxxxxxx",
+                  "redirect_url": null,
                   "release_method": "buy_now",
                   "renewal_price": 50.0,
                   "sku": null,
