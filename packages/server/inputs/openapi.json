@@ -44830,6 +44830,14 @@
             "example": false,
             "type": "boolean"
           },
+          "unpaid_invoice_count": {
+            "description": "Number of issued invoices for this variant that are not paid or void. While it is above `0`, you can't change the variant's prices, billing period, trial, number of payments, currency or billing type. `null` unless the actor has the `plan:basic:read` scope on the variant's account.",
+            "example": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "updated_at": {
             "description": "When the variant was last updated, as an ISO 8601 timestamp.",
             "example": "2026-01-01T12:00:00.000Z",
@@ -44891,6 +44899,7 @@
           "tax_type",
           "collect_tax",
           "deletable",
+          "unpaid_invoice_count",
           "effective_payment_method_configuration",
           "custom_fields"
         ],
@@ -55301,6 +55310,14 @@
             "example": false,
             "type": "boolean"
           },
+          "unpaid_invoice_count": {
+            "description": "Number of issued invoices for this variant that are not paid or void. While it is above `0`, you can't change the variant's prices, billing period, trial, number of payments, currency or billing type. `null` unless the actor has the `plan:basic:read` scope on the variant's account.",
+            "example": 0,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "updated_at": {
             "description": "When the variant was last updated, as an ISO 8601 timestamp.",
             "example": "2026-01-01T12:00:00.000Z",
@@ -55362,6 +55379,7 @@
           "tax_type",
           "collect_tax",
           "deletable",
+          "unpaid_invoice_count",
           "effective_payment_method_configuration",
           "custom_fields"
         ],
@@ -127965,6 +127983,29 @@
             }
           },
           {
+            "description": "Only invoices in any of these statuses. Repeat the parameter to pass several. Combined with `status` when both are sent.",
+            "in": "query",
+            "name": "statuses",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "draft",
+                  "open",
+                  "authorized",
+                  "paid",
+                  "pending",
+                  "uncollectible",
+                  "unresolved",
+                  "void"
+                ],
+                "example": "open",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
             "in": "query",
             "name": "overdue",
             "required": false,
@@ -127992,6 +128033,15 @@
           {
             "in": "query",
             "name": "product_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only invoices that bill this variant, prefixed `plan_`. An invoice matches when the variant is any of its items.",
+            "in": "query",
+            "name": "variant_id",
             "required": false,
             "schema": {
               "type": "string"
@@ -176971,7 +177021,7 @@
         }
       ],
       "patch": {
-        "description": "Updates a variant's pricing, billing interval, visibility, stock, and other settings.",
+        "description": "Updates a variant's pricing, billing interval, visibility, stock, and other settings. While `unpaid_invoice_count` is above `0`, a change to the prices, billing period, trial, number of payments, currency or billing type returns a `400`.",
         "operationId": "updateVariant",
         "parameters": [],
         "requestBody": {
@@ -177318,6 +177368,10 @@
               }
             },
             "description": "variant updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "variant billed by an unpaid invoice"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized",
@@ -200204,6 +200258,7 @@
                   "title": "Unlimited Wash Club",
                   "trial_period_days": null,
                   "unlimited_stock": false,
+                  "unpaid_invoice_count": 0,
                   "updated_at": "2026-01-01T12:00:00.000Z",
                   "visibility": "visible"
                 },
@@ -200518,6 +200573,7 @@
                   "title": "Unlimited Wash Club",
                   "trial_period_days": null,
                   "unlimited_stock": false,
+                  "unpaid_invoice_count": 0,
                   "updated_at": "2026-01-01T12:00:00.000Z",
                   "visibility": "visible"
                 },
@@ -200832,6 +200888,7 @@
                   "title": "Unlimited Wash Club",
                   "trial_period_days": 7,
                   "unlimited_stock": false,
+                  "unpaid_invoice_count": 0,
                   "updated_at": "2026-01-01T12:00:00.000Z",
                   "visibility": "visible"
                 },
