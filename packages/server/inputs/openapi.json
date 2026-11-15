@@ -53776,6 +53776,11 @@
               "null"
             ]
           },
+          "followers_count": {
+            "description": "The number of users who follow this user.",
+            "example": 0,
+            "type": "integer"
+          },
           "id": {
             "description": "User ID, prefixed `user_`.",
             "example": "user_xxxxxxxxxxxxxx",
@@ -53851,6 +53856,14 @@
             },
             "type": "object"
           },
+          "verified_at": {
+            "description": "When the user received a verified badge, as an ISO 8601 timestamp. `null` when the user is not verified.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "whop_partner_enabled_at": {
             "description": "When the user became an enrolled Whop Partner, as an ISO 8601 timestamp. `null` if never enrolled.",
             "example": "2026-01-01T12:00:00.000Z",
@@ -53894,6 +53907,8 @@
           "cards",
           "trading",
           "level",
+          "followers_count",
+          "verified_at",
           "verification",
           "whop_partner_enabled_at",
           "whop_partner_verified_at",
