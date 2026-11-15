@@ -23532,12 +23532,6 @@
             "nullable": true,
             "type": "string"
           },
-          "feature_flag_only": {
-            "description": "`true` when this was created as a feature flag rather than a full experiment. Feature flags share the same evaluation API but do not collect metric results.",
-            "example": false,
-            "nullable": true,
-            "type": "boolean"
-          },
           "findings": {
             "description": "What was learned and why this outcome, recorded when the experiment was ended. `null` until then.",
             "example": "Treatment lifted conversion 8%",
@@ -23594,80 +23588,6 @@
             ],
             "example": "draft",
             "type": "string"
-          },
-          "targeting_rules": {
-            "description": "Rules gating who is in the experiment at all. Conditions within a rule are AND-ed, rules are OR-ed, and `exclude` rules always win. Empty means everyone qualifies.",
-            "items": {
-              "properties": {
-                "conditions": {
-                  "description": "Conditions within this rule, all of which must match.",
-                  "items": {
-                    "properties": {
-                      "field": {
-                        "description": "Property name to read from the user context. Present when `type` is `property`.",
-                        "nullable": true,
-                        "type": "string"
-                      },
-                      "operator": {
-                        "description": "Comparison to apply.",
-                        "enum": [
-                          "any",
-                          "none",
-                          "eq",
-                          "neq",
-                          "gt",
-                          "gte",
-                          "lt",
-                          "lte"
-                        ],
-                        "example": "any",
-                        "type": "string"
-                      },
-                      "type": {
-                        "description": "What the condition matches on: the user ID, the account ID, or a named user property.",
-                        "enum": [
-                          "user_id",
-                          "account_id",
-                          "property"
-                        ],
-                        "example": "user_id",
-                        "type": "string"
-                      },
-                      "value": {
-                        "description": "Value or list of values to match against."
-                      }
-                    },
-                    "required": [
-                      "type",
-                      "operator",
-                      "value"
-                    ],
-                    "type": "object"
-                  },
-                  "type": "array"
-                },
-                "pass_percentage": {
-                  "description": "Percentage of matching subjects that this rule lets in, from 0 to 100. Absent when the rule lets in every matching subject. Raising it keeps every subject that the rule already lets in.",
-                  "maximum": 100,
-                  "minimum": 0,
-                  "type": "number"
-                },
-                "type": {
-                  "description": "`include` — users matching this rule qualify; `exclude` — users matching this rule are always excluded, overriding any include rule.",
-                  "enum": [
-                    "include",
-                    "exclude"
-                  ],
-                  "example": "include",
-                  "type": "string"
-                }
-              },
-              "required": [
-                "conditions"
-              ],
-              "type": "object"
-            },
-            "type": "array"
           },
           "updated_at": {
             "example": "2026-01-01T12:00:00.000Z",
@@ -23736,8 +23656,7 @@
           "flag_key",
           "name",
           "status",
-          "variants",
-          "targeting_rules"
+          "variants"
         ],
         "type": "object"
       },
@@ -116724,10 +116643,6 @@
                     },
                     "type": "object"
                   },
-                  "feature_flag_only": {
-                    "description": "When `true`, creates a binary feature flag rather than a full experiment. Feature flags expose the same evaluation API but do not collect metric results. Defaults to `false`.",
-                    "type": "boolean"
-                  },
                   "flag_key": {
                     "description": "Developer-chosen handle referenced from code, used in evaluation and results calls. Interchangeable with the returned `expt_` id anywhere the API takes an experiment identifier.",
                     "example": "checkout_redesign_v2",
@@ -116755,80 +116670,6 @@
                     "$ref": "#/components/schemas/ExperimentResourceReference",
                     "description": "Resource owned by the account that this experiment is bound to, such as an app or product. `null` when unbound. Fixed once the experiment first activates.",
                     "nullable": true
-                  },
-                  "targeting_rules": {
-                    "description": "Rules that determine which subjects qualify for the experiment.",
-                    "items": {
-                      "properties": {
-                        "conditions": {
-                          "description": "Conditions within this rule. Must be non-empty. All conditions must be satisfied for the rule to match (AND logic). Rules are OR-ed together.",
-                          "items": {
-                            "properties": {
-                              "field": {
-                                "description": "Property name to read from the user context. Required when `type` is `property`.",
-                                "nullable": true,
-                                "type": "string"
-                              },
-                              "operator": {
-                                "description": "Comparison to apply: `any`/`none` — inclusion/exclusion list; `eq`/`neq` — equality; `gt`/`gte`/`lt`/`lte` — numeric range.",
-                                "enum": [
-                                  "any",
-                                  "none",
-                                  "eq",
-                                  "neq",
-                                  "gt",
-                                  "gte",
-                                  "lt",
-                                  "lte"
-                                ],
-                                "example": "any",
-                                "type": "string"
-                              },
-                              "type": {
-                                "description": "`user_id` — match on subject user ID; `account_id` — match on account ID (prefixed `biz_`); `property` — match on a named user property (requires `field`).",
-                                "enum": [
-                                  "user_id",
-                                  "account_id",
-                                  "property"
-                                ],
-                                "example": "user_id",
-                                "type": "string"
-                              },
-                              "value": {
-                                "description": "Value or list of values to match against. Pass an array for `any`/`none`, a scalar for the others."
-                              }
-                            },
-                            "required": [
-                              "type",
-                              "operator",
-                              "value"
-                            ],
-                            "type": "object"
-                          },
-                          "type": "array"
-                        },
-                        "pass_percentage": {
-                          "description": "Percentage of matching subjects that this rule lets in, from 0 to 100. Omit it to let in every matching subject. Only `include` rules accept it. Raising it keeps every subject that the rule already lets in.",
-                          "maximum": 100,
-                          "minimum": 0,
-                          "type": "number"
-                        },
-                        "type": {
-                          "description": "`include` — users matching this rule qualify; `exclude` — users matching this rule are always excluded, overriding any include rule. Defaults to `include`.",
-                          "enum": [
-                            "include",
-                            "exclude"
-                          ],
-                          "example": "include",
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "conditions"
-                      ],
-                      "type": "object"
-                    },
-                    "type": "array"
                   },
                   "variants": {
                     "description": "Treatment arms to create. Users outside every arm form the implicit `control` group. Required unless `feature_flag_only` is `true`.",
@@ -117103,80 +116944,6 @@
                     "description": "Resource owned by the account that this experiment is bound to, such as an app or product. `null` when unbound. Fixed once the experiment first activates.",
                     "nullable": true
                   },
-                  "targeting_rules": {
-                    "description": "Replace the targeting rules with this set. Omit to leave unchanged.",
-                    "items": {
-                      "properties": {
-                        "conditions": {
-                          "description": "Conditions within this rule. Must be non-empty. All conditions must be satisfied for the rule to match (AND logic). Rules are OR-ed together.",
-                          "items": {
-                            "properties": {
-                              "field": {
-                                "description": "Property name to read from the user context. Required when `type` is `property`.",
-                                "nullable": true,
-                                "type": "string"
-                              },
-                              "operator": {
-                                "description": "Comparison to apply: `any`/`none` — inclusion/exclusion list; `eq`/`neq` — equality; `gt`/`gte`/`lt`/`lte` — numeric range.",
-                                "enum": [
-                                  "any",
-                                  "none",
-                                  "eq",
-                                  "neq",
-                                  "gt",
-                                  "gte",
-                                  "lt",
-                                  "lte"
-                                ],
-                                "example": "any",
-                                "type": "string"
-                              },
-                              "type": {
-                                "description": "`user_id` — match on subject user ID; `account_id` — match on account ID (prefixed `biz_`); `property` — match on a named user property (requires `field`).",
-                                "enum": [
-                                  "user_id",
-                                  "account_id",
-                                  "property"
-                                ],
-                                "example": "user_id",
-                                "type": "string"
-                              },
-                              "value": {
-                                "description": "Value or list of values to match against. Pass an array for `any`/`none`, a scalar for the others."
-                              }
-                            },
-                            "required": [
-                              "type",
-                              "operator",
-                              "value"
-                            ],
-                            "type": "object"
-                          },
-                          "type": "array"
-                        },
-                        "pass_percentage": {
-                          "description": "Percentage of matching subjects that this rule lets in, from 0 to 100. Omit it to let in every matching subject. Only `include` rules accept it. Raising it keeps every subject that the rule already lets in.",
-                          "maximum": 100,
-                          "minimum": 0,
-                          "type": "number"
-                        },
-                        "type": {
-                          "description": "`include` — users matching this rule qualify; `exclude` — users matching this rule are always excluded, overriding any include rule. Defaults to `include`.",
-                          "enum": [
-                            "include",
-                            "exclude"
-                          ],
-                          "example": "include",
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "conditions"
-                      ],
-                      "type": "object"
-                    },
-                    "type": "array"
-                  },
                   "variants": {
                     "description": "Grow treatment allocation. Pass every existing treatment with an equal-or-higher weight; append new names to add arms. Weights never decrease and arms are never removed. Omit to leave unchanged.",
                     "items": {
@@ -117274,14 +117041,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "duration_days": {
-                    "description": "Reporting window length in days. Omit to use the default. This does not automatically end the experiment.",
-                    "example": 30,
-                    "nullable": true,
-                    "type": "integer"
-                  }
-                },
+                "properties": {},
                 "type": "object"
               }
             }
