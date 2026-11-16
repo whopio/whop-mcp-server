@@ -30170,7 +30170,7 @@
             "type": "string"
           },
           "pinned_at": {
-            "description": "When a moderator pinned this livestream's recording, as an ISO 8601 timestamp. `null` when it is not pinned.",
+            "description": "When the recording was pinned or last moved, as an ISO 8601 timestamp. Pinned livestreams are ordered by it, newest first. `null` when not pinned.",
             "example": "2026-01-01T12:00:00.000Z",
             "type": [
               "string",
@@ -130798,7 +130798,7 @@
             }
           },
           {
-            "description": "When `true`, only pinned livestreams, most recently pinned first. When `false`, only livestreams that are not pinned.",
+            "description": "When `true`, only pinned livestreams, newest `pinned_at` first. When `false`, only livestreams that are not pinned.",
             "in": "query",
             "name": "pinned",
             "required": false,
@@ -131015,13 +131015,35 @@
         }
       ],
       "post": {
-        "description": "Pins an ended livestream's recording so everyone in the experience sees it featured. Pinning it again keeps the original `pinned_at`.",
+        "description": "Pins an ended livestream's recording so everyone in the experience sees it featured, up to 3 per experience. Without `position`, a new pin goes first and an existing pin keeps its place. With `position`, the pin moves there and every pinned livestream in that experience gets a new `pinned_at` in the new order.",
         "operationId": "pinLivestream",
         "parameters": [
           {
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "experience_id": {
+                    "description": "ID of the livestreams experience that `position` counts in, prefixed `exp_`. Required with `position` when the livestream is in more than one experience.",
+                    "example": "exp_xxxxxxxxxxxxxx",
+                    "type": "string"
+                  },
+                  "position": {
+                    "description": "Zero-based index in the experience's pinned livestreams after the change. Omit it to put a new pin first or keep an existing pin in place.",
+                    "example": 1,
+                    "minimum": 0,
+                    "type": "integer"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -131050,7 +131072,8 @@
             "description": "livestream not found"
           },
           "409": {
-            "$ref": "#/components/responses/Conflict"
+            "$ref": "#/components/responses/Conflict",
+            "description": "the pinned livestreams are being updated"
           }
         },
         "security": [
@@ -131114,7 +131137,8 @@
             "description": "livestream not found"
           },
           "409": {
-            "$ref": "#/components/responses/Conflict"
+            "$ref": "#/components/responses/Conflict",
+            "description": "the pinned livestreams are being updated"
           }
         },
         "security": [
