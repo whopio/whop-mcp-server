@@ -107,6 +107,11 @@ overrides:
       - time_zone
       - user_id
 
+  # The API rejects a user token without account_id on this list, so a user
+  # connection is asked for the business up front.
+  "GET /ad_campaigns":
+    requiresAccount: true
+
   "GET /payments":
     description: >-
       See sales and payments, newest first: who paid, how much, when, and
@@ -149,6 +154,7 @@ overrides:
       See your customers: everyone who has bought from an account. A
       member is one buyer's relationship with the account, however many
       memberships they hold.
+    requiresAccount: true
 
   "GET /channels":
     description: >-
@@ -277,8 +283,9 @@ overrides:
 
   "GET /courses":
     description: >-
-      See the courses in a business or in one of its apps. Hidden courses
-      are included only for callers who can edit courses.
+      See the courses in a business or in one of its apps. Pass
+      `account_id` or `experience_id`; one of them is required. Hidden
+      courses are included only for callers who can edit courses.
 
   "GET /payouts":
     description: >-
@@ -445,7 +452,9 @@ overrides:
   "GET /forum_posts":
     description: >-
       Read the posts in a forum, or the replies under one post, with an
-      option to show only pinned posts.
+      option to show only pinned posts. `experience_id` must be a forum:
+      check each experience's `app.name` in experiences_list first, since
+      a chat or course experience returns 400.
 
   "GET /bounties":
     description: >-

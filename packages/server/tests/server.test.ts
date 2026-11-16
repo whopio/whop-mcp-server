@@ -846,7 +846,8 @@ describe("chatgpt surface", () => {
 		expect(chatgpt.some((path) => path.endsWith("/payments"))).toBe(true);
 
 		const full = await queried("full");
-		expect(full.some((path) => path.endsWith("/members"))).toBe(true);
+		expect(full.some((path) => path.endsWith("/products"))).toBe(true);
+		expect(full.some((path) => path.endsWith("/members"))).toBe(false);
 	});
 
 	const userPrincipal = () =>
@@ -955,7 +956,7 @@ describe("chatgpt surface", () => {
 		}
 	});
 
-	it("keeps request IDs out of error replies here, and in the audit log", async () => {
+	it("keeps request IDs out of error replies here, and logs them on every route", async () => {
 		const fail = async (surface: SurfaceName) => {
 			const auditSink = new InMemoryAuditSink();
 			const { fetch } = fakeFetch(() => ({
@@ -989,7 +990,7 @@ describe("chatgpt surface", () => {
 		for (const surface of ["full", "claude_directory"] as const) {
 			const older = await fail(surface);
 			expect(older.error.request_id).toBe("req_1");
-			expect(older.audit?.requestId).toBeFalsy();
+			expect(older.audit?.requestId).toBe("req_1");
 		}
 	});
 
@@ -1293,5 +1294,49 @@ describe("direct execution and policy hooks", () => {
 		});
 		expect(allowed.isError).toBeFalsy();
 		expect(requests.length).toBe(1);
+	});
+});
+
+describe("lists that need a business for a user token", () => {
+	const userPrincipal = principalFixture({
+		principalType: "user",
+		accountId: null,
+	});
+
+	it.each(["members_list", "ad-campaigns_list"])(
+		"%s asks a user connection for account_id before calling the API",
+		async (name) => {
+			const { fetch, requests } = fakeFetch();
+			const client = await connect({ principal: userPrincipal, fetch });
+			const tool = (await client.listTools()).tools.find(
+				(candidate) => candidate.name === name,
+			);
+			expect(tool?.inputSchema.required).toContain("account_id");
+
+			const missing = parseResult(
+				await client.callTool({ name, arguments: {} }),
+			);
+			expect(JSON.stringify(missing)).toContain("account_required");
+			expect(JSON.stringify(missing)).toContain("accounts_list");
+			expect(requests).toHaveLength(0);
+
+			const result = await client.callTool({
+				name,
+				arguments: { account_id: "biz_1" },
+			});
+			expect(result.isError).toBeFalsy();
+			expect(requests[0]?.url).toContain("account_id=biz_1");
+		},
+	);
+
+	it("fills in the bound business for a business connection", async () => {
+		const { fetch, requests } = fakeFetch();
+		const client = await connect({ fetch });
+		const result = await client.callTool({
+			name: "members_list",
+			arguments: {},
+		});
+		expect(result.isError).toBeFalsy();
+		expect(requests[0]?.url).toContain("account_id=biz_boundAccount");
 	});
 });

@@ -542,9 +542,7 @@ export function createWhopMcpServer(
 						pluginSource: options.pluginSource,
 						errorCode: failure.code,
 						upstreamStatus: failure.status,
-						...(options.surface === "chatgpt"
-							? { requestId: failure.requestId }
-							: {}),
+						requestId: failure.requestId,
 						...(via ? { via } : {}),
 					},
 				),
