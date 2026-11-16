@@ -14616,7 +14616,7 @@
             "type": "boolean"
           },
           "levels_points": {
-            "description": "Whop Levels points this transaction earned for the business. Negative for a refund that takes them back. Null when it earns none: a transaction that hasn't settled or was declined.",
+            "description": "Whop Levels points this transaction earned for the business. Negative for a refund that takes them back. For a pending transaction, the points it will earn once it settles. Null when it earns none, such as a declined transaction.",
             "example": null,
             "type": [
               "number",
@@ -189859,7 +189859,7 @@
                   "declined_reason": null,
                   "id": "citx_xxxxxxxxxxxxxx",
                   "international": false,
-                  "levels_points": null,
+                  "levels_points": 125.0,
                   "local_amount": 12.5,
                   "merchant_category": "Auto Parts & Accessories",
                   "merchant_category_code": "5533",
