@@ -26407,6 +26407,14 @@
             "example": "open",
             "type": "string"
           },
+          "subscription_starts_at": {
+            "description": "When the first billing period of the invoice's recurring items starts, as an ISO 8601 timestamp. Renewals count from this moment. `null` starts the period when the invoice is paid, and so does a time that has passed by then. An invoice with a start date skips its variants' free trial.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "subtotal": {
             "$ref": "#/components/schemas/Money"
           },
@@ -26453,6 +26461,7 @@
           "overdue",
           "deletable",
           "due_at",
+          "subscription_starts_at",
           "scheduled_send_at",
           "scheduled_charge_at",
           "scheduled_collection_method",
@@ -122427,7 +122436,7 @@
                             },
                             "billing_period": {
                               "description": "A recurring variant's billing period in days, from 2 to 365, such as `45`.",
-                              "example": 45,
+                              "example": 30,
                               "maximum": 365,
                               "minimum": 2,
                               "type": [
@@ -122442,7 +122451,7 @@
                                 "renewal",
                                 "one_time"
                               ],
-                              "example": "one_time",
+                              "example": "renewal",
                               "type": [
                                 "string",
                                 "null"
@@ -122733,7 +122742,7 @@
                             },
                             "title": {
                               "description": "Variant title.",
-                              "example": "Paint correction",
+                              "example": "Coaching",
                               "type": [
                                 "string",
                                 "null"
@@ -122869,6 +122878,15 @@
                     },
                     "maxItems": 50,
                     "type": "array"
+                  },
+                  "subscription_starts_at": {
+                    "description": "When the first billing period of the invoice's recurring items starts, as an ISO 8601 timestamp in the future. Renewals count from this moment. `null` starts the period when the invoice is paid. Needs a recurring item. Can be updated on drafts. A start date replaces a variant's free trial, and the invoice bills the full price.",
+                    "example": "2026-01-01T12:00:00.000Z",
+                    "format": "date-time",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "time_zone": {
                     "description": "The IANA time zone for the dates on the invoice's email and PDF. Set it so the due date reads as the day you picked. When omitted, a new invoice uses the time zone Whop has for the user creating it, else UTC. Can be updated on drafts.",
@@ -123194,7 +123212,7 @@
                             },
                             "billing_period": {
                               "description": "A recurring variant's billing period in days, from 2 to 365, such as `45`.",
-                              "example": 45,
+                              "example": 30,
                               "maximum": 365,
                               "minimum": 2,
                               "type": [
@@ -123209,7 +123227,7 @@
                                 "renewal",
                                 "one_time"
                               ],
-                              "example": "one_time",
+                              "example": "renewal",
                               "type": [
                                 "string",
                                 "null"
@@ -123500,7 +123518,7 @@
                             },
                             "title": {
                               "description": "Variant title.",
-                              "example": "Paint correction",
+                              "example": "Coaching",
                               "type": [
                                 "string",
                                 "null"
@@ -123636,6 +123654,15 @@
                     },
                     "maxItems": 50,
                     "type": "array"
+                  },
+                  "subscription_starts_at": {
+                    "description": "When the first billing period of the invoice's recurring items starts, as an ISO 8601 timestamp in the future. Renewals count from this moment. `null` starts the period when the invoice is paid. Needs a recurring item. Can be updated on drafts. A start date replaces a variant's free trial, and the invoice bills the full price.",
+                    "example": "2026-01-01T12:00:00.000Z",
+                    "format": "date-time",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "time_zone": {
                     "description": "The IANA time zone for the dates on the invoice's email and PDF. Set it so the due date reads as the day you picked. When omitted, a new invoice uses the time zone Whop has for the user creating it, else UTC. Can be updated on drafts.",
