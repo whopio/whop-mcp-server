@@ -1595,6 +1595,7 @@
               "my",
               "do",
               "sv",
+              "hn",
               null
             ],
             "example": "usa",
@@ -1976,6 +1977,52 @@
                   "percentage": 2.6
                 },
                 "source": "custom"
+              },
+              "hn": {
+                "default": {
+                  "fixed": {
+                    "amount": "0.30",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 4.9
+                },
+                "fixed": {
+                  "amount": "0.30",
+                  "currency": "usd",
+                  "decimals": 2,
+                  "display_decimals": 2
+                },
+                "maximum": {
+                  "fixed": {
+                    "amount": "1.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 10.0
+                },
+                "minimum": {
+                  "fixed": {
+                    "amount": "0.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 4.7
+                },
+                "percentage": 4.9,
+                "reset": {
+                  "fixed": {
+                    "amount": "0.30",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 4.9
+                },
+                "source": "default"
               },
               "mx": {
                 "default": {
@@ -13181,7 +13228,8 @@
               "rub",
               "cny",
               "kzt",
-              "awg"
+              "awg",
+              "hnl"
             ],
             "example": "usd",
             "type": "string"
@@ -16180,6 +16228,7 @@
               "awg",
               "whop_usd",
               "xau",
+              "hnl",
               null
             ],
             "example": "usd",
@@ -18720,7 +18769,8 @@
           "kzt",
           "awg",
           "whop_usd",
-          "xau"
+          "xau",
+          "hnl"
         ],
         "example": "usd",
         "type": "string"
@@ -24760,7 +24810,8 @@
               "kzt",
               "awg",
               "whop_usd",
-              "xau"
+              "xau",
+              "hnl"
             ],
             "example": "aud",
             "type": "string"
@@ -30177,6 +30228,10 @@
               "null"
             ]
           },
+          "recap": {
+            "$ref": "#/components/schemas/LivestreamRecap",
+            "description": "Top moments AI picked from chat, and chat activity. Only `retrieve` returns it, and only to callers with the `livestream:moderate` permission."
+          },
           "recording_started_at": {
             "description": "When the recording's first frame was captured, as an ISO 8601 timestamp. Offsets into the recording count from here, not from `started_at`. `null` until recording starts.",
             "example": "2026-01-01T12:00:00.000Z",
@@ -30241,6 +30296,136 @@
           "thumbnail_url",
           "recording_url",
           "created_at"
+        ],
+        "type": "object"
+      },
+      "LivestreamRecap": {
+        "properties": {
+          "chat": {
+            "description": "Chat activity during the livestream. `null` while `status` is `pending`, before the livestream ends, or when the recap could not be started.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/LivestreamRecapChat"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "moments": {
+            "items": {
+              "$ref": "#/components/schemas/LivestreamRecapMoment",
+              "description": "Up to 5 top moments AI picked from what chat reacted to, earliest first. Empty while `status` is not `ready`, when nothing stood out, or when they could not be picked. A moment is left out once its `message` is removed from chat."
+            },
+            "type": "array"
+          },
+          "status": {
+            "description": "`pending` while the recap is being generated and `ready` once it is. `unavailable` when the livestream has not ended, had no chat, or the recap could not be started. Retrieve the livestream again later while it is `pending`, or to retry a recap that could not be started.",
+            "enum": [
+              "pending",
+              "ready",
+              "unavailable"
+            ],
+            "example": "ready",
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "moments",
+          "chat"
+        ],
+        "type": "object"
+      },
+      "LivestreamRecapChat": {
+        "properties": {
+          "chatter_count": {
+            "description": "How many different people sent those messages.",
+            "example": 87,
+            "type": "integer"
+          },
+          "message_count": {
+            "description": "Chat messages sent from a minute before `recording_started_at`, or `started_at` when the livestream was not recorded, to a minute after `ended_at`.",
+            "example": 412,
+            "type": "integer"
+          },
+          "per_minute": {
+            "items": {
+              "description": "Chat messages sent in each minute from `recording_started_at`, or `started_at` when the livestream was not recorded, to `ended_at`. Messages sent outside that span are left out.",
+              "example": 4,
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "message_count",
+          "chatter_count",
+          "per_minute"
+        ],
+        "type": "object"
+      },
+      "LivestreamRecapMessage": {
+        "properties": {
+          "content": {
+            "description": "Message text, with whitespace collapsed and cut to at most 280 characters.",
+            "example": "how do I get these presets??",
+            "type": "string"
+          },
+          "id": {
+            "description": "ID of the chat message.",
+            "example": "post_xxxxxxxxxxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "user_name": {
+            "description": "Display name of the person who sent the message. `null` when their account no longer exists.",
+            "example": "Maya Chen",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "content",
+          "user_name"
+        ],
+        "type": "object"
+      },
+      "LivestreamRecapMoment": {
+        "properties": {
+          "description": {
+            "description": "One sentence on what happened and how chat reacted, in at most 140 characters.",
+            "example": "Elena showed her new preset pack and chat asked how to get it.",
+            "type": "string"
+          },
+          "end_offset_seconds": {
+            "description": "Where chat's reaction to the moment ends, in seconds from the same point as `offset_seconds`. Never before `offset_seconds`, and never after the next moment's `offset_seconds`.",
+            "example": 1461,
+            "type": "integer"
+          },
+          "message": {
+            "$ref": "#/components/schemas/LivestreamRecapMessage",
+            "description": "Chat message that best sums up the moment."
+          },
+          "offset_seconds": {
+            "description": "Where the moment starts, shortly before chat reacted, in seconds from `recording_started_at`, or from `started_at` when the livestream was not recorded.",
+            "example": 1412,
+            "type": "integer"
+          },
+          "title": {
+            "description": "What happened on stream, in at most 60 characters.",
+            "example": "Elena reveals the blue hour preset pack",
+            "type": "string"
+          }
+        },
+        "required": [
+          "offset_seconds",
+          "end_offset_seconds",
+          "title",
+          "description",
+          "message"
         ],
         "type": "object"
       },
@@ -33963,7 +34148,8 @@
             "type": "integer"
           },
           "referring_partner": {
-            "description": "The user currently attributed as this user's primary referrer. Null when there is no active primary referral.",
+            "deprecated": true,
+            "description": "The user who referred this user. Deprecated: no longer populated. Always `null`.\nDEPRECATED: No longer populated. Always null.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/UserSummary"
@@ -36088,7 +36274,8 @@
                   "kzt",
                   "awg",
                   "whop_usd",
-                  "xau"
+                  "xau",
+                  "hnl"
                 ],
                 "example": "usd",
                 "type": "string"
@@ -44670,7 +44857,8 @@
               "kzt",
               "awg",
               "whop_usd",
-              "xau"
+              "xau",
+              "hnl"
             ],
             "example": "usd",
             "type": "string"
@@ -46604,7 +46792,8 @@
               "kzt",
               "awg",
               "whop_usd",
-              "xau"
+              "xau",
+              "hnl"
             ],
             "example": "usd",
             "type": "string"
@@ -46920,7 +47109,8 @@
               "kzt",
               "awg",
               "whop_usd",
-              "xau"
+              "xau",
+              "hnl"
             ],
             "example": "usd",
             "type": "string"
@@ -50015,7 +50205,8 @@
               "kzt",
               "awg",
               "whop_usd",
-              "xau"
+              "xau",
+              "hnl"
             ],
             "example": "usd",
             "type": "string"
@@ -112642,7 +112833,8 @@
                           "kzt",
                           "awg",
                           "whop_usd",
-                          "xau"
+                          "xau",
+                          "hnl"
                         ],
                         "example": "usd",
                         "type": "string"
@@ -122892,7 +123084,8 @@
                                 "rub",
                                 "cny",
                                 "kzt",
-                                "awg"
+                                "awg",
+                                "hnl"
                               ],
                               "example": "usd",
                               "type": "string"
@@ -128612,7 +128805,8 @@
                                 "kzt",
                                 "awg",
                                 "whop_usd",
-                                "xau"
+                                "xau",
+                                "hnl"
                               ],
                               "example": "usd",
                               "type": "string"
@@ -129370,7 +129564,8 @@
                                 "kzt",
                                 "awg",
                                 "whop_usd",
-                                "xau"
+                                "xau",
+                                "hnl"
                               ],
                               "example": "usd",
                               "type": "string"
@@ -131024,7 +131219,7 @@
     },
     "/livestreams/{id}": {
       "get": {
-        "description": "Retrieves a livestream by ID.",
+        "description": "Retrieves a livestream by ID. Callers with the `livestream:moderate` permission also get its `recap`: the top moments AI picked from chat, and chat activity.",
         "operationId": "retrieveLivestream",
         "responses": {
           "200": {
@@ -145278,7 +145473,8 @@
                                     "kzt",
                                     "awg",
                                     "whop_usd",
-                                    "xau"
+                                    "xau",
+                                    "hnl"
                                   ],
                                   "example": "usd",
                                   "type": "string"
@@ -146148,7 +146344,8 @@
                               "kzt",
                               "awg",
                               "whop_usd",
-                              "xau"
+                              "xau",
+                              "hnl"
                             ],
                             "example": "usd",
                             "type": "string"
@@ -159342,7 +159539,8 @@
                       "kzt",
                       "awg",
                       "whop_usd",
-                      "xau"
+                      "xau",
+                      "hnl"
                     ],
                     "example": "usd",
                     "type": "string"
@@ -166111,7 +166309,7 @@
             }
           },
           {
-            "description": "Only counts payments for products in these comma-separated product categories, such as `algo_trading_course`.",
+            "description": "Only counts payments for products in these comma-separated product categories, such as `algo_trading_program`.",
             "in": "query",
             "name": "product_category",
             "required": false,
@@ -167165,7 +167363,7 @@
             }
           },
           {
-            "description": "Filter to one product category, for example `algo_trading_course`. Pair with `breakdown_by=product_category` to split by product category. Available on metrics that list `product_category`.",
+            "description": "Filter to one product category, for example `algo_trading_program`. Pair with `breakdown_by=product_category` to split by product category. Available on metrics that list `product_category`.",
             "in": "query",
             "name": "product_category",
             "required": false,
@@ -168151,7 +168349,7 @@
             }
           },
           {
-            "description": "Filter to one product category, for example `algo_trading_course`. Pair with `breakdown_by=product_category` to split by product category. Available on metrics that list `product_category`.",
+            "description": "Filter to one product category, for example `algo_trading_program`. Pair with `breakdown_by=product_category` to split by product category. Available on metrics that list `product_category`.",
             "in": "query",
             "name": "product_category",
             "required": false,
@@ -173222,7 +173420,8 @@
                           "rub",
                           "cny",
                           "kzt",
-                          "awg"
+                          "awg",
+                          "hnl"
                         ],
                         "example": "usd",
                         "type": "string"
