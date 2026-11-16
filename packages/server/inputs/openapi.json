@@ -77272,7 +77272,7 @@
           "$ref": "#/components/parameters/ApiVersionDate"
         },
         {
-          "description": "App ID (prefixed `app_`). Retrieval also accepts the app's claimed route, an active verified custom hostname, or its proxy domain id; a custom hostname returns `404` when its assignment is inactive, the owning account is suspended, or the app is deleted.",
+          "description": "App ID (prefixed `app_`). Retrieval also accepts the app's claimed route, an active verified custom hostname, or its proxy domain id. A custom hostname returns `404` when its assignment is inactive or the app or its owning account is deleted.",
           "in": "path",
           "name": "id",
           "required": true,
@@ -101319,7 +101319,7 @@
         }
       ],
       "post": {
-        "description": "Returns the deposit methods for an account or user, including crypto addresses, bank transfer instructions, and, for a business, a hosted deposit page. Bitcoin deposits are converted to USDT on Plasma in the destination's wallet. Business destinations require no authentication. Pass `payment_method_id` to also charge a business's saved payment method for `amount` in USD and add it to the business's balance; that requires authentication with the `payment:charge` scope. The charge has no fees or taxes and does not count as revenue.",
+        "description": "Returns the deposit methods for an account or user, including crypto addresses, bank transfer instructions, and, for a business, a hosted deposit page. Bitcoin and Tron deposits are converted to USDT on Plasma in the destination's wallet. Business destinations require no authentication. Pass `payment_method_id` to also charge a business's saved payment method for `amount` in USD and add it to the business's balance. That requires authentication with the `payment:charge` scope. The charge has no fees or taxes and does not count as revenue.",
         "operationId": "createDeposit",
         "parameters": [
           {
@@ -101580,6 +101580,7 @@
                                   "Ethereum",
                                   "Solana",
                                   "Bitcoin",
+                                  "Tron",
                                   "Base",
                                   "BNB Smart Chain",
                                   "Hyperliquid",
@@ -101615,6 +101616,7 @@
                                         "HYPE",
                                         "PYUSD",
                                         "SOL",
+                                        "TRX",
                                         "USD1",
                                         "USDC",
                                         "USDC.e",
