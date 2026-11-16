@@ -27227,7 +27227,7 @@
             ]
           },
           "initial_price": {
-            "description": "The part of `unit_amount` that is a recurring variant's one-time upfront fee, the variant's `initial_price`, charged on this invoice only. The rest of `unit_amount` is the first billing period. Null for one-time items, renewal invoices, items with no upfront fee, and items whose variant prices changed after the invoice was priced.",
+            "description": "The part of `unit_amount` that is a recurring variant's one-time upfront fee, the variant's `initial_price`, charged on this invoice only. The rest of `unit_amount` is the first billing period. A trial has no first-period charge. Null for one-time items, renewal invoices, items with no upfront fee, and items whose variant prices changed after the invoice was priced.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/Money"
@@ -27280,8 +27280,16 @@
               }
             ]
           },
+          "trial_period_days": {
+            "description": "Free trial days before this recurring item's first renewal charge, from the variant's `trial_period_days`. The invoice then bills only the variant's `initial_price` for the item. `null` for one-time items and renewal invoices, and when the customer already had a subscription to the variant.",
+            "example": null,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
           "unit_amount": {
-            "description": "The saved price of one unit before discounts, in the payment's `currency`. Creating or replacing recurring items includes the upfront fee and first billing period. Renewal invoices exclude the upfront fee. Other edits preserve saved prices. Null when the payment recorded no price.",
+            "description": "The saved price of one unit before discounts, in the payment's `currency`. Creating or replacing recurring items includes the upfront fee, plus the first billing period unless the item starts with a trial. Renewal invoices exclude the upfront fee. Other edits preserve saved prices. Null when the payment recorded no price.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/Money"
@@ -27311,7 +27319,8 @@
           "initial_price",
           "subtotal",
           "discount_amount",
-          "tax_amount"
+          "tax_amount",
+          "trial_period_days"
         ],
         "type": "object"
       },
@@ -128354,7 +128363,7 @@
                     ]
                   },
                   "items": {
-                    "description": "The variants being invoiced, all in the same currency. Each variant may appear once. Use quantity for multiple units. A recurring variant must belong to a product. Its first invoice charges `initial_price` plus `renewal_price`. Later invoices charge only `renewal_price`. Paying the first invoice starts a paid billing period immediately, without the variant's trial. The subscription uses the `collection_method` the invoice was sent or issued with. A finite payment count includes the first paid invoice. With several items, every item that has a product must be a regular product, and all items need compatible payment, tax, and access settings.",
+                    "description": "The variants being invoiced, all in the same currency. Each variant may appear once. Use quantity for multiple units. A recurring variant must belong to a product. Its first invoice charges `initial_price` plus `renewal_price`. Later invoices charge only `renewal_price`. When the variant has `trial_period_days`, the first invoice charges only `initial_price`. Paying it starts the trial, and the first renewal is billed when the trial ends. A customer who already had a subscription to the variant gets no trial, so paying starts a paid billing period immediately. Renewal invoices never start a trial. When the trial leaves nothing due, issuing or sending needs a `payment_method_id` or the `send_invoice` collection method. The subscription uses the `collection_method` the invoice was sent or issued with. A finite payment count includes the first paid invoice. With several items, every item that has a product must be a regular product, and all items need compatible payment, tax, access, and trial settings.",
                     "items": {
                       "additionalProperties": false,
                       "oneOf": [
@@ -128701,7 +128710,7 @@
                             },
                             "renewal_price": {
                               "description": "Recurring price in the variant currency.",
-                              "example": 45,
+                              "example": 499,
                               "type": [
                                 "number",
                                 "null"
@@ -128724,6 +128733,7 @@
                             },
                             "trial_period_days": {
                               "description": "Free trial days before renewal.",
+                              "example": 7,
                               "type": [
                                 "integer",
                                 "null"
@@ -129111,7 +129121,7 @@
                     ]
                   },
                   "items": {
-                    "description": "The variants being invoiced, all in the same currency. Each variant may appear once. Use quantity for multiple units. A recurring variant must belong to a product. Its first invoice charges `initial_price` plus `renewal_price`. Later invoices charge only `renewal_price`. Paying the first invoice starts a paid billing period immediately, without the variant's trial. The subscription uses the `collection_method` the invoice was sent or issued with. A finite payment count includes the first paid invoice. With several items, every item that has a product must be a regular product, and all items need compatible payment, tax, and access settings.",
+                    "description": "The variants being invoiced, all in the same currency. Each variant may appear once. Use quantity for multiple units. A recurring variant must belong to a product. Its first invoice charges `initial_price` plus `renewal_price`. Later invoices charge only `renewal_price`. When the variant has `trial_period_days`, the first invoice charges only `initial_price`. Paying it starts the trial, and the first renewal is billed when the trial ends. A customer who already had a subscription to the variant gets no trial, so paying starts a paid billing period immediately. Renewal invoices never start a trial. When the trial leaves nothing due, issuing or sending needs a `payment_method_id` or the `send_invoice` collection method. The subscription uses the `collection_method` the invoice was sent or issued with. A finite payment count includes the first paid invoice. With several items, every item that has a product must be a regular product, and all items need compatible payment, tax, access, and trial settings.",
                     "items": {
                       "additionalProperties": false,
                       "oneOf": [
@@ -129458,7 +129468,7 @@
                             },
                             "renewal_price": {
                               "description": "Recurring price in the variant currency.",
-                              "example": 45,
+                              "example": 499,
                               "type": [
                                 "number",
                                 "null"
@@ -129481,6 +129491,7 @@
                             },
                             "trial_period_days": {
                               "description": "Free trial days before renewal.",
+                              "example": 7,
                               "type": [
                                 "integer",
                                 "null"
