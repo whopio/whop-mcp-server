@@ -28,4 +28,7 @@ export interface Env {
 	// OpenAI's domain verification value for this host. Unset outside Whop's
 	// own production deployment.
 	OPENAI_APPS_CHALLENGE_TOKEN?: string;
+	// Muse's server verification value for this host. Unset outside Whop's
+	// own production deployment.
+	MUSE_CHALLENGE_TOKEN?: string;
 }

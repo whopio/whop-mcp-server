@@ -250,6 +250,11 @@ async function handleCallback(request: Request, env: Env): Promise<Response> {
 // (internal/wrangler.jsonc), so a deployment without one answers 404.
 const OPENAI_APPS_CHALLENGE_PATH = "/.well-known/openai-apps-challenge";
 
+// Muse confirms Whop controls this host before it accepts the connector: it
+// fetches /.well-known/muse-challenge/<value> and expects
+// "muse-challenge=<value>" as plain text.
+const MUSE_CHALLENGE_PATH_PREFIX = "/.well-known/muse-challenge/";
+
 export const defaultHandler = {
 	async fetch(request: Request, env: Env): Promise<Response> {
 		const url = new URL(request.url);
@@ -258,6 +263,15 @@ export const defaultHandler = {
 			env.OPENAI_APPS_CHALLENGE_TOKEN
 		) {
 			return new Response(env.OPENAI_APPS_CHALLENGE_TOKEN, {
+				headers: { "Content-Type": "text/plain; charset=utf-8" },
+			});
+		}
+		if (
+			env.MUSE_CHALLENGE_TOKEN &&
+			url.pathname ===
+				`${MUSE_CHALLENGE_PATH_PREFIX}${env.MUSE_CHALLENGE_TOKEN}`
+		) {
+			return new Response(`muse-challenge=${env.MUSE_CHALLENGE_TOKEN}`, {
 				headers: { "Content-Type": "text/plain; charset=utf-8" },
 			});
 		}

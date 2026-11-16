@@ -230,6 +230,37 @@ describe("OpenAI domain verification", () => {
 	});
 });
 
+describe("Muse server verification", () => {
+	const challengeUrl = "https://mcp.whop.com/.well-known/muse-challenge/abc123";
+	const configured = () => envStub({ MUSE_CHALLENGE_TOKEN: "abc123" });
+
+	it("serves the deployment's value as plain text, with nothing around it", async () => {
+		const response = await defaultHandler.fetch(
+			new Request(challengeUrl),
+			configured(),
+		);
+		expect(response.status).toBe(200);
+		expect(response.headers.get("Content-Type")).toContain("text/plain");
+		expect(await response.text()).toBe("muse-challenge=abc123");
+	});
+
+	it("answers 404 on a deployment that has no value set", async () => {
+		const response = await defaultHandler.fetch(
+			new Request(challengeUrl),
+			envStub(),
+		);
+		expect(response.status).toBe(404);
+	});
+
+	it("answers 404 for a different value", async () => {
+		const response = await defaultHandler.fetch(
+			new Request("https://mcp.whop.com/.well-known/muse-challenge/other"),
+			configured(),
+		);
+		expect(response.status).toBe(404);
+	});
+});
+
 describe("OAuth authorize", () => {
 	it("redirects straight upstream with a full-access grant", async () => {
 		let pendingKey = "";
