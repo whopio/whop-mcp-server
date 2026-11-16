@@ -30244,6 +30244,85 @@
         ],
         "type": "object"
       },
+      "LivestreamViewersPoint": {
+        "properties": {
+          "offset_seconds": {
+            "description": "Seconds from the start of the livestream to the start of this minute.",
+            "example": 0,
+            "type": "integer"
+          },
+          "viewers": {
+            "description": "Highest number of viewers watching at once during this minute, not counting the host.",
+            "example": 38,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "offset_seconds",
+          "viewers"
+        ],
+        "type": "object"
+      },
+      "LivestreamViewership": {
+        "properties": {
+          "average_viewers": {
+            "description": "Average number of viewers watching at once, not counting the host: `watch_time_seconds` divided by how long the livestream has run, rounded to one decimal place.",
+            "example": 31.1,
+            "type": "number"
+          },
+          "new_members": {
+            "description": "Number of members who joined the account between the start of the livestream and its end, or now while it is live. Team members are not counted.",
+            "example": 1,
+            "type": "integer"
+          },
+          "peak_viewers": {
+            "description": "Highest number of viewers watching at once, not counting the host.",
+            "example": 164,
+            "type": "integer"
+          },
+          "peak_viewers_at": {
+            "description": "When the livestream first reached `peak_viewers`, as an ISO 8601 timestamp. `null` when nobody watched.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "tracked": {
+            "description": "Whether viewer activity was tracked for this livestream. `false` before it starts, and after it ends when nothing was recorded, such as for livestreams from before viewer tracking existed. Every viewer count is then `0`.",
+            "example": true,
+            "type": "boolean"
+          },
+          "unique_viewers": {
+            "description": "Number of distinct people who watched, not counting the host. A signed-out guest counts once per visit.",
+            "example": 182,
+            "type": "integer"
+          },
+          "viewers": {
+            "items": {
+              "$ref": "#/components/schemas/LivestreamViewersPoint",
+              "description": "Viewers for each minute of the livestream, oldest first. Empty before it starts."
+            },
+            "type": "array"
+          },
+          "watch_time_seconds": {
+            "description": "Total time viewers spent watching, in seconds, not counting the host.",
+            "example": 197340,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "tracked",
+          "peak_viewers",
+          "peak_viewers_at",
+          "average_viewers",
+          "unique_viewers",
+          "watch_time_seconds",
+          "new_members",
+          "viewers"
+        ],
+        "type": "object"
+      },
       "Market": {
         "properties": {
           "change_24h_percentage": {
@@ -131153,6 +131232,62 @@
           "Livestreams"
         ]
       },
+      "x-whop-surface": "native"
+    },
+    "/livestreams/{id}/viewership": {
+      "get": {
+        "description": "Retrieves a livestream's viewership: peak, average, and unique viewers, total watch time, viewers for each minute, and how many members joined the account during it. Counts update while the livestream is live and settle about five minutes after it ends.",
+        "operationId": "retrieveLivestreamViewership",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LivestreamViewership"
+                }
+              }
+            },
+            "description": "livestream viewership retrieved"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "missing or invalid authentication"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "missing the `livestream:moderate` permission"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "livestream not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "livestream:moderate"
+            ]
+          }
+        ],
+        "summary": "Retrieve Livestream Viewership",
+        "tags": [
+          "Livestreams"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "Livestream ID, prefixed `lfeed_`.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
       "x-whop-surface": "native"
     },
     "/media/generate": {
