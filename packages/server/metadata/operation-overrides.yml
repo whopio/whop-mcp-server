@@ -150,14 +150,15 @@ overrides:
       member is one buyer's relationship with the account, however many
       memberships they hold.
 
-  "GET /support_channels":
+  "GET /channels":
     description: >-
-      See customer support conversations, most recently active first. Pass
-      `open=true` for the ones still waiting for a reply.
+      See DM, group, chat, and customer support conversations. Pass
+      `kind=private` for DMs or `kind=support` for support conversations,
+      and `status=unresolved` for support conversations still open.
 
-  "GET /support_channels/{id}":
+  "GET /channels/{id}":
     description: >-
-      Look up one customer support conversation.
+      Look up one DM, group, chat, or customer support conversation.
 
   "GET /course_lessons/{id}":
     description: >-
@@ -446,10 +447,6 @@ overrides:
       Read the posts in a forum, or the replies under one post, with an
       option to show only pinned posts.
 
-  "GET /dm_channels":
-    description: >-
-      See your DM inbox, most recently active first.
-
   "GET /bounties":
     description: >-
       Find paid clipping and content work: the bounties you can see and
@@ -507,7 +504,7 @@ core:
   - "GET /members"
   - "POST /files"
   - "GET /stats/time_series/{metric}"
-  - "GET /support_channels"
+  - "GET /channels"
   - "GET /events"
   - "GET /course_lessons/{id}"
   - "GET /products"
@@ -520,7 +517,6 @@ core:
   - "GET /accounts"
   - "POST /variants"
   - "GET /messages/{id}"
-  - "GET /dm_channels"
   - "PATCH /variants/{id}"
   - "GET /accounts/{id}"
   - "POST /course_lessons"

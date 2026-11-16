@@ -208,9 +208,9 @@ describe("registry generation", () => {
 
 		for (const toolName of [
 			"bounties_cancel",
-			"support-channels_create",
-			"support-channels_get",
-			"support-channels_list",
+			"channels_create",
+			"channels_get",
+			"channels_list",
 			"swaps_create",
 			"transfers_create",
 		]) {

@@ -69,8 +69,7 @@ Reads change nothing.
 | `forum-posts_list` | Forum posts | `forum:read` |
 | `messages_list` | Messages in a chat, DM, or support conversation | `support_chat:read`, `chat:read`, or `dms:read` |
 | `messages_get` | One message | `support_chat:read`, `chat:read`, or `dms:read` |
-| `dm-channels_list` | The user's DM conversations | `dms:read` |
-| `support-channels_list` | Customer support conversations | `support_chat:read` |
+| `channels_list` | DM, group, chat, and customer support conversations | `dms:read`, `chat:read`, or `support_chat:read` |
 | `resolution-center-cases_list` | Buyer complaints and refund requests | `payment:resolution_center_case:read` |
 | `accounts_list` | Businesses the user can act on | none, or `company:balance:read` |
 | `accounts_get` | One business | `company:balance:read` |
