@@ -279,17 +279,17 @@ describe("MCP contract", () => {
 					.map((tool) => tool.name)
 					.sort(),
 			).toEqual([
-				"stats_get",
-				"stats_list",
 				"stats_reports_list",
 				"stats_reports_platform_trends",
 				"stats_time-series_get",
 				"stats_time-series_list",
 			]);
-			await client.callTool({ name: "stats_list", arguments: {} });
-			expect(new URL(requests[0].url).pathname).toBe("/api/v1/stats");
+			await client.callTool({ name: "stats_time-series_list", arguments: {} });
+			expect(new URL(requests[0].url).pathname).toBe(
+				"/api/v1/stats/time_series",
+			);
 			const funnel = await client.callTool({
-				name: "stats_get",
+				name: "stats_time-series_get",
 				arguments: {
 					metric: "funnel",
 					account_id: "biz_boundAccount",
@@ -303,7 +303,7 @@ describe("MCP contract", () => {
 			});
 			expect(funnel.isError).not.toBe(true);
 			const funnelUrl = new URL(requests[1].url);
-			expect(funnelUrl.pathname).toBe("/api/v1/stats/funnel");
+			expect(funnelUrl.pathname).toBe("/api/v1/stats/time_series/funnel");
 			expect(funnelUrl.searchParams.get("steps[1][event]")).toBe("pixel.page");
 			expect(funnelUrl.searchParams.get("steps[1][page]")).toBe("/pricing*");
 			expect(funnelUrl.searchParams.get("steps[2][event]")).toBe(
@@ -312,7 +312,13 @@ describe("MCP contract", () => {
 			expect(funnelUrl.searchParams.get("steps[2][plan_id]")).toBe(
 				"plan_monthly",
 			);
-			for (const name of ["stats_describe", "stats_metric", "stats_raw"]) {
+			for (const name of [
+				"stats_describe",
+				"stats_metric",
+				"stats_raw",
+				"stats_get",
+				"stats_list",
+			]) {
 				const result = await client.callTool({ name, arguments: {} });
 				expect(result.isError).toBe(true);
 				expect(parseResult(result)).toMatchObject({
@@ -563,7 +569,6 @@ describe("claude_directory surface", () => {
 				"PATCH /payments/{id}",
 				"PATCH /payments/{payment_id}/return_url",
 				"PATCH /setup_intents/{setup_intent_id}/return_url",
-				"POST /ad_campaigns/{id}/retry_payment",
 				"POST /cashback_rule",
 				"POST /company_token_transactions",
 				"POST /disputes/{id}/accept",
@@ -582,8 +587,6 @@ describe("claude_directory surface", () => {
 				"POST /memberships/{id}/reactivate",
 				"POST /partner_referral_requests/{id}/accept",
 				"POST /partners/businesses/{id}/resend_invite",
-				"POST /payment_method_domains",
-				"POST /payment_method_domains/{id}/verify",
 				"POST /payments",
 				"POST /payments/{id}/capture",
 				"POST /payments/{id}/refund",

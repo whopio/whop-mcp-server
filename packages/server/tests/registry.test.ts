@@ -307,6 +307,22 @@ describe("registry generation", () => {
 		}
 	});
 
+	it("excludes deprecated operations and names their successor", () => {
+		const keys = new Set(
+			registry.operations.map((op) => `${op.method.toUpperCase()} ${op.path}`),
+		);
+		const deprecated = registry.exclusions.filter(
+			(entry) => entry.owner === "api-deprecation",
+		);
+		expect(deprecated.map((entry) => entry.operation)).toContain("GET /plans");
+		for (const entry of deprecated) {
+			expect(keys, entry.operation).not.toContain(entry.operation);
+		}
+		expect(
+			deprecated.find((entry) => entry.operation === "GET /plans")?.reason,
+		).toContain("Use GET /variants.");
+	});
+
 	it("fails on scopes missing from the scope definitions", () => {
 		const doc = JSON.parse(loadOpenApiRaw());
 		const metadata = loadMetadata();

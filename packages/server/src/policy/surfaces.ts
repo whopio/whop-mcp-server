@@ -135,8 +135,7 @@ export const CHATGPT_EXCLUSIONS: ReadonlySet<string> = new Set([
 	"POST /financing_applications", // starts a credit/financing application
 	"PATCH /financing_applications/{id}", // answers a financing application
 	"POST /financing_applications/{id}/submit", // submits a financing application with legal acceptance
-	// Ad runner reporting and the old ad payment retry
-	"POST /ad_campaigns/{id}/retry_payment", // deprecated; POST /accounts/{id}/retry_ads_payment replaces it
+	// Ad runner reporting
 	"POST /ad_issues", // reports why a runner's ad can't deliver; same family as POST /ad_stats
 	"POST /ad_stats", // records an ad runner's stats and pays them for the spend
 	// Identity documents, card data, and credentials
@@ -205,23 +204,6 @@ export const CHATGPT_EXCLUSIONS: ReadonlySet<string> = new Set([
 	"GET /ai_chats/{id}", // Whop AI chat management
 	"PATCH /ai_chats/{id}", // Whop AI chat management
 	"DELETE /ai_chats/{id}", // Whop AI chat management
-	// Old duplicates that newer tools replace
-	"GET /payment_method_domains", // deprecated; Apple Pay now goes through /domains
-	"POST /payment_method_domains", // deprecated; Apple Pay now goes through /domains
-	"GET /payment_method_domains/{id}", // deprecated; Apple Pay now goes through /domains
-	"DELETE /payment_method_domains/{id}", // deprecated; Apple Pay now goes through /domains
-	"POST /payment_method_domains/{id}/verify", // deprecated; Apple Pay now goes through /domains
-	"GET /plans", // deprecated compatibility endpoint; use variants_*
-	"POST /plans", // deprecated compatibility endpoint; use variants_*
-	"GET /plans/{id}", // deprecated compatibility endpoint; use variants_*
-	"PATCH /plans/{id}", // deprecated compatibility endpoint; use variants_*
-	"DELETE /plans/{id}", // deprecated compatibility endpoint; use variants_*
-	"POST /plans/{id}/calculate_tax", // deprecated compatibility endpoint; use variants_calculate_tax
-	"GET /social_accounts", // deprecated compatibility endpoint; use external-accounts_*
-	"POST /social_accounts", // deprecated compatibility endpoint; use external-accounts_*
-	"POST /social_accounts/connect", // deprecated compatibility endpoint; use external-accounts_*
-	"DELETE /social_accounts/{id}", // deprecated compatibility endpoint; use external-accounts_*
-	"POST /social_accounts/{id}/refresh", // deprecated compatibility endpoint; use external-accounts_*
 ]);
 
 /**

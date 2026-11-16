@@ -346,6 +346,10 @@ const VAULT_EXCLUSION_REASON =
 	"Served only on the vault host (x-whop-vault): the MCP dispatcher sends every call to one base URL and cannot route card details to Basis Theory. Use an official SDK, which routes the operation itself.";
 const VAULT_EXCLUSION_OWNER = "vault-ingress";
 
+const DEPRECATED_EXCLUSION_REASON =
+	"Deprecated in the API contract in favor of a successor, so agents learn only the successor.";
+const DEPRECATED_EXCLUSION_OWNER = "api-deprecation";
+
 function collectOperations(doc: OpenApiDocument): RawOperation[] {
 	const out: RawOperation[] = [];
 	for (const path of Object.keys(doc.paths).sort()) {
@@ -761,6 +765,17 @@ export function buildRegistry(
 				openapiOperationId: typeof opId === "string" ? opId : "",
 				reason: VAULT_EXCLUSION_REASON,
 				owner: VAULT_EXCLUSION_OWNER,
+			});
+			continue;
+		}
+
+		const successor = raw.op["x-whop-successor"];
+		if (raw.op.deprecated === true && typeof successor === "string") {
+			exclusions.push({
+				operation: key,
+				openapiOperationId: typeof opId === "string" ? opId : "",
+				reason: `${DEPRECATED_EXCLUSION_REASON} Use ${successor}.`,
+				owner: DEPRECATED_EXCLUSION_OWNER,
 			});
 			continue;
 		}

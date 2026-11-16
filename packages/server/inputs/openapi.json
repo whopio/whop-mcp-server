@@ -26739,6 +26739,11 @@
               }
             ]
           },
+          "time_zone": {
+            "description": "The IANA time zone for the dates on the invoice's email and PDF, such as `America/New_York`. `UTC` unless one was set.",
+            "example": "UTC",
+            "type": "string"
+          },
           "total": {
             "$ref": "#/components/schemas/Money"
           },
@@ -26788,6 +26793,7 @@
           "line_items",
           "payment_method_configuration",
           "memo",
+          "time_zone",
           "metadata",
           "created_at",
           "updated_at",
@@ -129134,6 +129140,14 @@
                     },
                     "maxItems": 50,
                     "type": "array"
+                  },
+                  "time_zone": {
+                    "description": "The IANA time zone for the dates on the invoice's email and PDF. Set it so the due date reads as the day you picked. When omitted, a new invoice uses the time zone Whop has for the user creating it, else UTC. Can be updated on drafts.",
+                    "example": "America/New_York",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   }
                 },
                 "required": [
@@ -129893,6 +129907,14 @@
                     },
                     "maxItems": 50,
                     "type": "array"
+                  },
+                  "time_zone": {
+                    "description": "The IANA time zone for the dates on the invoice's email and PDF. Set it so the due date reads as the day you picked. When omitted, a new invoice uses the time zone Whop has for the user creating it, else UTC. Can be updated on drafts.",
+                    "example": "America/New_York",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   }
                 },
                 "type": "object"

@@ -187,7 +187,7 @@ describe("dispatcher", () => {
 	it("dispatches native metrics with flat filters and the bound account", async () => {
 		const { fetch, requests } = fakeFetch();
 		await makeDispatcher(fetch).dispatch(
-			findOperation(registry, "stats_get"),
+			findOperation(registry, "stats_time-series_get"),
 			{
 				metric: "successful_payments",
 				product: "prod_test1",
@@ -201,7 +201,7 @@ describe("dispatcher", () => {
 		);
 		const query = new URL(requests[0].url).searchParams;
 		expect(new URL(requests[0].url).pathname).toBe(
-			"/api/v1/stats/successful_payments",
+			"/api/v1/stats/time_series/successful_payments",
 		);
 		expect(query.get("product")).toBe("prod_test1");
 		expect(query.get("interval")).toBe("month");
@@ -539,7 +539,7 @@ describe("dispatcher", () => {
 		).rejects.toMatchObject({ code: "account_mismatch" });
 	});
 
-	for (const toolName of ["stats_get", "stats_time-series_get"]) {
+	for (const toolName of ["stats_time-series_get"]) {
 		for (const metric of ["businesses", "gmv_usd", "gross_revenue"]) {
 			it(`passes the platform stats sentinel through ${toolName} for ${metric} when an account is bound`, async () => {
 				const { fetch, requests } = fakeFetch();
@@ -558,7 +558,7 @@ describe("dispatcher", () => {
 		}
 	}
 
-	it("rejects the platform sentinel outside stats_get", async () => {
+	it("rejects the platform sentinel outside stats time series", async () => {
 		const op = findOperation(registry, "products_list");
 		await expect(
 			makeDispatcher(fakeFetch().fetch).dispatch(
