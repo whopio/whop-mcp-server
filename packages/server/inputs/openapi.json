@@ -7289,17 +7289,14 @@
           "delivery_status": {
             "description": "Whether the ad is delivering right now, and if not, why. When several states apply at once, the highest-precedence one is returned.",
             "enum": [
-              "in_appeal",
               "rejected",
               "in_review",
               "draft",
               "campaign_paused",
-              "ad_group_paused",
               "paused",
               "processing",
               "issues",
               "scheduled",
-              "learning_limited",
               "learning",
               "active"
             ],
@@ -7813,12 +7810,8 @@
             "description": "Whether the campaign's ads are delivering right now, and if not, why. Content review is in_review; a campaign waiting to start is processing. Account billing failures set payment_failed without changing the configured status. Successful payment retry clears that block and recalculates delivery. When several states apply at once, the highest-precedence one is returned.",
             "enum": [
               "payment_failed",
-              "waiting_for_ein",
-              "in_appeal",
               "all_ads_rejected",
               "draft",
-              "no_ad_groups",
-              "no_ads",
               "paused",
               "in_review",
               "learning",
@@ -7826,7 +7819,6 @@
               "issues",
               "scheduled",
               "completed",
-              "ad_groups_off",
               "active"
             ],
             "example": "issues",
@@ -8565,11 +8557,9 @@
           "delivery_status": {
             "description": "Whether ads in this ad group are delivering right now, and if not, why. When several states apply at once, the highest-precedence one is returned.",
             "enum": [
-              "in_appeal",
               "all_ads_rejected",
               "rejected",
               "draft",
-              "no_ads",
               "campaign_paused",
               "paused",
               "in_review",
@@ -8577,12 +8567,10 @@
               "issues",
               "scheduled",
               "completed",
-              "ads_off",
-              "learning_limited",
               "learning",
               "active"
             ],
-            "example": "no_ads",
+            "example": "paused",
             "type": "string"
           },
           "demographics": {
@@ -178721,17 +178709,14 @@
                       "delivery_status": {
                         "description": "Whether the ad is delivering right now, and if not, why. When several states apply at once, the highest-precedence one is returned.",
                         "enum": [
-                          "in_appeal",
                           "rejected",
                           "in_review",
                           "draft",
                           "campaign_paused",
-                          "ad_group_paused",
                           "paused",
                           "processing",
                           "issues",
                           "scheduled",
-                          "learning_limited",
                           "learning",
                           "active"
                         ],
@@ -179055,12 +179040,8 @@
                         "description": "Whether the campaign's ads are delivering right now, and if not, why. Content review is in_review; a campaign waiting to start is processing. Account billing failures set payment_failed without changing the configured status. Successful payment retry clears that block and recalculates delivery. When several states apply at once, the highest-precedence one is returned.",
                         "enum": [
                           "payment_failed",
-                          "waiting_for_ein",
-                          "in_appeal",
                           "all_ads_rejected",
                           "draft",
-                          "no_ad_groups",
-                          "no_ads",
                           "paused",
                           "in_review",
                           "learning",
@@ -179068,7 +179049,6 @@
                           "issues",
                           "scheduled",
                           "completed",
-                          "ad_groups_off",
                           "active"
                         ],
                         "example": "issues",
@@ -179429,12 +179409,8 @@
                         "description": "Whether the campaign's ads are delivering right now, and if not, why. Content review is in_review; a campaign waiting to start is processing. Account billing failures set payment_failed without changing the configured status. Successful payment retry clears that block and recalculates delivery. When several states apply at once, the highest-precedence one is returned.",
                         "enum": [
                           "payment_failed",
-                          "waiting_for_ein",
-                          "in_appeal",
                           "all_ads_rejected",
                           "draft",
-                          "no_ad_groups",
-                          "no_ads",
                           "paused",
                           "in_review",
                           "learning",
@@ -179442,7 +179418,6 @@
                           "issues",
                           "scheduled",
                           "completed",
-                          "ad_groups_off",
                           "active"
                         ],
                         "example": "issues",
@@ -179839,11 +179814,9 @@
                       "delivery_status": {
                         "description": "Whether ads in this ad group are delivering right now, and if not, why. When several states apply at once, the highest-precedence one is returned.",
                         "enum": [
-                          "in_appeal",
                           "all_ads_rejected",
                           "rejected",
                           "draft",
-                          "no_ads",
                           "campaign_paused",
                           "paused",
                           "in_review",
@@ -179851,12 +179824,10 @@
                           "issues",
                           "scheduled",
                           "completed",
-                          "ads_off",
-                          "learning_limited",
                           "learning",
                           "active"
                         ],
-                        "example": "no_ads",
+                        "example": "paused",
                         "type": "string"
                       },
                       "demographics": {
