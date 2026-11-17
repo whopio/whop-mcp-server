@@ -35718,6 +35718,7 @@
           "closed_account",
           "issuer_unavailable",
           "invalid_zip",
+          "invalid_billing_address",
           "invalid_expiry_month",
           "invalid_expiry_year",
           "invalid_expiry",
@@ -36483,6 +36484,7 @@
               "closed_account",
               "issuer_unavailable",
               "invalid_zip",
+              "invalid_billing_address",
               "invalid_expiry_month",
               "invalid_expiry_year",
               "invalid_expiry",
@@ -42771,7 +42773,7 @@
             "type": "string"
           },
           "action": {
-            "description": "What this account's rule requests when every condition matches. One applicable account-rule action wins, in this order: `allow`, `block`, `review`, `enforce_3ds`. An `allow` overrides this account's other rules, never Whop's own fraud controls. A `review` requests authorization without capture for an eligible on-session card payment through Whop Payments. Automatic capture is scheduled for 48 hours after authorization; capture or void the payment before then to decide sooner. Capture may complete later or fail. Review is skipped for unsupported methods, off-session payments, and payments already configured for manual capture. An `enforce_3ds` is skipped when the account rule cannot apply a challenge. Other 3DS requirements still apply.",
+            "description": "What this account's rule requests when every condition matches. One applicable account-rule action wins, in this order: `allow`, `block`, `review`, `enforce_3ds`. An `allow` overrides this account's other rules, never Whop's own fraud controls. A `review` requests authorization without capture for an eligible on-session card payment through Whop Payments. Automatic capture is scheduled for 48 hours after authorization. Capture or void the payment before then to decide sooner. Capture may complete later or fail. Review is skipped for unsupported methods, off-session payments, and payments already configured for manual capture. An `enforce_3ds` is skipped when the account rule cannot apply a challenge. Other 3DS requirements still apply. A rule on `postal_code_check`, `address_line1_check`, or `cvv_check` accepts `block` or `review`. Whop authorizes a freshly entered card first. When the rule matches the bank's result, `block` voids and declines the payment. A `review` holds it for you to capture or void, with the same automatic capture.",
             "enum": [
               "allow",
               "block",
@@ -42860,7 +42862,10 @@
               "customer_email",
               "email_domain",
               "ip_address",
-              "ip_country"
+              "ip_country",
+              "postal_code_check",
+              "address_line1_check",
+              "cvv_check"
             ],
             "example": "amount_in_usd",
             "type": "string"
@@ -42897,7 +42902,7 @@
         "type": "object"
       },
       "PaymentRuleConditionValue": {
-        "description": "The value to compare against. A whole number from 0 to 100 for `risk_score`, a number of at least 0 for `amount_in_usd`, a string for the other fields, and an array of strings for the `in` and `not_in` operators.",
+        "description": "The value to compare against. `risk_score` takes a whole number from 0 to 100, and `amount_in_usd` a number of at least 0. The `in` and `not_in` operators take an array of strings. Other fields take a string. The check fields accept `PASS`, `FAIL`, `UNAVAILABLE`, and `UNCHECKED`.",
         "oneOf": [
           {
             "minimum": 0,
@@ -42946,7 +42951,10 @@
               "customer_email",
               "email_domain",
               "ip_address",
-              "ip_country"
+              "ip_country",
+              "postal_code_check",
+              "address_line1_check",
+              "cvv_check"
             ],
             "example": "risk_score",
             "type": "string"
@@ -138003,7 +138011,7 @@
                     "type": "string"
                   },
                   "action": {
-                    "description": "What this account's rule requests when every condition matches. One applicable account-rule action wins, in this order: `allow`, `block`, `review`, `enforce_3ds`. An `allow` overrides this account's other rules, never Whop's own fraud controls. A `review` requests authorization without capture for an eligible on-session card payment through Whop Payments. Automatic capture is scheduled for 48 hours after authorization; capture or void the payment before then to decide sooner. Capture may complete later or fail. Review is skipped for unsupported methods, off-session payments, and payments already configured for manual capture. An `enforce_3ds` is skipped when the account rule cannot apply a challenge. Other 3DS requirements still apply.",
+                    "description": "What this account's rule requests when every condition matches. One applicable account-rule action wins, in this order: `allow`, `block`, `review`, `enforce_3ds`. An `allow` overrides this account's other rules, never Whop's own fraud controls. A `review` requests authorization without capture for an eligible on-session card payment through Whop Payments. Automatic capture is scheduled for 48 hours after authorization. Capture or void the payment before then to decide sooner. Capture may complete later or fail. Review is skipped for unsupported methods, off-session payments, and payments already configured for manual capture. An `enforce_3ds` is skipped when the account rule cannot apply a challenge. Other 3DS requirements still apply. A rule on `postal_code_check`, `address_line1_check`, or `cvv_check` accepts `block` or `review`. Whop authorizes a freshly entered card first. When the rule matches the bank's result, `block` voids and declines the payment. A `review` holds it for you to capture or void, with the same automatic capture.",
                     "enum": [
                       "allow",
                       "block",
@@ -138045,7 +138053,10 @@
                                 "customer_email",
                                 "email_domain",
                                 "ip_address",
-                                "ip_country"
+                                "ip_country",
+                                "postal_code_check",
+                                "address_line1_check",
+                                "cvv_check"
                               ],
                               "example": "risk_score",
                               "type": "string"
@@ -138481,7 +138492,7 @@
                 "additionalProperties": false,
                 "properties": {
                   "action": {
-                    "description": "What this account's rule requests when every condition matches. One applicable account-rule action wins, in this order: `allow`, `block`, `review`, `enforce_3ds`. An `allow` overrides this account's other rules, never Whop's own fraud controls. A `review` requests authorization without capture for an eligible on-session card payment through Whop Payments. Automatic capture is scheduled for 48 hours after authorization; capture or void the payment before then to decide sooner. Capture may complete later or fail. Review is skipped for unsupported methods, off-session payments, and payments already configured for manual capture. An `enforce_3ds` is skipped when the account rule cannot apply a challenge. Other 3DS requirements still apply.",
+                    "description": "What this account's rule requests when every condition matches. One applicable account-rule action wins, in this order: `allow`, `block`, `review`, `enforce_3ds`. An `allow` overrides this account's other rules, never Whop's own fraud controls. A `review` requests authorization without capture for an eligible on-session card payment through Whop Payments. Automatic capture is scheduled for 48 hours after authorization. Capture or void the payment before then to decide sooner. Capture may complete later or fail. Review is skipped for unsupported methods, off-session payments, and payments already configured for manual capture. An `enforce_3ds` is skipped when the account rule cannot apply a challenge. Other 3DS requirements still apply. A rule on `postal_code_check`, `address_line1_check`, or `cvv_check` accepts `block` or `review`. Whop authorizes a freshly entered card first. When the rule matches the bank's result, `block` voids and declines the payment. A `review` holds it for you to capture or void, with the same automatic capture.",
                     "enum": [
                       "allow",
                       "block",
@@ -138523,7 +138534,10 @@
                                 "customer_email",
                                 "email_domain",
                                 "ip_address",
-                                "ip_country"
+                                "ip_country",
+                                "postal_code_check",
+                                "address_line1_check",
+                                "cvv_check"
                               ],
                               "example": "risk_score",
                               "type": "string"
