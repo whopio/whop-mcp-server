@@ -15914,6 +15914,17 @@
             },
             "type": "array"
           },
+          "replying_to_message": {
+            "description": "The replied-to message. Omitted unless `include_replying_to_message=true`. Includes all message fields except `replying_to_message`. `null` when this message is deleted or no same-channel target exists.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ChatMessage"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "replying_to_message_id": {
             "example": null,
             "type": [
@@ -128466,6 +128477,16 @@
             }
           },
           {
+            "description": "Include the full replied-to message. Nested replies are not included.",
+            "in": "query",
+            "name": "include_replying_to_message",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
             "description": "Return messages created strictly after this ISO 8601 timestamp.",
             "in": "query",
             "name": "created_after",
@@ -128972,6 +128993,18 @@
       "get": {
         "description": "Retrieves a live message from an accessible channel. Use list synchronization to retrieve deletion entries.",
         "operationId": "retrieveMessage",
+        "parameters": [
+          {
+            "description": "Include the full replied-to message. Nested replies are not included.",
+            "in": "query",
+            "name": "include_replying_to_message",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
