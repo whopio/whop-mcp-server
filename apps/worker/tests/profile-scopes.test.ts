@@ -5,10 +5,16 @@ import {
 	expandProfileToWhopScopes,
 	isProfileName,
 	PROFILE_NAMES,
+	WHOP_SCOPES,
 } from "../src/profile-scopes.ts";
 import { registry } from "../src/registry.ts";
 
 const operations = registry.operations;
+
+// The CLI's list exists only in the monorepo; the public mirror has no copy to
+// compare against. Importing it at run time keeps type checking from resolving
+// it there.
+const CLI_SCOPES_MODULE = "../../../../packages/cli/src/auth/scopes.ts";
 
 describe("muse scopes", () => {
 	it("holds the scopes of non-financial operations but none that move money", () => {
@@ -167,6 +173,21 @@ describe("profile scopes", () => {
 		expect(scopes).toContain("user:notifications:read");
 		expect(scopes).toContain("payment:resolution_center_case:manage");
 		expect(scopes).toContain("crypto_wallet:swap");
+	});
+
+	it("matches the CLI's OAuth scope list, so a scope added there is grantable here", async (context) => {
+		const url = new URL(
+			CLI_SCOPES_MODULE,
+			(import.meta as ImportMeta & { url: string }).url,
+		);
+		const cli = (await import(/* @vite-ignore */ url.href).catch(
+			() => undefined,
+		)) as { WHOP_SCOPES: readonly string[] } | undefined;
+		if (!cli) context.skip();
+		expect(cli?.WHOP_SCOPES.length).toBeGreaterThan(0);
+		expect([...WHOP_SCOPES].sort()).toEqual(
+			[...(cli?.WHOP_SCOPES ?? [])].sort(),
+		);
 	});
 
 	it("never hands a non-admin credential a financial-action scope", () => {

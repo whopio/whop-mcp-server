@@ -688,6 +688,10 @@
     "bot": true,
     "user": true
   },
+  "plan:waitlist:manage": {
+    "bot": true,
+    "user": true
+  },
   "plan:waitlist:read": {
     "bot": true,
     "user": true
@@ -780,5 +784,17 @@
     "bot": false,
     "user": true,
     "disallow_api_authorization": false
+  },
+  "waitlist_entry:cancel": {
+    "bot": true,
+    "user": true
+  },
+  "waitlist_entry:create": {
+    "bot": true,
+    "user": true
+  },
+  "waitlist_entry:read": {
+    "bot": true,
+    "user": true
   }
 }

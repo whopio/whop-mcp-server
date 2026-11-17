@@ -178,6 +178,10 @@ export const WHOP_SCOPES = [
 	"user:notifications:read",
 	"user:notifications:update",
 	"user:profile:update",
+	"review:delete",
+	"waitlist_entry:read",
+	"waitlist_entry:create",
+	"waitlist_entry:cancel",
 ] as const;
 
 // No email: userinfo's email is never consumed, so it is never requested.

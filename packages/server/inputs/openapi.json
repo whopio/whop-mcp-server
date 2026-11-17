@@ -174894,7 +174894,14 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "waitlist_entry:read"
+            ]
+          },
+          {
+            "bearerAuth": [
+              "plan:waitlist:read"
+            ]
           }
         ],
         "summary": "List Waitlist Entries",
@@ -175002,7 +175009,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "waitlist_entry:create"
+            ]
           }
         ],
         "summary": "Create Waitlist Entry",
@@ -175113,7 +175122,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "plan:waitlist:manage"
+            ]
           }
         ],
         "summary": "Approve All Waitlist Entries",
@@ -175153,7 +175164,14 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "waitlist_entry:read"
+            ]
+          },
+          {
+            "bearerAuth": [
+              "plan:waitlist:read"
+            ]
           }
         ],
         "summary": "Retrieve Waitlist Entry",
@@ -175236,7 +175254,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "plan:waitlist:manage"
+            ]
           }
         ],
         "summary": "Approve Waitlist Entry",
@@ -175299,7 +175319,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "waitlist_entry:cancel"
+            ]
           }
         ],
         "summary": "Cancel Waitlist Entry",
@@ -175368,7 +175390,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "plan:waitlist:manage"
+            ]
           }
         ],
         "summary": "Deny Waitlist Entry",
