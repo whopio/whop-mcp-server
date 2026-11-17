@@ -3,6 +3,7 @@ import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
 import { describe, expect, it } from "vitest";
 import { PROFILE_NAMES } from "../src/policy/profiles.ts";
 import {
+	MUSE_REFUND_WRITES,
 	movesMoney,
 	SURFACE_NAMES,
 	type SurfaceName,
@@ -22,8 +23,9 @@ import {
 
 const registry = buildRealRegistry();
 const TOOL_LIST_BUDGET_BYTES = 175_000;
-const MUSE_TOOL_LIST_BUDGET_BYTES = 150_000;
-const MAX_LISTED_OPERATIONS = 45;
+const MUSE_TOOL_LIST_BUDGET_BYTES = 200_000;
+const MAX_LISTED_OPERATIONS = 48;
+const MUSE_MAX_LISTED_OPERATIONS = 115;
 const OPERATION_TOOLS = [
 	"search_operations",
 	"describe_operation",
@@ -89,7 +91,9 @@ describe("compact tool listing", () => {
 						registry.operations.some((op) => op.toolName === tool.name),
 					);
 					expect(listedOperations.length).toBeLessThanOrEqual(
-						MAX_LISTED_OPERATIONS,
+						surface === "muse"
+							? MUSE_MAX_LISTED_OPERATIONS
+							: MAX_LISTED_OPERATIONS,
 					);
 				});
 			}
@@ -110,7 +114,7 @@ describe("compact tool listing", () => {
 		expect(names).not.toContain("plans_create");
 	});
 
-	it("lists core operations most used first", async () => {
+	it("lists core operations in the order the core list gives", async () => {
 		const client = await connect();
 		const names = (await client.listTools()).tools.map((tool) => tool.name);
 		const listedCore = names.filter((name) =>
@@ -122,9 +126,9 @@ describe("compact tool listing", () => {
 			.map((op) => op.toolName);
 		expect(listedCore).toEqual(byRank);
 		expect(listedCore.slice(0, 3)).toEqual([
-			"payments_list",
-			"memberships_list",
-			"messages_list",
+			"accounts_list",
+			"accounts_get",
+			"accounts_create",
 		]);
 	});
 
@@ -227,19 +231,24 @@ describe("muse surface", () => {
 		return (await client.listTools()).tools;
 	}
 
-	it("lists /mcp's core tools without the ones that move money", async () => {
+	it("lists /mcp's core tools, then its own muse list, and refunds as the only money writes", async () => {
 		const coreOnMcp = (await listed())
 			.map((tool) => tool.name)
 			.filter((name) => operationNames.has(name));
 		const onMuse = (await listed("muse"))
 			.map((tool) => tool.name)
 			.filter((name) => operationNames.has(name));
-		const moneyTools = new Set(
-			registry.operations.filter(movesMoney).map((op) => op.toolName),
-		);
-		expect(onMuse).toEqual(coreOnMcp.filter((name) => !moneyTools.has(name)));
-		expect(coreOnMcp).toContain("payments_refund");
-		expect(onMuse).not.toContain("payments_refund");
+		const museOnly = registry.operations
+			.filter((op) => op.muse !== undefined)
+			.sort((a, b) => (a.muse ?? 0) - (b.muse ?? 0))
+			.map((op) => op.toolName);
+		expect(onMuse).toEqual([...coreOnMcp, ...museOnly]);
+		for (const name of museOnly) expect(coreOnMcp).not.toContain(name);
+		const moneyOnMuse = registry.operations
+			.filter((op) => movesMoney(op) && onMuse.includes(op.toolName))
+			.map((op) => `${op.method.toUpperCase()} ${op.path}`)
+			.sort();
+		expect(moneyOnMuse).toEqual([...MUSE_REFUND_WRITES].sort());
 	});
 
 	it("offers read-only operation tools and no intent fields", async () => {
@@ -265,8 +274,16 @@ describe("muse surface", () => {
 			surface: "muse",
 		});
 		const writes = reachable.filter((op) => !op.annotations.readOnlyHint);
-		expect(writes.every((op) => op.core !== undefined)).toBe(true);
-		expect(reachable.filter(movesMoney)).toEqual([]);
+		expect(
+			writes.every((op) => op.core !== undefined || op.muse !== undefined),
+		).toBe(true);
+		expect(
+			reachable
+				.filter(movesMoney)
+				.every((op) =>
+					MUSE_REFUND_WRITES.has(`${op.method.toUpperCase()} ${op.path}`),
+				),
+		).toBe(true);
 		expect(reachable.map((op) => op.toolName)).toContain("payouts_list");
 		expect(reachable.map((op) => op.toolName)).not.toContain("webhooks_list");
 
@@ -285,7 +302,7 @@ describe("muse surface", () => {
 
 		for (const name of [
 			"transfers_create",
-			"payments_refund",
+			"payouts_create",
 			"webhooks_create",
 		]) {
 			const direct = await client.callTool({ name, arguments: {} });

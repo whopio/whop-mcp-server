@@ -17,23 +17,27 @@ const operations = registry.operations;
 const CLI_SCOPES_MODULE = "../../../../packages/cli/src/auth/scopes.ts";
 
 describe("muse scopes", () => {
-	it("holds the scopes of non-financial operations but none that move money", () => {
+	it("holds the scopes its listed tools need, refunds included, but no transfers, payouts or charges", () => {
 		const scopes = expandMuseToWhopScopes(operations);
 		expect(scopes).toContain("payment:basic:read");
 		expect(scopes).toContain("payment:dispute:read");
 		expect(scopes).toContain("payment:resolution_center_case:read");
 		expect(scopes).toContain("courses:update");
-		expect(scopes).toContain("member:manage");
+		expect(scopes).toContain("company:update");
+		expect(scopes).toContain("checkout_configuration:create");
+		expect(scopes).toContain("support_chat:create");
+		expect(scopes).toContain("payment:manage");
+		expect(scopes).toContain("payment:dispute");
+		expect(scopes).toContain("payment:resolution_center");
 		for (const excluded of [
 			"payment:charge",
-			"payment:dispute",
-			"payment:resolution_center",
 			"payout:withdraw_funds",
 			"payout:update_destination",
 			"payout:transfer_funds",
 			"crypto_wallet:swap",
 			"invoice:create",
 			"media:generate",
+			"ai_chat:create",
 		]) {
 			expect(scopes).not.toContain(excluded);
 		}

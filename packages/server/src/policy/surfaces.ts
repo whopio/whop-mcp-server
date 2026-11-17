@@ -16,12 +16,12 @@ import type { OperationDef } from "../registry/types.ts";
  *                     business on Whop, including AI media and domains. No
  *                     one-off customer charges, refunds, or money movement.
  *   muse              the Muse connector listing: the core operations /mcp
- *                     lists, minus those that move money (writes the safety
- *                     metadata marks financial), plus every read that read
- *                     scopes alone can run. Muse reviews and approves tools
- *                     one by one, so the only writes reachable are the
- *                     listed core ones, and its grant holds no other write
- *                     scopes.
+ *                     lists plus the `muse` list in operation-overrides.yml,
+ *                     minus writes that move money other than the refunds in
+ *                     MUSE_REFUND_WRITES, plus every read that read scopes
+ *                     alone can run. Muse reviews and approves tools one by
+ *                     one, so the only writes reachable are listed ones, and
+ *                     its grant holds no other write scopes.
  */
 export const SURFACE_NAMES = [
 	"full",
@@ -355,6 +355,24 @@ const EXCLUSIONS: Record<SurfaceName, ReadonlySet<string>> = {
 	muse: new Set(),
 };
 
+/**
+ * Muse's guidelines ask connectors to support refunds where the product offers
+ * them (section 1.1) and bar only transfers between accounts and trades
+ * (section 4.6), so these two financial writes stay reachable on /muse/mcp.
+ */
+export const MUSE_REFUND_WRITES: ReadonlySet<string> = new Set([
+	"POST /payments/{id}/refund",
+	"POST /resolution_center_cases/{id}/accept",
+]);
+
+export function listedOnSurface(
+	operation: OperationDef,
+	surface: SurfaceName | undefined,
+): boolean {
+	if (operation.core !== undefined) return true;
+	return surface === "muse" && operation.muse !== undefined;
+}
+
 export function isSurfaceName(value: string): value is SurfaceName {
 	return (SURFACE_NAMES as readonly string[]).includes(value);
 }
@@ -365,7 +383,13 @@ export function operationInSurface(
 ): boolean {
 	if (surface === "muse") {
 		if (operation.annotations.readOnlyHint) return runsOnReadScopes(operation);
-		return operation.core !== undefined && !movesMoney(operation);
+		if (!listedOnSurface(operation, "muse")) return false;
+		return (
+			!movesMoney(operation) ||
+			MUSE_REFUND_WRITES.has(
+				`${operation.method.toUpperCase()} ${operation.path}`,
+			)
+		);
 	}
 	const key = `${operation.method.toUpperCase()} ${operation.path}`;
 	if (EXCLUSIONS[surface].has(key)) return false;

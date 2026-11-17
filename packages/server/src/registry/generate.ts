@@ -209,6 +209,7 @@ export interface GeneratorMetadata {
 	overrides: {
 		overrides: Record<string, OperationOverride>;
 		core?: string[];
+		muse?: string[];
 	};
 	/**
 	 * The configured scope capabilities record which credential kinds can hold
@@ -670,6 +671,9 @@ function buildOperation(
 		...(metadata.overrides.core?.includes(key)
 			? { core: metadata.overrides.core.indexOf(key) + 1 }
 			: {}),
+		...(metadata.overrides.muse?.includes(key)
+			? { muse: metadata.overrides.muse.indexOf(key) + 1 }
+			: {}),
 		principals,
 		scopeAlternatives,
 		scopes,
@@ -734,6 +738,18 @@ export function buildRegistry(
 		if (!allKeys.has(key)) {
 			fail(
 				`operation-overrides.yml core entry "${key}" matches no operation in the OpenAPI contract.`,
+			);
+		}
+	}
+	for (const key of metadata.overrides.muse ?? []) {
+		if (!allKeys.has(key)) {
+			fail(
+				`operation-overrides.yml muse entry "${key}" matches no operation in the OpenAPI contract.`,
+			);
+		}
+		if (metadata.overrides.core?.includes(key)) {
+			fail(
+				`operation-overrides.yml muse entry "${key}" is already in core, which /muse/mcp lists too.`,
 			);
 		}
 	}
@@ -831,10 +847,13 @@ export function buildRegistry(
 	const exposedKeys = new Set(
 		operations.map((op) => operationKey(op.method, op.path)),
 	);
-	for (const key of metadata.overrides.core ?? []) {
+	for (const key of [
+		...(metadata.overrides.core ?? []),
+		...(metadata.overrides.muse ?? []),
+	]) {
 		if (!exposedKeys.has(key)) {
 			fail(
-				`operation-overrides.yml core entry "${key}" is excluded or pending review, so it cannot be listed.`,
+				`operation-overrides.yml entry "${key}" in core or muse is excluded or pending review, so it cannot be listed.`,
 			);
 		}
 	}

@@ -19,6 +19,7 @@ import {
 	CHATGPT_OPEN_WORLD_WRITES,
 	CHATGPT_SIDE_EFFECT_READS,
 	DEFAULT_SURFACE,
+	listedOnSurface,
 	type SurfaceName,
 } from "../policy/surfaces.ts";
 import { visibleOperations } from "../policy/visibility.ts";
@@ -361,8 +362,12 @@ export function createWhopMcpServer(
 		collectsIntent ? withIntentContext(schema) : schema;
 	const listedOperations = compact
 		? operations
-				.filter((op) => op.core)
-				.sort((a, b) => (a.core ?? 0) - (b.core ?? 0))
+				.filter((op) => listedOnSurface(op, options.surface))
+				.sort(
+					(a, b) =>
+						(a.core ?? 10_000 + (a.muse ?? 0)) -
+						(b.core ?? 10_000 + (b.muse ?? 0)),
+				)
 		: operations;
 
 	const auditSink = options.auditSink ?? new InMemoryAuditSink();

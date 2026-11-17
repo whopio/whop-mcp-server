@@ -145,7 +145,7 @@ describe("per-route tool surfaces", () => {
 		}
 	});
 
-	it("serves /mcp's core tools without money movement to a Muse grant", async () => {
+	it("serves /mcp's core tools plus the Muse list, and refunds as the only money writes, to a Muse grant", async () => {
 		const muse = {
 			...props,
 			profile: "muse",
@@ -158,8 +158,10 @@ describe("per-route tool surfaces", () => {
 		expect(names).toContain("connection_status");
 		expect(names).toContain("search_operations");
 		expect(names).toContain("call_read_operation");
+		expect(names).toContain("payments_refund");
+		expect(names).toContain("resolution-center-cases_accept");
 		for (const name of [
-			"payments_refund",
+			"payouts_create",
 			"call_write_operation",
 			"report_feedback",
 			"ask_question",
@@ -171,11 +173,14 @@ describe("per-route tool surfaces", () => {
 		const operationNames = new Set(
 			registry.operations.map((op) => op.toolName),
 		);
-		expect(names.filter((name) => operationNames.has(name))).toEqual(
-			full.filter(
-				(name) => operationNames.has(name) && name !== "payments_refund",
-			),
-		);
+		const museOnly = registry.operations
+			.filter((op) => op.muse !== undefined)
+			.sort((a, b) => (a.muse ?? 0) - (b.muse ?? 0))
+			.map((op) => op.toolName);
+		expect(names.filter((name) => operationNames.has(name))).toEqual([
+			...full.filter((name) => operationNames.has(name)),
+			...museOnly,
+		]);
 		const result = (await rpc(
 			"muse",
 			"/muse/mcp",

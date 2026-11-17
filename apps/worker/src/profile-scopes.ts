@@ -1,5 +1,6 @@
 import {
 	isReadNamedScope as isReadOnlyScope,
+	listedOnSurface,
 	operationInSurface,
 	type OperationDef,
 } from "@whop/mcp-server";
@@ -290,12 +291,12 @@ export function expandProfileToWhopScopes(
  * the registry classifies the operations that declare them. Some operations
  * that are not marked financial still declare one (POST /payouts/quotes needs
  * payout:withdraw_funds), so the surface filter alone would leak it.
+ * payment:manage, payment:dispute and payment:resolution_center are not here:
+ * refunds, dispute responses and buyer-complaint actions need them, and Muse
+ * reaches writes only through the tools it lists.
  */
 const MUSE_DENIED_WHOP_SCOPES = new Set([
 	"payment:charge",
-	"payment:manage",
-	"payment:dispute",
-	"payment:resolution_center",
 	"payment:setup_intent:manage",
 	"payout:withdraw_funds",
 	"payout:transfer_funds",
@@ -321,18 +322,21 @@ const MUSE_DENIED_WHOP_SCOPES = new Set([
 
 /**
  * Muse grants hold the scopes of the operations its route serves, minus money
- * capabilities. Reads outside the listed core only contribute read-named
- * scopes: some reads declare write scopes (API key listings need
- * developer:manage_api_key), and those must not reach a read-only path.
+ * capabilities. Listed writes contribute every scope they need; reads,
+ * listed or not, only contribute read-named scopes. Some reads declare write
+ * scopes as alternatives (API key listings need developer:manage_api_key,
+ * economic-intelligence_list accepts ai_chat:create), and those must not
+ * reach a read-only path.
  */
 export function expandMuseToWhopScopes(operations: OperationDef[]): string[] {
 	const requested = new Set<string>(IDENTITY_SCOPES);
 	for (const operation of operations) {
 		if (!operationInSurface(operation, "muse")) continue;
-		const listed = operation.core !== undefined;
+		const listedWrite =
+			listedOnSurface(operation, "muse") && !operation.annotations.readOnlyHint;
 		for (const scope of operation.scopes) {
 			if (!GRANTABLE.has(scope) || MUSE_DENIED_WHOP_SCOPES.has(scope)) continue;
-			if (listed || isReadNamedScope(scope)) requested.add(scope);
+			if (listedWrite || isReadNamedScope(scope)) requested.add(scope);
 		}
 	}
 	return [...requested].sort();

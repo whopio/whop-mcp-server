@@ -19,6 +19,8 @@ export {
 	DEFAULT_SURFACE,
 	isReadNamedScope,
 	isSurfaceName,
+	listedOnSurface,
+	MUSE_REFUND_WRITES,
 	operationInSurface,
 	SURFACE_NAMES,
 	type SurfaceName,

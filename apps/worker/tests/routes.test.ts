@@ -92,7 +92,9 @@ describe("route table", () => {
 		const muse = await toolNames("/muse/mcp", "muse");
 		expect(muse).toContain("payments_list");
 		expect(muse).toContain("search_operations");
-		expect(muse).not.toContain("payments_refund");
+		expect(muse).toContain("payments_refund");
+		expect(muse).toContain("memberships_cancel");
+		expect(muse).not.toContain("payouts_create");
 		expect(muse).not.toContain("call_write_operation");
 	});
 });

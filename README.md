@@ -38,10 +38,10 @@ than placed in the client configuration or exposed to the model.
 
 ## Tools
 
-The hosted endpoint lists about 40 of the most-used Whop operations as their
-own tools, such as payments, memberships, products, prices, files, courses,
-chat, and bounties. Every other operation your connection can use is reached
-through four tools:
+The hosted endpoint lists about 45 Whop operations as their own tools, picked
+for the jobs creators ask an agent to do: payments, memberships, products,
+prices, checkout links, support chats, and courses. Every other operation your
+connection can use is reached through four tools:
 
 - `search_operations` takes a task in plain words, such as "create a promo
   code", and returns matching operations. The top three include their full
