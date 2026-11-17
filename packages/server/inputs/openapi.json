@@ -37988,6 +37988,17 @@
               "null"
             ]
           },
+          "estimate": {
+            "description": "Estimate of the payment's part of its account's monthly rebate, as if its month closed now. It uses the account's level so far and the share of the payment that its spend so far covers. Both can change until the month closes. `null` unless `status` is `pending` with the processing fee posted, and when estimates are unavailable.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PaymentLevelsRebateEstimate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "ineligible_reason": {
             "description": "Why the payment can't earn a rebate: `not_card_payment`, `before_levels` (made before Whop Levels started), `not_in_levels` (its account wasn't in Whop Levels that month), `fee_not_posted`, `fee_at_level_rate` (its fee was already at or below the level's rate) or `no_level_rate` (its fee matched no level rate). `null` unless `status` is `ineligible`.",
             "enum": [
@@ -38072,7 +38083,67 @@
           "processing_rate_percentage",
           "effective_rate_percentage",
           "covered_share",
-          "month_started_at"
+          "month_started_at",
+          "estimate"
+        ],
+        "type": "object"
+      },
+      "PaymentLevelsRebateEstimate": {
+        "properties": {
+          "amount": {
+            "$ref": "#/components/schemas/Money",
+            "description": "Estimated part of the account's monthly rebate for this payment, in the currency it settled in. `0` when the account's spend so far doesn't cover it, or its fee is already at or below the level's rate."
+          },
+          "covered_share": {
+            "description": "How much of the payment the account's spend so far covers, from `0` to `1`. The month's earliest card payments are covered first.",
+            "example": 1.0,
+            "type": "number"
+          },
+          "effective_rate_percentage": {
+            "description": "Processing fee as a percentage of the amount it was charged on, before the rebate, where `2.7` means 2.7%.",
+            "example": 2.9,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "level": {
+            "description": "The account's level so far this month, from `0` up to `10`. The month closes at the highest level the account reaches.",
+            "example": 5,
+            "type": "integer"
+          },
+          "processing_rate_percentage": {
+            "description": "Card processing percentage at `level` for cards from `region`, where `2.1` means 2.1%. `null` when the fee matched no level rate.",
+            "example": 1.5,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "region": {
+            "description": "Card region the processing fee was charged in, which sets `processing_rate_percentage`. `null` when the fee matched no level rate.",
+            "enum": [
+              "us_and_canada",
+              "europe_uk_and_australia",
+              "latin_america",
+              "peru",
+              "brazil",
+              null
+            ],
+            "example": "us_and_canada",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "amount",
+          "level",
+          "region",
+          "processing_rate_percentage",
+          "effective_rate_percentage",
+          "covered_share"
         ],
         "type": "object"
       },
