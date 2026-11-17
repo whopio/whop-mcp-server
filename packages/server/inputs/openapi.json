@@ -36229,7 +36229,7 @@
       "PaymentInstrument": {
         "properties": {
           "card": {
-            "description": "Card payments only: the card's network, last four, issuer identification number, expiry, and network transaction id.",
+            "description": "Card, Apple Pay, and Google Pay payments only: the card's network, last four, issuer identification number, expiry, and network transaction id.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/PaymentInstrumentCard"
