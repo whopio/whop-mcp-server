@@ -1146,6 +1146,24 @@
       },
       "AccountCards": {
         "properties": {
+          "decline_reason": {
+            "description": "Reason the card issuer declined the application. `compliance` covers sanctions, politically exposed person, and adverse media checks. `other` covers reasons that are not in this list. `null` when `status` is not `denied`, or when the issuer did not decline the application.",
+            "enum": [
+              "compromised_identity",
+              "duplicate",
+              "unsupported_region",
+              "compliance",
+              "fraud",
+              "verification_failed",
+              "other",
+              null
+            ],
+            "example": "compromised_identity",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "kind": {
             "description": "Whether the card application verifies a business (`business`, KYB) or a person (`individual`, consumer identity). `null` when the application is not yet linked to a verification.",
             "enum": [
@@ -1177,7 +1195,8 @@
         },
         "required": [
           "kind",
-          "status"
+          "status",
+          "decline_reason"
         ],
         "type": "object"
       },
