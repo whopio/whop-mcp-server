@@ -2236,7 +2236,7 @@
             "description": "The rate that takes effect when this account's custom rate is cleared, including inherited pricing. Its `percentage` and `fixed` are `null` when a subaccount's fees are read without access to its parent account."
           },
           "source": {
-            "description": "Where the rate in effect comes from: `default` is the platform rate, `custom` a rate negotiated for this account, and `inherited` a rate negotiated by the platform this account is connected to. `null` when a subaccount's fees are read without access to its parent account.",
+            "description": "Where the rate in effect comes from. `default` is the platform rate, `custom` a rate negotiated for this account, and `inherited` a rate negotiated by this account's platform. `null` when a subaccount's fees are read without access to its parent account.",
             "enum": [
               "default",
               "custom",
@@ -2342,6 +2342,165 @@
       },
       "AccountFeeMarkups": {
         "properties": {
+          "card_regions": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/AccountFeeMarkup"
+            },
+            "description": "Markups on card payments, keyed by acquiring region (`usa`, `eu`, `uk`, `ca`, or `au`). A region without its own markup uses `payment_methods.card`.",
+            "example": {
+              "au": {
+                "adjustable": false,
+                "default": {
+                  "fixed": {
+                    "amount": "0.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 0.0
+                },
+                "fixed": {
+                  "amount": "0.00",
+                  "currency": "usd",
+                  "decimals": 2,
+                  "display_decimals": 2
+                },
+                "maximum": {
+                  "fixed": {
+                    "amount": "100.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 100.0
+                },
+                "percentage": 0.0,
+                "source": "default",
+                "unadjustable_reason": "not_permitted"
+              },
+              "ca": {
+                "adjustable": false,
+                "default": {
+                  "fixed": {
+                    "amount": "0.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 0.0
+                },
+                "fixed": {
+                  "amount": "0.00",
+                  "currency": "usd",
+                  "decimals": 2,
+                  "display_decimals": 2
+                },
+                "maximum": {
+                  "fixed": {
+                    "amount": "100.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 100.0
+                },
+                "percentage": 0.0,
+                "source": "default",
+                "unadjustable_reason": "not_permitted"
+              },
+              "eu": {
+                "adjustable": false,
+                "default": {
+                  "fixed": {
+                    "amount": "0.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 0.0
+                },
+                "fixed": {
+                  "amount": "0.00",
+                  "currency": "usd",
+                  "decimals": 2,
+                  "display_decimals": 2
+                },
+                "maximum": {
+                  "fixed": {
+                    "amount": "100.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 100.0
+                },
+                "percentage": 0.0,
+                "source": "default",
+                "unadjustable_reason": "not_permitted"
+              },
+              "uk": {
+                "adjustable": false,
+                "default": {
+                  "fixed": {
+                    "amount": "0.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 0.0
+                },
+                "fixed": {
+                  "amount": "0.00",
+                  "currency": "usd",
+                  "decimals": 2,
+                  "display_decimals": 2
+                },
+                "maximum": {
+                  "fixed": {
+                    "amount": "100.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 100.0
+                },
+                "percentage": 0.0,
+                "source": "default",
+                "unadjustable_reason": "not_permitted"
+              },
+              "usa": {
+                "adjustable": false,
+                "default": {
+                  "fixed": {
+                    "amount": "0.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 0.0
+                },
+                "fixed": {
+                  "amount": "0.00",
+                  "currency": "usd",
+                  "decimals": 2,
+                  "display_decimals": 2
+                },
+                "maximum": {
+                  "fixed": {
+                    "amount": "100.00",
+                    "currency": "usd",
+                    "decimals": 2,
+                    "display_decimals": 2
+                  },
+                  "percentage": 100.0
+                },
+                "percentage": 0.0,
+                "source": "default",
+                "unadjustable_reason": "not_permitted"
+              }
+            },
+            "type": "object"
+          },
           "card_spend": {
             "$ref": "#/components/schemas/AccountFeeMarkup",
             "description": "The markup on card purchases settled by the subaccount."
@@ -2690,6 +2849,7 @@
           "payouts",
           "deposits",
           "payment_methods",
+          "card_regions",
           "transfers",
           "crypto_swaps",
           "payments",
@@ -58713,6 +58873,34 @@
                   "child_markups": {
                     "description": "Default markups for subaccounts. Available on accounts without a parent, even before any accounts connect.",
                     "properties": {
+                      "card_regions": {
+                        "additionalProperties": {
+                          "description": "The new markup. Fields left out keep their current value. `null` clears the row so the markup returns to its default.",
+                          "properties": {
+                            "fixed": {
+                              "description": "The amount the platform adds per event, in US dollars.",
+                              "example": 0.25,
+                              "type": "number"
+                            },
+                            "percentage": {
+                              "description": "The percentage of the transaction the platform adds, where `2` means 2%.",
+                              "example": 1,
+                              "type": "number"
+                            }
+                          },
+                          "type": [
+                            "object",
+                            "null"
+                          ]
+                        },
+                        "description": "Markups on card payments, keyed by acquiring region: `usa`, `eu`, `uk`, `ca`, or `au`. `null` clears a region's markup so it uses `payment_methods.card`.",
+                        "example": {
+                          "uk": {
+                            "percentage": 2.2
+                          }
+                        },
+                        "type": "object"
+                      },
                       "card_spend": {
                         "description": "The markup on card purchases settled by the subaccount. `null` clears the custom markup.",
                         "properties": {
@@ -59424,6 +59612,34 @@
                   "markups": {
                     "description": "Markups on this subaccount, set by the platform it is connected to.",
                     "properties": {
+                      "card_regions": {
+                        "additionalProperties": {
+                          "description": "The new markup. Fields left out keep their current value. `null` clears the row so the markup returns to its default.",
+                          "properties": {
+                            "fixed": {
+                              "description": "The amount the platform adds per event, in US dollars.",
+                              "example": 0.25,
+                              "type": "number"
+                            },
+                            "percentage": {
+                              "description": "The percentage of the transaction the platform adds, where `2` means 2%.",
+                              "example": 1,
+                              "type": "number"
+                            }
+                          },
+                          "type": [
+                            "object",
+                            "null"
+                          ]
+                        },
+                        "description": "Markups on card payments, keyed by acquiring region: `usa`, `eu`, `uk`, `ca`, or `au`. `null` clears a region's markup so it uses `payment_methods.card`.",
+                        "example": {
+                          "uk": {
+                            "percentage": 2.2
+                          }
+                        },
+                        "type": "object"
+                      },
                       "card_spend": {
                         "description": "The markup on card purchases settled by the subaccount. `null` clears the custom markup.",
                         "properties": {
