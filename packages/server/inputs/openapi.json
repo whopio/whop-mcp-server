@@ -27948,6 +27948,7 @@
               "onchain_internal_transfer_incoming",
               "onchain_swap_source",
               "onchain_swap_target",
+              "savings_revaluation",
               "onchain_swap_offset",
               "whop_swap_fee_received",
               "swap_fee",
@@ -115810,7 +115811,7 @@
                             "type": "string"
                           },
                           "line_category": {
-                            "description": "The ledger line category the row aggregates. Balance summary rows carry the balance bucket instead.",
+                            "description": "The ledger line category the row aggregates. Balance summary rows carry the balance bucket instead. A `savings_revaluation` row is the change in the value of savings shares above one dollar each.",
                             "enum": [
                               "accelerated_settlement_fee",
                               "account_settlement",
@@ -116110,6 +116111,7 @@
                               "sales_tax_remittance",
                               "sales_tax_remittance_reversal",
                               "sales_tax_remitted",
+                              "savings_revaluation",
                               "settlement_rounding_variance",
                               "settlement_shortfall_loss",
                               "software_rental_revshare",
