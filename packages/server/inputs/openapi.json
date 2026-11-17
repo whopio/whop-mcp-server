@@ -7202,7 +7202,7 @@
           },
           "cost_per_result": {
             "description": "Spend divided by Whop pixel-attributed results; null when nothing Whop-attributable is being optimized for.",
-            "example": 7.653333333333333,
+            "example": 12.68842105263158,
             "type": [
               "number",
               "null"
@@ -7288,7 +7288,7 @@
               "learning",
               "active"
             ],
-            "example": "paused",
+            "example": "processing",
             "type": "string"
           },
           "descriptions": {
@@ -7382,7 +7382,7 @@
               "messaging_conversation",
               null
             ],
-            "example": "custom",
+            "example": "purchase",
             "type": [
               "string",
               "null"
@@ -7398,7 +7398,7 @@
           },
           "results": {
             "description": "The Whop pixel-attributed count behind result_event. When a campaign's ad groups optimize different goals there is no single result_event (it is null), and this is instead the sum of each ad group's own attributed results. Null when nothing Whop-attributable is being optimized for.",
-            "example": 63,
+            "example": 38,
             "type": [
               "number",
               "null"
@@ -7440,7 +7440,7 @@
               "in_review",
               "rejected"
             ],
-            "example": "paused",
+            "example": "active",
             "type": "string"
           },
           "submitted_application_value": {
@@ -7455,7 +7455,7 @@
           },
           "title": {
             "description": "Display title of the ad.",
-            "example": "Ceramic coating — spring hook v2",
+            "example": "Hero video (Copy 1)",
             "type": [
               "string",
               "null"
@@ -16957,8 +16957,8 @@
               "complete_registration",
               "lead",
               "content_view",
-              "search",
               "contact",
+              "search",
               "customize_product",
               "donate",
               "find_location",
@@ -178665,7 +178665,7 @@
                           "learning",
                           "active"
                         ],
-                        "example": "paused",
+                        "example": "processing",
                         "type": "string"
                       },
                       "descriptions": {
@@ -178709,12 +178709,12 @@
                           "in_review",
                           "rejected"
                         ],
-                        "example": "paused",
+                        "example": "active",
                         "type": "string"
                       },
                       "title": {
                         "description": "Display title of the ad.",
-                        "example": "Ceramic coating — spring hook v2",
+                        "example": "Hero video (Copy 1)",
                         "type": [
                           "string",
                           "null"
