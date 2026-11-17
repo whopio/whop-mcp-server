@@ -125262,6 +125262,94 @@
       ],
       "x-whop-surface": "native"
     },
+    "/livestreams/{id}/add_co_host": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "Livestream ID, prefixed `lfeed_`.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "description": "Makes someone in a live livestream a co-host until it ends. Co-hosts can change chat settings, manage the stage, and moderate chat, but can't end the livestream.",
+        "operationId": "addLivestreamCoHost",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "user_id": {
+                    "description": "User ID, prefixed `user_`. The user needs access to the livestream.",
+                    "example": "user_xxxxxxxxxxxxxx",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "user_id"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Livestream"
+                }
+              }
+            },
+            "description": "co-host added"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "livestream is not live"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "missing or invalid authentication"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "missing the `livestream:moderate` permission"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "user not found"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "livestream:moderate"
+            ]
+          }
+        ],
+        "summary": "Add Livestream Co-host",
+        "tags": [
+          "Livestreams"
+        ]
+      },
+      "x-whop-surface": "native"
+    },
     "/livestreams/{id}/pin": {
       "parameters": [
         {
@@ -125347,6 +125435,94 @@
           }
         ],
         "summary": "Pin Livestream",
+        "tags": [
+          "Livestreams"
+        ]
+      },
+      "x-whop-surface": "native"
+    },
+    "/livestreams/{id}/remove_co_host": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "Livestream ID, prefixed `lfeed_`.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "description": "Removes a co-host from a live livestream.",
+        "operationId": "removeLivestreamCoHost",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "user_id": {
+                    "description": "User ID, prefixed `user_`.",
+                    "example": "user_xxxxxxxxxxxxxx",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "user_id"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Livestream"
+                }
+              }
+            },
+            "description": "co-host removed"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "livestream is not live"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "missing or invalid authentication"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "missing the `livestream:moderate` permission"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "user not found"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "livestream:moderate"
+            ]
+          }
+        ],
+        "summary": "Remove Livestream Co-host",
         "tags": [
           "Livestreams"
         ]
