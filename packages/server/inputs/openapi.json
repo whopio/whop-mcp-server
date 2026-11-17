@@ -9593,6 +9593,10 @@
       },
       "AdPixel": {
         "properties": {
+          "account": {
+            "$ref": "#/components/schemas/StorefrontAccount",
+            "description": "The business whose claimed campaigns send conversions to this pixel, with its name and logo."
+          },
           "account_id": {
             "description": "The business whose claimed campaigns send conversions to this pixel, prefixed `biz_`.",
             "example": "biz_xxxxxxxxxxxxxx",
@@ -9659,6 +9663,7 @@
         "required": [
           "id",
           "account_id",
+          "account",
           "platform",
           "external_id",
           "name",
@@ -51945,7 +51950,7 @@
             ]
           },
           "route": {
-            "description": "Account public route identifier — the `whop.com/{route}` storefront path.",
+            "description": "Account public route identifier, used in the `whop.com/{route}` storefront path.",
             "example": "shine-time-auto-detailing",
             "type": "string"
           },
