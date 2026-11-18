@@ -47587,6 +47587,344 @@
         ],
         "type": "string"
       },
+      "RecommendedAction": {
+        "properties": {
+          "account_id": {
+            "description": "The account the action is for, prefixed `biz_`.",
+            "example": "biz_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "created_at": {
+            "description": "When the action was created, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
+          "id": {
+            "description": "Recommended action ID, prefixed `reca_`.",
+            "example": "reca_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "preview": {
+            "description": "The website change the action makes when it runs. `type` picks the shape. New types can be added, so skip a preview whose `type` you do not know. `null` while the action is `preparing`, or when the action does not change a website.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RecommendedActionPreview"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "reasoning": {
+            "description": "Why Whop recommends the action, written for the account owner.",
+            "example": "Visitors who reach your pricing section buy, but most leave the home page before they scroll to it.",
+            "type": "string"
+          },
+          "run_by_user_id": {
+            "description": "The user who ran the action, prefixed `user_`. `null` until the action runs.",
+            "example": "user_xxxxxxxxxxxxxx",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "run_ended_at": {
+            "description": "When the run ended, as an ISO 8601 timestamp. `null` until the run ends.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "run_started_at": {
+            "description": "When the run started, as an ISO 8601 timestamp. `null` until the action runs.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "description": "Where the action is. `preparing` while its work is built, and it cannot run yet. `ready` when it can run. `running` while its steps are sent. `executed` when every step succeeded. `failed` when the run ended before every step succeeded. `dismissed` when the owner chose not to run it. `superseded` when Whop retired it, such as for a newer action.",
+            "enum": [
+              "preparing",
+              "ready",
+              "running",
+              "executed",
+              "failed",
+              "dismissed",
+              "superseded"
+            ],
+            "example": "running",
+            "type": "string"
+          },
+          "title": {
+            "description": "What the action does, written for the account owner.",
+            "example": "Lead your home page with member results",
+            "type": "string"
+          },
+          "type": {
+            "description": "What kind of change the action makes. New values can be added, so skip an action whose type you do not know.",
+            "enum": [
+              "add_cancel_offer",
+              "create_email_automation",
+              "improve_landing_page",
+              "fix_broken_website",
+              "clone_and_ab_test_site"
+            ],
+            "example": "improve_landing_page",
+            "type": "string"
+          },
+          "updated_at": {
+            "description": "When the action was last updated, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
+          "workflow": {
+            "description": "The API calls the action makes when it runs. `null` while the action is `preparing`, or when it has no steps.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/RecommendedActionWorkflow"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "account_id",
+          "type",
+          "title",
+          "reasoning",
+          "status",
+          "workflow",
+          "run_by_user_id",
+          "run_started_at",
+          "run_ended_at",
+          "created_at",
+          "updated_at",
+          "preview"
+        ],
+        "type": "object"
+      },
+      "RecommendedActionChangedResource": {
+        "properties": {
+          "id": {
+            "description": "ID of the resource. A `variant` ID is prefixed `plan_`.",
+            "type": "string"
+          },
+          "object": {
+            "description": "Type of the resource. New types can be added, so skip an entry whose `object` you do not know.",
+            "enum": [
+              "variant"
+            ],
+            "example": "variant",
+            "type": "string"
+          }
+        },
+        "required": [
+          "object",
+          "id"
+        ],
+        "type": "object"
+      },
+      "RecommendedActionPreview": {
+        "description": "The website change a recommended action makes when it runs. `type` picks the shape. New types can be added, so skip a preview whose `type` you do not know.",
+        "discriminator": {
+          "mapping": {
+            "website_ab_test": "#/components/schemas/RecommendedActionWebsiteAbTestPreview",
+            "website_change": "#/components/schemas/RecommendedActionWebsiteChangePreview"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/RecommendedActionWebsiteChangePreview"
+          },
+          {
+            "$ref": "#/components/schemas/RecommendedActionWebsiteAbTestPreview"
+          }
+        ]
+      },
+      "RecommendedActionWebsiteAbTestPreview": {
+        "properties": {
+          "app_id": {
+            "description": "App ID of the website, prefixed `app_`.",
+            "example": "app_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "base_build_id": {
+            "description": "App build ID of the live build the draft is tested against, prefixed `apbu_`.",
+            "example": "apbu_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "changed_resources": {
+            "items": {
+              "$ref": "#/components/schemas/RecommendedActionChangedResource",
+              "description": "Resources besides the website that running the action changes. Each item's `object` names its type."
+            },
+            "type": "array"
+          },
+          "draft_build_id": {
+            "description": "App build ID of the drafted build, prefixed `apbu_`.",
+            "example": "apbu_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "page_paths": {
+            "items": {
+              "description": "Paths of the pages the draft changes, such as `/` for the home page.",
+              "example": "/",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "traffic_percent": {
+            "description": "Percentage of visitors who see the drafted build during the test, such as `50`.",
+            "example": 50,
+            "type": "integer"
+          },
+          "type": {
+            "description": "Always `website_ab_test`. Running the action tests the drafted build against the live build.",
+            "enum": [
+              "website_ab_test"
+            ],
+            "example": "website_ab_test",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "app_id",
+          "base_build_id",
+          "draft_build_id",
+          "page_paths",
+          "traffic_percent",
+          "changed_resources"
+        ],
+        "type": "object"
+      },
+      "RecommendedActionWebsiteChangePreview": {
+        "properties": {
+          "app_id": {
+            "description": "App ID of the website, prefixed `app_`.",
+            "type": "string"
+          },
+          "base_build_id": {
+            "description": "App build ID of the live build the draft was made from, prefixed `apbu_`. `null` when the website has no live build.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "changed_resources": {
+            "items": {
+              "$ref": "#/components/schemas/RecommendedActionChangedResource",
+              "description": "Resources besides the website that running the action changes. Each item's `object` names its type."
+            },
+            "type": "array"
+          },
+          "draft_build_id": {
+            "description": "App build ID of the drafted build, prefixed `apbu_`.",
+            "type": "string"
+          },
+          "page_paths": {
+            "items": {
+              "description": "Paths of the pages the draft changes, such as `/` for the home page.",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "type": {
+            "description": "Always `website_change`. Running the action publishes the drafted build to every visitor.",
+            "enum": [
+              "website_change"
+            ],
+            "example": "website_change",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "app_id",
+          "base_build_id",
+          "draft_build_id",
+          "page_paths",
+          "changed_resources"
+        ],
+        "type": "object"
+      },
+      "RecommendedActionWorkflow": {
+        "properties": {
+          "api_version": {
+            "description": "The `Api-Version-Date` every step is sent with, such as `2026-11-14`. The arguments of each step have the shape of this version.",
+            "example": "2026-01-01",
+            "type": "string"
+          },
+          "steps": {
+            "items": {
+              "$ref": "#/components/schemas/RecommendedActionWorkflowStep",
+              "description": "The API calls the action makes when it runs, in the order they are sent."
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "api_version",
+          "steps"
+        ],
+        "type": "object"
+      },
+      "RecommendedActionWorkflowStep": {
+        "properties": {
+          "arguments": {
+            "description": "The input of the operation under `api_version`. It holds the path, query and body parameters in one map. A value of the form `{{steps[<index>].<field>}}` reads a field from the response of an earlier step. `<index>` is that step's position in `steps`, counting from 0. The value is replaced before the step is sent.",
+            "example": {
+              "id": "{{steps[0].id}}"
+            },
+            "type": "object"
+          },
+          "error": {
+            "description": "Why the call did not go through. `null` when the step succeeded or was not sent.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "operation": {
+            "description": "The `operationId` of the API operation the step calls, such as `createExperiment`.",
+            "example": "activateExperiment",
+            "type": "string"
+          },
+          "status": {
+            "description": "Where the step is in the run. `pending` until the run sends it. `skipped` means an earlier step failed, so this step was not sent.",
+            "enum": [
+              "pending",
+              "running",
+              "succeeded",
+              "failed",
+              "skipped"
+            ],
+            "example": "pending",
+            "type": "string"
+          },
+          "title": {
+            "description": "One sentence for the account owner about what the step changes, such as `Add a one-time wash button in the hero`.",
+            "example": "Start the A/B test",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title",
+          "operation",
+          "arguments",
+          "status",
+          "error"
+        ],
+        "type": "object"
+      },
       "Refund": {
         "properties": {
           "account_id": {
@@ -155773,6 +156111,718 @@
         "x-group-title": "Engagement"
       }
     },
+    "/recommended_actions": {
+      "get": {
+        "description": "Lists the actions Whop recommends for accounts with Economic Intelligence, newest first.",
+        "operationId": "listRecommendedActions",
+        "parameters": [
+          {
+            "description": "Only this account's actions, prefixed `biz_`. Without it, a user gets the actions of every account they can read that has Economic Intelligence. An account credential gets its own account.",
+            "in": "query",
+            "name": "account_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only actions in any of these statuses. Repeat the parameter to pass several.",
+            "in": "query",
+            "name": "statuses",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "preparing",
+                  "ready",
+                  "running",
+                  "executed",
+                  "failed",
+                  "dismissed",
+                  "superseded"
+                ],
+                "example": "ready",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Field to sort by.",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "enum": [
+                "created_at",
+                "run_started_at"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Sort direction.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the start of the range.",
+            "in": "query",
+            "name": "first",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results after this cursor. Use `page_info.end_cursor` from the previous response to fetch the next page.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the end of the range.",
+            "in": "query",
+            "name": "last",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results before this cursor. Use `page_info.start_cursor` from the previous response to fetch the previous page.",
+            "in": "query",
+            "name": "before",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "ready_actions": {
+                    "value": {
+                      "data": [
+                        {
+                          "account_id": "biz_3xV9cT7rQwLm",
+                          "created_at": "2026-11-17T05:12:44.318Z",
+                          "id": "reca_8kQ2mZtV4nLp",
+                          "preview": {
+                            "app_id": "app_Wq81LmZr0aXk",
+                            "base_build_id": "apbu_Base7Kp2Vn",
+                            "changed_resources": [
+                              {
+                                "id": "plan_Xr2mQ8nVt4Ld",
+                                "object": "variant"
+                              }
+                            ],
+                            "draft_build_id": "apbu_Draft9Qe4Ls",
+                            "page_paths": [
+                              "/"
+                            ],
+                            "traffic_percent": 50,
+                            "type": "website_ab_test"
+                          },
+                          "reasoning": "Visitors who reach your pricing section buy at 4.1%, but 62% leave the home page before they scroll to it. Moving member results above the fold shows the payoff first.",
+                          "run_by_user_id": null,
+                          "run_ended_at": null,
+                          "run_started_at": null,
+                          "status": "ready",
+                          "title": "Lead your home page with member results",
+                          "type": "improve_landing_page",
+                          "updated_at": "2026-11-17T05:14:02.907Z",
+                          "workflow": {
+                            "api_version": "2026-11-14",
+                            "steps": [
+                              {
+                                "arguments": {
+                                  "account_id": "biz_3xV9cT7rQwLm",
+                                  "bucket_by": "anonymous",
+                                  "control": {
+                                    "related_resource": {
+                                      "id": "apbu_Base7Kp2Vn",
+                                      "object": "app_build"
+                                    }
+                                  },
+                                  "flag_key": "ei_reca_xxxxxxxxxxxxx",
+                                  "name": "Lead your home page with member results",
+                                  "related_resource": {
+                                    "id": "app_Wq81LmZr0aXk",
+                                    "object": "app"
+                                  },
+                                  "variants": [
+                                    {
+                                      "name": "ei_change",
+                                      "related_resource": {
+                                        "id": "apbu_Draft9Qe4Ls",
+                                        "object": "app_build"
+                                      },
+                                      "weight": 50
+                                    }
+                                  ]
+                                },
+                                "error": null,
+                                "operation": "createExperiment",
+                                "status": "pending",
+                                "title": "Lead your home page with member results"
+                              },
+                              {
+                                "arguments": {
+                                  "id": "{{steps[0].id}}"
+                                },
+                                "error": null,
+                                "operation": "activateExperiment",
+                                "status": "pending",
+                                "title": "Start the A/B test"
+                              }
+                            ]
+                          }
+                        }
+                      ],
+                      "page_info": {
+                        "end_cursor": "MjAyNi0xMS0xN1QwNToxMjo0NA",
+                        "has_next_page": false,
+                        "has_previous_page": false,
+                        "start_cursor": "MjAyNi0xMS0xN1QwNToxMjo0NA"
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "items": {
+                        "$ref": "#/components/schemas/RecommendedAction"
+                      },
+                      "type": "array"
+                    },
+                    "page_info": {
+                      "properties": {
+                        "end_cursor": {
+                          "example": null,
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "has_next_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "has_previous_page": {
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "start_cursor": {
+                          "example": "WyJjdXJzb3IiLDFd",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "start_cursor",
+                        "end_cursor",
+                        "has_next_page",
+                        "has_previous_page"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "page_info"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Recommended actions"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "a status outside the enum"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "the account does not have Economic Intelligence"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "an account the caller cannot read"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "company:basic:read"
+            ]
+          }
+        ],
+        "summary": "List Recommended Actions",
+        "tags": [
+          "Recommended Actions"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        }
+      ],
+      "x-whop-surface": "native"
+    },
+    "/recommended_actions/{id}": {
+      "get": {
+        "description": "Retrieves one recommended action.",
+        "operationId": "retrieveRecommendedAction",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "ready_action": {
+                    "value": {
+                      "account_id": "biz_3xV9cT7rQwLm",
+                      "created_at": "2026-11-17T05:12:44.318Z",
+                      "id": "reca_8kQ2mZtV4nLp",
+                      "preview": {
+                        "app_id": "app_Wq81LmZr0aXk",
+                        "base_build_id": "apbu_Base7Kp2Vn",
+                        "changed_resources": [
+                          {
+                            "id": "plan_Xr2mQ8nVt4Ld",
+                            "object": "variant"
+                          }
+                        ],
+                        "draft_build_id": "apbu_Draft9Qe4Ls",
+                        "page_paths": [
+                          "/"
+                        ],
+                        "traffic_percent": 50,
+                        "type": "website_ab_test"
+                      },
+                      "reasoning": "Visitors who reach your pricing section buy at 4.1%, but 62% leave the home page before they scroll to it. Moving member results above the fold shows the payoff first.",
+                      "run_by_user_id": null,
+                      "run_ended_at": null,
+                      "run_started_at": null,
+                      "status": "ready",
+                      "title": "Lead your home page with member results",
+                      "type": "improve_landing_page",
+                      "updated_at": "2026-11-17T05:14:02.907Z",
+                      "workflow": {
+                        "api_version": "2026-11-14",
+                        "steps": [
+                          {
+                            "arguments": {
+                              "account_id": "biz_3xV9cT7rQwLm",
+                              "bucket_by": "anonymous",
+                              "control": {
+                                "related_resource": {
+                                  "id": "apbu_Base7Kp2Vn",
+                                  "object": "app_build"
+                                }
+                              },
+                              "flag_key": "ei_reca_xxxxxxxxxxxxx",
+                              "name": "Lead your home page with member results",
+                              "related_resource": {
+                                "id": "app_Wq81LmZr0aXk",
+                                "object": "app"
+                              },
+                              "variants": [
+                                {
+                                  "name": "ei_change",
+                                  "related_resource": {
+                                    "id": "apbu_Draft9Qe4Ls",
+                                    "object": "app_build"
+                                  },
+                                  "weight": 50
+                                }
+                              ]
+                            },
+                            "error": null,
+                            "operation": "createExperiment",
+                            "status": "pending",
+                            "title": "Lead your home page with member results"
+                          },
+                          {
+                            "arguments": {
+                              "id": "{{steps[0].id}}"
+                            },
+                            "error": null,
+                            "operation": "activateExperiment",
+                            "status": "pending",
+                            "title": "Start the A/B test"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendedAction"
+                }
+              }
+            },
+            "description": "Recommended action"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "the account does not have Economic Intelligence"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "an action in an internal status"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "company:basic:read"
+            ]
+          }
+        ],
+        "summary": "Retrieve Recommended Action",
+        "tags": [
+          "Recommended Actions"
+        ]
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "Recommended action ID, prefixed `reca_`.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "example": "reca_xxxxxxxxxxxxx",
+            "type": "string"
+          }
+        }
+      ],
+      "x-whop-surface": "native"
+    },
+    "/recommended_actions/{id}/dismiss": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "Recommended action ID, prefixed `reca_`.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "example": "reca_xxxxxxxxxxxxx",
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "description": "Dismisses a `ready` or `preparing` action, so it does not run.",
+        "operationId": "dismissRecommendedAction",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "dismissed_action": {
+                    "value": {
+                      "account_id": "biz_3xV9cT7rQwLm",
+                      "created_at": "2026-11-17T05:12:44.318Z",
+                      "id": "reca_8kQ2mZtV4nLp",
+                      "preview": {
+                        "app_id": "app_Wq81LmZr0aXk",
+                        "base_build_id": "apbu_Base7Kp2Vn",
+                        "changed_resources": [
+                          {
+                            "id": "plan_Xr2mQ8nVt4Ld",
+                            "object": "variant"
+                          }
+                        ],
+                        "draft_build_id": "apbu_Draft9Qe4Ls",
+                        "page_paths": [
+                          "/"
+                        ],
+                        "traffic_percent": 50,
+                        "type": "website_ab_test"
+                      },
+                      "reasoning": "Visitors who reach your pricing section buy at 4.1%, but 62% leave the home page before they scroll to it. Moving member results above the fold shows the payoff first.",
+                      "run_by_user_id": null,
+                      "run_ended_at": null,
+                      "run_started_at": null,
+                      "status": "dismissed",
+                      "title": "Lead your home page with member results",
+                      "type": "improve_landing_page",
+                      "updated_at": "2026-11-17T15:40:27.006Z",
+                      "workflow": {
+                        "api_version": "2026-11-14",
+                        "steps": [
+                          {
+                            "arguments": {
+                              "account_id": "biz_3xV9cT7rQwLm",
+                              "bucket_by": "anonymous",
+                              "control": {
+                                "related_resource": {
+                                  "id": "apbu_Base7Kp2Vn",
+                                  "object": "app_build"
+                                }
+                              },
+                              "flag_key": "ei_reca_xxxxxxxxxxxxx",
+                              "name": "Lead your home page with member results",
+                              "related_resource": {
+                                "id": "app_Wq81LmZr0aXk",
+                                "object": "app"
+                              },
+                              "variants": [
+                                {
+                                  "name": "ei_change",
+                                  "related_resource": {
+                                    "id": "apbu_Draft9Qe4Ls",
+                                    "object": "app_build"
+                                  },
+                                  "weight": 50
+                                }
+                              ]
+                            },
+                            "error": null,
+                            "operation": "createExperiment",
+                            "status": "pending",
+                            "title": "Lead your home page with member results"
+                          },
+                          {
+                            "arguments": {
+                              "id": "{{steps[0].id}}"
+                            },
+                            "error": null,
+                            "operation": "activateExperiment",
+                            "status": "pending",
+                            "title": "Start the A/B test"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendedAction"
+                }
+              }
+            },
+            "description": "Action dismissed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "a credential without company:update"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "no such action"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict",
+            "description": "an action that already ran"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "company:update"
+            ]
+          }
+        ],
+        "summary": "Dismiss Recommended Action",
+        "tags": [
+          "Recommended Actions"
+        ]
+      },
+      "x-whop-surface": "native"
+    },
+    "/recommended_actions/{id}/execute": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "Recommended action ID, prefixed `reca_`.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "example": "reca_xxxxxxxxxxxxx",
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "description": "Runs a `ready` action. The caller must be a user. The caller must also have every scope that the operations in the action's `workflow` steps need. Each step is sent in order, as the caller. The response returns when the run starts. Retrieve the action to follow the `status` of each step.",
+        "operationId": "executeRecommendedAction",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "examples": {
+                  "running_action": {
+                    "value": {
+                      "account_id": "biz_3xV9cT7rQwLm",
+                      "created_at": "2026-11-17T05:12:44.318Z",
+                      "id": "reca_8kQ2mZtV4nLp",
+                      "preview": {
+                        "app_id": "app_Wq81LmZr0aXk",
+                        "base_build_id": "apbu_Base7Kp2Vn",
+                        "changed_resources": [
+                          {
+                            "id": "plan_Xr2mQ8nVt4Ld",
+                            "object": "variant"
+                          }
+                        ],
+                        "draft_build_id": "apbu_Draft9Qe4Ls",
+                        "page_paths": [
+                          "/"
+                        ],
+                        "traffic_percent": 50,
+                        "type": "website_ab_test"
+                      },
+                      "reasoning": "Visitors who reach your pricing section buy at 4.1%, but 62% leave the home page before they scroll to it. Moving member results above the fold shows the payoff first.",
+                      "run_by_user_id": "user_Hn4kP0sQ2wEr",
+                      "run_ended_at": null,
+                      "run_started_at": "2026-11-17T15:02:11.540Z",
+                      "status": "running",
+                      "title": "Lead your home page with member results",
+                      "type": "improve_landing_page",
+                      "updated_at": "2026-11-17T15:02:11.540Z",
+                      "workflow": {
+                        "api_version": "2026-11-14",
+                        "steps": [
+                          {
+                            "arguments": {
+                              "account_id": "biz_3xV9cT7rQwLm",
+                              "bucket_by": "anonymous",
+                              "control": {
+                                "related_resource": {
+                                  "id": "apbu_Base7Kp2Vn",
+                                  "object": "app_build"
+                                }
+                              },
+                              "flag_key": "ei_reca_xxxxxxxxxxxxx",
+                              "name": "Lead your home page with member results",
+                              "related_resource": {
+                                "id": "app_Wq81LmZr0aXk",
+                                "object": "app"
+                              },
+                              "variants": [
+                                {
+                                  "name": "ei_change",
+                                  "related_resource": {
+                                    "id": "apbu_Draft9Qe4Ls",
+                                    "object": "app_build"
+                                  },
+                                  "weight": 50
+                                }
+                              ]
+                            },
+                            "error": null,
+                            "operation": "createExperiment",
+                            "status": "running",
+                            "title": "Lead your home page with member results"
+                          },
+                          {
+                            "arguments": {
+                              "id": "{{steps[0].id}}"
+                            },
+                            "error": null,
+                            "operation": "activateExperiment",
+                            "status": "pending",
+                            "title": "Start the A/B test"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendedAction"
+                }
+              }
+            },
+            "description": "Run started"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "an account API key, which has no user to run the steps as"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "an action on an account the caller cannot read"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict",
+            "description": "an action that is not ready"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "company:basic:read"
+            ]
+          }
+        ],
+        "summary": "Execute Recommended Action",
+        "tags": [
+          "Recommended Actions"
+        ],
+        "x-whop-credentials": [
+          "oauth_token"
+        ]
+      },
+      "x-whop-surface": "native"
+    },
     "/refunds": {
       "get": {
         "description": "Lists refunds the caller can read, newest first. Filter by payment, account, or buyer to narrow the results.",
@@ -178052,6 +179102,11 @@
       "x-whop-summary": "What an account should do next to grow, generated from its own data."
     },
     {
+      "description": "A recommended action is one change that Whop recommends for an account with Economic Intelligence. Its `workflow` lists the API calls it makes when it runs.\n\nUse the Recommended Actions API to list an account's actions, run a `ready` action, or dismiss it. A run sends each step in order, as the user who runs it. Retrieve the action to follow each step's `status`.\n",
+      "name": "Recommended Actions",
+      "x-whop-summary": "Changes Whop recommends for an account, which its owner runs or dismisses."
+    },
+    {
       "description": "A Channel is a conversation on Whop that holds chat messages. A `private` channel is a one-to-one or group conversation. A `community` channel is the chat in one of an account's Chat experiences. A `support` channel is a conversation between an account and one customer.\n\nUse the Channels API to [create](/api-reference/channels/create-channel) and [list](/api-reference/channels/list-channels) channels, and to [retrieve](/api-reference/channels/retrieve-channel) one by its own ID or its Chat experience's ID. You can also [accept](/api-reference/channels/accept-dm-request) or [decline](/api-reference/channels/decline-dm-request) direct-message requests, [mark a channel read](/api-reference/channels/mark-channel-read), and [resolve](/api-reference/channels/resolve-support-channel) or [reopen](/api-reference/channels/reopen-support-channel) support conversations.\n",
       "name": "Channels",
       "x-whop-summary": "Private, community and support chat channels."
@@ -198955,7 +200010,8 @@
         "People",
         "Events",
         "Exports",
-        "Economic Intelligence"
+        "Economic Intelligence",
+        "Recommended Actions"
       ]
     },
     {

@@ -87,6 +87,24 @@ rules:
     set:
       classification: mutating
 
+  # ── Recommended actions: a run sends the action's API calls as the user ──
+  - name: recommended-action-execute
+    match:
+      operations:
+        - POST /recommended_actions/{id}/execute
+    set:
+      classification: mutating
+      idempotency: supported
+      confirmation: true
+
+  - name: recommended-action-dismiss
+    match:
+      operations:
+        - POST /recommended_actions/{id}/dismiss
+    set:
+      classification: mutating
+      idempotency: supported
+
   # ── Money movement: always confirmation + idempotency ────────────────────
   - name: money-movement
     match:
