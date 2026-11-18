@@ -6060,7 +6060,7 @@
           },
           "resolution_center_auto_refund": {
             "$ref": "#/components/schemas/AccountResolutionCenterAutoRefundControl",
-            "description": "Automatic refund settings for resolution center cases."
+            "description": "Settings for automatic refunds of Resolution Center cases. You can change them with `PATCH /accounts/{id}`."
           },
           "restricted_payment_methods": {
             "items": {
@@ -6717,15 +6717,15 @@
       "AccountResolutionCenterAutoRefundControl": {
         "properties": {
           "card_threshold_usd": {
-            "description": "Maximum card-funded resolution center case amount automatically refunded in USD. `null` when automatic refunds are disabled for cards.",
-            "example": 50,
+            "description": "Whop automatically refunds Resolution Center cases on card payments up to this amount in USD. Card payments include Visa, Mastercard, American Express and Discover. `null` when Whop does not automatically refund card cases. You can change it with `PATCH /accounts/{id}` while `locked` is `false`.",
+            "example": 49.99,
             "type": [
               "number",
               "null"
             ]
           },
           "financing_threshold_usd": {
-            "description": "Maximum financing-funded resolution center case amount automatically refunded in USD. `null` when automatic refunds are disabled for financing.",
+            "description": "Whop automatically refunds Resolution Center cases on financing payments up to this amount in USD. Financing payments include Klarna, Affirm, Zip, Afterpay, Splitit and Sezzle. `null` when Whop does not automatically refund financing cases. You can change it with `PATCH /accounts/{id}` while `locked` is `false`.",
             "example": 25,
             "type": [
               "number",
@@ -6733,12 +6733,20 @@
             ]
           },
           "locked": {
-            "description": "Whether the account owner is prevented from changing these thresholds.",
+            "description": "Whether the thresholds are locked. While `true`, `PATCH /accounts/{id}` refuses a threshold change with a `403`. You cannot change this field.",
             "example": false,
             "type": "boolean"
           },
+          "message": {
+            "description": "Message the customer gets when Whop automatically refunds their case. `null` when no message is set. You can change it with `PATCH /accounts/{id}`. You can also change it while `locked` is `true`.",
+            "example": "We refunded your payment. Sorry it didn't work out.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "paypal_threshold_usd": {
-            "description": "Maximum PayPal-funded resolution center case amount automatically refunded in USD. `null` when automatic refunds are disabled for PayPal.",
+            "description": "Whop automatically refunds Resolution Center cases on PayPal and Venmo payments up to this amount in USD. `null` when Whop does not automatically refund these cases. You can change it with `PATCH /accounts/{id}` while `locked` is `false`.",
             "example": 40,
             "type": [
               "number",
@@ -6750,6 +6758,7 @@
           "card_threshold_usd",
           "financing_threshold_usd",
           "paypal_threshold_usd",
+          "message",
           "locked"
         ],
         "type": "object"
@@ -35212,6 +35221,23 @@
               "null"
             ]
           },
+          "resolution_center_ineligible_reason": {
+            "description": "Why the buyer cannot open a Resolution Center case on this payment with `POST /resolution_center_cases`, or null when they can. `already_opened`: a case is already open or was decided (a withdrawn case does not count). `unsupported_payment_processor`: the payment method does not support cases. `out_of_date`: the window to open a case has passed. `not_paid`: the payment is not `paid`. `free`: nothing was charged. `already_refunded`: some of it has been refunded.",
+            "enum": [
+              "already_opened",
+              "unsupported_payment_processor",
+              "out_of_date",
+              "not_paid",
+              "free",
+              "already_refunded",
+              null
+            ],
+            "example": "not_paid",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "response_due_at": {
             "description": "When the earliest response is due on a dispute or Resolution Center case awaiting the account's response, as an ISO 8601 timestamp. Null when nothing awaits a response, or without the permission to read that dispute or case.",
             "example": null,
@@ -35406,6 +35432,7 @@
           "refundable",
           "retryable",
           "voidable",
+          "resolution_center_ineligible_reason",
           "account_id",
           "user",
           "member_id",
@@ -48423,6 +48450,14 @@
             "$ref": "#/components/schemas/ResolutionBuyer",
             "description": "The customer who opened the case."
           },
+          "closed_at": {
+            "description": "When the case closed, as an ISO 8601 timestamp. `null` while the case is open, and on older closed cases that predate this being recorded.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "created_at": {
             "description": "When the case was opened, as an ISO 8601 timestamp.",
             "example": "2026-01-01T12:00:00.000Z",
@@ -48559,6 +48594,7 @@
           "customer_appealed",
           "available_actions",
           "response_due_at",
+          "closed_at",
           "buyer",
           "payment",
           "created_at",
@@ -62555,6 +62591,58 @@
                       "string",
                       "null"
                     ]
+                  },
+                  "payment_controls": {
+                    "additionalProperties": false,
+                    "description": "Payment controls to change. Only `resolution_center_auto_refund` can change. Whop ignores the other fields, so you can send back the object from `GET`. Requires the `payment:resolution_center` and `company:balance:read` scopes.",
+                    "properties": {
+                      "resolution_center_auto_refund": {
+                        "additionalProperties": false,
+                        "description": "Settings for automatic refunds of Resolution Center cases. Fields you leave out keep their value. A threshold change while `locked` is `true` returns a `403`. You can send back the object from `GET` unchanged.",
+                        "properties": {
+                          "card_threshold_usd": {
+                            "description": "Whop automatically refunds Resolution Center cases on card payments up to this amount in USD. Card payments include Visa, Mastercard, American Express and Discover. Send `null` or `0` to turn it off. Otherwise it must be at least `1`. Whop rounds it to cents.",
+                            "example": 49.99,
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "financing_threshold_usd": {
+                            "description": "Whop automatically refunds Resolution Center cases on financing payments up to this amount in USD. Financing payments include Klarna, Affirm, Zip, Afterpay, Splitit and Sezzle. Send `null` or `0` to turn it off. Otherwise it must be at least `1`. Whop rounds it to cents.",
+                            "example": null,
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "locked": {
+                            "description": "Whether the thresholds are locked. You cannot change this field. Whop ignores it when you send it.",
+                            "example": true,
+                            "type": "boolean"
+                          },
+                          "message": {
+                            "description": "Message the customer gets when Whop automatically refunds their case. A message is required while any threshold is set. You can also change it while `locked` is `true`.",
+                            "example": "We refunded your payment. Sorry it didn't work out.",
+                            "maxLength": 5000,
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "paypal_threshold_usd": {
+                            "description": "Whop automatically refunds Resolution Center cases on PayPal and Venmo payments up to this amount in USD. Send `null` or `0` to turn it off. Otherwise it must be at least `1`. Whop rounds it to cents.",
+                            "example": 0,
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          }
+                        },
+                        "type": "object"
+                      }
+                    },
+                    "type": "object"
                   },
                   "privacy_policy": {
                     "additionalProperties": true,
@@ -155954,7 +156042,7 @@
     },
     "/resolution_center_cases": {
       "get": {
-        "description": "Lists resolution center cases. Without `account_id` you get every case you can read — the ones you opened as a buyer and every account you are a team member of; the filters narrow that list.",
+        "description": "Lists resolution center cases. Without `account_id` you get every case you can read: cases you opened as a buyer, and cases on accounts where you are on the team. The filters narrow that list.",
         "operationId": "listResolutionCenterCases",
         "parameters": [
           {
@@ -155970,7 +156058,7 @@
             }
           },
           {
-            "description": "Only cases opened by this customer — a `user_` tag, or `me` for the calling user. It narrows what you can already read, so `me` lists the cases you opened without the ones on accounts you are a team member of.",
+            "description": "Only cases opened by this customer: a `user_` tag, or `me` for the calling user. It narrows what you can already read, so `me` lists the cases you opened without the ones on accounts you are a team member of.",
             "in": "query",
             "name": "user_id",
             "required": false,
@@ -156046,7 +156134,7 @@
             }
           },
           {
-            "description": "Only cases in these statuses. Repeat the parameter to pass several — one paginated list covers all of them.",
+            "description": "Only cases in these statuses. Repeat the parameter to pass several. One paginated list covers all of them.",
             "in": "query",
             "name": "status",
             "required": false,
@@ -156115,6 +156203,243 @@
             "description": "Only cases created after this ISO 8601 timestamp.",
             "in": "query",
             "name": "created_after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only cases about a payment for these products, each prefixed `prod_`. A case matches when any item on its payment is one of them. Repeat the parameter to pass several.",
+            "in": "query",
+            "name": "product_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "example": "prod_xxxxxxxxxxxxx",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Only cases opened on these payments, each prefixed `pay_`. Repeat the parameter to pass several.",
+            "in": "query",
+            "name": "payment_id",
+            "required": false,
+            "schema": {
+              "items": {
+                "example": "pay_xxxxxxxxxxxxxx",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Only cases about a payment made with one of these methods. Takes card brands such as `amex`, wallets such as `apple_pay`, and types such as `paypal`. Repeat the parameter to pass several.",
+            "in": "query",
+            "name": "payment_methods",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "mastercard",
+                  "visa",
+                  "amex",
+                  "discover",
+                  "unionpay",
+                  "jcb",
+                  "diners",
+                  "link",
+                  "troy",
+                  "visadankort",
+                  "visabancontact",
+                  "china_union_pay",
+                  "rupay",
+                  "jcbrupay",
+                  "elo",
+                  "maestro",
+                  "tarjeta_naranja",
+                  "cirrus",
+                  "nspk_mir",
+                  "verve",
+                  "ebt",
+                  "private_label",
+                  "local_brand",
+                  "uatp",
+                  "wexcard",
+                  "uzcard",
+                  "meeza",
+                  "hrg_store_card",
+                  "girocard",
+                  "fuel_card",
+                  "dankort",
+                  "carnet",
+                  "atm_card",
+                  "china_union_payuzcard",
+                  "codensa",
+                  "cabal",
+                  "hipercard",
+                  "jcblankapay",
+                  "cmi",
+                  "aura",
+                  "accel",
+                  "culiance",
+                  "nyce",
+                  "pulse",
+                  "star",
+                  "eftpos",
+                  "alelo",
+                  "edenred",
+                  "sodexo",
+                  "unknown",
+                  "acss_debit",
+                  "addi",
+                  "affirm",
+                  "afterpay_clearpay",
+                  "alipay",
+                  "alipayhk",
+                  "alma",
+                  "amazon_pay",
+                  "apple",
+                  "apple_pay",
+                  "au_bank_transfer",
+                  "au_becs_debit",
+                  "bacs_debit",
+                  "bancolombia",
+                  "bancontact",
+                  "bank_wire",
+                  "billie",
+                  "blik",
+                  "boleto",
+                  "bre_b",
+                  "ca_bank_transfer",
+                  "capchase_pay",
+                  "card",
+                  "card_present",
+                  "card_installments_three",
+                  "card_installments_six",
+                  "card_installments_twelve",
+                  "cashapp",
+                  "claritypay",
+                  "coinbase",
+                  "crypto",
+                  "crypto_subscription",
+                  "custom",
+                  "customer_balance",
+                  "demo_pay",
+                  "duitnow_qr",
+                  "efecty",
+                  "eps",
+                  "eu_bank_transfer",
+                  "fpx",
+                  "flex_pay",
+                  "gb_bank_transfer",
+                  "gcash",
+                  "giropay",
+                  "google_pay",
+                  "gopay",
+                  "grabpay",
+                  "id_bank_transfer",
+                  "ideal",
+                  "interac",
+                  "international_bank_wire",
+                  "kakao_pay",
+                  "klarna",
+                  "klarna_pay_now",
+                  "konbini",
+                  "kr_card",
+                  "kr_market",
+                  "kriya",
+                  "kueski",
+                  "mb_way",
+                  "m_pesa",
+                  "mercado_pago",
+                  "mercado_pago_ar",
+                  "mercado_pago_mx",
+                  "mobilepay",
+                  "modo",
+                  "mondu",
+                  "multibanco",
+                  "naver_pay",
+                  "nequi",
+                  "netbanking",
+                  "ng_bank",
+                  "ng_bank_transfer",
+                  "ng_card",
+                  "ng_market",
+                  "ng_ussd",
+                  "ng_wallet",
+                  "nupay",
+                  "nz_bank_account",
+                  "oney",
+                  "oney_3x",
+                  "oney_4x",
+                  "opay",
+                  "oxxo",
+                  "p24",
+                  "pago_efectivo",
+                  "pse",
+                  "pay_by_bank",
+                  "payco",
+                  "paynow",
+                  "paypal",
+                  "paypal_express",
+                  "paypay",
+                  "payto",
+                  "payto_email",
+                  "payto_phone",
+                  "payto_bank_account",
+                  "pix",
+                  "pix_automatico",
+                  "platform_balance",
+                  "promptpay",
+                  "qris",
+                  "rapipago",
+                  "rechnung",
+                  "revolut_pay",
+                  "samsung_pay",
+                  "satispay",
+                  "scalapay",
+                  "sencillito",
+                  "sepa_debit",
+                  "sequra",
+                  "servipag",
+                  "sezzle",
+                  "shop_pay",
+                  "shopeepay",
+                  "sofort",
+                  "south_korea_market",
+                  "spei",
+                  "splitit",
+                  "sunbit",
+                  "swish",
+                  "tabby",
+                  "tamara",
+                  "touch_n_go",
+                  "twint",
+                  "upi",
+                  "us_bank_account",
+                  "us_bank_transfer",
+                  "venmo",
+                  "vipps",
+                  "webpay",
+                  "wechat_pay",
+                  "whop_pay",
+                  "yape",
+                  "zip",
+                  "coinflow",
+                  "tap_to_pay"
+                ],
+                "example": "paypal",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Search cases by case ID, payment ID, user ID, membership ID, user email, name, or username. Email search requires the member:email:read permission.",
+            "in": "query",
+            "name": "query",
             "required": false,
             "schema": {
               "type": "string"
@@ -156340,7 +156665,7 @@
             }
           },
           {
-            "description": "Only cases opened by this customer — a `user_` tag, or `me` for the calling user.",
+            "description": "Only cases opened by this customer: a `user_` tag, or `me` for the calling user.",
             "in": "query",
             "name": "user_id",
             "required": false,
@@ -156418,6 +156743,243 @@
             "description": "Only count cases created after this ISO 8601 timestamp.",
             "in": "query",
             "name": "created_after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only count cases about a payment for these products, each prefixed `prod_`. Repeat the parameter to pass several.",
+            "in": "query",
+            "name": "product_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "example": "prod_xxxxxxxxxxxxx",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Only count cases opened on these payments, each prefixed `pay_`. Repeat the parameter to pass several.",
+            "in": "query",
+            "name": "payment_id",
+            "required": false,
+            "schema": {
+              "items": {
+                "example": "pay_xxxxxxxxxxxxxx",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Only count cases about a payment paid with any of these methods. Repeat the parameter to pass several.",
+            "in": "query",
+            "name": "payment_methods",
+            "required": false,
+            "schema": {
+              "items": {
+                "enum": [
+                  "mastercard",
+                  "visa",
+                  "amex",
+                  "discover",
+                  "unionpay",
+                  "jcb",
+                  "diners",
+                  "link",
+                  "troy",
+                  "visadankort",
+                  "visabancontact",
+                  "china_union_pay",
+                  "rupay",
+                  "jcbrupay",
+                  "elo",
+                  "maestro",
+                  "tarjeta_naranja",
+                  "cirrus",
+                  "nspk_mir",
+                  "verve",
+                  "ebt",
+                  "private_label",
+                  "local_brand",
+                  "uatp",
+                  "wexcard",
+                  "uzcard",
+                  "meeza",
+                  "hrg_store_card",
+                  "girocard",
+                  "fuel_card",
+                  "dankort",
+                  "carnet",
+                  "atm_card",
+                  "china_union_payuzcard",
+                  "codensa",
+                  "cabal",
+                  "hipercard",
+                  "jcblankapay",
+                  "cmi",
+                  "aura",
+                  "accel",
+                  "culiance",
+                  "nyce",
+                  "pulse",
+                  "star",
+                  "eftpos",
+                  "alelo",
+                  "edenred",
+                  "sodexo",
+                  "unknown",
+                  "acss_debit",
+                  "addi",
+                  "affirm",
+                  "afterpay_clearpay",
+                  "alipay",
+                  "alipayhk",
+                  "alma",
+                  "amazon_pay",
+                  "apple",
+                  "apple_pay",
+                  "au_bank_transfer",
+                  "au_becs_debit",
+                  "bacs_debit",
+                  "bancolombia",
+                  "bancontact",
+                  "bank_wire",
+                  "billie",
+                  "blik",
+                  "boleto",
+                  "bre_b",
+                  "ca_bank_transfer",
+                  "capchase_pay",
+                  "card",
+                  "card_present",
+                  "card_installments_three",
+                  "card_installments_six",
+                  "card_installments_twelve",
+                  "cashapp",
+                  "claritypay",
+                  "coinbase",
+                  "crypto",
+                  "crypto_subscription",
+                  "custom",
+                  "customer_balance",
+                  "demo_pay",
+                  "duitnow_qr",
+                  "efecty",
+                  "eps",
+                  "eu_bank_transfer",
+                  "fpx",
+                  "flex_pay",
+                  "gb_bank_transfer",
+                  "gcash",
+                  "giropay",
+                  "google_pay",
+                  "gopay",
+                  "grabpay",
+                  "id_bank_transfer",
+                  "ideal",
+                  "interac",
+                  "international_bank_wire",
+                  "kakao_pay",
+                  "klarna",
+                  "klarna_pay_now",
+                  "konbini",
+                  "kr_card",
+                  "kr_market",
+                  "kriya",
+                  "kueski",
+                  "mb_way",
+                  "m_pesa",
+                  "mercado_pago",
+                  "mercado_pago_ar",
+                  "mercado_pago_mx",
+                  "mobilepay",
+                  "modo",
+                  "mondu",
+                  "multibanco",
+                  "naver_pay",
+                  "nequi",
+                  "netbanking",
+                  "ng_bank",
+                  "ng_bank_transfer",
+                  "ng_card",
+                  "ng_market",
+                  "ng_ussd",
+                  "ng_wallet",
+                  "nupay",
+                  "nz_bank_account",
+                  "oney",
+                  "oney_3x",
+                  "oney_4x",
+                  "opay",
+                  "oxxo",
+                  "p24",
+                  "pago_efectivo",
+                  "pse",
+                  "pay_by_bank",
+                  "payco",
+                  "paynow",
+                  "paypal",
+                  "paypal_express",
+                  "paypay",
+                  "payto",
+                  "payto_email",
+                  "payto_phone",
+                  "payto_bank_account",
+                  "pix",
+                  "pix_automatico",
+                  "platform_balance",
+                  "promptpay",
+                  "qris",
+                  "rapipago",
+                  "rechnung",
+                  "revolut_pay",
+                  "samsung_pay",
+                  "satispay",
+                  "scalapay",
+                  "sencillito",
+                  "sepa_debit",
+                  "sequra",
+                  "servipag",
+                  "sezzle",
+                  "shop_pay",
+                  "shopeepay",
+                  "sofort",
+                  "south_korea_market",
+                  "spei",
+                  "splitit",
+                  "sunbit",
+                  "swish",
+                  "tabby",
+                  "tamara",
+                  "touch_n_go",
+                  "twint",
+                  "upi",
+                  "us_bank_account",
+                  "us_bank_transfer",
+                  "venmo",
+                  "vipps",
+                  "webpay",
+                  "wechat_pay",
+                  "whop_pay",
+                  "yape",
+                  "zip",
+                  "coinflow",
+                  "tap_to_pay"
+                ],
+                "example": "paypal",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Only count cases that match this search, as on the list.",
+            "in": "query",
+            "name": "query",
             "required": false,
             "schema": {
               "type": "string"
@@ -157248,6 +157810,22 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "message": {
+                    "description": "Why you are withdrawing the case, recorded on the case timeline where the merchant can read it. Without one, the timeline says the customer withdrew.",
+                    "example": "The merchant sent the missing files.",
+                    "type": "string"
+                  }
+                },
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -177696,6 +178274,7 @@
                       "card_threshold_usd": null,
                       "financing_threshold_usd": null,
                       "locked": false,
+                      "message": null,
                       "paypal_threshold_usd": null
                     },
                     "restricted_payment_methods": [],
@@ -178024,6 +178603,7 @@
                       "card_threshold_usd": null,
                       "financing_threshold_usd": null,
                       "locked": false,
+                      "message": null,
                       "paypal_threshold_usd": null
                     },
                     "restricted_payment_methods": [],
@@ -178485,6 +179065,7 @@
                       "card_threshold_usd": null,
                       "financing_threshold_usd": null,
                       "locked": false,
+                      "message": null,
                       "paypal_threshold_usd": null
                     },
                     "restricted_payment_methods": [],
@@ -188929,6 +189510,7 @@
                     "display_decimals": 2
                   },
                   "refunded_at": null,
+                  "resolution_center_ineligible_reason": "not_paid",
                   "response_due_at": null,
                   "retryable": false,
                   "risk_score": null,
@@ -189234,6 +189816,7 @@
                     "display_decimals": 2
                   },
                   "refunded_at": null,
+                  "resolution_center_ineligible_reason": "not_paid",
                   "response_due_at": null,
                   "retryable": false,
                   "risk_score": null,
@@ -189539,6 +190122,7 @@
                     "display_decimals": 2
                   },
                   "refunded_at": null,
+                  "resolution_center_ineligible_reason": "not_paid",
                   "response_due_at": null,
                   "retryable": true,
                   "risk_score": null,
@@ -189844,6 +190428,7 @@
                     "display_decimals": 2
                   },
                   "refunded_at": null,
+                  "resolution_center_ineligible_reason": "not_paid",
                   "response_due_at": null,
                   "retryable": true,
                   "risk_score": null,
@@ -190142,6 +190727,7 @@
                     "display_decimals": 2
                   },
                   "refunded_at": null,
+                  "resolution_center_ineligible_reason": "not_paid",
                   "response_due_at": null,
                   "retryable": false,
                   "risk_score": null,
@@ -190447,6 +191033,7 @@
                     "display_decimals": 2
                   },
                   "refunded_at": null,
+                  "resolution_center_ineligible_reason": "not_paid",
                   "response_due_at": null,
                   "retryable": false,
                   "risk_score": null,
@@ -190752,6 +191339,7 @@
                     "display_decimals": 2
                   },
                   "refunded_at": null,
+                  "resolution_center_ineligible_reason": null,
                   "response_due_at": null,
                   "retryable": false,
                   "risk_score": null,
@@ -195341,6 +195929,7 @@
                     "user_id": "user_xxxxxxxxxxxxxx",
                     "username": "marcuswebb"
                   },
+                  "closed_at": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "currency": "usd",
                   "customer_appealed": false,
@@ -195510,6 +196099,7 @@
                     "user_id": "user_xxxxxxxxxxxxxx",
                     "username": "marcuswebb"
                   },
+                  "closed_at": "2026-01-01T12:00:00.000Z",
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "currency": "usd",
                   "customer_appealed": false,
@@ -195679,6 +196269,7 @@
                     "user_id": "user_xxxxxxxxxxxxxx",
                     "username": "marcuswebb"
                   },
+                  "closed_at": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "currency": "usd",
                   "customer_appealed": false,

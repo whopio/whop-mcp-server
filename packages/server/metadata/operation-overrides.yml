@@ -253,6 +253,7 @@ overrides:
       Without `account_id` it returns every case you can read: the ones
       you opened as a buyer and the ones on businesses you are on the team
       of.
+    listedSchemaOmit: [payment_id, payment_methods, product_ids, query]
 
   "GET /memberships/{id}":
     description: >-
