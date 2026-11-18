@@ -26352,6 +26352,10 @@
       },
       "Invoice": {
         "properties": {
+          "account": {
+            "$ref": "#/components/schemas/AccountSummary",
+            "description": "The account that sent the invoice."
+          },
           "account_id": {
             "example": "biz_xxxxxxxxxxxxxx",
             "type": "string"
@@ -26465,6 +26469,7 @@
             "additionalProperties": {
               "type": "string"
             },
+            "description": "Key-value pairs the seller stored on the invoice. Empty when the invoice is read without a credential.",
             "example": {},
             "type": "object"
           },
@@ -26609,6 +26614,7 @@
           "id",
           "object",
           "account_id",
+          "account",
           "member_id",
           "membership_id",
           "number",
@@ -123341,6 +123347,7 @@
       "get": {
         "description": "Retrieves a receipt-backed invoice by its pay_ ID.",
         "operationId": "retrieveInvoice",
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
