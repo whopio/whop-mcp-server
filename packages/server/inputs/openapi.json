@@ -23736,7 +23736,7 @@
         "properties": {
           "error": {
             "description": "Why this external account currently can't be used for advertising — a failed share or a Meta-side restriction. Null when the account is healthy.",
-            "example": "You don't have permission to share this account with Whop. Contact Whop support for help.",
+            "example": null,
             "type": [
               "string",
               "null"
@@ -23744,7 +23744,7 @@
           },
           "external_id": {
             "description": "The platform-specific ID for this external account.",
-            "example": "1234567891",
+            "example": "555222",
             "type": [
               "string",
               "null"
@@ -23757,7 +23757,7 @@
           },
           "name": {
             "description": "The display name of the external account on the platform.",
-            "example": "Shine Time Auto Detailing",
+            "example": "Valentine Tromp",
             "type": [
               "string",
               "null"
@@ -23801,7 +23801,7 @@
           },
           "profile_picture_url": {
             "description": "The URL where the profile picture of the external account can be accessed.",
-            "example": "https://shinetime.example/logo.png",
+            "example": "http://zboncak.example/greg_mcclure",
             "type": [
               "string",
               "null"
@@ -23817,7 +23817,7 @@
           },
           "url": {
             "description": "The URL where the external account can be accessed on the platform. Null while a Whop-owned account is still being provisioned.",
-            "example": "https://instagram.com/shinetimedetail",
+            "example": "https://instagram.com/shinetimeaustin",
             "type": [
               "string",
               "null"
@@ -23825,7 +23825,7 @@
           },
           "username": {
             "description": "The username of the external account on the platform. Null while a Whop-owned account is still being provisioned, and on platforms without usernames, such as Klaviyo.",
-            "example": "shinetimedetail",
+            "example": "shinetimeaustin",
             "type": [
               "string",
               "null"
@@ -23833,7 +23833,7 @@
           },
           "verified": {
             "description": "Whether the external account is verified on the platform.",
-            "example": true,
+            "example": false,
             "type": "boolean"
           }
         },
