@@ -160624,7 +160624,7 @@
                           "properties": {
                             "description": "The properties you can use with this metric — pass one as a filter (property=value) to narrow the series, or as breakdown_by=property to split it.",
                             "items": {
-                              "example": "source",
+                              "example": "segment",
                               "type": "string"
                             },
                             "type": "array"
@@ -161611,7 +161611,7 @@
                           "properties": {
                             "description": "The properties you can use with this metric — pass one as a filter (property=value) to narrow the series, or as breakdown_by=property to split it.",
                             "items": {
-                              "example": "source",
+                              "example": "segment",
                               "type": "string"
                             },
                             "type": "array"
@@ -162478,6 +162478,11 @@
                         "currency": {
                           "description": "ISO currency the values are denominated in. Present for currency-unit metrics: the convert_to currency, or usd.",
                           "example": "usd",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "data_as_of": {
+                          "description": "Present for metrics computed on a schedule. When the values were computed, as an ISO 8601 timestamp.",
                           "nullable": true,
                           "type": "string"
                         },
@@ -163463,6 +163468,11 @@
                         "currency": {
                           "description": "ISO currency the values are denominated in. Present for currency-unit metrics: the convert_to currency, or usd.",
                           "example": "usd",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "data_as_of": {
+                          "description": "Present for metrics computed on a schedule. When the values were computed, as an ISO 8601 timestamp.",
                           "nullable": true,
                           "type": "string"
                         },
