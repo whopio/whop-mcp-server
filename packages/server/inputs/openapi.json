@@ -6279,6 +6279,10 @@
               "null"
             ]
           },
+          "off_session_payment_rules": {
+            "description": "Whether all of this account's payment rules apply to off-session charges, including subscription renewals. Off by default, when renewals skip the rules and other off-session charges use only block and allow rules. Off-session payments still skip 3D Secure rule actions, and review requires an eligible card payment.",
+            "type": "boolean"
+          },
           "preferred_settlement_currency": {
             "description": "Lowercase ISO currency code every new sale settles into, regardless of the plan's currency or what the buyer paid in. Sales converted this way carry an additional 0.5% FX fee. `null` when the account settles each sale in its plan's currency.",
             "enum": [
@@ -6362,7 +6366,8 @@
           "subaccount_notifications",
           "subaccount_team_view_only",
           "subscription_failure_behavior",
-          "customer_tracking"
+          "customer_tracking",
+          "off_session_payment_rules"
         ],
         "type": "object"
       },
@@ -42495,7 +42500,7 @@
             "description": "Exactly what the buyer must pay, in the charged currency."
           },
           "copy_code": {
-            "description": "The code the buyer pastes into their payment app instead of scanning, such as Pix's copy-and-paste code, so they can pay from the device showing the QR. Only present for methods that accept a pasted code.",
+            "description": "The code the buyer pastes into their payment app instead of scanning, such as Pix's copy-and-paste code. This lets them pay from the device showing the QR. Only present for methods that accept a pasted code.",
             "type": "string"
           },
           "document_url": {
@@ -42514,7 +42519,7 @@
             "type": "string"
           },
           "qr_code": {
-            "description": "The QR code's contents, ready to render as a scannable image — `qr_format` says how it is encoded.",
+            "description": "The QR code's contents, ready to render as a scannable image. `qr_format` says how it is encoded.",
             "example": "pix.shinetime.example/qr/dana-4417",
             "type": "string"
           },
@@ -42784,7 +42789,7 @@
             "type": "string"
           },
           "action": {
-            "description": "What this account's rule requests when every condition matches. One applicable account-rule action wins, in this order: `allow`, `block`, `review`, `enforce_3ds`. An `allow` overrides this account's other rules, never Whop's own fraud controls. A `review` requests authorization without capture for an eligible on-session card payment through Whop Payments. Automatic capture is scheduled for 48 hours after authorization. Capture or void the payment before then to decide sooner. Capture may complete later or fail. Review is skipped for unsupported methods, off-session payments, and payments already configured for manual capture. An `enforce_3ds` is skipped when the account rule cannot apply a challenge. Other 3DS requirements still apply. A rule on `avs_check` or `cvv_check` accepts `block` or `review`. Whop authorizes a freshly entered card first. When the rule matches the bank's result, `block` voids and declines the payment. A `review` holds it for you to capture or void, with the same automatic capture.",
+            "description": "What this account's rule requests when every condition matches. One applicable account-rule action wins, in this order: `allow`, `block`, `review`, `enforce_3ds`. An `allow` overrides this account's other rules, never Whop's own fraud controls. A `review` requests authorization without capture for an eligible card payment through Whop Payments. Off-session renewals require `off_session_payment_rules` to be enabled. Automatic capture is scheduled for 48 hours after authorization. Capture or void the payment before then to decide sooner. Capture may complete later or fail. Review is skipped for unsupported methods, numbered invoice payments, and payments already configured for manual capture. An `enforce_3ds` is skipped when the account rule cannot apply a challenge. Other 3DS requirements still apply. A rule on `avs_check` or `cvv_check` accepts `block` or `review`. Whop authorizes a freshly entered card first. When the rule matches the bank's result, `block` voids and declines the payment. A `review` holds it for you to capture or void, with the same automatic capture.",
             "enum": [
               "allow",
               "block",
@@ -60969,6 +60974,11 @@
                         "null"
                       ]
                     },
+                    "off_session_payment_rules": {
+                      "description": "Whether all active account payment rules apply to future off-session charges, including renewals. Off by default. Requires the payment:manage scope to change.",
+                      "example": false,
+                      "type": "boolean"
+                    },
                     "preferred_settlement_currency": {
                       "description": "Lowercase ISO currency code every new sale settles into, regardless of the plan's currency or what the buyer paid in. Sales converted this way carry an additional 0.5% FX fee. `null` when the account settles each sale in its plan's currency.",
                       "enum": [
@@ -61057,7 +61067,8 @@
                     "subaccount_notifications",
                     "subaccount_team_view_only",
                     "subscription_failure_behavior",
-                    "customer_tracking"
+                    "customer_tracking",
+                    "off_session_payment_rules"
                   ],
                   "type": "object"
                 }
@@ -61113,7 +61124,7 @@
         }
       ],
       "patch": {
-        "description": "Updates the account's preferences. Each top-level key in the body replaces its stored value as a whole. Keys left out keep their current values.\n\nThe required scope depends on which preferences you update.\n\n- `ad_campaign:create`: `ads_payment_methods`, `ads_reporting_currency`, `ads_scheduling_timezone`, `ads_triple_whale_integration`.\n- `payout:account:update`: `cards_auto_top_up`, `cards_notifications`, `covers_subaccount_negative_balances`, `merchant_of_record`.\n- `payment:dispute`: `dispute_fighter_enabled`.\n- `company:update`: `economic_intelligence_duration_key`, `economic_intelligence_auto_renew`, `review_request_emails`, `cancellation_emails`, `renewal_reminder_emails`, `failed_payment_emails`, `subaccount_notifications`, `subaccount_team_view_only`.\n- `company:manage_checkout`: `feedback_options`, `customer_tracking`.\n\nTo update keys under more than one scope, the API key needs all of those scopes.\n",
+        "description": "Updates the account's preferences. Each top-level key in the body replaces its stored value as a whole. Keys left out keep their current values.\n\nThe required scope depends on which preferences you update.\n\n- `ad_campaign:create`: `ads_payment_methods`, `ads_reporting_currency`, `ads_scheduling_timezone`, `ads_triple_whale_integration`.\n- `payout:account:update`: `cards_auto_top_up`, `cards_notifications`, `covers_subaccount_negative_balances`, `merchant_of_record`.\n- `payment:manage`: `off_session_payment_rules`.\n- `payment:dispute`: `dispute_fighter_enabled`.\n- `company:update`: `economic_intelligence_duration_key`, `economic_intelligence_auto_renew`, `review_request_emails`, `cancellation_emails`, `renewal_reminder_emails`, `failed_payment_emails`, `subaccount_notifications`, `subaccount_team_view_only`.\n- `company:manage_checkout`: `feedback_options`, `customer_tracking`.\n\nTo update keys under more than one scope, the API key needs all of those scopes.\n",
         "operationId": "updateAccountPreferences",
         "parameters": [
           {
@@ -61356,6 +61367,11 @@
                     ],
                     "example": "account",
                     "type": "string"
+                  },
+                  "off_session_payment_rules": {
+                    "description": "Whether this account's active payment rules apply to future off-session charges, including renewals. Off by default. Requires the payment:manage scope on your API key.",
+                    "example": true,
+                    "type": "boolean"
                   },
                   "preferred_settlement_currency": {
                     "description": "Settle every new sale into this currency, regardless of the plan's currency or what the buyer paid in; sales converted this way carry an additional 0.5% FX fee. Pass `null` to go back to settling each sale in its plan's currency. Changing it never converts money already in your balances, and it can change at most once a day (see `preferred_settlement_currency_changeable_at`). Requires the `payout:account:update` scope on your API key.",
@@ -61879,6 +61895,11 @@
                         "null"
                       ]
                     },
+                    "off_session_payment_rules": {
+                      "description": "Whether all active account payment rules apply to future off-session charges, including renewals. Off by default. Requires the payment:manage scope to change.",
+                      "example": false,
+                      "type": "boolean"
+                    },
                     "preferred_settlement_currency": {
                       "description": "Lowercase ISO currency code every new sale settles into, regardless of the plan's currency or what the buyer paid in. Sales converted this way carry an additional 0.5% FX fee. `null` when the account settles each sale in its plan's currency.",
                       "enum": [
@@ -61967,7 +61988,8 @@
                     "subaccount_notifications",
                     "subaccount_team_view_only",
                     "subscription_failure_behavior",
-                    "customer_tracking"
+                    "customer_tracking",
+                    "off_session_payment_rules"
                   ],
                   "type": "object"
                 }
@@ -137734,7 +137756,7 @@
                     "type": "string"
                   },
                   "action": {
-                    "description": "What this account's rule requests when every condition matches. One applicable account-rule action wins, in this order: `allow`, `block`, `review`, `enforce_3ds`. An `allow` overrides this account's other rules, never Whop's own fraud controls. A `review` requests authorization without capture for an eligible on-session card payment through Whop Payments. Automatic capture is scheduled for 48 hours after authorization. Capture or void the payment before then to decide sooner. Capture may complete later or fail. Review is skipped for unsupported methods, off-session payments, and payments already configured for manual capture. An `enforce_3ds` is skipped when the account rule cannot apply a challenge. Other 3DS requirements still apply. A rule on `avs_check` or `cvv_check` accepts `block` or `review`. Whop authorizes a freshly entered card first. When the rule matches the bank's result, `block` voids and declines the payment. A `review` holds it for you to capture or void, with the same automatic capture.",
+                    "description": "What this account's rule requests when every condition matches. One applicable account-rule action wins, in this order: `allow`, `block`, `review`, `enforce_3ds`. An `allow` overrides this account's other rules, never Whop's own fraud controls. A `review` requests authorization without capture for an eligible card payment through Whop Payments. Off-session renewals require `off_session_payment_rules` to be enabled. Automatic capture is scheduled for 48 hours after authorization. Capture or void the payment before then to decide sooner. Capture may complete later or fail. Review is skipped for unsupported methods, numbered invoice payments, and payments already configured for manual capture. An `enforce_3ds` is skipped when the account rule cannot apply a challenge. Other 3DS requirements still apply. A rule on `avs_check` or `cvv_check` accepts `block` or `review`. Whop authorizes a freshly entered card first. When the rule matches the bank's result, `block` voids and declines the payment. A `review` holds it for you to capture or void, with the same automatic capture.",
                     "enum": [
                       "allow",
                       "block",
@@ -138225,7 +138247,7 @@
                 "additionalProperties": false,
                 "properties": {
                   "action": {
-                    "description": "What this account's rule requests when every condition matches. One applicable account-rule action wins, in this order: `allow`, `block`, `review`, `enforce_3ds`. An `allow` overrides this account's other rules, never Whop's own fraud controls. A `review` requests authorization without capture for an eligible on-session card payment through Whop Payments. Automatic capture is scheduled for 48 hours after authorization. Capture or void the payment before then to decide sooner. Capture may complete later or fail. Review is skipped for unsupported methods, off-session payments, and payments already configured for manual capture. An `enforce_3ds` is skipped when the account rule cannot apply a challenge. Other 3DS requirements still apply. A rule on `avs_check` or `cvv_check` accepts `block` or `review`. Whop authorizes a freshly entered card first. When the rule matches the bank's result, `block` voids and declines the payment. A `review` holds it for you to capture or void, with the same automatic capture.",
+                    "description": "What this account's rule requests when every condition matches. One applicable account-rule action wins, in this order: `allow`, `block`, `review`, `enforce_3ds`. An `allow` overrides this account's other rules, never Whop's own fraud controls. A `review` requests authorization without capture for an eligible card payment through Whop Payments. Off-session renewals require `off_session_payment_rules` to be enabled. Automatic capture is scheduled for 48 hours after authorization. Capture or void the payment before then to decide sooner. Capture may complete later or fail. Review is skipped for unsupported methods, numbered invoice payments, and payments already configured for manual capture. An `enforce_3ds` is skipped when the account rule cannot apply a challenge. Other 3DS requirements still apply. A rule on `avs_check` or `cvv_check` accepts `block` or `review`. Whop authorizes a freshly entered card first. When the rule matches the bank's result, `block` voids and declines the payment. A `review` holds it for you to capture or void, with the same automatic capture.",
                     "enum": [
                       "allow",
                       "block",
