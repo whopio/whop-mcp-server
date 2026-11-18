@@ -26379,7 +26379,7 @@
           },
           "checkout_link": {
             "description": "A signed link that opens this invoice in a checkout session so the buyer can pay it. Pass it as `link` to `POST /checkout_sessions`. Present while the invoice is open. `null` in any other status, for an invoice billed to a business buyer, and for an invoice whose membership was canceled. Also `null` unless you have `payment:charge`, or `invoice:create` or `invoice:update` on an invoice with no `payment_method_id`.",
-            "example": "pay_xxxxxxxxxxxxxx.eyJfcmFpbHMiOnsiZGF0YSI6WzEsZmFsc2VdLCJwdXIiOiJSZWNlaXB0XG5jaGVja291dF9tb3VudFxuIn19--xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "example": "pay_xxxxxxxxxxxxxx.xxxxxxxxxxxxxxxx",
             "type": [
               "string",
               "null"
