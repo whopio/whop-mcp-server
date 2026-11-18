@@ -42,7 +42,12 @@ const env = {
 	CF_VERSION_METADATA: { id: "test-version" },
 };
 
-async function toolNames(path: string, profile: string): Promise<string[]> {
+async function call(
+	path: string,
+	profile: string,
+	method: string,
+	params?: unknown,
+): Promise<{ result: Record<string, unknown> }> {
 	const response = await captured.handlers[path].fetch(
 		new Request(`https://mcp.whop.test${path}`, {
 			method: "POST",
@@ -50,7 +55,7 @@ async function toolNames(path: string, profile: string): Promise<string[]> {
 				"Content-Type": "application/json",
 				Accept: "application/json, text/event-stream",
 			},
-			body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+			body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
 		}),
 		env,
 		{
@@ -66,10 +71,24 @@ async function toolNames(path: string, profile: string): Promise<string[]> {
 		},
 	);
 	expect(response.status).toBe(200);
-	const body = (await response.json()) as {
-		result: { tools: { name: string }[] };
-	};
-	return body.result.tools.map((tool) => tool.name);
+	return (await response.json()) as { result: Record<string, unknown> };
+}
+
+async function toolNames(path: string, profile: string): Promise<string[]> {
+	const { result } = await call(path, profile, "tools/list");
+	return (result.tools as { name: string }[]).map((tool) => tool.name);
+}
+
+async function capabilities(
+	path: string,
+	profile: string,
+): Promise<Record<string, unknown>> {
+	const { result } = await call(path, profile, "initialize", {
+		protocolVersion: "2025-06-18",
+		capabilities: {},
+		clientInfo: { name: "test", version: "1" },
+	});
+	return result.capabilities as Record<string, unknown>;
 }
 
 describe("route table", () => {
@@ -96,5 +115,24 @@ describe("route table", () => {
 		expect(muse).toContain("memberships_cancel");
 		expect(muse).not.toContain("payouts_create");
 		expect(muse).not.toContain("call_write_operation");
+	});
+
+	it("serves the guides on /mcp and /muse/mcp only", async () => {
+		for (const [path, profile] of [
+			["/mcp", "admin"],
+			["/muse/mcp", "muse"],
+		]) {
+			const caps = await capabilities(path, profile);
+			expect(caps).toHaveProperty("prompts");
+			expect(caps).toHaveProperty("resources");
+		}
+		for (const [path, profile] of [
+			["/claude/mcp", "admin"],
+			["/chatgpt/mcp", "chatgpt"],
+		]) {
+			const caps = await capabilities(path, profile);
+			expect(caps).not.toHaveProperty("prompts");
+			expect(caps).not.toHaveProperty("resources");
+		}
 	});
 });

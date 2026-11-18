@@ -1,7 +1,12 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import {
 	CallToolRequestSchema,
+	GetPromptRequestSchema,
+	ListPromptsRequestSchema,
+	ListResourcesRequestSchema,
 	ListToolsRequestSchema,
+	McpError,
+	ReadResourceRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import type {
 	JsonSchema,
@@ -31,6 +36,9 @@ import type { McpRequestContext } from "./mcp-context.ts";
 import { docsTools } from "./docs.ts";
 import { feedbackTools, type FeedbackSink } from "./feedback.ts";
 import { type OperationCallVia, operationTools } from "./operation-tools.ts";
+import { getPrompt, listedPrompts } from "./prompts.ts";
+import { listedResources, readResource } from "./resources.ts";
+import { toolReach } from "./tool-reach.ts";
 
 export const SERVER_NAME = "whop";
 export const SERVER_VERSION = "0.0.1";
@@ -43,6 +51,8 @@ export const SERVER_ICONS = [
 	},
 ];
 
+// The MCP spec's code for a resource that doesn't exist.
+const RESOURCE_NOT_FOUND = -32002;
 const IDEMPOTENCY_KEY_FIELD = "idempotency_key";
 const INTENT_FIELD = "intent";
 const INTENT_ID_FIELD = "intent_id";
@@ -145,6 +155,14 @@ export interface CreateWhopMcpServerOptions {
 	 * these two tools.
 	 */
 	chatGptCompat?: boolean;
+	/**
+	 * Serve the guide prompts and resources (runtime/prompts.ts and
+	 * runtime/resources.ts), built from the flows in runtime/flows.ts. A prompt
+	 * or flow is offered only when this connection can call every tool it
+	 * needs, and a tool that isn't listed is named with the operation tool
+	 * that runs it.
+	 */
+	promptsAndResources?: boolean;
 }
 
 export interface WhopMcpServer {
@@ -427,7 +445,10 @@ export function createWhopMcpServer(
 	const server = new Server(
 		{ name: SERVER_NAME, version: SERVER_VERSION, icons: SERVER_ICONS },
 		{
-			capabilities: { tools: {} },
+			capabilities: {
+				tools: {},
+				...(options.promptsAndResources && { prompts: {}, resources: {} }),
+			},
 			instructions: buildInstructions(
 				principal,
 				options.surface,
@@ -435,6 +456,7 @@ export function createWhopMcpServer(
 				listedOperations,
 				builtins,
 				collectsIntent,
+				options.promptsAndResources ?? false,
 			),
 		},
 	);
@@ -472,6 +494,29 @@ export function createWhopMcpServer(
 			),
 		],
 	}));
+
+	if (options.promptsAndResources) {
+		const reach = toolReach(operations, listedOperations, builtinByName.keys());
+		server.setRequestHandler(ListPromptsRequestSchema, async () => ({
+			prompts: listedPrompts(reach),
+		}));
+		server.setRequestHandler(GetPromptRequestSchema, async (request) =>
+			getPrompt(request.params.name, request.params.arguments ?? {}, reach),
+		);
+		server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+			resources: listedResources(reach),
+		}));
+		server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+			const resource = readResource(request.params.uri, reach);
+			if (!resource) {
+				throw new McpError(
+					RESOURCE_NOT_FOUND,
+					`Unknown resource "${request.params.uri}".`,
+				);
+			}
+			return { contents: [resource] };
+		});
+	}
 
 	server.setRequestHandler(CallToolRequestSchema, async (request, extra) => {
 		const { name, arguments: rawArgs = {} } = request.params;
@@ -705,6 +750,9 @@ const CHATGPT_UNAVAILABLE_INSTRUCTION =
 const CHATGPT_PERSONAL_DATA_INSTRUCTION =
 	"Do not volunteer customers' email addresses, phone numbers, postal addresses, IP addresses or card or bank details. Include one when the user asks for it or needs it to tell two customers apart.";
 
+const GUIDES_INSTRUCTION =
+	"Step-by-step guides for common Whop workflows are resources under whop://guides/. whop://guides/finding-tools shows how to reach operations that aren't in the tool list.";
+
 function buildInstructions(
 	principal: PrincipalContext,
 	surface: SurfaceName | undefined,
@@ -712,6 +760,7 @@ function buildInstructions(
 	listedOperations: OperationDef[],
 	builtins: BuiltinTool[],
 	collectsIntent: boolean,
+	guides: boolean,
 ): string {
 	const toolCount =
 		listedOperations.length === operations.length
@@ -739,6 +788,7 @@ function buildInstructions(
 				]
 			: []),
 		...builtins.flatMap((tool) => tool.instruction ?? []),
+		...(guides ? [GUIDES_INSTRUCTION] : []),
 		surface === "chatgpt"
 			? "Call connection_status to see the signed-in user, account, permission profile, and tool coverage."
 			: "Call connection_status to see the authenticated identity, account, scopes, and tool coverage.",

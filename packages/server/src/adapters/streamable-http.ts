@@ -63,6 +63,8 @@ export interface StreamableHttpAdapterOptions {
 	surface?: SurfaceName;
 	/** Which operations tools/list shows (see CreateWhopMcpServerOptions). */
 	toolListing?: ToolListing;
+	/** Serve the guide prompts and resources (see CreateWhopMcpServerOptions). */
+	promptsAndResources?: boolean;
 }
 
 function jsonRpcError(status: number, code: number, message: string): Response {
@@ -154,6 +156,7 @@ export function createStreamableHttpHandler(
 			chatGptCompat: options.chatGptCompat,
 			surface: options.surface,
 			toolListing: options.toolListing,
+			promptsAndResources: options.promptsAndResources,
 			extraHeaders: auth.extraHeaders,
 		});
 

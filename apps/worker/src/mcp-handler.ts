@@ -88,6 +88,7 @@ export function createMcpApiHandler(surface: SurfaceName = "full") {
 				chatGptCompat: !muse,
 				surface,
 				toolListing: listingFor(surface),
+				promptsAndResources: surface === "full" || muse,
 				authenticator: {
 					async authenticate() {
 						const pluginSource = readPluginSource(request);
