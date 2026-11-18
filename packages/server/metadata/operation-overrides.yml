@@ -179,6 +179,7 @@ overrides:
       member is one buyer's relationship with the account, however many
       memberships they hold.
     requiresAccount: true
+    listedSchemaOmit: [affiliate_id, buyer_account_ids]
 
   "GET /channels":
     description: >-

@@ -30633,6 +30633,14 @@
             "example": "biz_xxxxxxxxxxxxxx",
             "type": "string"
           },
+          "buyer_account_id": {
+            "description": "The business that bought, prefixed `biz_`. `null` when the buyer is a person.",
+            "example": "biz_xxxxxxxxxxxxxx",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "created_at": {
             "description": "When the member record was created, as an ISO 8601 timestamp.",
             "example": "2026-01-01T12:00:00.000Z",
@@ -30800,6 +30808,7 @@
         "required": [
           "id",
           "account_id",
+          "buyer_account_id",
           "access_level",
           "status",
           "display_name",
@@ -126112,6 +126121,29 @@
             }
           },
           {
+            "description": "Only return members this affiliate referred, prefixed `aff_`. Requires `affiliate:basic:read` and sorts by `created_at` only. Unknown IDs match nothing.",
+            "in": "query",
+            "name": "affiliate_id",
+            "required": false,
+            "schema": {
+              "example": "aff_xxxxxxxxxxxxxx",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Only return members bought by these accounts, prefixed `biz_`. Unknown IDs match nothing.",
+            "in": "query",
+            "name": "buyer_account_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "example": "biz_xxxxxxxxxxxxxx",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
             "description": "Search members by name or username. An exact email address also matches when the credential holds the member:email:read scope.",
             "in": "query",
             "name": "query",
@@ -126403,6 +126435,7 @@
       "get": {
         "description": "Retrieves a member by ID. Accessible to the account and to the member's own user.",
         "operationId": "retrieveMember",
+        "parameters": [],
         "responses": {
           "200": {
             "content": {
@@ -127025,6 +127058,88 @@
         ],
         "x-whop-docs-subgroup": "Notes"
       },
+      "x-whop-surface": "native"
+    },
+    "/members/{member_id}/notes/{id}": {
+      "delete": {
+        "description": "Deletes a note from a member, whoever wrote it. A deleted note's ID returns a `404`. Deleting can't be undone.",
+        "operationId": "deleteMemberNote",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "deleted": {
+                      "description": "Always `true`.",
+                      "example": true,
+                      "type": "boolean"
+                    },
+                    "id": {
+                      "description": "The ID of the deleted note, prefixed `note_`.",
+                      "example": "note_xxxxxxxxxxxxxx",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "deleted"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "member note deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "missing credentials"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "credential lacks the member-manage scope"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "note not on this member"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "member:manage"
+            ]
+          }
+        ],
+        "summary": "Delete Member Note",
+        "tags": [
+          "Members"
+        ],
+        "x-whop-docs-subgroup": "Notes"
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "The member the note is about, prefixed `mber_`.",
+          "in": "path",
+          "name": "member_id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "description": "The ID of the note to delete, prefixed `note_`.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
       "x-whop-surface": "native"
     },
     "/memberships": {
@@ -174910,6 +175025,15 @@
             }
           },
           {
+            "description": "Set to `true` to return the number of matching results in `page_info.total_count`. Send `first=0` as well to return the count without any results.",
+            "in": "query",
+            "name": "include_total_count",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "description": "Only return signups for this variant, prefixed `plan_`.",
             "in": "query",
             "name": "variant_id",
@@ -175050,13 +175174,26 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "total_count": {
+                          "description": "Number of results matching the filters, across every page. Counting stops at 10,000. `null` when `include_total_count` isn't `true`, or when the count ran out of time.",
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "total_count_capped": {
+                          "description": "Whether counting stopped at the limit. `true` means `total_count` is 10,000 or more.",
+                          "type": "boolean"
                         }
                       },
                       "required": [
                         "has_next_page",
                         "has_previous_page",
                         "start_cursor",
-                        "end_cursor"
+                        "end_cursor",
+                        "total_count",
+                        "total_count_capped"
                       ],
                       "type": "object"
                     }
@@ -187790,6 +187927,7 @@
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
+                  "buyer_account_id": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "display_name": "Jack Sharkey the 151st",
                   "earnings_usd": {
@@ -187954,6 +188092,7 @@
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
+                  "buyer_account_id": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "display_name": "Jack Sharkey the 153rd",
                   "earnings_usd": {
