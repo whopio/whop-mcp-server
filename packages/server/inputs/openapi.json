@@ -7357,7 +7357,6 @@
               "rejected",
               "in_review",
               "draft",
-              "campaign_paused",
               "paused",
               "processing",
               "revise_content",
@@ -7876,7 +7875,7 @@
             "description": "Whether the campaign's ads are delivering right now, and if not, why. Content review is in_review; a campaign waiting to start is processing. Account billing failures set payment_failed without changing the configured status. Successful payment retry clears that block and recalculates delivery. When several states apply at once, the highest-precedence one is returned.",
             "enum": [
               "payment_failed",
-              "all_ads_rejected",
+              "rejected",
               "draft",
               "paused",
               "in_review",
@@ -8624,10 +8623,8 @@
           "delivery_status": {
             "description": "Whether ads in this ad group are delivering right now, and if not, why. When several states apply at once, the highest-precedence one is returned.",
             "enum": [
-              "all_ads_rejected",
               "rejected",
               "draft",
-              "campaign_paused",
               "paused",
               "in_review",
               "processing",
@@ -21603,6 +21600,8 @@
               "transfer_rejected",
               "transfer_not_cancellable",
               "domain_transfer_failed",
+              "transfer_out_locked",
+              "registrar_unavailable",
               "apple_pay_unverified",
               "pixel_not_seen",
               "pixel_not_installed",
@@ -22283,10 +22282,11 @@
             "type": "string"
           },
           "state": {
-            "description": "`ready` while the code waits to be used. `pending` once it has: Whop removes the domain's email, Apple Pay and pixel from this account, then moves the registration and removes the domain from this account.",
+            "description": "`ready` while the code waits to be used. `pending` once another account uses it. Whop then removes the domain's email, Apple Pay and pixel from this account. Then it moves the registration and removes the domain from this account. `releasing` while Whop turns the transfer off.",
             "enum": [
               "ready",
-              "pending"
+              "pending",
+              "releasing"
             ],
             "example": "ready",
             "type": "string"
@@ -178732,7 +178732,6 @@
                           "rejected",
                           "in_review",
                           "draft",
-                          "campaign_paused",
                           "paused",
                           "processing",
                           "revise_content",
@@ -179061,7 +179060,7 @@
                         "description": "Whether the campaign's ads are delivering right now, and if not, why. Content review is in_review; a campaign waiting to start is processing. Account billing failures set payment_failed without changing the configured status. Successful payment retry clears that block and recalculates delivery. When several states apply at once, the highest-precedence one is returned.",
                         "enum": [
                           "payment_failed",
-                          "all_ads_rejected",
+                          "rejected",
                           "draft",
                           "paused",
                           "in_review",
@@ -179431,7 +179430,7 @@
                         "description": "Whether the campaign's ads are delivering right now, and if not, why. Content review is in_review; a campaign waiting to start is processing. Account billing failures set payment_failed without changing the configured status. Successful payment retry clears that block and recalculates delivery. When several states apply at once, the highest-precedence one is returned.",
                         "enum": [
                           "payment_failed",
-                          "all_ads_rejected",
+                          "rejected",
                           "draft",
                           "paused",
                           "in_review",
@@ -179837,10 +179836,8 @@
                       "delivery_status": {
                         "description": "Whether ads in this ad group are delivering right now, and if not, why. When several states apply at once, the highest-precedence one is returned.",
                         "enum": [
-                          "all_ads_rejected",
                           "rejected",
                           "draft",
-                          "campaign_paused",
                           "paused",
                           "in_review",
                           "processing",
