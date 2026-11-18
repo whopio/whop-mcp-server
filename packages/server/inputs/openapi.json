@@ -913,6 +913,11 @@
             },
             "type": "array"
           },
+          "perps": {
+            "description": "Amount held for perpetual trading, at what the trading account is worth now, in native units, as a decimal string. It is not part of `available`.",
+            "example": "0",
+            "type": "string"
+          },
           "reserve": {
             "description": "Amount held back, in native units, as a decimal string. Retrieve the account's reserves for why it is held and when it unlocks.",
             "example": "0",
@@ -923,6 +928,7 @@
           "available",
           "pending",
           "in_transit",
+          "perps",
           "reserve",
           "pending_settlements",
           "finishing_settlement"
