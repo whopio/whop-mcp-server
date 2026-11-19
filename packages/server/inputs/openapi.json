@@ -65492,7 +65492,7 @@
         }
       ],
       "post": {
-        "description": "Attributes the whole campaign and its daily budget to the calling user as its runner. One runner holds a campaign at a time. Takes the runner's Whop session, or a user API key with `ad_campaign:update`. The caller also needs active advertiser-supplier program access. Everyone else gets a 404. Returns 403 until the caller has verified their identity and added a phone number and a social account. Returns 403 when the claim would take the daily budget the caller holds past the limit for their score. Returns 409 when another user holds the campaign. Changes nothing when the caller already holds it.",
+        "description": "Attributes the whole campaign and its daily budget to the calling user as its runner. One runner holds a campaign at a time. Takes the runner's Whop session, or a user API key with `ad_campaign:update`. The caller also needs active advertiser-supplier program access. Everyone else gets a 404. Returns 403 until the caller has verified their identity and added a phone number and a social account. Returns 403 when the claim would take the daily budget the caller holds past the limit for their score. Returns 409 when another user holds the campaign. Changes nothing when the caller already holds it. Returns 429 when the caller already claimed the campaign in the last hour: a runner can claim each campaign once an hour.",
         "operationId": "claimAdCampaign",
         "parameters": [
           {
@@ -65512,6 +65512,10 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequests",
+            "description": "ad campaign claimed by the caller in the last hour"
           }
         },
         "security": [
@@ -173677,6 +173681,49 @@
                             "example": "idpf_xxxxxxxxxxxx",
                             "type": "string"
                           },
+                          "identity_document": {
+                            "description": "Identity document on file for the person. Individual verifications only. `null` until the person sends a document.",
+                            "properties": {
+                              "country": {
+                                "description": "Two-letter ISO 3166-1 code of the country that issued the document.",
+                                "example": "US",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "status": {
+                                "description": "Review result of the document. `pending` until the review ends.",
+                                "enum": [
+                                  "pending",
+                                  "approved",
+                                  "rejected"
+                                ],
+                                "example": "approved",
+                                "type": "string"
+                              },
+                              "type": {
+                                "description": "Kind of identity document.",
+                                "enum": [
+                                  "id_card",
+                                  "drivers",
+                                  "residence_permit",
+                                  "passport"
+                                ],
+                                "example": "passport",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "country",
+                              "status"
+                            ],
+                            "type": [
+                              "object",
+                              "null"
+                            ]
+                          },
                           "incorporation_date": {
                             "description": "Date the business was incorporated, formatted as `YYYY-MM-DD`, as on file for the business verification. Business verifications only; `null` until it is sent.",
                             "example": "2021-03-15",
@@ -174016,6 +174063,38 @@
                               "type": "object"
                             },
                             "type": "array"
+                          },
+                          "selfie": {
+                            "description": "Selfie check of the person. Individual verifications only. `null` when the verification has no selfie check.",
+                            "properties": {
+                              "capture": {
+                                "description": "How the selfie is taken. `liveness` is a live camera check. `upload` is a photo sent as a file.",
+                                "enum": [
+                                  "upload",
+                                  "liveness"
+                                ],
+                                "example": "liveness",
+                                "type": "string"
+                              },
+                              "status": {
+                                "description": "Review result of the selfie check. `pending` until the review ends.",
+                                "enum": [
+                                  "pending",
+                                  "approved",
+                                  "rejected"
+                                ],
+                                "example": "approved",
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "capture",
+                              "status"
+                            ],
+                            "type": [
+                              "object",
+                              "null"
+                            ]
                           },
                           "session_url": {
                             "description": "Hosted verification session URL for the user to complete identity checks. Expires 7 days after creation.",
@@ -174812,6 +174891,49 @@
                       "example": "idpf_xxxxxxxxxxxx",
                       "type": "string"
                     },
+                    "identity_document": {
+                      "description": "Identity document on file for the person. Individual verifications only. `null` until the person sends a document.",
+                      "properties": {
+                        "country": {
+                          "description": "Two-letter ISO 3166-1 code of the country that issued the document.",
+                          "example": "US",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "status": {
+                          "description": "Review result of the document. `pending` until the review ends.",
+                          "enum": [
+                            "pending",
+                            "approved",
+                            "rejected"
+                          ],
+                          "example": "approved",
+                          "type": "string"
+                        },
+                        "type": {
+                          "description": "Kind of identity document.",
+                          "enum": [
+                            "id_card",
+                            "drivers",
+                            "residence_permit",
+                            "passport"
+                          ],
+                          "example": "passport",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "country",
+                        "status"
+                      ],
+                      "type": [
+                        "object",
+                        "null"
+                      ]
+                    },
                     "incorporation_date": {
                       "description": "Date the business was incorporated, formatted as `YYYY-MM-DD`, as on file for the business verification. Business verifications only; `null` until it is sent.",
                       "example": "2021-03-15",
@@ -175152,6 +175274,38 @@
                       },
                       "type": "array"
                     },
+                    "selfie": {
+                      "description": "Selfie check of the person. Individual verifications only. `null` when the verification has no selfie check.",
+                      "properties": {
+                        "capture": {
+                          "description": "How the selfie is taken. `liveness` is a live camera check. `upload` is a photo sent as a file.",
+                          "enum": [
+                            "upload",
+                            "liveness"
+                          ],
+                          "example": "liveness",
+                          "type": "string"
+                        },
+                        "status": {
+                          "description": "Review result of the selfie check. `pending` until the review ends.",
+                          "enum": [
+                            "pending",
+                            "approved",
+                            "rejected"
+                          ],
+                          "example": "approved",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "capture",
+                        "status"
+                      ],
+                      "type": [
+                        "object",
+                        "null"
+                      ]
+                    },
                     "session_url": {
                       "description": "Hosted verification session URL for the user to complete identity checks. Expires 7 days after creation.",
                       "example": "https://sumsub.com/session/abc",
@@ -175315,6 +175469,49 @@
                       "description": "Verification profile ID, prefixed `idpf_`.",
                       "example": "idpf_xxxxxxxxxxxx",
                       "type": "string"
+                    },
+                    "identity_document": {
+                      "description": "Identity document on file for the person. Individual verifications only. `null` until the person sends a document.",
+                      "properties": {
+                        "country": {
+                          "description": "Two-letter ISO 3166-1 code of the country that issued the document.",
+                          "example": "US",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "status": {
+                          "description": "Review result of the document. `pending` until the review ends.",
+                          "enum": [
+                            "pending",
+                            "approved",
+                            "rejected"
+                          ],
+                          "example": "approved",
+                          "type": "string"
+                        },
+                        "type": {
+                          "description": "Kind of identity document.",
+                          "enum": [
+                            "id_card",
+                            "drivers",
+                            "residence_permit",
+                            "passport"
+                          ],
+                          "example": "passport",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "country",
+                        "status"
+                      ],
+                      "type": [
+                        "object",
+                        "null"
+                      ]
                     },
                     "incorporation_date": {
                       "description": "Date the business was incorporated, formatted as `YYYY-MM-DD`, as on file for the business verification. Business verifications only; `null` until it is sent.",
@@ -175656,6 +175853,38 @@
                       },
                       "type": "array"
                     },
+                    "selfie": {
+                      "description": "Selfie check of the person. Individual verifications only. `null` when the verification has no selfie check.",
+                      "properties": {
+                        "capture": {
+                          "description": "How the selfie is taken. `liveness` is a live camera check. `upload` is a photo sent as a file.",
+                          "enum": [
+                            "upload",
+                            "liveness"
+                          ],
+                          "example": "liveness",
+                          "type": "string"
+                        },
+                        "status": {
+                          "description": "Review result of the selfie check. `pending` until the review ends.",
+                          "enum": [
+                            "pending",
+                            "approved",
+                            "rejected"
+                          ],
+                          "example": "approved",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "capture",
+                        "status"
+                      ],
+                      "type": [
+                        "object",
+                        "null"
+                      ]
+                    },
                     "session_url": {
                       "description": "Hosted verification session URL for the user to complete identity checks. Expires 7 days after creation.",
                       "example": "https://sumsub.com/session/new",
@@ -175874,6 +176103,49 @@
                       "description": "Verification profile ID, prefixed `idpf_`.",
                       "example": "idpf_xxxxxxxxxxxx",
                       "type": "string"
+                    },
+                    "identity_document": {
+                      "description": "Identity document on file for the person. Individual verifications only. `null` until the person sends a document.",
+                      "properties": {
+                        "country": {
+                          "description": "Two-letter ISO 3166-1 code of the country that issued the document.",
+                          "example": "US",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "status": {
+                          "description": "Review result of the document. `pending` until the review ends.",
+                          "enum": [
+                            "pending",
+                            "approved",
+                            "rejected"
+                          ],
+                          "example": "approved",
+                          "type": "string"
+                        },
+                        "type": {
+                          "description": "Kind of identity document.",
+                          "enum": [
+                            "id_card",
+                            "drivers",
+                            "residence_permit",
+                            "passport"
+                          ],
+                          "example": "passport",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "country",
+                        "status"
+                      ],
+                      "type": [
+                        "object",
+                        "null"
+                      ]
                     },
                     "incorporation_date": {
                       "description": "Date the business was incorporated, formatted as `YYYY-MM-DD`, as on file for the business verification. Business verifications only; `null` until it is sent.",
@@ -176214,6 +176486,38 @@
                         "type": "object"
                       },
                       "type": "array"
+                    },
+                    "selfie": {
+                      "description": "Selfie check of the person. Individual verifications only. `null` when the verification has no selfie check.",
+                      "properties": {
+                        "capture": {
+                          "description": "How the selfie is taken. `liveness` is a live camera check. `upload` is a photo sent as a file.",
+                          "enum": [
+                            "upload",
+                            "liveness"
+                          ],
+                          "example": "liveness",
+                          "type": "string"
+                        },
+                        "status": {
+                          "description": "Review result of the selfie check. `pending` until the review ends.",
+                          "enum": [
+                            "pending",
+                            "approved",
+                            "rejected"
+                          ],
+                          "example": "approved",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "capture",
+                        "status"
+                      ],
+                      "type": [
+                        "object",
+                        "null"
+                      ]
                     },
                     "session_url": {
                       "description": "Hosted verification session URL for the user to complete identity checks. Expires 7 days after creation.",
@@ -177178,6 +177482,49 @@
                       "example": "idpf_xxxxxxxxxxxx",
                       "type": "string"
                     },
+                    "identity_document": {
+                      "description": "Identity document on file for the person. Individual verifications only. `null` until the person sends a document.",
+                      "properties": {
+                        "country": {
+                          "description": "Two-letter ISO 3166-1 code of the country that issued the document.",
+                          "example": "US",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "status": {
+                          "description": "Review result of the document. `pending` until the review ends.",
+                          "enum": [
+                            "pending",
+                            "approved",
+                            "rejected"
+                          ],
+                          "example": "approved",
+                          "type": "string"
+                        },
+                        "type": {
+                          "description": "Kind of identity document.",
+                          "enum": [
+                            "id_card",
+                            "drivers",
+                            "residence_permit",
+                            "passport"
+                          ],
+                          "example": "passport",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "country",
+                        "status"
+                      ],
+                      "type": [
+                        "object",
+                        "null"
+                      ]
+                    },
                     "incorporation_date": {
                       "description": "Date the business was incorporated, formatted as `YYYY-MM-DD`, as on file for the business verification. Business verifications only; `null` until it is sent.",
                       "example": "2021-03-15",
@@ -177517,6 +177864,38 @@
                         "type": "object"
                       },
                       "type": "array"
+                    },
+                    "selfie": {
+                      "description": "Selfie check of the person. Individual verifications only. `null` when the verification has no selfie check.",
+                      "properties": {
+                        "capture": {
+                          "description": "How the selfie is taken. `liveness` is a live camera check. `upload` is a photo sent as a file.",
+                          "enum": [
+                            "upload",
+                            "liveness"
+                          ],
+                          "example": "liveness",
+                          "type": "string"
+                        },
+                        "status": {
+                          "description": "Review result of the selfie check. `pending` until the review ends.",
+                          "enum": [
+                            "pending",
+                            "approved",
+                            "rejected"
+                          ],
+                          "example": "approved",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "capture",
+                        "status"
+                      ],
+                      "type": [
+                        "object",
+                        "null"
+                      ]
                     },
                     "session_url": {
                       "description": "Hosted verification session URL for the user to complete identity checks. Expires 7 days after creation.",
