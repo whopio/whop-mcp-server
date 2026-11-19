@@ -83,7 +83,7 @@ Reads change nothing.
 | `resolution-center-cases_list` | Buyer complaints and refund requests | `payment:resolution_center_case:read` |
 | `accounts_list` | Businesses the user can act on | none, or `company:balance:read` |
 | `accounts_get` | One business | `company:balance:read` |
-| `economic-intelligence_list` | Recommended next actions for a business | `company:basic:read` |
+| `recommended-actions_list` | Recommended next actions for a business | `company:basic:read` |
 
 ### Write
 
@@ -120,7 +120,7 @@ Reads change nothing.
 | `checkout-configurations_create` | Creates a checkout link; nobody is charged until a customer checks out | `checkout_configuration:create` |
 | `channels_create` | Opens a DM or support conversation; nothing is sent until `messages_create` | `dms:channel:manage` or `support_chat:create` |
 | `channels_resolve` | Marks a support conversation resolved | `support_chat:create` |
-| `economic-intelligence_update` | Records a recommended action's status or the owner's feedback | `company:basic:read` |
+| `recommended-actions_dismiss` | Dismisses a recommended action the owner does not want | `company:update` |
 
 ### Sensitive write
 

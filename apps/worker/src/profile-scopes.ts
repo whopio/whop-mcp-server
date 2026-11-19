@@ -325,7 +325,7 @@ const MUSE_DENIED_WHOP_SCOPES = new Set([
  * capabilities. Listed writes contribute every scope they need; reads,
  * listed or not, only contribute read-named scopes. Some reads declare write
  * scopes as alternatives (API key listings need developer:manage_api_key,
- * economic-intelligence_list accepts ai_chat:create), and those must not
+ * some reads accept ai_chat:create), and those must not
  * reach a read-only path.
  */
 export function expandMuseToWhopScopes(operations: OperationDef[]): string[] {

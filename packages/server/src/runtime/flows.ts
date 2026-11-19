@@ -48,12 +48,13 @@ export const FLOWS: readonly Flow[] = [
 		title: "What should I do next?",
 		steps: [
 			{
-				tool: "economic-intelligence_list",
-				does: "Read the recommended actions. `status: ready` is what the business can act on now.",
+				tool: "recommended-actions_list",
+				does: "Pass `statuses` `ready` to read the recommended actions the business can act on now.",
 			},
 			{
-				tool: "economic-intelligence_update",
-				does: "Mark a recommendation `running` before acting on it, and `executed` when it's done.",
+				tool: "recommended-actions_dismiss",
+				does: "Dismiss a recommended action the owner doesn't want.",
+				optional: true,
 			},
 		],
 	},

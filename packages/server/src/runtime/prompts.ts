@@ -93,13 +93,13 @@ export const GUIDE_PROMPTS: readonly GuidePrompt[] = [
 				"Whop's recommended next steps for the business, explained in plain words.",
 			arguments: [BUSINESS_ARGUMENT],
 		},
-		requiredTools: ["accounts_list", "economic-intelligence_list"],
+		requiredTools: ["accounts_list", "recommended-actions_list"],
 		render: (args, n) =>
 			[
 				`What should I do next with ${business(args)}?`,
 				"",
 				`1. ${findBusiness(n)}`,
-				`2. Read the recommendations that are ready with ${n("economic-intelligence_list")} and status ready.`,
+				`2. Read the business's ready recommended actions with ${n("recommended-actions_list")} and statuses ready.`,
 				"3. For the top three, say what each would change and why it should help.",
 				"",
 				`${READ_ONLY} If I pick one, show me exactly what it will change and wait for my go-ahead first.`,
