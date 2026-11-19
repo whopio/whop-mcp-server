@@ -55376,8 +55376,33 @@
             "example": false,
             "type": "boolean"
           },
+          "show_earnings": {
+            "description": "Whether to show the user's earnings on their profile.",
+            "example": true,
+            "type": "boolean"
+          },
+          "show_joined_whops": {
+            "description": "Whether to show the whops the user joined on their profile.",
+            "example": true,
+            "type": "boolean"
+          },
           "show_level": {
             "description": "Whether other people can see the user's Whop Level. Set to `false` to hide it.",
+            "example": true,
+            "type": "boolean"
+          },
+          "show_location": {
+            "description": "Whether to show the user's location on their profile.",
+            "example": true,
+            "type": "boolean"
+          },
+          "show_owned_whops": {
+            "description": "Whether to show the whops the user owns on their profile.",
+            "example": true,
+            "type": "boolean"
+          },
+          "show_user_ranking": {
+            "description": "Whether to show the user's ranking on their profile.",
             "example": true,
             "type": "boolean"
           },
@@ -55400,6 +55425,11 @@
           "terms_accepted",
           "terms_accepted_at",
           "cards_auto_top_up",
+          "show_earnings",
+          "show_joined_whops",
+          "show_location",
+          "show_owned_whops",
+          "show_user_ranking",
           "show_level"
         ],
         "type": "object"
@@ -171539,8 +171569,28 @@
                     "description": "Whether incoming funds, including pending balance, are automatically moved to the user's personal cards balance. Requires a cards balance and the `payout:account:update` permission.",
                     "type": "boolean"
                   },
+                  "show_earnings": {
+                    "description": "Whether to show the user's earnings on their profile.",
+                    "type": "boolean"
+                  },
+                  "show_joined_whops": {
+                    "description": "Whether to show the whops the user joined on their profile.",
+                    "type": "boolean"
+                  },
                   "show_level": {
                     "description": "Whether other people can see the user's Whop Level. Set to `false` to hide it.",
+                    "type": "boolean"
+                  },
+                  "show_location": {
+                    "description": "Whether to show the user's location on their profile.",
+                    "type": "boolean"
+                  },
+                  "show_owned_whops": {
+                    "description": "Whether to show the whops the user owns on their profile.",
+                    "type": "boolean"
+                  },
+                  "show_user_ranking": {
+                    "description": "Whether to show the user's ranking on their profile.",
                     "type": "boolean"
                   },
                   "terms_accepted": {
