@@ -22595,90 +22595,35 @@
       "EconomicIntelligence": {
         "properties": {
           "account_id": {
-            "description": "ID of the account this recommendation is for, prefixed `biz_`, or null for personal onboarding.",
+            "description": "ID of the account this recommendation is for, prefixed `biz_`.",
             "example": "biz_xxxxxxxxxxxxxx",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "acknowledged_at": {
-            "description": "When the executed run was first marked as seen, as an ISO 8601 timestamp, or `null` if it has not been.",
-            "example": "2026-01-01T12:00:00.000Z",
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           },
           "action_type": {
             "description": "Type of action recommended, or `null` when no type is assigned. New values may be added; handle unknown types gracefully.",
-            "example": "add_cancel_offer",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "ai_chat_id": {
-            "description": "The chat that ran the recommendation, shown only to the user who ran it, or `null` otherwise.",
-            "example": "aich_xxxxxxxxxxxxxx",
+            "example": "improve_landing_page",
             "type": [
               "string",
               "null"
             ]
           },
           "created_at": {
-            "description": "When the recommendation was created, as an ISO 8601 timestamp, or null for an unsaved recommendation.",
+            "description": "When the recommendation was created, as an ISO 8601 timestamp.",
             "example": "2026-01-01T12:00:00.000Z",
-            "type": [
-              "string",
-              "null"
-            ]
+            "type": "string"
           },
           "executed_at": {
             "description": "When the recommendation was carried out, as an ISO 8601 timestamp, or `null` if it has not been.",
-            "example": "2026-01-01T12:00:00.000Z",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "expected_tool_calls": {
-            "items": {
-              "$ref": "#/components/schemas/EconomicIntelligenceOperation",
-              "description": "Expected API operations or tools, in execution order, or null when no execution plan was recorded."
-            },
-            "type": [
-              "array",
-              "null"
-            ]
-          },
-          "id": {
-            "description": "Recommendation ID, prefixed `reca_`, or `create_business` for an unsaved setup recommendation. Authenticate and list again before executing an unsaved recommendation.",
-            "example": "reca_xxxxxxxxxxxxxx",
-            "type": "string"
-          },
-          "input": {
-            "description": "What you requested, in your own words, or `null` for recommendations generated without your input.",
             "example": null,
             "type": [
               "string",
               "null"
             ]
           },
-          "inputs": {
-            "items": {
-              "$ref": "#/components/schemas/EconomicIntelligenceInput",
-              "description": "Decisions this recommendation leaves to you. Pick one option for each before it runs, or write your own for a `whop_ai` recommendation; empty when there is nothing to decide."
-            },
-            "type": "array"
-          },
-          "prompt": {
-            "description": "Step-by-step instructions for Whop AI, or `null` when no instructions are available.",
-            "example": "Create a 20% off promo code for my members.",
-            "type": [
-              "string",
-              "null"
-            ]
+          "id": {
+            "description": "Recommendation ID, prefixed `reca_`.",
+            "example": "reca_xxxxxxxxxxxxxx",
+            "type": "string"
           },
           "reasoning": {
             "description": "Evidence and metrics supporting the recommendation, or `null` when no reasoning was provided.",
@@ -22689,8 +22634,8 @@
             ]
           },
           "result_url": {
-            "description": "Where to view what the run produced, such as the published website or created product, or `null` when the result is only in the chat.",
-            "example": "https://atlas.whop.site/",
+            "description": "Where to view what the run produced, such as the published website or created product, or `null` when there is nothing to view.",
+            "example": null,
             "type": [
               "string",
               "null"
@@ -22713,28 +22658,15 @@
             ]
           },
           "run_started_at": {
-            "description": "When the run started, by Whop AI or the recommendation's API calls, as an ISO 8601 timestamp, or `null` if it has not run.",
+            "description": "When the run started, as an ISO 8601 timestamp, or `null` if it has not run.",
             "example": "2026-01-01T12:00:00.000Z",
             "type": [
               "string",
               "null"
             ]
           },
-          "sentiment": {
-            "description": "How the user rated this recommendation, or `null` if they have not rated it",
-            "enum": [
-              "positive",
-              "negative",
-              null
-            ],
-            "example": "positive",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
           "status": {
-            "description": "`queued` when awaiting generation; `pending` while generating or preparing its work; `ready` when available to run; `running` while Whop AI or the recommendation's API calls carry it out; `executed` when carried out; `incomplete` when the run ended without carrying it out; `superseded` when rejected or replaced.",
+            "description": "`queued` waits for generation. `pending` is being generated or prepared. `ready` can run. `running` is sending its API calls. `executed` was carried out. `incomplete` ended before it was carried out. `superseded` was rejected or replaced.",
             "enum": [
               "queued",
               "pending",
@@ -22755,25 +22687,9 @@
               "null"
             ]
           },
-          "target_url": {
-            "description": "Website URL selected for pixel setup, or `null` when no website was captured for this recommendation.",
-            "example": "https://example.com/join",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
           "title": {
             "description": "Recommended action and its expected benefit, or `null` until generated.",
             "example": "Move $180 from 3 dead ad groups into BATCH#3, +1.7x return",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "user_feedback": {
-            "description": "The user's written feedback, or `null` if they have not provided any.",
-            "example": null,
             "type": [
               "string",
               "null"
@@ -22785,11 +22701,7 @@
           "account_id",
           "action_type",
           "title",
-          "prompt",
           "reasoning",
-          "expected_tool_calls",
-          "inputs",
-          "input",
           "status",
           "executed_at",
           "superseded_at",
@@ -22797,71 +22709,7 @@
           "run_ended_at",
           "run_by_user_id",
           "result_url",
-          "ai_chat_id",
-          "created_at",
-          "sentiment",
-          "user_feedback",
-          "acknowledged_at"
-        ],
-        "type": "object"
-      },
-      "EconomicIntelligenceInput": {
-        "properties": {
-          "answer": {
-            "description": "What the run used: one of the options, or your own text for a `whop_ai` recommendation. `null` until a run starts.",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "id": {
-            "description": "Identifies the input when you answer it.",
-            "type": "string"
-          },
-          "label": {
-            "description": "What you are choosing, such as the daily ad budget.",
-            "type": "string"
-          },
-          "options": {
-            "items": {
-              "description": "Three suggested values, strongest first. You can answer with one of them, or with your own text for a `whop_ai` recommendation.",
-              "type": "string"
-            },
-            "type": "array"
-          },
-          "template": {
-            "description": "A plan sentence with one {answer} blank to fill with the selected answer.",
-            "type": "string"
-          }
-        },
-        "required": [
-          "id",
-          "label",
-          "template",
-          "options",
-          "answer"
-        ],
-        "type": "object"
-      },
-      "EconomicIntelligenceOperation": {
-        "properties": {
-          "description": {
-            "description": "Concise description of the operation and affected resource, or null for older recommendations.",
-            "example": "Increase the summer campaign budget",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "tool_name": {
-            "description": "API operation or assistant tool name.",
-            "example": "updateAdCampaign",
-            "type": "string"
-          }
-        },
-        "required": [
-          "tool_name",
-          "description"
+          "created_at"
         ],
         "type": "object"
       },
@@ -106006,7 +105854,8 @@
     },
     "/economic_intelligence": {
       "get": {
-        "description": "Lists an account's recommendations, newest first by default. `status: ready` is what the account can act on now. Any other listing is its history of runs. Executed recommendations and runs stay listed after Economic Intelligence turns off, but new recommendations are offered only to businesses it is written for. For visitor countries, page views, ad impressions and clicks, or payment volume over a time range, use `GET /stats/time_series/:metric`.",
+        "deprecated": true,
+        "description": "Deprecated. Use `GET /recommended_actions` instead. Lists an account's recommendations, newest first by default. `status: ready` lists what the account can act on now. Any other listing is its history of runs. Executed recommendations and runs stay listed after Economic Intelligence turns off. New recommendations are offered only to businesses it is written for. For visitor countries, page views, ad impressions and clicks, or payment volume over a time range, use `GET /stats/time_series/:metric`.",
         "operationId": "listEconomicIntelligence",
         "parameters": [
           {
@@ -106033,16 +105882,6 @@
                 "incomplete",
                 "superseded"
               ],
-              "type": "string"
-            }
-          },
-          {
-            "description": "No longer read: recommendations are written for the business as it changes. Up to 1000 characters.",
-            "in": "query",
-            "name": "input",
-            "required": false,
-            "schema": {
-              "maxLength": 1000,
               "type": "string"
             }
           },
@@ -106181,7 +106020,7 @@
           },
           "400": {
             "$ref": "#/components/responses/InvalidParameters",
-            "description": "unknown status"
+            "description": "an unknown status, or a parameter that moved to recommended actions"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized",
@@ -106197,18 +106036,15 @@
             "bearerAuth": [
               "company:basic:read"
             ]
-          },
-          {
-            "bearerAuth": [
-              "ai_chat:create"
-            ]
-          },
-          {}
+          }
         ],
         "summary": "List Economic Intelligence",
         "tags": [
           "Economic Intelligence"
-        ]
+        ],
+        "x-whop-deprecated-since": "2026-11-17",
+        "x-whop-docs": "hidden",
+        "x-whop-successor": "GET /recommended_actions"
       },
       "parameters": [
         {
@@ -106242,7 +106078,8 @@
         }
       ],
       "patch": {
-        "description": "Updates a recommendation status, records feedback, or both. Send `sentiment` to rate it. Include `status: superseded` to retire a ready recommendation. A rating alone leaves its status unchanged. To run a recommendation yourself, send `status: running` to start. Send `status: executed` when it is carried out, or `status: incomplete` if the run ended without carrying it out. With `executed`, name what changed in `result_id` or where the run worked in `result_page`, and the result links there. Whop AI reports its own runs the same way. Send `status: acknowledged` once an executed run's result has been seen.",
+        "deprecated": true,
+        "description": "Deprecated. Use `POST /recommended_actions/:id/dismiss` instead.Dismisses a ready recommendation. Send `status: superseded`. A recommendation that is already superseded stays unchanged. Other statuses and fields return a `400` that names `/api/v1/recommended_actions`.",
         "operationId": "updateEconomicIntelligence",
         "parameters": [],
         "requestBody": {
@@ -106250,69 +106087,18 @@
             "application/json": {
               "schema": {
                 "properties": {
-                  "input": {
-                    "description": "No longer read: recommendations are written for the business as it changes. Up to 1000 characters.",
-                    "maxLength": 1000,
-                    "type": "string"
-                  },
-                  "result_id": {
-                    "description": "With `status: executed`, the ID of what the run produced or changed, and the recommendation's `result_url` becomes where to view it: an ad (`ad_`), ad group (`adgrp_`) or ad campaign (`adcamp_`), a website (`app_`), a product (`prod_`), a plan (`plan_`), a checkout link (`ch_`), a promo code (`promo_`), or an experience (`exp_`). Without `result_id` or `result_page`, `result_url` links to the resource the recommendation was about, when it names one. Send only one of `result_id`, `result_page` and `result_url`.",
-                    "example": "prod_xxxxxxxxxxxxx",
-                    "type": "string"
-                  },
-                  "result_page": {
-                    "description": "With `status: executed`, the page where the run's result can be seen when it is not one resource, such as the checkout links list. The recommendation's `result_url` becomes that page on the account's dashboard.",
-                    "enum": [
-                      "home",
-                      "products",
-                      "ads",
-                      "websites",
-                      "checkout_links",
-                      "tracking_links",
-                      "promo_codes",
-                      "payments",
-                      "customers",
-                      "affiliates",
-                      "analytics",
-                      "store_page"
-                    ],
-                    "example": "promo_codes",
-                    "type": "string"
-                  },
-                  "result_url": {
-                    "description": "With `status: executed`, where to view what was produced when it is outside Whop. An http or https URL. Prefer `result_id` for anything on Whop.",
-                    "example": "https://atlas.whop.site/",
-                    "maxLength": 2048,
-                    "type": "string"
-                  },
-                  "sentiment": {
-                    "description": "A signed-in user can rate a recommendation as `positive` or `negative`. Can be sent alone or together with status.",
-                    "enum": [
-                      "positive",
-                      "negative"
-                    ],
-                    "example": "positive",
-                    "type": "string"
-                  },
                   "status": {
-                    "description": "Use `running` to start a run of a ready recommendation, `executed` to record that it was carried out, `incomplete` to record that a running recommendation's run ended without carrying it out, `superseded` to reject a ready recommendation, or `acknowledged` to mark an executed run as seen; the recommendation stays `executed` and records `acknowledged_at`.",
+                    "description": "Use `superseded` to dismiss a ready recommendation.",
                     "enum": [
-                      "running",
-                      "executed",
-                      "incomplete",
-                      "superseded",
-                      "acknowledged"
+                      "superseded"
                     ],
                     "example": "superseded",
                     "type": "string"
-                  },
-                  "user_feedback": {
-                    "description": "An optional explanation of the rating or rejection.",
-                    "example": "  Focus on returning buyers  ",
-                    "maxLength": 2000,
-                    "type": "string"
                   }
                 },
+                "required": [
+                  "status"
+                ],
                 "type": "object"
               }
             }
@@ -106332,11 +106118,11 @@
           },
           "400": {
             "$ref": "#/components/responses/InvalidParameters",
-            "description": "status is not a supported transition"
+            "description": "a status or field that moved to recommended actions"
           },
           "403": {
             "$ref": "#/components/responses/Forbidden",
-            "description": "running a recommendation needs Economic Intelligence on"
+            "description": "partners cannot update recommendations"
           },
           "404": {
             "$ref": "#/components/responses/NotFound",
@@ -106357,7 +106143,10 @@
         "summary": "Update Recommendation",
         "tags": [
           "Economic Intelligence"
-        ]
+        ],
+        "x-whop-deprecated-since": "2026-11-17",
+        "x-whop-docs": "hidden",
+        "x-whop-successor": "POST /recommended_actions/{id}/dismiss"
       },
       "x-whop-surface": "native"
     },

@@ -79,14 +79,6 @@ rules:
     set:
       classification: mutating
 
-  # ── Economic intelligence: runs, retires, or acknowledges a card ─────────
-  - name: economic-intelligence-writes
-    match:
-      operations:
-        - PATCH /economic_intelligence/{id}
-    set:
-      classification: mutating
-
   # ── Recommended actions: a run sends the action's API calls as the user ──
   - name: recommended-action-execute
     match:

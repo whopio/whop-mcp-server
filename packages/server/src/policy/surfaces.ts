@@ -193,12 +193,10 @@ export const CHATGPT_EXCLUSIONS: ReadonlySet<string> = new Set([
 	"GET /accounts/{account_id}/preferences", // gated on write scopes; shows paid Economic Intelligence offers
 	"GET /api_keys/permissions", // catalog only; this route has no API key tools
 	"GET /apps/{id}/logs", // runtime logs may contain secrets an app printed
-	"GET /economic_intelligence", // paid Whop service; listing queues AI generation
 	"GET /recommended_actions", // paid Whop service
 	"GET /recommended_actions/{id}", // paid Whop service
 	"GET /users/{id}/recommend_actions", // promotional CTAs (start a business, become an affiliate)
 	// Identity and paid-service writes
-	"PATCH /economic_intelligence/{id}", // paid Whop service
 	"POST /recommended_actions/{id}/dismiss", // paid Whop service
 	"PATCH /recommended_actions/{id}", // paid Whop service; edits the API calls a run sends
 	"POST /recommended_actions/{id}/execute", // paid Whop service; sends the action's API calls as the user
