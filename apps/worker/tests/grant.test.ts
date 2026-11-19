@@ -15,8 +15,7 @@ describe("attributionHeaders", () => {
 	it("stamps hosted-worker attribution", () => {
 		const headers = attributionHeaders(env, props);
 		expect(headers).toEqual({
-			"x-whop-mcp-client":
-				"whop-mcp-worker/test-version; profile=admin; transport=http",
+			"x-whop-mcp-client": "whop-mcp-worker/test-version; profile=admin",
 			"x-whop-mcp-client-name": "Claude",
 		});
 	});

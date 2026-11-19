@@ -142,7 +142,7 @@ export function attributionHeaders(
 	pluginSource?: string,
 ): Record<string, string> {
 	const headers: Record<string, string> = {
-		"x-whop-mcp-client": `whop-mcp-worker/${env.CF_VERSION_METADATA.id}; profile=${props.profile}; transport=http`,
+		"x-whop-mcp-client": `whop-mcp-worker/${env.CF_VERSION_METADATA.id}; profile=${props.profile}`,
 	};
 	const clientName = normalizeMcpClientName(props.mcpClientName);
 	if (clientName) headers["x-whop-mcp-client-name"] = clientName;
