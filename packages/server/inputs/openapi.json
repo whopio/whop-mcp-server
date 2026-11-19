@@ -132522,6 +132522,15 @@
             }
           },
           {
+            "description": "When true, only the referrals that the `partner_network_volume` series count today. A referral whose window has ended is left out. Requires `referring_account_id`.",
+            "in": "query",
+            "name": "counted_in_network_volume",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "description": "Number of results to return from the start of the range.",
             "in": "query",
             "name": "first",
@@ -162477,6 +162486,7 @@
                           "breakdowns": {
                             "description": "The values `breakdown_by` accepts.",
                             "items": {
+                              "example": "revenue_line",
                               "type": "string"
                             },
                             "type": "array"
@@ -162492,12 +162502,13 @@
                                     "average",
                                     "none"
                                   ],
-                                  "example": "sum",
+                                  "example": "none",
                                   "type": "string"
                                 },
                                 "available_on": {
                                   "description": "Properties only. The breakdowns this property can ride along with.",
                                   "items": {
+                                    "example": "revenue_line",
                                     "type": "string"
                                   },
                                   "type": "array"
@@ -162512,23 +162523,26 @@
                                 },
                                 "default": {
                                   "description": "Metrics only. Whether the metric is returned when `columns` is omitted.",
+                                  "example": true,
                                   "type": "boolean"
                                 },
                                 "key": {
                                   "description": "The column's key, as `columns` accepts it and as rows carry it.",
+                                  "example": "revenue_line",
                                   "type": "string"
                                 },
                                 "name": {
                                   "description": "The column's display name.",
+                                  "example": "Revenue line",
                                   "type": "string"
                                 },
                                 "set": {
-                                  "description": "Properties only. `fixed` breakdowns list every value, zero-filled; `open` ones list values with activity.",
+                                  "description": "Properties only. `fixed` breakdowns list every value, zero-filled. `open` ones list values with activity.",
                                   "enum": [
                                     "fixed",
                                     "open"
                                   ],
-                                  "example": "fixed",
+                                  "example": "open",
                                   "type": "string"
                                 },
                                 "type": {
@@ -162554,6 +162568,7 @@
                                 },
                                 "weight": {
                                   "description": "Metrics only. For `average` metrics, the column to weight by.",
+                                  "example": null,
                                   "nullable": true,
                                   "type": "string"
                                 },
@@ -162577,23 +162592,27 @@
                           },
                           "description": {
                             "description": "What the report measures.",
+                            "example": "The revenue lines charged to the businesses a partner business's team referred, with the commission the partner business was paid on each. Lines that share an income source show that source's whole commission. A team member who is not an owner sees only their own line. While a day of the window is still being read, commission and paid are null on every row. A line may be missing. The days fill within minutes.",
                             "type": "string"
                           },
                           "key": {
                             "description": "The report's key, which is also the last segment of its path.",
+                            "example": "partner_revenue_lines",
                             "type": "string"
                           },
                           "path": {
                             "description": "The path that retrieves the report.",
+                            "example": "/api/v1/stats/reports/partner_revenue_lines",
                             "type": "string"
                           },
                           "window_field": {
                             "description": "The timestamp a range window filters on, such as `paid_at`.",
+                            "example": "posted_at",
                             "nullable": true,
                             "type": "string"
                           },
                           "window_kind": {
-                            "description": "`range` reports measure activity in a period; `as_of` reports measure state at a moment.",
+                            "description": "`range` reports measure activity in a period. `as_of` reports measure state at a moment.",
                             "enum": [
                               "range",
                               "as_of"
@@ -162636,6 +162655,343 @@
           }
         ],
         "summary": "List Reports",
+        "tags": [
+          "Stats"
+        ],
+        "x-whop-docs-subgroup": "Reports"
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        }
+      ],
+      "x-whop-surface": "native"
+    },
+    "/stats/reports/partner_revenue_lines": {
+      "get": {
+        "description": "The revenue lines charged to the businesses that the team of a partner business referred. Each row shows the commission paid to the partner business on that line. Lines that share an income source show the whole commission of that source. A team member who is not an owner sees only the referrals of their own team. While a day of the window is still being read, `commission` and `paid` are `null` on every row. A line may be missing. The days fill within minutes, so read the report again.",
+        "operationId": "retrievePartnerRevenueLinesReport",
+        "parameters": [
+          {
+            "description": "Partner business to report on, prefixed `biz_`.",
+            "in": "query",
+            "name": "referring_account_id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "`revenue_line` for one row per revenue line. Omit it for one row per window with the total commission.",
+            "in": "query",
+            "name": "breakdown_by",
+            "required": false,
+            "schema": {
+              "enum": [
+                "revenue_line"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated columns to return on each row. Defaults to `commission,paid`. `income_source` is available on `revenue_line` rows.",
+            "in": "query",
+            "name": "columns",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated windows of at most 366 days, at most four, in the syntax every report accepts. Each window covers whole days, through the end of its last day. A `prev:` window covers as many days and ends where the window it precedes starts. Defaults to `30d`.",
+            "in": "query",
+            "name": "windows",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "IANA zone that the days of each window fall in. Defaults to `Etc/UTC`.",
+            "in": "query",
+            "name": "time_zone",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated revenue lines to keep.",
+            "in": "query",
+            "name": "revenue_line",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Comma-separated income sources to keep.",
+            "in": "query",
+            "name": "income_source",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "The requested metric that ranks rows, by its value in the first window. Defaults to the first requested metric.",
+            "in": "query",
+            "name": "order",
+            "required": false,
+            "schema": {
+              "enum": [
+                "commission",
+                "paid"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Ranking direction. Defaults to `desc`.",
+            "in": "query",
+            "name": "direction",
+            "required": false,
+            "schema": {
+              "enum": [
+                "asc",
+                "desc"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "description": "Currency code to return money in. Defaults to `usd`.",
+            "in": "query",
+            "name": "convert_to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Number of results to return from the start of the range.",
+            "in": "query",
+            "name": "first",
+            "required": false,
+            "schema": {
+              "default": 20,
+              "maximum": 1000,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Return results after this cursor. Use `page_info.end_cursor` from the previous response to fetch the next page.",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "properties": {
+                        "breakdown_by": {
+                          "description": "What each row is, or `null` for one total row per window.",
+                          "example": "revenue_line",
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "columns": {
+                          "description": "The breakdown first, then each requested column, in row order.",
+                          "items": {
+                            "example": {
+                              "key": "revenue_line",
+                              "name": "Revenue line",
+                              "type": "property"
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "data_as_of": {
+                          "description": "When the data was read, as an ISO 8601 timestamp.",
+                          "example": "2026-01-01T12:00:00.000Z",
+                          "type": "string"
+                        },
+                        "report": {
+                          "description": "The report's key.",
+                          "example": "partner_revenue_lines",
+                          "type": "string"
+                        },
+                        "reports": {
+                          "description": "One entry per requested window, in request order. Rows line up by index across entries.",
+                          "items": {
+                            "properties": {
+                              "rows": {
+                                "description": "The page of rows. Only the requested columns are present.",
+                                "items": {
+                                  "properties": {
+                                    "commission": {
+                                      "description": "Commission paid on the line's income source in the window. `null` while a day of the window is still being read. Also `null` on a line with no known income source.",
+                                      "oneOf": [
+                                        {
+                                          "$ref": "#/components/schemas/Money"
+                                        },
+                                        {
+                                          "type": "null"
+                                        }
+                                      ]
+                                    },
+                                    "income_source": {
+                                      "nullable": true,
+                                      "properties": {
+                                        "id": {
+                                          "description": "The income source that pays commission on this line. `null` when no source pays on it.",
+                                          "example": "sales",
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "description": "Display name.",
+                                          "example": "Sales",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id",
+                                        "name"
+                                      ],
+                                      "type": "object"
+                                    },
+                                    "paid": {
+                                      "description": "`1` when the line's income source paid commission in the window, else `0`. `null` while a day of the window is still being read.",
+                                      "example": 1,
+                                      "nullable": true,
+                                      "type": "integer"
+                                    },
+                                    "revenue_line": {
+                                      "nullable": true,
+                                      "properties": {
+                                        "id": {
+                                          "description": "The ledger category of the revenue line.",
+                                          "example": "payment_processing_percentage_fee",
+                                          "type": "string"
+                                        },
+                                        "name": {
+                                          "description": "Display name.",
+                                          "example": "Payment processing percentage fee",
+                                          "type": "string"
+                                        }
+                                      },
+                                      "required": [
+                                        "id",
+                                        "name"
+                                      ],
+                                      "type": "object"
+                                    }
+                                  },
+                                  "type": "object"
+                                },
+                                "type": "array"
+                              },
+                              "window": {
+                                "description": "The window that answered, with the bounds of its data.",
+                                "example": {
+                                  "as_of": null,
+                                  "from": "2026-01-01T12:00:00.000Z",
+                                  "key": "2026-06-01..2026-06-30",
+                                  "kind": "range",
+                                  "time_zone": "Etc/UTC",
+                                  "to": "2026-01-01T12:00:00.000Z"
+                                },
+                                "type": "object"
+                              }
+                            },
+                            "required": [
+                              "window",
+                              "rows"
+                            ],
+                            "type": "object"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "required": [
+                        "report",
+                        "breakdown_by",
+                        "columns",
+                        "reports",
+                        "data_as_of"
+                      ],
+                      "type": "object"
+                    },
+                    "page_info": {
+                      "properties": {
+                        "end_cursor": {
+                          "description": "Pass as `after` for the next page.",
+                          "example": null,
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "has_next_page": {
+                          "description": "Whether more rows follow this page.",
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "has_previous_page": {
+                          "description": "Whether rows precede this page.",
+                          "example": false,
+                          "type": "boolean"
+                        },
+                        "start_cursor": {
+                          "description": "The cursor of the first row on this page.",
+                          "example": "MQ",
+                          "nullable": true,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "end_cursor",
+                        "start_cursor",
+                        "has_next_page",
+                        "has_previous_page"
+                      ],
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "page_info"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Each revenue line's figures for each requested window, with rows in the same order in every window."
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "The window is longer than 366 days."
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "The caller cannot read the partner business."
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "company:basic:read"
+            ]
+          }
+        ],
+        "summary": "Retrieve Partner Revenue Lines",
         "tags": [
           "Stats"
         ],
