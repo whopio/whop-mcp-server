@@ -5,6 +5,7 @@ import {
 	validateToolArgs,
 } from "./builtin-tool.ts";
 import { WhopMcpError } from "./errors.ts";
+import type { McpRequestContext } from "./mcp-context.ts";
 
 export const SEARCH_OPERATIONS_TOOL = "search_operations";
 export const DESCRIBE_OPERATION_TOOL = "describe_operation";
@@ -18,6 +19,7 @@ export type OperationCallVia =
 export type OperationExecutor = (
 	operation: OperationDef,
 	args: Record<string, unknown>,
+	mcpRequestContext: McpRequestContext | undefined,
 	via: OperationCallVia,
 ) => Promise<unknown>;
 
@@ -272,10 +274,7 @@ const DESCRIBE_DEFINITION: ToolDefinition = {
 	},
 };
 
-function callDefinition(
-	via: OperationCallVia,
-	withIntentContext: (schema: JsonSchema) => JsonSchema,
-): ToolDefinition {
+function callDefinition(via: OperationCallVia): ToolDefinition {
 	const write = via === CALL_WRITE_OPERATION_TOOL;
 	const properties: Record<string, JsonSchema> = {
 		name: NAME_PROPERTY,
@@ -297,12 +296,12 @@ function callDefinition(
 		description: write
 			? "Runs a Whop operation that creates, changes or deletes something, found with search_operations. Only accepts operations whose read_only is false."
 			: "Runs a read-only Whop operation found with search_operations. Only accepts operations whose read_only is true.",
-		inputSchema: withIntentContext({
+		inputSchema: {
 			type: "object",
 			properties,
 			required: ["name"],
 			additionalProperties: false,
-		}) as ToolDefinition["inputSchema"],
+		},
 		annotations: write
 			? {
 					title: "Run a Whop write operation",
@@ -324,7 +323,6 @@ function callDefinition(
 export function operationTools(
 	visibleOperations: OperationDef[],
 	execute: OperationExecutor,
-	withIntentContext: (schema: JsonSchema) => JsonSchema,
 	inputSchemaFor: (operation: OperationDef) => JsonSchema,
 	options: { readOnly?: boolean } = {},
 ): BuiltinTool[] {
@@ -351,11 +349,12 @@ export function operationTools(
 	}
 
 	function callTool(via: OperationCallVia): BuiltinTool {
-		const definition = callDefinition(via, withIntentContext);
+		const definition = callDefinition(via);
 		const write = via === CALL_WRITE_OPERATION_TOOL;
 		return {
 			definition,
-			call: async (args) => {
+			asksForIntent: true,
+			call: async (args, _signal, mcpRequestContext) => {
 				validateToolArgs(definition, args);
 				const operation = lookup(args.name as string);
 				if (operation.annotations.readOnlyHint === write) {
@@ -370,13 +369,17 @@ export function operationTools(
 				const {
 					name: _name,
 					arguments: operationArgs,
-					...context
+					...callOptions
 				} = args as Record<string, unknown> & {
 					arguments?: Record<string, unknown>;
 				};
 				const result = await execute(
 					operation,
-					{ ...operationArgs, ...context },
+					{ ...operationArgs, ...callOptions },
+					mcpRequestContext && {
+						...mcpRequestContext,
+						toolName: operation.toolName,
+					},
 					via,
 				);
 				return JSON.stringify(result, null, 2);

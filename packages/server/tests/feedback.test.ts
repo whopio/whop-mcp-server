@@ -1,12 +1,14 @@
 import type { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
-import { describe, expect, it, vi } from "vitest";
+import { Buffer } from "node:buffer";
+import { describe, expect, it } from "vitest";
 import {
 	createStreamableHttpHandler,
 	HttpAuthError,
 } from "../src/adapters/streamable-http.ts";
-import type { FeedbackSink } from "../src/runtime/feedback.ts";
+import type { SurfaceName } from "../src/policy/surfaces.ts";
 import {
 	buildRealRegistry,
+	fakeFetch,
 	principalFixture,
 	staticCredential,
 } from "./helpers.ts";
@@ -17,13 +19,21 @@ interface ToolResponse {
 	result: { isError?: boolean; content: { text: string }[] };
 }
 
+function api(body: unknown = { id: "fbk_saved" }) {
+	return fakeFetch(() => ({ status: 202, body }));
+}
+
 function handler(
-	feedbackSink?: FeedbackSink,
+	whopApi?: ReturnType<typeof api>,
 	accountId: string | null = "biz_boundAccount",
+	surface?: SurfaceName,
 ) {
 	return createStreamableHttpHandler({
 		registry,
-		feedbackSink,
+		feedback: whopApi !== undefined,
+		fetch: whopApi?.fetch,
+		baseUrl: "https://api.whop.test/api/v1",
+		surface,
 		authenticator: {
 			async authenticate(request) {
 				if (request.headers.get("Authorization") !== "Bearer test-token") {
@@ -52,10 +62,25 @@ function request(method: string, params: Record<string, unknown> = {}) {
 	});
 }
 
+const INTENT = {
+	intent: "Why did my product fail to publish?",
+	intent_id: "123e4567-e89b-42d3-a456-426614174000",
+};
+
+function toolCall(
+	params: { name: string; arguments: Record<string, unknown> },
+	intent: Record<string, unknown> = INTENT,
+) {
+	return request("tools/call", {
+		...params,
+		arguments: { ...intent, ...params.arguments },
+	});
+}
+
 describe("feedback tools over authenticated HTTP", () => {
-	it("advertises both write tools only when a feedback sink is configured", async () => {
+	it("advertises both write tools only when feedback is enabled", async () => {
 		for (const enabled of [true, false]) {
-			const response = await handler(enabled ? { record: vi.fn() } : undefined)(
+			const response = await handler(enabled ? api() : undefined)(
 				request("tools/list"),
 			);
 			const { result } = (await response.json()) as { result: ListToolsResult };
@@ -67,7 +92,11 @@ describe("feedback tools over authenticated HTTP", () => {
 					expect(tool).toBeUndefined();
 					continue;
 				}
-				expect(tool?.inputSchema.required).toEqual(["content"]);
+				expect(tool?.inputSchema.required).toEqual([
+					"content",
+					"intent",
+					"intent_id",
+				]);
 				expect(tool?.annotations).toMatchObject({
 					readOnlyHint: false,
 					destructiveHint: false,
@@ -78,11 +107,11 @@ describe("feedback tools over authenticated HTTP", () => {
 	});
 
 	it.each(["report_feedback", "ask_question"])(
-		"records %s with trusted identity and returns a receipt without an answer",
+		"sends %s to the Whop API with the user's intent and returns a receipt without an answer",
 		async (name) => {
-			const record = vi.fn().mockResolvedValue("fbk_saved");
-			const response = await handler({ record })(
-				request("tools/call", {
+			const whopApi = api();
+			const response = await handler(whopApi)(
+				toolCall({
 					name,
 					arguments: {
 						content: "The API returned a confusing error.",
@@ -100,20 +129,33 @@ describe("feedback tools over authenticated HTTP", () => {
 			expect(receipt.message).toContain(
 				name === "ask_question" ? "No answer" : "No follow-up",
 			);
-			expect(record).toHaveBeenCalledExactlyOnceWith({
-				id: expect.any(String),
-				createdAt: expect.any(String),
-				kind: name,
-				userId: "user_test1",
-				accountId: "biz_boundAccount",
-				clientName: "test-client",
-				pluginSource: "test-plugin",
-				fields: {
-					content: "The API returned a confusing error.",
-					intention: "Create a product",
-					tool: "products_create",
-					modelType: "test model",
+			expect(whopApi.requests).toHaveLength(1);
+			const [sent] = whopApi.requests;
+			expect(sent).toMatchObject({
+				url: "https://api.whop.test/api/v1/feedback_submissions",
+				method: "POST",
+				redirect: "manual",
+				headers: { "idempotency-key": expect.any(String) },
+				body: {
+					account_id: "biz_boundAccount",
+					source: `mcp_${name}`,
+					content:
+						"The API returned a confusing error.\n\nintention: Create a product\n\ntool: products_create\n\nmodelType: test model\n\nclient: test-client\n\nplugin: test-plugin",
 				},
+			});
+			expect(
+				JSON.parse(
+					Buffer.from(sent.headers["x-whop-mcp-context"], "base64url").toString(
+						"utf8",
+					),
+				),
+			).toMatchObject({
+				intent: INTENT.intent,
+				intent_id: INTENT.intent_id,
+				tool_name: name,
+				tool_call_id: expect.stringMatching(
+					/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+				),
 			});
 		},
 	);
@@ -121,43 +163,38 @@ describe("feedback tools over authenticated HTTP", () => {
 	it.each(["report_feedback", "ask_question"])(
 		"uses explicit account context for %s",
 		async (name) => {
-			const record = vi.fn().mockResolvedValue("fbk_saved");
-			await handler({ record })(
-				request("tools/call", {
+			const whopApi = api();
+			await handler(whopApi)(
+				toolCall({
 					name,
 					arguments: { content: "A problem", account_id: "biz_resource" },
 				}),
 			);
-			expect(record).toHaveBeenCalledWith(
-				expect.objectContaining({
-					accountId: "biz_resource",
-					userId: "user_test1",
-					fields: { content: "A problem" },
-				}),
-			);
+			expect(whopApi.requests[0].body).toMatchObject({
+				account_id: "biz_resource",
+				content: "A problem\n\nclient: test-client\n\nplugin: test-plugin",
+			});
 		},
 	);
 
 	it("allows accountless submissions", async () => {
-		const record = vi.fn().mockResolvedValue("fbk_saved");
+		const whopApi = api();
 		await handler(
-			{ record },
+			whopApi,
 			null,
 		)(
-			request("tools/call", {
+			toolCall({
 				name: "ask_question",
 				arguments: { content: "A question" },
 			}),
 		);
-		expect(record).toHaveBeenCalledWith(
-			expect.objectContaining({ accountId: null }),
-		);
+		expect(whopApi.requests[0].body).not.toHaveProperty("account_id");
 	});
 
-	it("records severity and workaround and scrubs recognized credentials from every supplied field", async () => {
-		const record = vi.fn().mockResolvedValue("fbk_saved");
-		await handler({ record })(
-			request("tools/call", {
+	it("sends severity and workaround and scrubs recognized credentials from every supplied field", async () => {
+		const whopApi = api();
+		await handler(whopApi)(
+			toolCall({
 				name: "report_feedback",
 				arguments: {
 					content: "Request with Bearer abc.def failed",
@@ -166,10 +203,9 @@ describe("feedback tools over authenticated HTTP", () => {
 				},
 			}),
 		);
-		expect(record.mock.calls[0][0].fields).toEqual({
-			content: "Request with Bearer [redacted] failed",
-			severity: "degraded",
-			workaround: "Tried [redacted] instead",
+		expect(whopApi.requests[0].body).toMatchObject({
+			content:
+				"Request with Bearer [redacted] failed\n\nseverity: degraded\n\nworkaround: Tried [redacted] instead\n\nclient: test-client\n\nplugin: test-plugin",
 		});
 	});
 
@@ -189,41 +225,82 @@ describe("feedback tools over authenticated HTTP", () => {
 		{ content: "Valid", userId: "user_spoofed" },
 		{ content: "Valid", accountId: "biz_spoofed" },
 		{ content: "Valid", workaround: " " },
-	])("rejects invalid or spoofed fields before recording: %j", async (args) => {
-		const record = vi.fn();
-		const response = await handler({ record })(
-			request("tools/call", { name: "report_feedback", arguments: args }),
+	])("rejects invalid or spoofed fields before sending: %j", async (args) => {
+		const whopApi = api();
+		const response = await handler(whopApi)(
+			toolCall({ name: "report_feedback", arguments: args }),
 		);
 		const { result } = (await response.json()) as ToolResponse;
 		expect(result.isError).toBe(true);
 		expect(JSON.parse(result.content[0].text).error.code).toBe("invalid_input");
-		expect(record).not.toHaveBeenCalled();
+		expect(whopApi.requests).toHaveLength(0);
 	});
 
-	it("requires authentication before recording", async () => {
-		const record = vi.fn();
-		const input = request("tools/call", {
+	it.each([
+		{},
+		{ intent: INTENT.intent },
+		{ intent_id: INTENT.intent_id },
+		{ intent: " ", intent_id: INTENT.intent_id },
+		{ intent: INTENT.intent, intent_id: "not-a-uuid" },
+	])("requires the user's intent before sending: %j", async (intent) => {
+		const whopApi = api();
+		const response = await handler(whopApi)(
+			toolCall(
+				{ name: "report_feedback", arguments: { content: "A real issue" } },
+				intent,
+			),
+		);
+		const { result } = (await response.json()) as ToolResponse;
+		expect(result.isError).toBe(true);
+		expect(JSON.parse(result.content[0].text).error.code).toBe("invalid_input");
+		expect(whopApi.requests).toHaveLength(0);
+	});
+
+	it("asks ChatGPT for no intent and sends no context", async () => {
+		const whopApi = api();
+		const chatgpt = handler(whopApi, "biz_boundAccount", "chatgpt");
+		const listed = (await (await chatgpt(request("tools/list"))).json()) as {
+			result: ListToolsResult;
+		};
+		const tool = listed.result.tools.find(
+			(tool: { name: string }) => tool.name === "report_feedback",
+		);
+		expect(tool?.inputSchema.required).toEqual(["content"]);
+		expect(tool?.inputSchema.properties).not.toHaveProperty("intent");
+
+		const response = await chatgpt(
+			request("tools/call", {
+				name: "report_feedback",
+				arguments: { content: "A real issue" },
+			}),
+		);
+		const { result } = (await response.json()) as ToolResponse;
+		expect(result.isError).not.toBe(true);
+		expect(whopApi.requests[0].headers).not.toHaveProperty(
+			"x-whop-mcp-context",
+		);
+	});
+
+	it("requires authentication before sending", async () => {
+		const whopApi = api();
+		const input = toolCall({
 			name: "ask_question",
 			arguments: { content: "How does this work?" },
 		});
 		input.headers.delete("Authorization");
-		expect((await handler({ record })(input)).status).toBe(401);
-		expect(record).not.toHaveBeenCalled();
+		expect((await handler(whopApi)(input)).status).toBe(401);
+		expect(whopApi.requests).toHaveLength(0);
 	});
 
-	it("does not claim success or expose sink errors when recording fails", async () => {
-		const record = vi
-			.fn()
-			.mockRejectedValue(new Error("private storage credentials"));
-		const response = await handler({ record })(
-			request("tools/call", {
+	it("does not claim success without a feedback receipt", async () => {
+		const response = await handler(api({}))(
+			toolCall({
 				name: "ask_question",
 				arguments: { content: "How does this work?" },
 			}),
 		);
 		const { result } = (await response.json()) as ToolResponse;
 		expect(result.isError).toBe(true);
-		expect(result.content[0].text).not.toContain("private storage credentials");
 		expect(JSON.parse(result.content[0].text).error.code).toBe(
 			"internal_error",
 		);
@@ -231,7 +308,7 @@ describe("feedback tools over authenticated HTTP", () => {
 
 	it("rejects direct calls when the tools are not configured", async () => {
 		const response = await handler()(
-			request("tools/call", {
+			toolCall({
 				name: "report_feedback",
 				arguments: { content: "A real issue" },
 			}),

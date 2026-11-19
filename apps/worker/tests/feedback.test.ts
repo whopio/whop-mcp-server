@@ -3,7 +3,6 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 vi.mock("cloudflare:workers", () => ({ DurableObject: class {} }));
 
 const { createMcpApiHandler } = await import("../src/mcp-handler.ts");
-import { ApiFeedbackSink } from "../src/feedback.ts";
 import type { Env, WhopGrantProps } from "../src/types.ts";
 
 afterEach(() => {
@@ -51,6 +50,8 @@ describe("hosted MCP feedback submissions", () => {
 							arguments: {
 								content: "The tool documentation is unclear.",
 								account_id: "biz_resource",
+								intent: "Why won't my product publish?",
+								intent_id: "123e4567-e89b-42d3-a456-426614174000",
 							},
 						},
 					}),
@@ -69,9 +70,23 @@ describe("hosted MCP feedback submissions", () => {
 			expect(url.toString()).toBe(
 				"https://api.whop.test/api/v1/feedback_submissions",
 			);
-			expect(init.headers).toMatchObject({
+			const headers = init.headers as Record<string, string>;
+			expect(headers).toMatchObject({
 				Authorization: "Bearer private-access-token",
 				"Idempotency-Key": expect.any(String),
+				"x-whop-mcp-client-name": "Test Client",
+			});
+			const context = JSON.parse(
+				atob(
+					headers["X-Whop-MCP-Context"].replace(/-/g, "+").replace(/_/g, "/"),
+				),
+			);
+			expect(context).toMatchObject({
+				version: 1,
+				intent: "Why won't my product publish?",
+				intent_id: "123e4567-e89b-42d3-a456-426614174000",
+				tool_name: name,
+				tool_call_id: expect.any(String),
 			});
 			const event = JSON.parse(init.body as string);
 			expect(event).toMatchObject({
@@ -84,63 +99,4 @@ describe("hosted MCP feedback submissions", () => {
 			expect(JSON.stringify(event)).not.toContain("private-refresh-token");
 		},
 	);
-});
-
-const submission = {
-	id: "test-receipt",
-	createdAt: new Date().toISOString(),
-	kind: "report_feedback" as const,
-	accountId: null,
-	fields: { content: "Test" },
-};
-
-it.each([301, 302, 307, 308, 400, 401, 429, 500])(
-	"rejects an unsuccessful submission response (%s)",
-	async (status) => {
-		vi.stubGlobal(
-			"fetch",
-			vi.fn().mockResolvedValue(new Response("failure", { status })),
-		);
-		await expect(
-			new ApiFeedbackSink("https://api.whop.test", "token").record(submission),
-		).rejects.toThrow("Feedback submission failed");
-	},
-);
-
-it("rejects success without a feedback receipt", async () => {
-	vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({})));
-	await expect(
-		new ApiFeedbackSink("https://api.whop.test", "token").record(submission),
-	).rejects.toThrow("Invalid feedback receipt");
-});
-
-it("bounds requests and prevents credential forwarding through redirects", async () => {
-	const request = vi.fn().mockRejectedValue(new Error("timeout"));
-	vi.stubGlobal("fetch", request);
-	await expect(
-		new ApiFeedbackSink("https://api.whop.test", "token").record(submission),
-	).rejects.toThrow("timeout");
-	expect(request.mock.calls[0][1]).toMatchObject({
-		redirect: "manual",
-		signal: expect.any(AbortSignal),
-	});
-});
-
-it("keeps optional context in the same readable content field", async () => {
-	const request = vi.fn().mockResolvedValue(Response.json({ id: "fbk_saved" }));
-	vi.stubGlobal("fetch", request);
-	await new ApiFeedbackSink("https://api.whop.test", "token").record({
-		...submission,
-		fields: {
-			content: "Request failed",
-			intention: "Create a product",
-			severity: "blocked",
-			workaround: "Used the dashboard",
-		},
-	});
-	expect(JSON.parse(request.mock.calls[0][1].body)).toEqual({
-		source: "mcp_report_feedback",
-		content:
-			"Request failed\n\nintention: Create a product\n\nseverity: blocked\n\nworkaround: Used the dashboard",
-	});
 });

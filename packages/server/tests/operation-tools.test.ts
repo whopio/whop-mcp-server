@@ -1,5 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { Buffer } from "node:buffer";
 import { describe, expect, it } from "vitest";
 import type { SurfaceName } from "../src/policy/surfaces.ts";
 import type { PrincipalContext } from "../src/policy/types.ts";
@@ -217,6 +218,14 @@ describe("call_read_operation and call_write_operation", () => {
 		});
 		expect(result.isError).toBeFalsy();
 		expect(requests[0]?.url).toContain("/payouts");
+		expect(
+			JSON.parse(
+				Buffer.from(
+					requests[0].headers["x-whop-mcp-context"],
+					"base64url",
+				).toString("utf8"),
+			),
+		).toMatchObject({ intent: INTENT.intent, tool_name: "payouts_list" });
 		expect(auditSink.events.at(-1)).toMatchObject({
 			toolName: "payouts_list",
 			outcome: "executed",

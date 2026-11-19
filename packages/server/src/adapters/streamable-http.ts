@@ -5,7 +5,6 @@ import type { ToolListing } from "../runtime/server.ts";
 import type { CredentialAdapter, PrincipalContext } from "../policy/types.ts";
 import type { AuditSink } from "../safety/audit.ts";
 import { createWhopMcpServer } from "../runtime/server.ts";
-import type { FeedbackSink } from "../runtime/feedback.ts";
 
 /**
  * The hosted adapter's authentication seam. Implementations validate the
@@ -43,7 +42,7 @@ export interface StreamableHttpAdapterOptions {
 	registry: RegistryManifest;
 	authenticator: HttpAuthenticator;
 	auditSink?: AuditSink;
-	feedbackSink?: FeedbackSink;
+	feedback?: boolean;
 	docs?: boolean;
 	fetch?: typeof fetch;
 	baseUrl?: string;
@@ -147,7 +146,7 @@ export function createStreamableHttpHandler(
 			credentialAdapter: auth.credentialAdapter,
 			principal: auth.principal,
 			auditSink: options.auditSink,
-			feedbackSink: options.feedbackSink,
+			feedback: options.feedback,
 			docs: options.docs,
 			fetch: options.fetch,
 			baseUrl: options.baseUrl,

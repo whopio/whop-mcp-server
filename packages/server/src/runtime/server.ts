@@ -34,7 +34,7 @@ import type { BuiltinTool, ToolDefinition } from "./builtin-tool.ts";
 import { chatGptTools } from "./chatgpt-compat.ts";
 import type { McpRequestContext } from "./mcp-context.ts";
 import { docsTools } from "./docs.ts";
-import { feedbackTools, type FeedbackSink } from "./feedback.ts";
+import { feedbackTools } from "./feedback.ts";
 import { type OperationCallVia, operationTools } from "./operation-tools.ts";
 import { getPrompt, listedPrompts } from "./prompts.ts";
 import { listedResources, readResource } from "./resources.ts";
@@ -118,7 +118,7 @@ export interface CreateWhopMcpServerOptions {
 	credentialAdapter: CredentialAdapter;
 	principal: PrincipalContext;
 	auditSink?: AuditSink;
-	feedbackSink?: FeedbackSink;
+	feedback?: boolean;
 	/** Expose docs_search and docs_query. */
 	docs?: boolean;
 	fetch?: typeof fetch;
@@ -376,8 +376,8 @@ export function createWhopMcpServer(
 	// OpenAI allows a brief, task-specific intent field only when it improves
 	// execution. This one is attribution only, so ChatGPT skips it too.
 	const collectsIntent = !reviewedToolsOnly && options.surface !== "chatgpt";
-	const intentSchema = (schema: JsonSchema) =>
-		collectsIntent ? withIntentContext(schema) : schema;
+	const intentSchema = (schema: JsonSchema, asksForIntent: boolean) =>
+		collectsIntent && asksForIntent ? withIntentContext(schema) : schema;
 	const listedOperations = compact
 		? operations
 				.filter((op) => listedOnSurface(op, options.surface))
@@ -404,8 +404,8 @@ export function createWhopMcpServer(
 		...(options.chatGptCompat
 			? chatGptTools(operations, dispatcher, principal, options.surface)
 			: []),
-		...(options.feedbackSink
-			? feedbackTools(options.feedbackSink, principal, {
+		...(options.feedback
+			? feedbackTools(dispatcher, principal, {
 					clientName: options.clientName,
 					pluginSource: options.pluginSource,
 				})
@@ -417,7 +417,6 @@ export function createWhopMcpServer(
 			? operationTools(
 					operations,
 					executeOperation,
-					intentSchema,
 					(operation) => withAccountRequirement(operation, principal),
 					{ readOnly: reviewedToolsOnly },
 				)
@@ -472,6 +471,7 @@ export function createWhopMcpServer(
 					compact
 						? listedInputSchema(op, principal)
 						: toolInputSchema(op, principal),
+					true,
 				) as Record<string, unknown>,
 				annotations: {
 					readOnlyHint:
@@ -490,7 +490,16 @@ export function createWhopMcpServer(
 				},
 			})),
 			...builtins.map((tool) =>
-				listedBuiltin(tool.definition, options.surface),
+				listedBuiltin(
+					{
+						...tool.definition,
+						inputSchema: intentSchema(
+							tool.definition.inputSchema,
+							tool.asksForIntent ?? false,
+						) as ToolDefinition["inputSchema"],
+					},
+					options.surface,
+				),
 			),
 		],
 	}));
@@ -521,61 +530,59 @@ export function createWhopMcpServer(
 	server.setRequestHandler(CallToolRequestSchema, async (request, extra) => {
 		const { name, arguments: rawArgs = {} } = request.params;
 		const builtin = builtinByName.get(name);
-		if (builtin) {
-			try {
+		const operation = builtin ? undefined : byName.get(name);
+		try {
+			const { arguments: args, context } = splitIntent(
+				name,
+				rawArgs,
+				builtin ? builtin.asksForIntent === true : operation !== undefined,
+			);
+			if (builtin) {
 				return {
 					content: [
 						{
 							type: "text" as const,
-							text: await builtin.call(rawArgs, extra.signal),
+							text: await builtin.call(args, extra.signal, context),
 						},
 					],
 				};
-			} catch (error) {
-				return errorContent(
-					error instanceof WhopMcpError
-						? error
-						: new WhopMcpError("internal_error", `${name} failed.`),
-				);
 			}
-		}
-
-		const operation = byName.get(name);
-		if (!operation) {
-			return errorContent(
-				new WhopMcpError(
-					"tool_not_found",
-					`Unknown tool "${name}" for this connection's profile and scopes.`,
-				),
-			);
-		}
-		try {
-			return jsonContent(await executeOperation(operation, rawArgs));
+			if (operation) {
+				return jsonContent(await executeOperation(operation, args, context));
+			}
 		} catch (error) {
 			return errorContent(
 				error instanceof WhopMcpError
 					? error
-					: new WhopMcpError("internal_error", "Unexpected server error."),
+					: new WhopMcpError("internal_error", `${name} failed.`),
 			);
 		}
+		return errorContent(
+			new WhopMcpError(
+				"tool_not_found",
+				`Unknown tool "${name}" for this connection's profile and scopes.`,
+			),
+		);
 	});
+
+	function splitIntent(
+		toolName: string,
+		suppliedArgs: Record<string, unknown>,
+		asksForIntent: boolean,
+	): { arguments: Record<string, unknown>; context?: McpRequestContext } {
+		return collectsIntent && asksForIntent
+			? parseIntentContext(toolName, suppliedArgs)
+			: { arguments: suppliedArgs };
+	}
 
 	async function executeOperation(
 		operation: OperationDef,
 		rawArgs: Record<string, unknown>,
+		mcpRequestContext: McpRequestContext | undefined,
 		via?: OperationCallVia,
 	): Promise<unknown> {
-		const intentContext = collectsIntent
-			? parseIntentContext(operation.toolName, rawArgs)
-			: { arguments: rawArgs, context: undefined };
-		if (intentContext instanceof WhopMcpError) throw intentContext;
 		try {
-			return await callOperation(
-				operation,
-				intentContext.arguments,
-				intentContext.context,
-				via,
-			);
+			return await callOperation(operation, rawArgs, mcpRequestContext, via);
 		} catch (error) {
 			const failure =
 				error instanceof WhopMcpError
@@ -646,12 +653,10 @@ export function createWhopMcpServer(
 function parseIntentContext(
 	toolName: string,
 	suppliedArgs: Record<string, unknown>,
-):
-	| { arguments: Record<string, unknown>; context: McpRequestContext }
-	| WhopMcpError {
+): { arguments: Record<string, unknown>; context: McpRequestContext } {
 	const intent = suppliedArgs[INTENT_FIELD];
 	if (typeof intent !== "string" || intent.trim().length === 0) {
-		return new WhopMcpError(
+		throw new WhopMcpError(
 			"invalid_input",
 			`${toolName} requires a non-empty intent containing the user's original request.`,
 		);
@@ -661,7 +666,7 @@ function parseIntentContext(
 		typeof suppliedIntentId !== "string" ||
 		!UUID_REGEX.test(suppliedIntentId)
 	) {
-		return new WhopMcpError(
+		throw new WhopMcpError(
 			"invalid_input",
 			`${toolName} requires intent_id to be a UUID reused across the current user turn.`,
 		);
@@ -784,7 +789,7 @@ function buildInstructions(
 			: "Pick the context per call from what the user asks for: pass account_id/company_id when they mean a specific business (find it with accounts_list if they name it), and pass no account or user filter for questions about the user themselves, like the memberships they own across all of Whop.",
 		...(collectsIntent
 			? [
-					"For each user message, generate one UUID intent_id and reuse it for every operation tool call made to fulfill that message. Copy the original user request into intent. Both fields are attribution metadata and are not sent as Whop API arguments.",
+					"For each user message, generate one UUID intent_id and reuse it for every tool call that asks for intent_id while fulfilling that message. Copy the original user request into intent. Both fields are attribution metadata and are not sent as Whop API arguments.",
 				]
 			: []),
 		...builtins.flatMap((tool) => tool.instruction ?? []),

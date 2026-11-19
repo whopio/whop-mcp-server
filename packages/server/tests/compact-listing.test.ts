@@ -54,7 +54,7 @@ async function connect(
 		fetch: options.fetch ?? fakeFetch().fetch,
 		docs: true,
 		chatGptCompat: true,
-		feedbackSink: { record: async () => "fb_test" },
+		feedback: true,
 		baseUrl: "https://api.whop.test/api/v1",
 	});
 	const client = new Client({ name: "test-client", version: "1.0.0" });

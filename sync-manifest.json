@@ -1,10 +1,10 @@
 {
   "formatVersion": 1,
   "sourceRepository": "whopio/whop-monorepo",
-  "sourceCommit": "92f95354883aff415b31c31265d835cab83b9fab",
+  "sourceCommit": "541aa5771250a5821c03f6ba72b2090dde359027",
   "openapiSha256": "22292029d15aac6846c015aee91022d1ba85afe9171bb903c8eef289de91aa2a",
   "scopeDefinitionsSha256": "6d032dc258de04cbb204c31ae7b9301c2cbbb8fdcc5118207ac3b72ac72d10ad",
-  "managedTreeSha256": "a4b79e6374204baa526827e00afb36bc4827e41eeb855e4a93188780230cf950",
+  "managedTreeSha256": "e597e6db43d5dc1444c33c3e0043a576e9ae63ccb94fae19b0452c1151dc4e67",
   "lockfileSha256": "cbe1e018ccf4c322feeddf361fda148b4aeb90e713460a96e953947949ffbff9",
   "managedFiles": [
     ".cursor-plugin/plugin.json",
@@ -21,7 +21,6 @@
     "apps/worker/README.md",
     "apps/worker/package.json",
     "apps/worker/src/authorize.ts",
-    "apps/worker/src/feedback.ts",
     "apps/worker/src/grant.ts",
     "apps/worker/src/html.ts",
     "apps/worker/src/index.ts",

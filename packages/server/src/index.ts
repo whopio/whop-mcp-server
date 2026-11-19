@@ -12,4 +12,3 @@ export {
 	type WhopMcpServer,
 } from "./runtime/server.ts";
 export type { AuditEvent, AuditSink } from "./safety/audit.ts";
-export type { FeedbackSink, FeedbackSubmission } from "./runtime/feedback.ts";

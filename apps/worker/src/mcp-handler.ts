@@ -15,7 +15,6 @@ import {
 	wrongRoute,
 } from "./grant.ts";
 import type { Env } from "./types.ts";
-import { ApiFeedbackSink } from "./feedback.ts";
 
 /**
  * The authenticated MCP handler for one route. workers-oauth-provider has
@@ -79,9 +78,7 @@ export function createMcpApiHandler(surface: SurfaceName = "full") {
 			const handler = createStreamableHttpHandler({
 				registry,
 				auditSink: new StructuredLogAuditSink(),
-				feedbackSink: muse
-					? undefined
-					: new ApiFeedbackSink(env.MCP_WHOP_API_ORIGIN, props.whopAccessToken),
+				feedback: !muse,
 				docs: true,
 				baseUrl: `${env.MCP_WHOP_API_ORIGIN}/api/v1`,
 				requireHttps: env.MCP_BASE_URL.startsWith("https://"),

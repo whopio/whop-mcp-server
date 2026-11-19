@@ -183,7 +183,6 @@ export class Dispatcher {
 		}
 
 		const operationSnapshot = registered.operation;
-		const request = registered.request;
 		if (!operationVisibleToPrincipal(operationSnapshot, principal)) {
 			throw new WhopMcpError(
 				"missing_scope",
@@ -191,6 +190,68 @@ export class Dispatcher {
 			);
 		}
 
+		const {
+			status,
+			requestId,
+			body: parsed,
+		} = await this.send(
+			operationSnapshot.toolName,
+			registered.request,
+			overrides,
+		);
+
+		this.enforceResponseOwnership(
+			operationSnapshot,
+			parsed,
+			principal,
+			requestId,
+		);
+
+		if (
+			["Apps", "Cards"].includes(operationSnapshot.tag) &&
+			parsed !== null &&
+			typeof parsed === "object"
+		) {
+			const resources =
+				"data" in parsed && Array.isArray(parsed.data) ? parsed.data : [parsed];
+			for (const resource of resources) {
+				if (
+					resource !== null &&
+					typeof resource === "object" &&
+					"secrets" in resource &&
+					resource.secrets !== null
+				) {
+					resource.secrets = "[redacted]";
+				}
+			}
+		}
+
+		return { status, requestId, body: parsed };
+	}
+
+	async postUnlisted(
+		toolName: string,
+		path: string,
+		body: Record<string, unknown>,
+		{ idempotencyKey, ...overrides }: DispatchOverrides = {},
+	): Promise<{ status: number; requestId?: string; body: unknown }> {
+		return this.send(
+			toolName,
+			{
+				method: "POST",
+				url: `${this.options.baseUrl.replace(/\/$/, "")}${path}`,
+				body,
+				idempotencyKey,
+			},
+			overrides,
+		);
+	}
+
+	private async send(
+		toolName: string,
+		request: Omit<PreparedDispatch, "args">,
+		overrides: Omit<DispatchOverrides, "idempotencyKey">,
+	): Promise<{ status: number; requestId?: string; body: unknown }> {
 		const { url, body, idempotencyKey } = request;
 
 		const { token } = await this.options.credentialAdapter.getCredential();
@@ -234,7 +295,7 @@ export class Dispatcher {
 			if (controller.signal.aborted) {
 				throw new WhopMcpError(
 					"timeout",
-					`${operationSnapshot.toolName} timed out after ${this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS}ms.`,
+					`${toolName} timed out after ${this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS}ms.`,
 				);
 			}
 			throw new WhopMcpError(
@@ -252,7 +313,7 @@ export class Dispatcher {
 			await response.body?.cancel().catch(() => {});
 			throw new WhopMcpError(
 				"upstream_error",
-				`${operationSnapshot.toolName} received an unexpected 3xx response from the Whop API.`,
+				`${toolName} received an unexpected 3xx response from the Whop API.`,
 				{ status: response.status, requestId },
 			);
 		}
@@ -266,7 +327,7 @@ export class Dispatcher {
 			if (controller.signal.aborted) {
 				throw new WhopMcpError(
 					"timeout",
-					`${operationSnapshot.toolName} timed out after ${this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS}ms while reading the response.`,
+					`${toolName} timed out after ${this.options.timeoutMs ?? DEFAULT_TIMEOUT_MS}ms while reading the response.`,
 					{ status: response.status, requestId },
 				);
 			}
@@ -284,7 +345,7 @@ export class Dispatcher {
 		if (text.length > maxBytes) {
 			throw new WhopMcpError(
 				"response_too_large",
-				`${operationSnapshot.toolName} returned ${text.length} characters (limit ${maxBytes}). Narrow the request with filters or pagination.`,
+				`${toolName} returned ${text.length} characters (limit ${maxBytes}). Narrow the request with filters or pagination.`,
 				{ status: response.status, requestId },
 			);
 		}
@@ -298,32 +359,6 @@ export class Dispatcher {
 
 		if (!response.ok) {
 			throw normalizeUpstreamError(response.status, parsed, requestId);
-		}
-
-		this.enforceResponseOwnership(
-			operationSnapshot,
-			parsed,
-			principal,
-			requestId,
-		);
-
-		if (
-			["Apps", "Cards"].includes(operationSnapshot.tag) &&
-			parsed !== null &&
-			typeof parsed === "object"
-		) {
-			const resources =
-				"data" in parsed && Array.isArray(parsed.data) ? parsed.data : [parsed];
-			for (const resource of resources) {
-				if (
-					resource !== null &&
-					typeof resource === "object" &&
-					"secrets" in resource &&
-					resource.secrets !== null
-				) {
-					resource.secrets = "[redacted]";
-				}
-			}
 		}
 
 		return { status: response.status, requestId, body: parsed };

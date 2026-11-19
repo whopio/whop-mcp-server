@@ -4,7 +4,9 @@ import {
 	type ToolDefinition,
 	validateToolArgs,
 } from "./builtin-tool.ts";
+import type { Dispatcher } from "./dispatcher.ts";
 import { redactText } from "./errors.ts";
+import type { McpRequestContext } from "./mcp-context.ts";
 
 export interface FeedbackSubmission {
 	id: string;
@@ -26,31 +28,28 @@ const commonProperties = {
 		type: "string",
 		maxLength: 255,
 		pattern: "^biz_[A-Za-z0-9]+$",
-		description:
-			"The account ID (biz_...) for the affected resource or request. Defaults to the current account context when available. Omit when no specific account is known.",
+		description: "The affected account (biz_...); defaults to the current one.",
 	},
 	intention: {
 		type: "string",
 		minLength: 1,
 		maxLength: 2000,
 		pattern: "\\S",
-		description:
-			"What you were trying to accomplish when this came up, in one short sentence.",
+		description: "What you were trying to do, in one short sentence.",
 	},
 	tool: {
 		type: "string",
 		minLength: 1,
 		maxLength: 200,
 		pattern: "\\S",
-		description:
-			"The affected MCP tool's exact name, if a single tool is involved.",
+		description: "The affected tool's exact name, if one tool is involved.",
 	},
 	modelType: {
 		type: "string",
 		minLength: 1,
 		maxLength: 200,
 		pattern: "\\S",
-		description: "Your model and host product, if known. Omit when unknown.",
+		description: "Your model and host product, if known.",
 	},
 };
 
@@ -60,7 +59,7 @@ function contentProperty(example: string) {
 		minLength: 1,
 		maxLength: 12000,
 		pattern: "\\S",
-		description: `A short note a Whop engineer can understand in one read. Lead with the problem or question in one plain sentence, say what you expected, and include only the IDs needed to reproduce it. Mention what you already ruled out only when it changes where to look. Example: "${example}" Remove secrets and personal or payment data before submitting.`,
+		description: `One plain note: the problem or question, what you expected, and only the IDs needed to reproduce it. Say what you ruled out only if it changes where to look. Example: "${example}"`,
 	};
 }
 
@@ -75,27 +74,26 @@ export const FEEDBACK_TOOLS: ToolDefinition[] = [
 	{
 		name: "report_feedback",
 		description:
-			"Report a concrete problem or friction with Whop or these tools for internal review: an incorrect result, confusing error, documentation gap, or unexpected API behavior. Whop engineers read these directly, so keep each field brief and plain. Returns a submission receipt only; no follow-up will reach this session. Submit only real observations, one per call. Never include credentials, secrets, personal data, or payment details.",
+			"Report a problem with Whop or these tools (wrong result, confusing error, docs gap, odd API behavior) for Whop engineers to review. One per call. Returns a receipt only; nothing comes back. Never include credentials, secrets, personal data or payment details.",
 		inputSchema: {
 			type: "object",
 			properties: {
 				content: contentProperty(
-					"products_update cannot set the post-checkout redirect URL, so I could not change where buyers land after buying prod_abc123. I expected a redirect_url field like the one checkout-configurations_create accepts.",
+					"products_update cannot set a post-checkout redirect for prod_abc123, though checkout-configurations_create has redirect_url.",
 				),
 				...commonProperties,
 				severity: {
 					type: "string",
 					enum: ["blocked", "degraded", "cosmetic"],
 					description:
-						"Impact on your task: blocked means you could not complete it, degraded means you needed a slower or awkward path, cosmetic means it worked but was confusing.",
+						"Impact: blocked (could not finish), degraded (needed a slower path) or cosmetic (worked but confusing).",
 				},
 				workaround: {
 					type: "string",
 					minLength: 1,
 					maxLength: 4000,
 					pattern: "\\S",
-					description:
-						"What worked instead, in a sentence or two. Omit if no workaround was found.",
+					description: "What worked instead, if anything.",
 				},
 			},
 			required: ["content"],
@@ -106,12 +104,12 @@ export const FEEDBACK_TOOLS: ToolDefinition[] = [
 	{
 		name: "ask_question",
 		description:
-			"Record a question about Whop you could not answer using the available tools and documentation. This collects gaps for Whop's internal review; it is not a live support or question-answering service. Returns a submission receipt only. No answer will come back now or later in this session: do not wait, poll, or repeat the question expecting an answer. Continue using available documentation and your best judgment. Submit only real unanswered questions. Never include credentials, secrets, personal data, or payment details.",
+			"Record a question about Whop the tools and docs could not answer, for Whop's internal review. Returns a receipt only: no answer will ever come back, so do not wait or ask again. Never include credentials, secrets, personal data or payment details.",
 		inputSchema: {
 			type: "object",
 			properties: {
 				content: contentProperty(
-					"Can a plan's renewal price differ from its initial price for existing members? The plans docs only cover new purchases.",
+					"Can a plan renew at a different price than it started at? The plans docs only cover new purchases.",
 				),
 				...commonProperties,
 			},
@@ -125,19 +123,58 @@ export const FEEDBACK_TOOLS: ToolDefinition[] = [
 type FeedbackAttribution = { clientName?: string; pluginSource?: string };
 
 export function feedbackTools(
-	sink: FeedbackSink,
+	dispatcher: Dispatcher,
 	principal: PrincipalContext,
 	attribution: FeedbackAttribution,
 ): BuiltinTool[] {
 	return FEEDBACK_TOOLS.map((definition) => ({
 		definition,
-		call: async (args) =>
+		asksForIntent: true,
+		call: async (args, _signal, mcpRequestContext) =>
 			JSON.stringify(
-				await submitFeedback(definition, args, principal, sink, attribution),
+				await submitFeedback(
+					definition,
+					args,
+					principal,
+					{
+						record: (submission) =>
+							postFeedback(dispatcher, submission, mcpRequestContext),
+					},
+					attribution,
+				),
 				null,
 				2,
 			),
 	}));
+}
+
+async function postFeedback(
+	dispatcher: Dispatcher,
+	submission: FeedbackSubmission,
+	mcpRequestContext: McpRequestContext | undefined,
+): Promise<string> {
+	const { content, ...fields } = submission.fields;
+	const details = Object.entries({
+		...fields,
+		client: submission.clientName,
+		plugin: submission.pluginSource,
+	})
+		.filter(([, value]) => value !== undefined)
+		.map(([key, value]) => `${key}: ${value}`);
+	const { body } = await dispatcher.postUnlisted(
+		submission.kind,
+		"/feedback_submissions",
+		{
+			account_id: submission.accountId ?? undefined,
+			source: `mcp_${submission.kind}`,
+			content: [content, ...details].join("\n\n"),
+		},
+		{ idempotencyKey: submission.id, mcpRequestContext },
+	);
+	const id = (body as { id?: unknown } | null)?.id;
+	if (typeof id !== "string" || !id.startsWith("fbk_"))
+		throw new Error("Invalid feedback receipt");
+	return id;
 }
 
 export async function submitFeedback(

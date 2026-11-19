@@ -1,6 +1,7 @@
 import type { Tool } from "@modelcontextprotocol/sdk/types.js";
 import type { JsonSchema } from "../registry/types.ts";
 import { WhopMcpError } from "./errors.ts";
+import type { McpRequestContext } from "./mcp-context.ts";
 import { validateAgainstSchema } from "./validate.ts";
 
 export type ToolDefinition = Tool & {
@@ -10,7 +11,12 @@ export type ToolDefinition = Tool & {
 export interface BuiltinTool {
 	definition: ToolDefinition;
 	instruction?: string;
-	call(args: Record<string, unknown>, signal?: AbortSignal): Promise<string>;
+	asksForIntent?: boolean;
+	call(
+		args: Record<string, unknown>,
+		signal?: AbortSignal,
+		mcpRequestContext?: McpRequestContext,
+	): Promise<string>;
 }
 
 export function validateToolArgs(
