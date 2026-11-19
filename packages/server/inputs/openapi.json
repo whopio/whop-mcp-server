@@ -52521,6 +52521,378 @@
         ],
         "type": "object"
       },
+      "SuspensionAppeal": {
+        "properties": {
+          "accounts": {
+            "items": {
+              "$ref": "#/components/schemas/SuspensionAppealAccount",
+              "description": "Every account covered by the appeal, with its individual decision and funds release date."
+            },
+            "type": "array"
+          },
+          "created_at": {
+            "description": "When the appeal was signed and submitted, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
+          "decided_at": {
+            "description": "When the decision was recorded, as an ISO 8601 timestamp.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "external_reason": {
+            "deprecated": true,
+            "description": "The same value as `reviewer_note`.\nDEPRECATED: Use `reviewer_note` instead.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "The appeal ID, prefixed inrq_.",
+            "example": "inrq_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "review_due_at": {
+            "description": "When Trust & Safety commits to a decision by, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": "string"
+          },
+          "reviewer_note": {
+            "description": "The note the reviewer wrote to the appellant about the decision. `null` until the appeal is decided, when the reviewer wrote none, or when the appeal covers accounts the viewer can't see.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "description": "The review outcome.",
+            "enum": [
+              "pending",
+              "approved",
+              "denied"
+            ],
+            "example": "pending",
+            "type": "string"
+          },
+          "subject_id": {
+            "description": "The suspended personal account (user_) or business (biz_) this appeal covers.",
+            "example": "biz_xxxxxxxxxxxxxx",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "subject_id",
+          "created_at",
+          "review_due_at",
+          "decided_at",
+          "reviewer_note",
+          "external_reason",
+          "accounts"
+        ],
+        "type": "object"
+      },
+      "SuspensionAppealAccount": {
+        "properties": {
+          "display_name": {
+            "description": "The account name at submission.",
+            "example": "Shine Time Auto Detailing",
+            "type": "string"
+          },
+          "funds_release_at": {
+            "description": "When this suspended account can pay out its balance to its own payout method, as an ISO 8601 timestamp. A dispute can move it later. `null` before submission, when the account is not suspended, and when its suspension holds the balance.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "funds_release_days": {
+            "description": "Whole days from `suspended_at` until this suspended account can pay out its balance. A dispute can move it later. `null` whenever `funds_release_at` is `null`.",
+            "example": null,
+            "type": [
+              "integer",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "The personal account (user_) or business (biz_) covered by the appeal.",
+            "example": "biz_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "status": {
+            "description": "The appeal outcome for this account, or null before submission.",
+            "enum": [
+              "pending",
+              "approved",
+              "denied",
+              null
+            ],
+            "example": "pending",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "suspended_at": {
+            "description": "When this suspension began, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "suspended_at",
+          "status",
+          "funds_release_days",
+          "funds_release_at"
+        ],
+        "type": "object"
+      },
+      "SuspensionAppealContext": {
+        "properties": {
+          "accounts": {
+            "items": {
+              "$ref": "#/components/schemas/SuspensionAppealAccount",
+              "description": "Suspensions included in one submission. Confirm this list when submitting."
+            },
+            "type": "array"
+          },
+          "can_submit": {
+            "description": "Whether the caller can file this appeal.",
+            "example": true,
+            "type": "boolean"
+          },
+          "declaration": {
+            "description": "The statement the appellant signs by submitting.",
+            "example": "I acknowledge that I am the account holder or am authorized to act on behalf of the business included in this appeal. I have read the Whop Terms of Service and confirm that the information and evidence I submit are accurate, complete, and authentic to the best of my knowledge. I authorize Whop to verify this information, including by contacting relevant customers. I understand that this is my final submission regarding this decision, that submitting an appeal does not guarantee reinstatement or the release of funds, and that all funds remain subject to the Terms of Service and Whop’s final decision.\n\nBy submitting this appeal, I accept the Whop Terms of Service.",
+            "type": "string"
+          },
+          "form_subject": {
+            "description": "Business questions apply whenever the submission covers a business.",
+            "enum": [
+              "user",
+              "business"
+            ],
+            "example": "business",
+            "type": "string"
+          },
+          "receipts": {
+            "items": {
+              "$ref": "#/components/schemas/SuspensionAppealPayment",
+              "description": "Recent customers of suspended businesses for optional fulfillment evidence."
+            },
+            "type": "array"
+          },
+          "subject": {
+            "$ref": "#/components/schemas/SuspensionAppealSubject",
+            "description": "The suspended account this context describes."
+          }
+        },
+        "required": [
+          "can_submit",
+          "declaration",
+          "subject",
+          "receipts",
+          "accounts",
+          "form_subject"
+        ],
+        "type": "object"
+      },
+      "SuspensionAppealPayment": {
+        "properties": {
+          "account_name": {
+            "description": "The business that received this payment.",
+            "type": "string"
+          },
+          "customer_email": {
+            "description": "The paying customer's email address.",
+            "type": "string"
+          },
+          "customer_name": {
+            "description": "The paying customer's display name.",
+            "type": "string"
+          },
+          "id": {
+            "description": "The payment ID, prefixed pay_.",
+            "type": "string"
+          },
+          "paid_at": {
+            "description": "When the customer paid, as an ISO 8601 timestamp.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "customer_name",
+          "customer_email",
+          "paid_at",
+          "account_name"
+        ],
+        "type": "object"
+      },
+      "SuspensionAppealSubject": {
+        "properties": {
+          "appeal": {
+            "description": "The appeal already filed for this suspension, if any.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/SuspensionAppeal"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "appeal_deadline": {
+            "description": "The last moment an appeal for this suspension is accepted, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "display_name": {
+            "description": "The personal account email or business name shown to the appellant.",
+            "example": "Shine Time Auto Detailing",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "eligible": {
+            "description": "Whether a new appeal can be filed for this suspension.",
+            "example": true,
+            "type": "boolean"
+          },
+          "funds_explanation": {
+            "description": "What happens to the account's balance during this suspension, written for the account holder in the request's locale. `null` when the account is not suspended, has no balance record, or its balance is not blocked.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "funds_release_at": {
+            "description": "When this suspended account can pay out its balance to its own payout method, as an ISO 8601 timestamp. A dispute can move it later, and a past value means it already can. `null` when the account is not suspended, has no balance record, or its suspension holds the balance.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "The suspended personal account (user_) or business (biz_).",
+            "example": "biz_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "ineligible_reason": {
+            "description": "Why a new appeal cannot be filed, or null when eligible.",
+            "enum": [
+              "not_suspended",
+              "already_submitted",
+              "deadline_passed",
+              null
+            ],
+            "example": "not_suspended",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "platform_name": {
+            "description": "The platform that operates the business and asked for the suspension. `null` unless the code is `platform_request` and the platform is still active.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "suspended_at": {
+            "description": "When the current suspension began, as an ISO 8601 timestamp.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "suspension_code": {
+            "description": "Why the account was suspended. `null` when the suspension has no current code.",
+            "enum": [
+              "fraudulent_activity",
+              "prohibited_business_category",
+              "unverifiable_business",
+              "sanctions",
+              "unsupported_jurisdiction",
+              "prohibited_content",
+              "intellectual_property_infringement",
+              "scamming_or_deceptive_practices",
+              "excessive_dispute_rate",
+              "tax_authority_order",
+              "platform_request",
+              "former_employee",
+              null
+            ],
+            "example": "fraudulent_activity",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "suspension_country": {
+            "description": "Where the account holder's sanctioned location is, as an ISO 3166-1 alpha-2 code. `UA` means one of the sanctioned regions of Ukraine, not the whole country. Null unless the code is `sanctions` and that location is sanctioned.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "suspension_explanation": {
+            "description": "Why the account was suspended, as one sentence written for the account holder in the request's locale. `null` when the account is not suspended. Also `null` for a personal account that has no current `suspension_code` but has a reason on file.",
+            "example": "The email we sent you explains why.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "suspension_reason": {
+            "description": "Sentence shown to the account holder for this suspension, such as `We cannot support your business due to fraudulent activity.` It is in the request's locale. A personal account suspended without a current `suspension_code` can show the reason it was given at the time. `null` when the account is not suspended.",
+            "example": "We cannot support your business.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "display_name",
+          "suspended_at",
+          "suspension_reason",
+          "suspension_explanation",
+          "suspension_code",
+          "platform_name",
+          "suspension_country",
+          "funds_explanation",
+          "funds_release_at",
+          "appeal_deadline",
+          "eligible",
+          "ineligible_reason",
+          "appeal"
+        ],
+        "type": "object"
+      },
       "TaxId": {
         "properties": {
           "type": {
@@ -164788,6 +165160,253 @@
             "type": "string"
           }
         },
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        }
+      ],
+      "x-whop-surface": "native"
+    },
+    "/suspension_appeals": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        }
+      ],
+      "post": {
+        "description": "Submits an appeal for one direct subaccount using a platform account API key with company:suspend_child. First retrieve the appeal context and copy its account IDs and suspension timestamps into the submission. Submitting accepts the declaration returned by the context. Provide written business answers or a private video uploaded through POST /files with the same platform account. Supporting files must also be private and uploaded by that platform. One appeal is accepted per suspension. Submission does not reinstate the account. Use Idempotency-Key to safely retry, and retrieve the context to check the decision.",
+        "operationId": "createSuspensionAppeal",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "account_id": {
+                    "description": "Direct subaccount ID, prefixed biz_. Required for platform API keys. Whop sessions may omit it for a personal appeal.",
+                    "example": "biz_xxxxxxxxxxxxxx",
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "suspension_appeal_submission": {
+                    "properties": {
+                      "accounts": {
+                        "description": "The account IDs and suspension timestamps displayed in the appeal context.",
+                        "items": {
+                          "properties": {
+                            "id": {
+                              "example": "biz_xxxxxxxxxxxxxx",
+                              "type": "string"
+                            },
+                            "suspended_at": {
+                              "example": "2026-01-01T12:00:00.000Z",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "id",
+                            "suspended_at"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "additional_information": {
+                        "description": "Optional context for the reviewer.",
+                        "maxLength": 5000,
+                        "type": "string"
+                      },
+                      "business_description": {
+                        "description": "What the business sells and what customers receive. Optional with a video. Must contain at least 30 words if provided.",
+                        "example": "answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer",
+                        "type": "string"
+                      },
+                      "business_fulfillment": {
+                        "description": "How purchases are delivered and customers supported. Optional with a video. Must contain at least 30 words if provided.",
+                        "example": "answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer",
+                        "type": "string"
+                      },
+                      "business_remediation": {
+                        "description": "Optional explanation of why the suspension should be reconsidered and what changed. Must contain at least 30 words if provided.",
+                        "example": "answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer",
+                        "type": "string"
+                      },
+                      "evidence_file_ids": {
+                        "description": "Private file IDs uploaded by the caller, at most 10 MB each.",
+                        "items": {
+                          "type": "string"
+                        },
+                        "maxItems": 5,
+                        "type": "array"
+                      },
+                      "evidence_links": {
+                        "description": "Supporting website links, with or without http or https. Bare domains use https. Stored for reviewers. Never fetched automatically.",
+                        "items": {
+                          "maxLength": 2048,
+                          "type": "string"
+                        },
+                        "maxItems": 5,
+                        "type": "array"
+                      },
+                      "proofs": {
+                        "description": "Optional fulfillment proofs for receipts returned by the context. May be empty.",
+                        "items": {
+                          "properties": {
+                            "explanation": {
+                              "description": "How that purchase was fulfilled. Must contain at least 25 words.",
+                              "type": "string"
+                            },
+                            "file_ids": {
+                              "description": "Private file IDs supporting this proof.",
+                              "items": {
+                                "type": "string"
+                              },
+                              "maxItems": 3,
+                              "type": "array"
+                            },
+                            "receipt_id": {
+                              "description": "A receipt ID from the context.",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "receipt_id",
+                            "explanation"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "video_file_id": {
+                        "description": "Optional private video file ID, prefixed file_. Upload a recording of at most 50 MB to replace the written answers.",
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "accounts"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "suspension_appeal_submission"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuspensionAppeal"
+                }
+              }
+            },
+            "description": "appeal submitted"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "A subaccount ID is required"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "Authentication required"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "The API key lacks company:suspend_child"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "The account is not a direct subaccount of the platform"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "company:suspend_child"
+            ]
+          }
+        ],
+        "summary": "Submit a Suspension Appeal",
+        "tags": [
+          "Accounts"
+        ],
+        "x-whop-credentials": [
+          "account_api_key"
+        ],
+        "x-whop-docs-subgroup": "Suspension appeals"
+      },
+      "x-whop-surface": "native"
+    },
+    "/suspension_appeals/context": {
+      "get": {
+        "description": "Returns appeal eligibility, the declaration accepted on submission, and optional fulfillment evidence requests for a direct subaccount. Requires a platform account API key with company:suspend_child and account_id. Only the requested subaccount is included. After submission, use this endpoint to read the appeal status and decision.",
+        "operationId": "getSuspensionAppealContext",
+        "parameters": [
+          {
+            "description": "Direct subaccount ID, prefixed biz_. Required for platform API keys. Whop sessions may omit it for a personal appeal.",
+            "in": "query",
+            "name": "account_id",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuspensionAppealContext"
+                }
+              }
+            },
+            "description": "eligibility returned"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "A subaccount ID is required"
+          },
+          "401": {
+            "description": "Authentication required"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "The API key lacks company:suspend_child"
+          },
+          "404": {
+            "description": "business is not visible to the caller"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "company:suspend_child"
+            ]
+          }
+        ],
+        "summary": "Get Appeal Eligibility",
+        "tags": [
+          "Accounts"
+        ],
+        "x-whop-credentials": [
+          "account_api_key"
+        ],
+        "x-whop-docs-subgroup": "Suspension appeals"
+      },
+      "parameters": [
         {
           "$ref": "#/components/parameters/ApiVersionDate"
         }
