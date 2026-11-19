@@ -77713,6 +77713,15 @@
             }
           },
           {
+            "description": "When `true`, only return installations whose app asks for permissions the account hasn't approved yet. When `false`, only return the others.",
+            "in": "query",
+            "name": "requesting_reauthorization",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
             "description": "Number of results to return from the start of the range.",
             "in": "query",
             "name": "first",
@@ -77749,6 +77758,15 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "description": "Set to `true` to return the number of matching results in `page_info.total_count`. Send `first=0` as well to return the count without any results.",
+            "in": "query",
+            "name": "include_total_count",
+            "required": false,
+            "schema": {
+              "type": "boolean"
             }
           },
           {
@@ -77815,13 +77833,26 @@
                             "string",
                             "null"
                           ]
+                        },
+                        "total_count": {
+                          "description": "Number of results matching the filters, across every page. Counting stops at 10,000. `null` when `include_total_count` isn't `true`, or when the count ran out of time.",
+                          "type": [
+                            "integer",
+                            "null"
+                          ]
+                        },
+                        "total_count_capped": {
+                          "description": "Whether counting stopped at the limit. `true` means `total_count` is 10,000 or more.",
+                          "type": "boolean"
                         }
                       },
                       "required": [
                         "end_cursor",
                         "start_cursor",
                         "has_next_page",
-                        "has_previous_page"
+                        "has_previous_page",
+                        "total_count",
+                        "total_count_capped"
                       ],
                       "type": "object"
                     }
