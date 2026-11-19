@@ -8386,7 +8386,7 @@
               "horizontal",
               null
             ],
-            "example": "vertical",
+            "example": "square",
             "type": [
               "string",
               "null"
@@ -8413,6 +8413,14 @@
               "null"
             ]
           },
+          "source_id": {
+            "description": "The file this format was cut out of, prefixed `file_`. Null for the original asset or a format uploaded as it is.",
+            "example": "file_xxxxxxxxxxxxxx",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "url": {
             "description": "CDN url of the asset.",
             "example": "https://whop-assets-example.s3.amazonaws.com/uploads/image/2026-01-01/xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
@@ -8424,6 +8432,7 @@
         },
         "required": [
           "id",
+          "source_id",
           "format",
           "url",
           "media_type",
@@ -68376,6 +68385,11 @@
                           "description": "Uploaded file ID, prefixed `file_`.",
                           "example": "file_xxxxxxxxxxxxxx",
                           "type": "string"
+                        },
+                        "source_id": {
+                          "description": "The uploaded file to cut this format out of, prefixed `file_`. Whop cuts the `crop` window out of it, in that file's pixels, and makes the slot's file. Omit it to use `id` as uploaded.",
+                          "example": "file_xxxxxxxxxxxxxx",
+                          "type": "string"
                         }
                       },
                       "type": "object"
@@ -68716,6 +68730,10 @@
                         "id": {
                           "description": "Uploaded file ID, prefixed `file_`.",
                           "example": "file_xxxxxxxxxxxxxx",
+                          "type": "string"
+                        },
+                        "source_id": {
+                          "description": "The uploaded file to cut this format out of, prefixed `file_`. Whop cuts the `crop` window out of it, in that file's pixels, and makes the slot's file. Omit it to use `id` as uploaded.",
                           "type": "string"
                         }
                       },
