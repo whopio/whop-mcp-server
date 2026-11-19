@@ -47816,6 +47816,14 @@
             "example": "2026-01-01T12:00:00.000Z",
             "type": "string"
           },
+          "experiment_id": {
+            "description": "The experiment measuring the action's outcome, prefixed `expt_`. `null` when there is none.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "id": {
             "description": "Recommended action ID, prefixed `reca_`.",
             "example": "reca_xxxxxxxxxxxxxx",
@@ -47875,6 +47883,13 @@
             "example": "running",
             "type": "string"
           },
+          "target_stats": {
+            "items": {
+              "$ref": "#/components/schemas/RecommendedActionStat",
+              "description": "The measures the action sets out to move, the primary first, as the stats API reads them."
+            },
+            "type": "array"
+          },
           "title": {
             "description": "What the action does, written for the account owner.",
             "example": "Lead your home page with member results",
@@ -47922,7 +47937,9 @@
           "run_ended_at",
           "created_at",
           "updated_at",
-          "preview"
+          "preview",
+          "experiment_id",
+          "target_stats"
         ],
         "type": "object"
       },
@@ -47930,6 +47947,7 @@
         "properties": {
           "id": {
             "description": "ID of the resource. A `variant` ID is prefixed `plan_`.",
+            "example": "plan_xxxxxxxxxxxxxx",
             "type": "string"
           },
           "object": {
@@ -47964,6 +47982,48 @@
             "$ref": "#/components/schemas/RecommendedActionWebsiteAbTestPreview"
           }
         ]
+      },
+      "RecommendedActionStat": {
+        "properties": {
+          "direction": {
+            "description": "Which way the measure should move.",
+            "enum": [
+              "up",
+              "down"
+            ],
+            "example": "up",
+            "type": "string"
+          },
+          "estimate": {
+            "description": "The value the measure is expected to reach, in its own unit. `null` when there is no estimate.",
+            "example": 1240.0,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "metric": {
+            "description": "The stats metric, the key of `GET /stats/time_series/{metric}`.",
+            "example": "gross_revenue",
+            "type": "string"
+          },
+          "params": {
+            "description": "The parameters of that metric beyond the account, as the stats API takes them.",
+            "example": {
+              "from": "2026-01-01",
+              "product": "prod_xxxxxxxxxxxxxx",
+              "to": "2026-01-01"
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "metric",
+          "params",
+          "estimate",
+          "direction"
+        ],
+        "type": "object"
       },
       "RecommendedActionWebsiteAbTestPreview": {
         "properties": {
@@ -48026,10 +48086,12 @@
         "properties": {
           "app_id": {
             "description": "App ID of the website, prefixed `app_`.",
+            "example": "app_xxxxxxxxxxxxxx",
             "type": "string"
           },
           "base_build_id": {
             "description": "App build ID of the live build the draft was made from, prefixed `apbu_`. `null` when the website has no live build.",
+            "example": "apbu_xxxxxxxxxxxxxx",
             "type": [
               "string",
               "null"
@@ -48044,11 +48106,13 @@
           },
           "draft_build_id": {
             "description": "App build ID of the drafted build, prefixed `apbu_`.",
+            "example": "apbu_xxxxxxxxxxxxxx",
             "type": "string"
           },
           "page_paths": {
             "items": {
               "description": "Paths of the pages the draft changes, such as `/` for the home page.",
+              "example": "/",
               "type": "string"
             },
             "type": "array"
@@ -48098,7 +48162,8 @@
           "arguments": {
             "description": "The input of the operation under `api_version`. It holds the path, query and body parameters in one map. A value of the form `{{steps[<index>].<field>}}` reads a field from the response of an earlier step. `<index>` is that step's position in `steps`, counting from 0. The value is replaced before the step is sent.",
             "example": {
-              "id": "{{steps[0].id}}"
+              "id": "plan_xxxxxxxxxxxxxx",
+              "visibility": "hidden"
             },
             "type": "object"
           },
@@ -48112,7 +48177,7 @@
           },
           "operation": {
             "description": "The `operationId` of the API operation the step calls, such as `createExperiment`.",
-            "example": "activateExperiment",
+            "example": "updatePlan",
             "type": "string"
           },
           "status": {
@@ -48129,7 +48194,7 @@
           },
           "title": {
             "description": "One sentence for the account owner about what the step changes, such as `Add a one-time wash button in the hero`.",
-            "example": "Start the A/B test",
+            "example": "Put the Pro bundle package on sale through the website",
             "type": "string"
           }
         },
@@ -156905,6 +156970,7 @@
                         {
                           "account_id": "biz_3xV9cT7rQwLm",
                           "created_at": "2026-11-17T05:12:44.318Z",
+                          "experiment_id": null,
                           "id": "reca_8kQ2mZtV4nLp",
                           "preview": {
                             "app_id": "app_Wq81LmZr0aXk",
@@ -156927,6 +156993,18 @@
                           "run_ended_at": null,
                           "run_started_at": null,
                           "status": "ready",
+                          "target_stats": [
+                            {
+                              "direction": "up",
+                              "estimate": 1240.0,
+                              "metric": "gross_revenue",
+                              "params": {
+                                "from": "2026-11-10",
+                                "product": "prod_Xr2mQ8nVt4Ld",
+                                "to": "2026-11-16"
+                              }
+                            }
+                          ],
                           "title": "Lead your home page with member results",
                           "type": "improve_landing_page",
                           "updated_at": "2026-11-17T05:14:02.907Z",
@@ -156935,44 +157013,23 @@
                             "steps": [
                               {
                                 "arguments": {
-                                  "account_id": "biz_3xV9cT7rQwLm",
-                                  "bucket_by": "anonymous",
-                                  "control": {
-                                    "related_resource": {
-                                      "id": "apbu_Base7Kp2Vn",
-                                      "object": "app_build"
-                                    }
-                                  },
-                                  "flag_key": "ei_reca_xxxxxxxxxxxxx",
-                                  "name": "Lead your home page with member results",
-                                  "related_resource": {
-                                    "id": "app_Wq81LmZr0aXk",
-                                    "object": "app"
-                                  },
-                                  "variants": [
-                                    {
-                                      "name": "ei_change",
-                                      "related_resource": {
-                                        "id": "apbu_Draft9Qe4Ls",
-                                        "object": "app_build"
-                                      },
-                                      "weight": 50
-                                    }
-                                  ]
+                                  "id": "plan_hMQ3vTn8YkZd2",
+                                  "visibility": "hidden"
                                 },
                                 "error": null,
-                                "operation": "createExperiment",
+                                "operation": "updatePlan",
                                 "status": "pending",
-                                "title": "Lead your home page with member results"
+                                "title": "Put the Starter bundle package on sale through the website"
                               },
                               {
                                 "arguments": {
-                                  "id": "{{steps[0].id}}"
+                                  "id": "plan_Pro9kL2mNq4Xs",
+                                  "visibility": "hidden"
                                 },
                                 "error": null,
-                                "operation": "activateExperiment",
+                                "operation": "updatePlan",
                                 "status": "pending",
-                                "title": "Start the A/B test"
+                                "title": "Put the Pro bundle package on sale through the website"
                               }
                             ]
                           }
@@ -157088,6 +157145,7 @@
                     "value": {
                       "account_id": "biz_3xV9cT7rQwLm",
                       "created_at": "2026-11-17T05:12:44.318Z",
+                      "experiment_id": null,
                       "id": "reca_8kQ2mZtV4nLp",
                       "preview": {
                         "app_id": "app_Wq81LmZr0aXk",
@@ -157110,6 +157168,18 @@
                       "run_ended_at": null,
                       "run_started_at": null,
                       "status": "ready",
+                      "target_stats": [
+                        {
+                          "direction": "up",
+                          "estimate": 1240.0,
+                          "metric": "gross_revenue",
+                          "params": {
+                            "from": "2026-11-10",
+                            "product": "prod_Xr2mQ8nVt4Ld",
+                            "to": "2026-11-16"
+                          }
+                        }
+                      ],
                       "title": "Lead your home page with member results",
                       "type": "improve_landing_page",
                       "updated_at": "2026-11-17T05:14:02.907Z",
@@ -157118,44 +157188,23 @@
                         "steps": [
                           {
                             "arguments": {
-                              "account_id": "biz_3xV9cT7rQwLm",
-                              "bucket_by": "anonymous",
-                              "control": {
-                                "related_resource": {
-                                  "id": "apbu_Base7Kp2Vn",
-                                  "object": "app_build"
-                                }
-                              },
-                              "flag_key": "ei_reca_xxxxxxxxxxxxx",
-                              "name": "Lead your home page with member results",
-                              "related_resource": {
-                                "id": "app_Wq81LmZr0aXk",
-                                "object": "app"
-                              },
-                              "variants": [
-                                {
-                                  "name": "ei_change",
-                                  "related_resource": {
-                                    "id": "apbu_Draft9Qe4Ls",
-                                    "object": "app_build"
-                                  },
-                                  "weight": 50
-                                }
-                              ]
+                              "id": "plan_hMQ3vTn8YkZd2",
+                              "visibility": "hidden"
                             },
                             "error": null,
-                            "operation": "createExperiment",
+                            "operation": "updatePlan",
                             "status": "pending",
-                            "title": "Lead your home page with member results"
+                            "title": "Put the Starter bundle package on sale through the website"
                           },
                           {
                             "arguments": {
-                              "id": "{{steps[0].id}}"
+                              "id": "plan_Pro9kL2mNq4Xs",
+                              "visibility": "hidden"
                             },
                             "error": null,
-                            "operation": "activateExperiment",
+                            "operation": "updatePlan",
                             "status": "pending",
-                            "title": "Start the A/B test"
+                            "title": "Put the Pro bundle package on sale through the website"
                           }
                         ]
                       }
@@ -157228,34 +157277,8 @@
                             "arguments": {
                               "description": "The input of the operation under `api_version`. It holds the path, query and body parameters in one map. A value of the form `{{steps[<index>].<field>}}` reads a field from the response of an earlier step. `<index>` is that step's position in `steps`, counting from 0. The value is replaced before the step is sent.",
                               "example": {
-                                "account_id": "biz_xxxxxxxxxxxxxx",
-                                "bucket_by": "anonymous",
-                                "control": {
-                                  "related_resource": {
-                                    "id": "apbu_xxxxxxxxxxxxxx",
-                                    "object": "app_build"
-                                  }
-                                },
-                                "flag_key": "ei_home_page_results",
-                                "hypothesis": "If we make this change to the website for visitors, then more of them will buy.",
-                                "metadata": {
-                                  "page_paths": "/"
-                                },
-                                "name": "Member results first",
-                                "related_resource": {
-                                  "id": "app_xxxxxxxxxxxxxx",
-                                  "object": "app"
-                                },
-                                "variants": [
-                                  {
-                                    "name": "ei_change",
-                                    "related_resource": {
-                                      "id": "apbu_xxxxxxxxxxxxxx",
-                                      "object": "app_build"
-                                    },
-                                    "weight": 50
-                                  }
-                                ]
+                                "id": "plan_xxxxxxxxxxxxxx",
+                                "visibility": "visible"
                               },
                               "type": "object"
                             },
@@ -157269,7 +157292,7 @@
                             },
                             "operation": {
                               "description": "The step's operation. It can't be changed.",
-                              "example": "createExperiment",
+                              "example": "updatePlan",
                               "type": "string"
                             },
                             "status": {
@@ -157286,7 +157309,7 @@
                             },
                             "title": {
                               "description": "The step's title. It can't be changed.",
-                              "example": "Start the A/B test",
+                              "example": "Put the Starter bundle package on sale through the website",
                               "type": "string"
                             }
                           },
@@ -157389,6 +157412,7 @@
                     "value": {
                       "account_id": "biz_3xV9cT7rQwLm",
                       "created_at": "2026-11-17T05:12:44.318Z",
+                      "experiment_id": null,
                       "id": "reca_8kQ2mZtV4nLp",
                       "preview": {
                         "app_id": "app_Wq81LmZr0aXk",
@@ -157411,6 +157435,18 @@
                       "run_ended_at": null,
                       "run_started_at": null,
                       "status": "dismissed",
+                      "target_stats": [
+                        {
+                          "direction": "up",
+                          "estimate": 1240.0,
+                          "metric": "gross_revenue",
+                          "params": {
+                            "from": "2026-11-10",
+                            "product": "prod_Xr2mQ8nVt4Ld",
+                            "to": "2026-11-16"
+                          }
+                        }
+                      ],
                       "title": "Lead your home page with member results",
                       "type": "improve_landing_page",
                       "updated_at": "2026-11-17T15:40:27.006Z",
@@ -157419,44 +157455,23 @@
                         "steps": [
                           {
                             "arguments": {
-                              "account_id": "biz_3xV9cT7rQwLm",
-                              "bucket_by": "anonymous",
-                              "control": {
-                                "related_resource": {
-                                  "id": "apbu_Base7Kp2Vn",
-                                  "object": "app_build"
-                                }
-                              },
-                              "flag_key": "ei_reca_xxxxxxxxxxxxx",
-                              "name": "Lead your home page with member results",
-                              "related_resource": {
-                                "id": "app_Wq81LmZr0aXk",
-                                "object": "app"
-                              },
-                              "variants": [
-                                {
-                                  "name": "ei_change",
-                                  "related_resource": {
-                                    "id": "apbu_Draft9Qe4Ls",
-                                    "object": "app_build"
-                                  },
-                                  "weight": 50
-                                }
-                              ]
+                              "id": "plan_hMQ3vTn8YkZd2",
+                              "visibility": "hidden"
                             },
                             "error": null,
-                            "operation": "createExperiment",
+                            "operation": "updatePlan",
                             "status": "pending",
-                            "title": "Lead your home page with member results"
+                            "title": "Put the Starter bundle package on sale through the website"
                           },
                           {
                             "arguments": {
-                              "id": "{{steps[0].id}}"
+                              "id": "plan_Pro9kL2mNq4Xs",
+                              "visibility": "hidden"
                             },
                             "error": null,
-                            "operation": "activateExperiment",
+                            "operation": "updatePlan",
                             "status": "pending",
-                            "title": "Start the A/B test"
+                            "title": "Put the Pro bundle package on sale through the website"
                           }
                         ]
                       }
@@ -157534,6 +157549,7 @@
                     "value": {
                       "account_id": "biz_3xV9cT7rQwLm",
                       "created_at": "2026-11-17T05:12:44.318Z",
+                      "experiment_id": null,
                       "id": "reca_8kQ2mZtV4nLp",
                       "preview": {
                         "app_id": "app_Wq81LmZr0aXk",
@@ -157556,6 +157572,18 @@
                       "run_ended_at": null,
                       "run_started_at": "2026-11-17T15:02:11.540Z",
                       "status": "running",
+                      "target_stats": [
+                        {
+                          "direction": "up",
+                          "estimate": 1240.0,
+                          "metric": "gross_revenue",
+                          "params": {
+                            "from": "2026-11-10",
+                            "product": "prod_Xr2mQ8nVt4Ld",
+                            "to": "2026-11-16"
+                          }
+                        }
+                      ],
                       "title": "Lead your home page with member results",
                       "type": "improve_landing_page",
                       "updated_at": "2026-11-17T15:02:11.540Z",
@@ -157564,44 +157592,23 @@
                         "steps": [
                           {
                             "arguments": {
-                              "account_id": "biz_3xV9cT7rQwLm",
-                              "bucket_by": "anonymous",
-                              "control": {
-                                "related_resource": {
-                                  "id": "apbu_Base7Kp2Vn",
-                                  "object": "app_build"
-                                }
-                              },
-                              "flag_key": "ei_reca_xxxxxxxxxxxxx",
-                              "name": "Lead your home page with member results",
-                              "related_resource": {
-                                "id": "app_Wq81LmZr0aXk",
-                                "object": "app"
-                              },
-                              "variants": [
-                                {
-                                  "name": "ei_change",
-                                  "related_resource": {
-                                    "id": "apbu_Draft9Qe4Ls",
-                                    "object": "app_build"
-                                  },
-                                  "weight": 50
-                                }
-                              ]
+                              "id": "plan_hMQ3vTn8YkZd2",
+                              "visibility": "hidden"
                             },
                             "error": null,
-                            "operation": "createExperiment",
+                            "operation": "updatePlan",
                             "status": "running",
-                            "title": "Lead your home page with member results"
+                            "title": "Put the Starter bundle package on sale through the website"
                           },
                           {
                             "arguments": {
-                              "id": "{{steps[0].id}}"
+                              "id": "plan_Pro9kL2mNq4Xs",
+                              "visibility": "hidden"
                             },
                             "error": null,
-                            "operation": "activateExperiment",
+                            "operation": "updatePlan",
                             "status": "pending",
-                            "title": "Start the A/B test"
+                            "title": "Put the Pro bundle package on sale through the website"
                           }
                         ]
                       }
