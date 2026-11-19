@@ -16015,6 +16015,17 @@
             },
             "type": "array"
           },
+          "external_message": {
+            "description": "The message outside chat that this message was sent or received as. `object` says which kind it is, such as `email_message`. For an email, the first file in `attachments` named `email.html` holds the email's HTML body. The email's own attachments are also in `attachments`. `null` for a message that exists only in chat, or a deleted message.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ExternalMessageEmail"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "gifs": {
             "items": {
               "$ref": "#/components/schemas/Gif",
@@ -16140,7 +16151,8 @@
           "view_count",
           "author",
           "gifs",
-          "embeds"
+          "embeds",
+          "external_message"
         ],
         "type": "object"
       },
@@ -24003,6 +24015,72 @@
           "profile_picture_url",
           "verified",
           "external_id"
+        ],
+        "type": "object"
+      },
+      "ExternalMessageEmail": {
+        "properties": {
+          "from_address": {
+            "description": "The address the email was sent from.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "description": "The email's ID, prefixed `emsg_`.",
+            "type": "string"
+          },
+          "object": {
+            "description": "Always `email_message`.",
+            "enum": [
+              "email_message"
+            ],
+            "example": "email_message",
+            "type": "string"
+          },
+          "status": {
+            "description": "The delivery status for this email.",
+            "enum": [
+              "received",
+              "spam",
+              "virus",
+              "queued",
+              "sent",
+              "delivered",
+              "bounced",
+              "complained",
+              "failed",
+              "refused_unsubscribed",
+              "refused_rate_limited",
+              "refused_spam",
+              "delayed"
+            ],
+            "example": "received",
+            "type": "string"
+          },
+          "subject": {
+            "description": "The email's subject.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "to_address": {
+            "description": "The address of the recipient this message is for.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "object",
+          "id",
+          "status",
+          "subject",
+          "from_address",
+          "to_address"
         ],
         "type": "object"
       },
