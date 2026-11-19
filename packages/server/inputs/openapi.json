@@ -44627,6 +44627,24 @@
           "WebhookReceiveWithdrawals"
         ]
       },
+      "PermissionGrant": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/PermissionAction",
+            "description": "The permission action."
+          },
+          "granted": {
+            "description": "Whether the action is granted on the resource.",
+            "example": false,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "action",
+          "granted"
+        ],
+        "type": "object"
+      },
       "PixelValidation": {
         "properties": {
           "affiliate_tracking_detected": {
@@ -151460,21 +151478,7 @@
                   "properties": {
                     "data": {
                       "items": {
-                        "properties": {
-                          "action": {
-                            "$ref": "#/components/schemas/PermissionAction"
-                          },
-                          "granted": {
-                            "description": "Whether the credential is granted the action for the resource.",
-                            "example": false,
-                            "type": "boolean"
-                          }
-                        },
-                        "required": [
-                          "action",
-                          "granted"
-                        ],
-                        "type": "object"
+                        "$ref": "#/components/schemas/PermissionGrant"
                       },
                       "type": "array"
                     }
