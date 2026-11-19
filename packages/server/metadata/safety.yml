@@ -105,6 +105,13 @@ rules:
       classification: mutating
       idempotency: supported
 
+  - name: recommended-action-update
+    match:
+      operations:
+        - PATCH /recommended_actions/{id}
+    set:
+      classification: mutating
+
   # ── Money movement: always confirmation + idempotency ────────────────────
   - name: money-movement
     match:

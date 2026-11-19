@@ -200,6 +200,7 @@ export const CHATGPT_EXCLUSIONS: ReadonlySet<string> = new Set([
 	// Identity and paid-service writes
 	"PATCH /economic_intelligence/{id}", // paid Whop service
 	"POST /recommended_actions/{id}/dismiss", // paid Whop service
+	"PATCH /recommended_actions/{id}", // paid Whop service; edits the API calls a run sends
 	"POST /recommended_actions/{id}/execute", // paid Whop service; sends the action's API calls as the user
 	"DELETE /identity_profiles/{id}", // identity profile data
 	// Whop AI chats, which can act outside this list

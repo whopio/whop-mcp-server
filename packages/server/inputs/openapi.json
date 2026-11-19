@@ -157019,6 +157019,151 @@
           }
         }
       ],
+      "patch": {
+        "description": "Edits the arguments of a `ready` action's steps before it runs. Send the action's `workflow` back with one entry for each step, in the same order. An entry with `arguments` replaces that step's arguments. An entry without them leaves the step as it is. Only `arguments` can change. Other step fields can be sent back only with the values the action has.",
+        "operationId": "updateRecommendedAction",
+        "parameters": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "workflow": {
+                    "description": "The action's workflow with the arguments to change.",
+                    "properties": {
+                      "steps": {
+                        "description": "One entry for each step of the action, in the same order.",
+                        "items": {
+                          "properties": {
+                            "arguments": {
+                              "description": "The input of the operation under `api_version`. It holds the path, query and body parameters in one map. A value of the form `{{steps[<index>].<field>}}` reads a field from the response of an earlier step. `<index>` is that step's position in `steps`, counting from 0. The value is replaced before the step is sent.",
+                              "example": {
+                                "account_id": "biz_xxxxxxxxxxxxxx",
+                                "bucket_by": "anonymous",
+                                "control": {
+                                  "related_resource": {
+                                    "id": "apbu_xxxxxxxxxxxxxx",
+                                    "object": "app_build"
+                                  }
+                                },
+                                "flag_key": "ei_home_page_results",
+                                "hypothesis": "If we make this change to the website for visitors, then more of them will buy.",
+                                "metadata": {
+                                  "page_paths": "/"
+                                },
+                                "name": "Member results first",
+                                "related_resource": {
+                                  "id": "app_xxxxxxxxxxxxxx",
+                                  "object": "app"
+                                },
+                                "variants": [
+                                  {
+                                    "name": "ei_change",
+                                    "related_resource": {
+                                      "id": "apbu_xxxxxxxxxxxxxx",
+                                      "object": "app_build"
+                                    },
+                                    "weight": 50
+                                  }
+                                ]
+                              },
+                              "type": "object"
+                            },
+                            "error": {
+                              "description": "The step's error. It can't be changed.",
+                              "example": null,
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "operation": {
+                              "description": "The step's operation. It can't be changed.",
+                              "example": "createExperiment",
+                              "type": "string"
+                            },
+                            "status": {
+                              "description": "The step's status. It can't be changed.",
+                              "enum": [
+                                "pending",
+                                "running",
+                                "succeeded",
+                                "failed",
+                                "skipped"
+                              ],
+                              "example": "pending",
+                              "type": "string"
+                            },
+                            "title": {
+                              "description": "The step's title. It can't be changed.",
+                              "example": "Start the A/B test",
+                              "type": "string"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "type": "array"
+                      }
+                    },
+                    "required": [
+                      "steps"
+                    ],
+                    "type": "object"
+                  }
+                },
+                "required": [
+                  "workflow"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecommendedAction"
+                }
+              }
+            },
+            "description": "Action updated"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "a different number of steps"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "unauthenticated"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "a partner, who only reads the account's actions"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "no such action"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict",
+            "description": "an action that is not ready"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "company:update"
+            ]
+          }
+        ],
+        "summary": "Update Recommended Action",
+        "tags": [
+          "Recommended Actions"
+        ]
+      },
       "x-whop-surface": "native"
     },
     "/recommended_actions/{id}/dismiss": {
