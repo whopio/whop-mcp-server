@@ -102764,7 +102764,8 @@
                                         "wire",
                                         "sepa",
                                         "fps",
-                                        "chaps"
+                                        "chaps",
+                                        "swift"
                                       ],
                                       "example": "wire",
                                       "type": "string"
