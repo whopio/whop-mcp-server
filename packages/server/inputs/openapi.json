@@ -8285,6 +8285,13 @@
             "description": "The evidence the review recorded for this rule.",
             "type": "string"
           },
+          "restrictions": {
+            "items": {
+              "$ref": "#/components/schemas/AdContentReviewTagRestriction",
+              "description": "Each network whose content policy this rule keeps the ad off, and what that network requires when the rule is conditional there."
+            },
+            "type": "array"
+          },
           "title": {
             "description": "The rule Whop content review found the ad breaks.",
             "type": "string"
@@ -8292,7 +8299,64 @@
         },
         "required": [
           "title",
-          "message"
+          "message",
+          "restrictions"
+        ],
+        "type": "object"
+      },
+      "AdContentReviewTagRestriction": {
+        "properties": {
+          "condition": {
+            "description": "What the network requires before it allows this content. `null` when the network doesn't allow it at all.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "country": {
+            "description": "The targeted country the condition applies in, as an ISO 3166-1 alpha-2 code. `null` when the condition isn't tied to a country.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "kind": {
+            "description": "The kind of condition the network sets. `null` when the network doesn't allow the content at all, and on reviews saved before kinds were recorded.",
+            "enum": [
+              "product",
+              "country",
+              "age",
+              "certification",
+              "disclosure",
+              "ad_format",
+              "audience",
+              "schedule",
+              "unconfirmed",
+              null
+            ],
+            "example": "product",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "network": {
+            "description": "The network whose content policy keeps the ad off. `whop` is Whop's own policy, which keeps it off every network.",
+            "enum": [
+              "whop",
+              "meta",
+              "tiktok",
+              "google"
+            ],
+            "example": "whop",
+            "type": "string"
+          }
+        },
+        "required": [
+          "network",
+          "kind",
+          "country",
+          "condition"
         ],
         "type": "object"
       },
