@@ -145459,6 +145459,19 @@
                             "example": "pyot_xxxxxxxxxxxxx",
                             "type": "string"
                           },
+                          "instant_unavailable_reason": {
+                            "description": "Why instant delivery is unavailable. `new_payout_method_hold` means the payout method is within its initial instant delivery hold. `minimum_crypto_sales_not_met` means the account has not reached the sales requirement for instant cryptocurrency payouts. `null` means neither restriction applies.",
+                            "enum": [
+                              "minimum_crypto_sales_not_met",
+                              "new_payout_method_hold",
+                              null
+                            ],
+                            "example": "minimum_crypto_sales_not_met",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "institution_name": {
                             "description": "Name of the bank or institution receiving payouts.",
                             "example": "Frost Bank",
@@ -145565,9 +145578,10 @@
                                 ]
                               },
                               "instant_unavailable_reason": {
-                                "description": "Why instant delivery is unavailable for this method. `minimum_crypto_sales_not_met` means the account has not reached the total sales required for instant cryptocurrency payouts. `null` when this restriction does not apply.",
+                                "description": "Why instant delivery is unavailable. `new_payout_method_hold` means the payout method is within its initial instant delivery hold. `minimum_crypto_sales_not_met` means the account has not reached the sales requirement for instant cryptocurrency payouts. `null` means neither restriction applies.",
                                 "enum": [
                                   "minimum_crypto_sales_not_met",
+                                  "new_payout_method_hold",
                                   null
                                 ],
                                 "example": "minimum_crypto_sales_not_met",
@@ -145789,6 +145803,7 @@
                           "created_at",
                           "last_paid_out_at",
                           "unavailable_reason",
+                          "instant_unavailable_reason",
                           "supported_payout_method",
                           "fee_structure",
                           "estimated_arrival",
@@ -146216,6 +146231,19 @@
                       "description": "Payout method ID, usable as payout_method_id on POST /payouts.",
                       "example": "potk_xxxxxxxxxxxxxx",
                       "type": "string"
+                    },
+                    "instant_unavailable_reason": {
+                      "description": "Why instant delivery is unavailable. `new_payout_method_hold` means the payout method is within its initial instant delivery hold. `minimum_crypto_sales_not_met` means the account has not reached the sales requirement for instant cryptocurrency payouts. `null` means neither restriction applies.",
+                      "enum": [
+                        "minimum_crypto_sales_not_met",
+                        "new_payout_method_hold",
+                        null
+                      ],
+                      "example": "minimum_crypto_sales_not_met",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
                     },
                     "institution_name": {
                       "example": "Frost Bank",
@@ -146691,6 +146719,19 @@
                       "example": "potk_xxxxxxxxxxxxxx",
                       "type": "string"
                     },
+                    "instant_unavailable_reason": {
+                      "description": "Why instant delivery is unavailable. `new_payout_method_hold` means the payout method is within its initial instant delivery hold. `minimum_crypto_sales_not_met` means the account has not reached the sales requirement for instant cryptocurrency payouts. `null` means neither restriction applies.",
+                      "enum": [
+                        "minimum_crypto_sales_not_met",
+                        "new_payout_method_hold",
+                        null
+                      ],
+                      "example": "minimum_crypto_sales_not_met",
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
                     "institution_name": {
                       "example": "Frost Bank",
                       "type": [
@@ -146910,6 +146951,7 @@
                     "created_at",
                     "last_paid_out_at",
                     "unavailable_reason",
+                    "instant_unavailable_reason",
                     "supported_payout_method",
                     "fee_structure",
                     "estimated_arrival",
@@ -194290,6 +194332,7 @@
                   "estimated_arrival": null,
                   "fee_structure": null,
                   "id": "potk_xxxxxxxxxxxxxx",
+                  "instant_unavailable_reason": null,
                   "institution_name": "Frost Bank",
                   "is_clone": false,
                   "is_default": true,
@@ -194446,6 +194489,19 @@
                         "example": "pyot_xxxxxxxxxxxxx",
                         "type": "string"
                       },
+                      "instant_unavailable_reason": {
+                        "description": "Why instant delivery is unavailable. `new_payout_method_hold` means the payout method is within its initial instant delivery hold. `minimum_crypto_sales_not_met` means the account has not reached the sales requirement for instant cryptocurrency payouts. `null` means neither restriction applies.",
+                        "enum": [
+                          "minimum_crypto_sales_not_met",
+                          "new_payout_method_hold",
+                          null
+                        ],
+                        "example": "minimum_crypto_sales_not_met",
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
                       "institution_name": {
                         "description": "Name of the bank or institution receiving payouts.",
                         "example": "Frost Bank",
@@ -194552,9 +194608,10 @@
                             ]
                           },
                           "instant_unavailable_reason": {
-                            "description": "Why instant delivery is unavailable for this method. `minimum_crypto_sales_not_met` means the account has not reached the total sales required for instant cryptocurrency payouts. `null` when this restriction does not apply.",
+                            "description": "Why instant delivery is unavailable. `new_payout_method_hold` means the payout method is within its initial instant delivery hold. `minimum_crypto_sales_not_met` means the account has not reached the sales requirement for instant cryptocurrency payouts. `null` means neither restriction applies.",
                             "enum": [
                               "minimum_crypto_sales_not_met",
+                              "new_payout_method_hold",
                               null
                             ],
                             "example": "minimum_crypto_sales_not_met",
@@ -194776,6 +194833,7 @@
                       "created_at",
                       "last_paid_out_at",
                       "unavailable_reason",
+                      "instant_unavailable_reason",
                       "supported_payout_method",
                       "fee_structure",
                       "estimated_arrival",
