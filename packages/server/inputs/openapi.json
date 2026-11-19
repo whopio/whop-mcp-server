@@ -7902,7 +7902,7 @@
               "completed",
               "active"
             ],
-            "example": "issues",
+            "example": "learning",
             "type": "string"
           },
           "desired_cost_per_result": {
@@ -7971,7 +7971,7 @@
               "sales",
               null
             ],
-            "example": "leads",
+            "example": "sales",
             "type": [
               "string",
               "null"
@@ -8120,7 +8120,7 @@
           },
           "title": {
             "description": "Display name of the ad campaign.",
-            "example": "Ceramic coating — Austin leads",
+            "example": "Spring launch",
             "type": "string"
           },
           "unique_click_through_rate": {
@@ -182555,7 +182555,7 @@
                           "completed",
                           "active"
                         ],
-                        "example": "issues",
+                        "example": "learning",
                         "type": "string"
                       },
                       "desired_cost_per_result": {
@@ -182596,7 +182596,7 @@
                           "sales",
                           null
                         ],
-                        "example": "leads",
+                        "example": "sales",
                         "type": [
                           "string",
                           "null"
@@ -182655,7 +182655,7 @@
                       },
                       "title": {
                         "description": "Display name of the ad campaign.",
-                        "example": "Ceramic coating — Austin leads",
+                        "example": "Spring launch",
                         "type": "string"
                       },
                       "updated_at": {
@@ -182925,7 +182925,7 @@
                           "completed",
                           "active"
                         ],
-                        "example": "issues",
+                        "example": "learning",
                         "type": "string"
                       },
                       "desired_cost_per_result": {
@@ -182966,7 +182966,7 @@
                           "sales",
                           null
                         ],
-                        "example": "leads",
+                        "example": "sales",
                         "type": [
                           "string",
                           "null"
@@ -183025,7 +183025,7 @@
                       },
                       "title": {
                         "description": "Display name of the ad campaign.",
-                        "example": "Ceramic coating — Austin leads",
+                        "example": "Spring launch",
                         "type": "string"
                       },
                       "updated_at": {
