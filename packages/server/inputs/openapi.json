@@ -148166,6 +148166,16 @@
             }
           },
           {
+            "description": "In countries that list methods by payout route, only list one generic method per route and receiving currency. Each is the method that costs least for the amount, and has `category` and `rail` set. Returns an empty list there when no generic method is available. Other countries list as without this parameter.",
+            "in": "query",
+            "name": "generic_only",
+            "required": false,
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          },
+          {
             "description": "Number of results to return from the start of the range.",
             "in": "query",
             "name": "first",
@@ -148214,6 +148224,20 @@
                     "data": {
                       "items": {
                         "properties": {
+                          "category": {
+                            "description": "Category of the payout route that this method belongs to. Set only when `generic_only` is true and this country lists methods by payout route. `null` for every other method.",
+                            "enum": [
+                              "bank_deposit",
+                              "crypto",
+                              "payment_app",
+                              null
+                            ],
+                            "example": "bank_deposit",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "delivery_type": {
                             "description": "How funds are delivered, for example `bank_deposit`.",
                             "enum": [
@@ -148402,6 +148426,14 @@
                               "null"
                             ]
                           },
+                          "rail": {
+                            "description": "Payout rail that this method pays through, for example `ach`, `sepa`, `venmo` or `ethereum`. Set only when `generic_only` is true and this country lists methods by payout route. `null` for every other method.",
+                            "example": null,
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "required_fields": {
                             "description": "Fields to collect before saving this supported payout method. Present only when supported_payout_method_id narrows the request to one method.",
                             "items": {
@@ -148511,6 +148543,8 @@
                           "icon_url",
                           "delivery_type",
                           "parent_id",
+                          "category",
+                          "rail",
                           "supports_standard_delivery",
                           "supports_instant_delivery",
                           "fee_structure",
