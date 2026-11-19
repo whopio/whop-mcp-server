@@ -17380,6 +17380,20 @@
               "null"
             ]
           },
+          "experience": {
+            "description": "The parent experience that this course belongs to.",
+            "properties": {
+              "id": {
+                "description": "The unique identifier for the experience.",
+                "example": "exp_xxxxxxxxxxxxxx",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "type": "object"
+          },
           "id": {
             "description": "The unique identifier for the course.",
             "example": "cors_xxxxxxxxxxxxx",
@@ -17553,6 +17567,7 @@
           "started_at",
           "lesson_unlock_days",
           "resume_lesson",
+          "experience",
           "chapters"
         ],
         "type": "object"
@@ -18441,6 +18456,20 @@
               "null"
             ]
           },
+          "experience": {
+            "description": "The parent experience that this course belongs to.",
+            "properties": {
+              "id": {
+                "description": "The unique identifier for the experience.",
+                "example": "exp_xxxxxxxxxxxxxx",
+                "type": "string"
+              }
+            },
+            "required": [
+              "id"
+            ],
+            "type": "object"
+          },
           "id": {
             "description": "The unique identifier for the course.",
             "example": "cors_xxxxxxxxxxxxx",
@@ -18613,7 +18642,8 @@
           "latest_lesson_created_at",
           "started_at",
           "lesson_unlock_days",
-          "resume_lesson"
+          "resume_lesson",
+          "experience"
         ],
         "type": "object"
       },
@@ -18705,6 +18735,26 @@
                   "null"
                 ]
               },
+              "profile_picture": {
+                "description": "The user's profile picture attachment with URL, content type, and file metadata. Null if using a legacy profile picture.",
+                "properties": {
+                  "url": {
+                    "description": "A pre-optimized URL for rendering this attachment on the client. This should be used for displaying attachments in apps.",
+                    "example": "https://media.whop.com/abc123/optimized.jpg",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
                 "example": "johndoe42",
@@ -18714,7 +18764,8 @@
             "required": [
               "id",
               "name",
-              "username"
+              "username",
+              "profile_picture"
             ],
             "type": "object"
           }
@@ -18781,6 +18832,26 @@
                   "null"
                 ]
               },
+              "profile_picture": {
+                "description": "The user's profile picture attachment with URL, content type, and file metadata. Null if using a legacy profile picture.",
+                "properties": {
+                  "url": {
+                    "description": "A pre-optimized URL for rendering this attachment on the client. This should be used for displaying attachments in apps.",
+                    "example": "https://media.whop.com/abc123/optimized.jpg",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [
+                  "url"
+                ],
+                "type": [
+                  "object",
+                  "null"
+                ]
+              },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
                 "example": "johndoe42",
@@ -18790,7 +18861,8 @@
             "required": [
               "id",
               "name",
-              "username"
+              "username",
+              "profile_picture"
             ],
             "type": "object"
           }
