@@ -10615,6 +10615,14 @@
             "example": false,
             "type": "boolean"
           },
+          "last_used_at": {
+            "description": "When the API key last authenticated a request, as an ISO 8601 timestamp. Recorded at most once an hour, so it can trail the latest request by up to an hour. `null` means the key has not been used since this field was introduced.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "name": {
             "description": "Human-readable name identifying the API key, or `null` when none was set.",
             "example": "Shine Time Booking (admin role)",
@@ -10664,6 +10672,7 @@
           "api_version_date",
           "expires_at",
           "ip_allowlist",
+          "last_used_at",
           "created_at",
           "updated_at"
         ],
