@@ -6183,6 +6183,10 @@
             "description": "Whether Whop emails members when their membership is canceled or terminated. `true` by default. Set it to `false` to stop these emails while keeping the account's other customer emails. They also stop while the account's `send_customer_emails` is `false`.",
             "type": "boolean"
           },
+          "card_surcharge": {
+            "$ref": "#/components/schemas/CardSurchargePreferences",
+            "description": "The card surcharge a point of sale adds to credit card payments. Debit and prepaid cards never pay it."
+          },
           "cards_auto_top_up": {
             "description": "Whether incoming funds are automatically moved to the account's cards balance. `false` when the account has no cards balance.",
             "type": "boolean"
@@ -6373,7 +6377,8 @@
           "subaccount_team_view_only",
           "subscription_failure_behavior",
           "customer_tracking",
-          "off_session_payment_rules"
+          "off_session_payment_rules",
+          "card_surcharge"
         ],
         "type": "object"
       },
@@ -14831,6 +14836,37 @@
           "declined"
         ],
         "type": "string"
+      },
+      "CardSurchargePreferences": {
+        "properties": {
+          "enabled": {
+            "description": "Whether credit card payments with `apply_surcharge` add the surcharge. False when the account cannot surcharge, even if it was turned on.",
+            "example": true,
+            "type": "boolean"
+          },
+          "maximum_percentage": {
+            "description": "The highest percentage this account can set. It is 3, or lower where the business's state sets a lower limit. Null when the account cannot surcharge, such as a business outside the US or in a state that does not allow surcharges.",
+            "example": 2.0,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "percentage": {
+            "description": "The surcharge as a percentage of the purchase after discounts and before tax, such as `3` for 3%. Null while the surcharge is off.",
+            "example": 2.0,
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "enabled",
+          "percentage",
+          "maximum_percentage"
+        ],
+        "type": "object"
       },
       "CardTransaction": {
         "properties": {
@@ -35465,6 +35501,17 @@
               }
             ]
           },
+          "surcharge": {
+            "description": "The card surcharge the buyer pays for paying by credit card. It is included in `total` and `amount_charged`, and appears in `line_items` as a line of its own. Null when the payment has no surcharge.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "tax_amount": {
             "description": "The sales tax or VAT collected. Null when no tax applied.",
             "oneOf": [
@@ -35604,6 +35651,7 @@
           "tax_refunded_amount",
           "auto_refunded",
           "amount_charged",
+          "surcharge",
           "amount_after_fees",
           "usd_total",
           "payment_method_type",
@@ -61694,6 +61742,10 @@
                       "example": true,
                       "type": "boolean"
                     },
+                    "card_surcharge": {
+                      "$ref": "#/components/schemas/CardSurchargePreferences",
+                      "description": "The card surcharge a point of sale adds to credit card payments. Debit and prepaid cards never pay it."
+                    },
                     "cards_auto_top_up": {
                       "description": "Whether incoming funds are automatically moved to the account's cards balance. `false` when the account has no cards balance.",
                       "example": false,
@@ -61967,6 +62019,7 @@
                     }
                   },
                   "required": [
+                    "card_surcharge",
                     "ads_payment_methods",
                     "ads_reporting_currency",
                     "ads_scheduling_timezone",
@@ -62051,7 +62104,7 @@
         }
       ],
       "patch": {
-        "description": "Updates the account's preferences. Each top-level key in the body replaces its stored value as a whole. Keys left out keep their current values.\n\nThe required scope depends on which preferences you update.\n\n- `ad_campaign:create`: `ads_payment_methods`, `ads_reporting_currency`, `ads_scheduling_timezone`, `ads_triple_whale_integration`.\n- `payout:account:update`: `cards_auto_top_up`, `cards_notifications`, `covers_subaccount_negative_balances`, `merchant_of_record`.\n- `payment:manage`: `off_session_payment_rules`.\n- `payment:dispute`: `dispute_fighter_enabled`.\n- `company:update`: `economic_intelligence_duration_key`, `economic_intelligence_auto_renew`, `review_request_emails`, `cancellation_emails`, `renewal_reminder_emails`, `failed_payment_emails`, `subaccount_notifications`, `subaccount_team_view_only`.\n- `company:manage_checkout`: `feedback_options`, `customer_tracking`.\n\nTo update keys under more than one scope, the API key needs all of those scopes.\n",
+        "description": "Updates the account's preferences. Each top-level key in the body replaces its stored value as a whole. Keys left out keep their current values.\n\nThe required scope depends on which preferences you update.\n\n- `ad_campaign:create`: `ads_payment_methods`, `ads_reporting_currency`, `ads_scheduling_timezone`, `ads_triple_whale_integration`.\n- `payout:account:update`: `cards_auto_top_up`, `cards_notifications`, `covers_subaccount_negative_balances`, `merchant_of_record`.\n- `payment:manage`: `off_session_payment_rules`.\n- `payment:dispute`: `dispute_fighter_enabled`.\n- `company:update`: `economic_intelligence_duration_key`, `economic_intelligence_auto_renew`, `review_request_emails`, `cancellation_emails`, `renewal_reminder_emails`, `failed_payment_emails`, `subaccount_notifications`, `subaccount_team_view_only`, `card_surcharge`.\n- `company:manage_checkout`: `feedback_options`, `customer_tracking`.\n\nTo update keys under more than one scope, the API key needs all of those scopes.\n",
         "operationId": "updateAccountPreferences",
         "parameters": [
           {
@@ -62150,6 +62203,29 @@
                     "description": "Whether Whop emails members when their membership is canceled or terminated. Set it to `false` to stop these emails while keeping the account's other customer emails. Requires the `company:update` scope on your API key.",
                     "example": true,
                     "type": "boolean"
+                  },
+                  "card_surcharge": {
+                    "additionalProperties": false,
+                    "description": "The card surcharge a point of sale adds to credit card payments, replaced as a whole. You can always turn it off. You can turn it on only when `card_surcharge.maximum_percentage` is not null. Requires the `company:update` scope on your API key.",
+                    "properties": {
+                      "enabled": {
+                        "description": "Whether credit card payments with `apply_surcharge` add the surcharge.",
+                        "example": false,
+                        "type": "boolean"
+                      },
+                      "percentage": {
+                        "description": "The surcharge as a percentage, such as `3` for 3%. Greater than 0, with at most 2 decimal places, and at most `maximum_percentage`. Required when `enabled` is true. Turning the surcharge off clears it.",
+                        "example": 3,
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "enabled"
+                    ],
+                    "type": "object"
                   },
                   "cards_auto_top_up": {
                     "description": "Whether incoming funds are automatically moved to the account's cards balance. Requires a cards balance on the account and the `payout:account:update` scope on your API key.",
@@ -62617,6 +62693,10 @@
                       "example": true,
                       "type": "boolean"
                     },
+                    "card_surcharge": {
+                      "$ref": "#/components/schemas/CardSurchargePreferences",
+                      "description": "The card surcharge a point of sale adds to credit card payments. Debit and prepaid cards never pay it."
+                    },
                     "cards_auto_top_up": {
                       "description": "Whether incoming funds are automatically moved to the account's cards balance. `false` when the account has no cards balance.",
                       "example": false,
@@ -62888,6 +62968,7 @@
                     }
                   },
                   "required": [
+                    "card_surcharge",
                     "ads_payment_methods",
                     "ads_reporting_currency",
                     "ads_scheduling_timezone",
@@ -140294,6 +140375,14 @@
                           "null"
                         ]
                       },
+                      "apply_surcharge": {
+                        "description": "Adds the account's card surcharge, set in `card_surcharge` on the account's preferences, when the card is a credit card. Send it only after you have shown the buyer the surcharge. Whop calculates the amount. You cannot send an amount. With a `confirmation_token`, the surcharge is a line of its own, calculated on the purchase after discounts and before tax. With a `card_present` `payment_method`, the surcharge is added after the reader reads the card, with `POST /payments/{id}/apply_surcharge`. A debit or prepaid card, or an account that cannot surcharge, pays no surcharge. The payment still goes ahead. Only for a one-time purchase, and not with `quote_id`. Defaults to false.",
+                        "example": true,
+                        "type": [
+                          "boolean",
+                          "null"
+                        ]
+                      },
                       "auto_capture_after_minutes": {
                         "description": "Minutes after authorization at which Whop captures the hold automatically unless it has been voided. Requires `capture: false`. Between 5 and 5760 (4 days).",
                         "example": 60,
@@ -192291,6 +192380,7 @@
                     "decimals": 2,
                     "display_decimals": 2
                   },
+                  "surcharge": null,
                   "tax_amount": null,
                   "tax_behavior": null,
                   "tax_refunded_amount": {
@@ -192597,6 +192687,7 @@
                     "decimals": 2,
                     "display_decimals": 2
                   },
+                  "surcharge": null,
                   "tax_amount": null,
                   "tax_behavior": null,
                   "tax_refunded_amount": {
@@ -192903,6 +192994,7 @@
                     "decimals": 2,
                     "display_decimals": 2
                   },
+                  "surcharge": null,
                   "tax_amount": null,
                   "tax_behavior": null,
                   "tax_refunded_amount": {
@@ -193209,6 +193301,7 @@
                     "decimals": 2,
                     "display_decimals": 2
                   },
+                  "surcharge": null,
                   "tax_amount": null,
                   "tax_behavior": null,
                   "tax_refunded_amount": {
@@ -193508,6 +193601,7 @@
                     "decimals": 2,
                     "display_decimals": 2
                   },
+                  "surcharge": null,
                   "tax_amount": null,
                   "tax_behavior": null,
                   "tax_refunded_amount": {
@@ -193814,6 +193908,7 @@
                     "decimals": 2,
                     "display_decimals": 2
                   },
+                  "surcharge": null,
                   "tax_amount": null,
                   "tax_behavior": null,
                   "tax_refunded_amount": {
@@ -194120,6 +194215,7 @@
                     "decimals": 2,
                     "display_decimals": 2
                   },
+                  "surcharge": null,
                   "tax_amount": null,
                   "tax_behavior": null,
                   "tax_refunded_amount": {
