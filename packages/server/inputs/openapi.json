@@ -23683,6 +23683,11 @@
             "nullable": true,
             "type": "object"
           },
+          "statistically_significant": {
+            "description": "Whether `lift_confidence_interval` excludes zero, so the lift is unlikely to be noise. `false` while the interval is unknown. `null` on the control.",
+            "nullable": true,
+            "type": "boolean"
+          },
           "value": {
             "description": "The measure on this arm, in the reading's unit. `null` when unknown.",
             "example": 840.0,
