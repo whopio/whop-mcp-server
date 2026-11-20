@@ -113096,7 +113096,16 @@
           "content": {
             "application/json": {
               "schema": {
-                "properties": {},
+                "properties": {
+                  "duration_days": {
+                    "description": "Reporting window length in days, at most 7. Omit to use the default of 7 days. This does not automatically end the experiment.",
+                    "example": 7,
+                    "maximum": 7,
+                    "minimum": 1,
+                    "nullable": true,
+                    "type": "integer"
+                  }
+                },
                 "type": "object"
               }
             }
@@ -157724,10 +157733,11 @@
                                 "error": null,
                                 "operation": "createExperiment",
                                 "status": "pending",
-                                "title": "Show the change to 50% of visitors and measure it against the current site"
+                                "title": "Experiment · 50% · 7 days"
                               },
                               {
                                 "arguments": {
+                                  "duration_days": 7,
                                   "id": "{{steps[2].id}}"
                                 },
                                 "error": null,
@@ -157957,10 +157967,11 @@
                             "error": null,
                             "operation": "createExperiment",
                             "status": "pending",
-                            "title": "Show the change to 50% of visitors and measure it against the current site"
+                            "title": "Experiment · 50% · 7 days"
                           },
                           {
                             "arguments": {
+                              "duration_days": 7,
                               "id": "{{steps[2].id}}"
                             },
                             "error": null,
@@ -158021,7 +158032,7 @@
         }
       ],
       "patch": {
-        "description": "Edits the arguments of a `ready` action's steps before it runs. Send the action's `workflow` back with one entry for each step, in the same order. An entry with `arguments` replaces that step's arguments. An entry without them leaves the step as it is. Only `arguments` can change. Other step fields can be sent back only with the values the action has.",
+        "description": "Edits the arguments of a `ready` action's steps before it runs. Send the action's `workflow` back with one entry for each step, in the same order. An entry with `arguments` replaces that step's arguments. An entry without them leaves the step as it is. Only `arguments` can change. Other step fields can be sent back only with the values the action has. Changing the `kind` of the `createExperiment` step rewrites the steps around it: `beforeafter` publishes the change before measuring it, and `experiment` tests it on a share of visitors.",
         "operationId": "updateRecommendedAction",
         "parameters": [],
         "requestBody": {
@@ -158071,7 +158082,7 @@
                             },
                             "title": {
                               "description": "The step's title. It can't be changed.",
-                              "example": "Show the change to 50% of visitors and measure it against the current site",
+                              "example": "Put the Starter bundle package on sale through the website",
                               "type": "string"
                             }
                           },
@@ -158282,10 +158293,11 @@
                             "error": null,
                             "operation": "createExperiment",
                             "status": "pending",
-                            "title": "Show the change to 50% of visitors and measure it against the current site"
+                            "title": "Experiment · 50% · 7 days"
                           },
                           {
                             "arguments": {
+                              "duration_days": 7,
                               "id": "{{steps[2].id}}"
                             },
                             "error": null,
@@ -158477,10 +158489,11 @@
                             "error": null,
                             "operation": "createExperiment",
                             "status": "pending",
-                            "title": "Show the change to 50% of visitors and measure it against the current site"
+                            "title": "Experiment · 50% · 7 days"
                           },
                           {
                             "arguments": {
+                              "duration_days": 7,
                               "id": "{{steps[2].id}}"
                             },
                             "error": null,
