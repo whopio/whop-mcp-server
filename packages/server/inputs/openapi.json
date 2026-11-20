@@ -53533,6 +53533,14 @@
             "example": false,
             "type": "boolean"
           },
+          "legal_name": {
+            "description": "The legal name from the member's approved identity verification, returned to the account's own API key when listing or retrieving a partner account's team members. `null` when the member has none, for invites, on write responses, and for other callers.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "reports_to_chain": {
             "items": {
               "$ref": "#/components/schemas/TeamMemberManager",
@@ -53609,6 +53617,7 @@
           "reports_to_id",
           "direct_reports_count",
           "reports_to_chain",
+          "legal_name",
           "user"
         ],
         "type": "object"
@@ -53639,6 +53648,14 @@
             "example": "ausr_xxxxxxxxxxxxxx",
             "type": "string"
           },
+          "legal_name": {
+            "description": "The legal name from the manager's approved identity verification, returned to the account's own API key when listing a partner account's team. `null` when the manager has none, and for other callers.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "user": {
             "$ref": "#/components/schemas/UserSummary",
             "description": "The user behind the manager's team membership."
@@ -53646,6 +53663,7 @@
         },
         "required": [
           "id",
+          "legal_name",
           "user"
         ],
         "type": "object"
@@ -131785,6 +131803,15 @@
             "required": false,
             "schema": {
               "type": "string"
+            }
+          },
+          {
+            "description": "Only return badges for experiences with unread notifications.",
+            "in": "query",
+            "name": "unread",
+            "required": false,
+            "schema": {
+              "type": "boolean"
             }
           }
         ],
