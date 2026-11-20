@@ -30891,6 +30891,17 @@
       },
       "MediaAssetGeneration": {
         "properties": {
+          "ad_video": {
+            "description": "The video ad request. `null` unless the asset was generated with `ad_video`.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MediaAssetsAdVideo"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "duration_seconds": {
             "description": "Requested video length in seconds. `null` for images.",
             "example": 5,
@@ -30900,13 +30911,13 @@
             ]
           },
           "prompt": {
-            "description": "What the asset was generated from.",
+            "description": "What the asset was generated from. For a video ad, this is the prompt Whop wrote. It is empty until Whop writes it.",
             "example": "A 9:16 product showcase of a cordless power scrubber",
             "type": "string"
           },
           "reference_media": {
             "items": {
-              "description": "Reference file IDs (`file_` prefixed) supplied at generation time. Includes the video when the asset remade one.",
+              "description": "Reference file IDs (`file_` prefixed) used for the generation. Includes the video when the asset remade one, and the product photos Whop picked for a video ad.",
               "example": "file_xxxxxxxxxxxxxx",
               "type": "string"
             },
@@ -30930,9 +30941,25 @@
         },
         "required": [
           "prompt",
+          "ad_video",
           "reference_media",
           "duration_seconds",
           "resolution"
+        ],
+        "type": "object"
+      },
+      "MediaAssetsAdVideo": {
+        "properties": {
+          "ad_id": {
+            "description": "The ad, prefixed `ad_`, whose landing page the video sells. `null` when the video sells the account's own products.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "ad_id"
         ],
         "type": "object"
       },
@@ -127257,6 +127284,16 @@
                     "example": "biz_xxxxxxxxxxxxxx",
                     "type": "string"
                   },
+                  "ad_video": {
+                    "description": "Makes a video ad: Whop writes the prompt, picks product photos, and adds a voiceover with captions. The video is 15 seconds at `720p` in 9:16. Video only. Can't be combined with `prompt`, `reference_media`, `duration_seconds` or `resolution`.",
+                    "properties": {
+                      "ad_id": {
+                        "description": "An ad of the account, prefixed `ad_`. The video sells that ad's landing page and avoids what content review turned down in it. Omit it to sell the account's own products.",
+                        "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
                   "duration_seconds": {
                     "description": "Video length in seconds. Video only; defaults to 5.",
                     "enum": [
@@ -127268,7 +127305,7 @@
                     "type": "integer"
                   },
                   "prompt": {
-                    "description": "What to generate. Up to 2,000 characters.",
+                    "description": "What to generate. Up to 2,000 characters. Required unless `ad_video` is set.",
                     "example": "A 9:16 product showcase of a cordless power scrubber",
                     "type": "string"
                   },
@@ -127302,8 +127339,7 @@
                   }
                 },
                 "required": [
-                  "type",
-                  "prompt"
+                  "type"
                 ],
                 "type": "object"
               }
