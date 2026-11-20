@@ -816,19 +816,24 @@ describe("chatgpt surface", () => {
 			(tool) => tool.name === "search",
 		);
 		expect(search?.description).toContain("marketplace");
-		expect(search?.description).not.toContain("connected Whop account");
+		expect(Object.keys(search?.inputSchema.properties ?? {})).toEqual([
+			"query",
+		]);
 
 		for (const surface of ["full", "claude_directory"] as const) {
 			const older = (await builtinTools(surface)).find(
 				(tool) => tool.name === "search",
 			);
-			expect(older?.description).toContain("connected Whop account");
+			expect(older?.inputSchema.properties).toHaveProperty("account_id");
 			expect(older?.annotations).toEqual({ readOnlyHint: true });
 		}
 	});
 
-	it("searches only what answers without a business on the ChatGPT route", async () => {
-		const queried = async (surface: SurfaceName) => {
+	it("searches only what answers without a business, and every list with one", async () => {
+		const queried = async (
+			surface: SurfaceName,
+			args: Record<string, unknown> = {},
+		) => {
 			const { fetch, requests } = fakeFetch(() => ({ body: { data: [] } }));
 			const client = await connect({
 				surface,
@@ -836,18 +841,31 @@ describe("chatgpt surface", () => {
 				fetch,
 				principal: principalFixture({ principalType: "user", accountId: null }),
 			});
-			await client.callTool({ name: "search", arguments: { query: "x" } });
-			return requests.map((request) => new URL(request.url).pathname);
+			await client.callTool({
+				name: "search",
+				arguments: { query: "x", ...args },
+			});
+			return requests.map((request) => new URL(request.url));
 		};
+		const paths = (urls: URL[]) => urls.map((url) => url.pathname).sort();
 
-		const chatgpt = await queried("chatgpt");
-		expect(chatgpt).toHaveLength(2);
-		expect(chatgpt.some((path) => path.endsWith("/products"))).toBe(true);
-		expect(chatgpt.some((path) => path.endsWith("/payments"))).toBe(true);
+		for (const surface of ["chatgpt", "full"] as const) {
+			expect(paths(await queried(surface))).toEqual([
+				"/api/v1/payments",
+				"/api/v1/products",
+			]);
+		}
 
-		const full = await queried("full");
-		expect(full.some((path) => path.endsWith("/products"))).toBe(true);
-		expect(full.some((path) => path.endsWith("/members"))).toBe(false);
+		const scoped = await queried("full", { account_id: "biz_1" });
+		expect(paths(scoped)).toEqual([
+			"/api/v1/members",
+			"/api/v1/payments",
+			"/api/v1/products",
+			"/api/v1/variants",
+		]);
+		for (const url of scoped) {
+			expect(url.searchParams.get("account_id")).toBe("biz_1");
+		}
 	});
 
 	const userPrincipal = () =>

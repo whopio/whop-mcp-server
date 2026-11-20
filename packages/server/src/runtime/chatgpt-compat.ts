@@ -1,4 +1,4 @@
-import type { OperationDef } from "../registry/types.ts";
+import type { JsonSchema, OperationDef } from "../registry/types.ts";
 import type { SurfaceName } from "../policy/surfaces.ts";
 import type { PrincipalContext } from "../policy/types.ts";
 import type { BuiltinTool, ToolDefinition } from "./builtin-tool.ts";
@@ -32,9 +32,12 @@ const SEARCH_SOURCES = [
 	},
 ] as const;
 
-// search takes no business on the ChatGPT route, so it asks only the sources
-// that answer without one. Variants and members need a business.
-const CHATGPT_SEARCH_TOOLS = new Set(["products_list", "payments_list"]);
+// Without a business, the API lists products and payments but not variants
+// or members.
+const SEARCH_TOOLS_WITHOUT_ACCOUNT = new Set([
+	"products_list",
+	"payments_list",
+]);
 
 const FETCH_SOURCES: Record<string, string> = {
 	prod: "products_get",
@@ -46,19 +49,37 @@ const FETCH_SOURCES: Record<string, string> = {
 	user: "users_get",
 };
 
+const QUERY_INPUT: JsonSchema = {
+	type: "string",
+	description: "Keywords to match.",
+};
+
 const SEARCH_TOOL: ToolDefinition = {
 	name: "search",
 	description:
-		"Search the connected Whop account's products, variants, payments, and members by keyword. Returns result IDs for use with fetch.",
+		"Search a business's products, variants, payments, and members by keyword. Returns result IDs for use with fetch.",
 	inputSchema: {
 		type: "object",
 		properties: {
-			query: { type: "string", description: "Keywords to match." },
+			query: QUERY_INPUT,
+			account_id: {
+				type: "string",
+				description:
+					"Business to search (biz_). Without it, only marketplace products and your payments are searched.",
+			},
 		},
 		required: ["query"],
 		additionalProperties: false,
 	},
 	annotations: { readOnlyHint: true },
+};
+
+const CHATGPT_SEARCH_TOOL: ToolDefinition = {
+	...SEARCH_TOOL,
+	inputSchema: {
+		...SEARCH_TOOL.inputSchema,
+		properties: { query: QUERY_INPUT },
+	},
 };
 
 const FETCH_TOOL: ToolDefinition = {
@@ -112,18 +133,17 @@ function rowTitle(
 
 async function runSearch(
 	query: string,
+	accountId: string | null,
 	visibleOps: OperationDef[],
 	dispatcher: Dispatcher,
 	principal: PrincipalContext,
-	surface: SurfaceName | undefined,
 ): Promise<{ results: SearchResult[] }> {
 	const needle = query.trim().toLowerCase();
-	const pool =
-		surface === "chatgpt"
-			? SEARCH_SOURCES.filter((source) =>
-					CHATGPT_SEARCH_TOOLS.has(source.toolName),
-				)
-			: SEARCH_SOURCES;
+	const pool = accountId
+		? SEARCH_SOURCES
+		: SEARCH_SOURCES.filter((source) =>
+				SEARCH_TOOLS_WITHOUT_ACCOUNT.has(source.toolName),
+			);
 	const sources = pool
 		.map((source) => ({
 			source,
@@ -140,7 +160,13 @@ async function runSearch(
 
 	const settled = await Promise.allSettled(
 		sources.map(({ operation }) =>
-			dispatcher.dispatch(operation, {}, principal),
+			dispatcher.dispatch(
+				operation,
+				accountId && operation.accountParam
+					? { [operation.accountParam]: accountId }
+					: {},
+				principal,
+			),
 		),
 	);
 
@@ -191,13 +217,18 @@ export function chatGptTools(
 	principal: PrincipalContext,
 	surface?: SurfaceName,
 ): BuiltinTool[] {
+	const takesAccount = surface !== "chatgpt";
 	return [
 		{
-			definition: SEARCH_TOOL,
+			definition: takesAccount ? SEARCH_TOOL : CHATGPT_SEARCH_TOOL,
 			call: async (args) => {
 				const query = typeof args.query === "string" ? args.query : "";
+				const accountId =
+					takesAccount && typeof args.account_id === "string"
+						? args.account_id
+						: principal.accountId;
 				return JSON.stringify(
-					await runSearch(query, visibleOps, dispatcher, principal, surface),
+					await runSearch(query, accountId, visibleOps, dispatcher, principal),
 					null,
 					2,
 				);
