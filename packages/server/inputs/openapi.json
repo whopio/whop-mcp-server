@@ -48050,8 +48050,8 @@
             "example": "plan_xxxxxxxxxxxxxx",
             "type": "string"
           },
-          "object": {
-            "description": "Type of the resource. New types can be added, so skip an entry whose `object` you do not know.",
+          "resource_type": {
+            "description": "Type of the resource. New types can be added, so skip an entry whose `resource_type` you do not know.",
             "enum": [
               "variant"
             ],
@@ -48060,7 +48060,7 @@
           }
         },
         "required": [
-          "object",
+          "resource_type",
           "id"
         ],
         "type": "object"
@@ -157288,7 +157288,7 @@
                             "changed_resources": [
                               {
                                 "id": "plan_Xr2mQ8nVt4Ld",
-                                "object": "variant"
+                                "resource_type": "variant"
                               }
                             ],
                             "draft_build_id": "apbu_Draft9Qe4Ls",
@@ -157463,7 +157463,7 @@
                         "changed_resources": [
                           {
                             "id": "plan_Xr2mQ8nVt4Ld",
-                            "object": "variant"
+                            "resource_type": "variant"
                           }
                         ],
                         "draft_build_id": "apbu_Draft9Qe4Ls",
@@ -157730,7 +157730,7 @@
                         "changed_resources": [
                           {
                             "id": "plan_Xr2mQ8nVt4Ld",
-                            "object": "variant"
+                            "resource_type": "variant"
                           }
                         ],
                         "draft_build_id": "apbu_Draft9Qe4Ls",
@@ -157867,7 +157867,7 @@
                         "changed_resources": [
                           {
                             "id": "plan_Xr2mQ8nVt4Ld",
-                            "object": "variant"
+                            "resource_type": "variant"
                           }
                         ],
                         "draft_build_id": "apbu_Draft9Qe4Ls",
