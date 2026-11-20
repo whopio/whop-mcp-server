@@ -48220,12 +48220,10 @@
         "properties": {
           "app_id": {
             "description": "App ID of the website, prefixed `app_`.",
-            "example": "app_xxxxxxxxxxxxxx",
             "type": "string"
           },
           "base_build_id": {
             "description": "App build ID of the live build the draft was made from, prefixed `apbu_`. `null` when the website has no live build.",
-            "example": "apbu_xxxxxxxxxxxxxx",
             "type": [
               "string",
               "null"
@@ -48240,13 +48238,11 @@
           },
           "draft_build_id": {
             "description": "App build ID of the drafted build, prefixed `apbu_`.",
-            "example": "apbu_xxxxxxxxxxxxxx",
             "type": "string"
           },
           "page_paths": {
             "items": {
               "description": "Paths of the pages the draft changes, such as `/` for the home page.",
-              "example": "/",
               "type": "string"
             },
             "type": "array"
@@ -112420,6 +112416,15 @@
                     "nullable": true,
                     "type": "string"
                   },
+                  "kind": {
+                    "description": "`experiment` assigns its subjects to arms and takes `variants`. `beforeafter` compares a change with the period before it: it assigns nobody and needs `target_stats`. Defaults to `experiment`.",
+                    "enum": [
+                      "experiment",
+                      "beforeafter"
+                    ],
+                    "example": "experiment",
+                    "type": "string"
+                  },
                   "metadata": {
                     "additionalProperties": {
                       "type": "string"
@@ -112436,6 +112441,13 @@
                     "$ref": "#/components/schemas/ExperimentResourceReference",
                     "description": "Resource owned by the account that this experiment is bound to, such as an app or product. `null` when unbound. Fixed once the experiment first activates.",
                     "nullable": true
+                  },
+                  "target_stats": {
+                    "description": "The measures the experiment sets out to move, as the stats API reads them. Only an account's experiment takes them.",
+                    "items": {
+                      "$ref": "#/components/schemas/ExperimentStat"
+                    },
+                    "type": "array"
                   },
                   "variants": {
                     "description": "Treatment arms to create. Users outside every arm form the implicit `control` group. Required unless `feature_flag_only` is `true`.",
@@ -157374,6 +157386,64 @@
                                 "operation": "updatePlan",
                                 "status": "pending",
                                 "title": "Put the Pro bundle package on sale through the website"
+                              },
+                              {
+                                "arguments": {
+                                  "account_id": "biz_3xV9cT7rQwLm",
+                                  "bucket_by": "anonymous",
+                                  "control": {
+                                    "related_resource": {
+                                      "id": "apbu_Base7Kp2Vn",
+                                      "object": "app_build"
+                                    }
+                                  },
+                                  "flag_key": "ei_reca_8kq2mztv4nlp",
+                                  "hypothesis": "If we make this change to the website for visitors, then more of them will buy, because 62% leave the home page before they scroll to the pricing section. Created by Economic Intelligence.",
+                                  "kind": "experiment",
+                                  "metadata": {
+                                    "page_paths": "/"
+                                  },
+                                  "name": "Lead your home page with member results",
+                                  "related_resource": {
+                                    "id": "app_Wq81LmZr0aXk",
+                                    "object": "app"
+                                  },
+                                  "target_stats": [
+                                    {
+                                      "direction": "up",
+                                      "estimate": 1240.0,
+                                      "metric": "gross_revenue",
+                                      "params": {
+                                        "from": "2026-11-10",
+                                        "product": "prod_Xr2mQ8nVt4Ld",
+                                        "to": "2026-11-16"
+                                      }
+                                    }
+                                  ],
+                                  "variants": [
+                                    {
+                                      "name": "ei_change",
+                                      "related_resource": {
+                                        "id": "apbu_Draft9Qe4Ls",
+                                        "object": "app_build"
+                                      },
+                                      "weight": 50
+                                    }
+                                  ]
+                                },
+                                "error": null,
+                                "operation": "createExperiment",
+                                "status": "pending",
+                                "title": "Show the change to 50% of visitors and measure it against the current site"
+                              },
+                              {
+                                "arguments": {
+                                  "id": "{{steps[2].id}}"
+                                },
+                                "error": null,
+                                "operation": "activateExperiment",
+                                "status": "pending",
+                                "title": "Start the test"
                               }
                             ]
                           }
@@ -157549,6 +157619,64 @@
                             "operation": "updatePlan",
                             "status": "pending",
                             "title": "Put the Pro bundle package on sale through the website"
+                          },
+                          {
+                            "arguments": {
+                              "account_id": "biz_3xV9cT7rQwLm",
+                              "bucket_by": "anonymous",
+                              "control": {
+                                "related_resource": {
+                                  "id": "apbu_Base7Kp2Vn",
+                                  "object": "app_build"
+                                }
+                              },
+                              "flag_key": "ei_reca_8kq2mztv4nlp",
+                              "hypothesis": "If we make this change to the website for visitors, then more of them will buy, because 62% leave the home page before they scroll to the pricing section. Created by Economic Intelligence.",
+                              "kind": "experiment",
+                              "metadata": {
+                                "page_paths": "/"
+                              },
+                              "name": "Lead your home page with member results",
+                              "related_resource": {
+                                "id": "app_Wq81LmZr0aXk",
+                                "object": "app"
+                              },
+                              "target_stats": [
+                                {
+                                  "direction": "up",
+                                  "estimate": 1240.0,
+                                  "metric": "gross_revenue",
+                                  "params": {
+                                    "from": "2026-11-10",
+                                    "product": "prod_Xr2mQ8nVt4Ld",
+                                    "to": "2026-11-16"
+                                  }
+                                }
+                              ],
+                              "variants": [
+                                {
+                                  "name": "ei_change",
+                                  "related_resource": {
+                                    "id": "apbu_Draft9Qe4Ls",
+                                    "object": "app_build"
+                                  },
+                                  "weight": 50
+                                }
+                              ]
+                            },
+                            "error": null,
+                            "operation": "createExperiment",
+                            "status": "pending",
+                            "title": "Show the change to 50% of visitors and measure it against the current site"
+                          },
+                          {
+                            "arguments": {
+                              "id": "{{steps[2].id}}"
+                            },
+                            "error": null,
+                            "operation": "activateExperiment",
+                            "status": "pending",
+                            "title": "Start the test"
                           }
                         ]
                       }
@@ -157653,7 +157781,7 @@
                             },
                             "title": {
                               "description": "The step's title. It can't be changed.",
-                              "example": "Put the Starter bundle package on sale through the website",
+                              "example": "Show the change to 50% of visitors and measure it against the current site",
                               "type": "string"
                             }
                           },
@@ -157816,6 +157944,64 @@
                             "operation": "updatePlan",
                             "status": "pending",
                             "title": "Put the Pro bundle package on sale through the website"
+                          },
+                          {
+                            "arguments": {
+                              "account_id": "biz_3xV9cT7rQwLm",
+                              "bucket_by": "anonymous",
+                              "control": {
+                                "related_resource": {
+                                  "id": "apbu_Base7Kp2Vn",
+                                  "object": "app_build"
+                                }
+                              },
+                              "flag_key": "ei_reca_8kq2mztv4nlp",
+                              "hypothesis": "If we make this change to the website for visitors, then more of them will buy, because 62% leave the home page before they scroll to the pricing section. Created by Economic Intelligence.",
+                              "kind": "experiment",
+                              "metadata": {
+                                "page_paths": "/"
+                              },
+                              "name": "Lead your home page with member results",
+                              "related_resource": {
+                                "id": "app_Wq81LmZr0aXk",
+                                "object": "app"
+                              },
+                              "target_stats": [
+                                {
+                                  "direction": "up",
+                                  "estimate": 1240.0,
+                                  "metric": "gross_revenue",
+                                  "params": {
+                                    "from": "2026-11-10",
+                                    "product": "prod_Xr2mQ8nVt4Ld",
+                                    "to": "2026-11-16"
+                                  }
+                                }
+                              ],
+                              "variants": [
+                                {
+                                  "name": "ei_change",
+                                  "related_resource": {
+                                    "id": "apbu_Draft9Qe4Ls",
+                                    "object": "app_build"
+                                  },
+                                  "weight": 50
+                                }
+                              ]
+                            },
+                            "error": null,
+                            "operation": "createExperiment",
+                            "status": "pending",
+                            "title": "Show the change to 50% of visitors and measure it against the current site"
+                          },
+                          {
+                            "arguments": {
+                              "id": "{{steps[2].id}}"
+                            },
+                            "error": null,
+                            "operation": "activateExperiment",
+                            "status": "pending",
+                            "title": "Start the test"
                           }
                         ]
                       }
@@ -157941,7 +158127,7 @@
                             },
                             "error": null,
                             "operation": "updatePlan",
-                            "status": "running",
+                            "status": "succeeded",
                             "title": "Put the Starter bundle package on sale through the website"
                           },
                           {
@@ -157951,8 +158137,66 @@
                             },
                             "error": null,
                             "operation": "updatePlan",
-                            "status": "pending",
+                            "status": "running",
                             "title": "Put the Pro bundle package on sale through the website"
+                          },
+                          {
+                            "arguments": {
+                              "account_id": "biz_3xV9cT7rQwLm",
+                              "bucket_by": "anonymous",
+                              "control": {
+                                "related_resource": {
+                                  "id": "apbu_Base7Kp2Vn",
+                                  "object": "app_build"
+                                }
+                              },
+                              "flag_key": "ei_reca_8kq2mztv4nlp",
+                              "hypothesis": "If we make this change to the website for visitors, then more of them will buy, because 62% leave the home page before they scroll to the pricing section. Created by Economic Intelligence.",
+                              "kind": "experiment",
+                              "metadata": {
+                                "page_paths": "/"
+                              },
+                              "name": "Lead your home page with member results",
+                              "related_resource": {
+                                "id": "app_Wq81LmZr0aXk",
+                                "object": "app"
+                              },
+                              "target_stats": [
+                                {
+                                  "direction": "up",
+                                  "estimate": 1240.0,
+                                  "metric": "gross_revenue",
+                                  "params": {
+                                    "from": "2026-11-10",
+                                    "product": "prod_Xr2mQ8nVt4Ld",
+                                    "to": "2026-11-16"
+                                  }
+                                }
+                              ],
+                              "variants": [
+                                {
+                                  "name": "ei_change",
+                                  "related_resource": {
+                                    "id": "apbu_Draft9Qe4Ls",
+                                    "object": "app_build"
+                                  },
+                                  "weight": 50
+                                }
+                              ]
+                            },
+                            "error": null,
+                            "operation": "createExperiment",
+                            "status": "pending",
+                            "title": "Show the change to 50% of visitors and measure it against the current site"
+                          },
+                          {
+                            "arguments": {
+                              "id": "{{steps[2].id}}"
+                            },
+                            "error": null,
+                            "operation": "activateExperiment",
+                            "status": "pending",
+                            "title": "Start the test"
                           }
                         ]
                       }
