@@ -884,6 +884,94 @@
         ],
         "type": "object"
       },
+      "AccountAffiliateProgram": {
+        "properties": {
+          "application_questions": {
+            "items": {
+              "$ref": "#/components/schemas/AccountAffiliateProgramQuestion",
+              "description": "The questions the affiliate application asks, in order. Empty when the application asks none."
+            },
+            "type": "array"
+          },
+          "application_required": {
+            "description": "Whether a person must apply and get approval to become an affiliate of the account.",
+            "example": true,
+            "type": "boolean"
+          },
+          "featured_product_id": {
+            "description": "The product the account features for affiliates, prefixed `prod_`. `null` when none is featured.",
+            "example": "prod_xxxxxxxxxxxxxx",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "instructions": {
+            "description": "The instructions the account shows its affiliates on how to promote it. `null` when none are set.",
+            "example": "Share your link on your socials.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "instructions",
+          "application_required",
+          "application_questions",
+          "featured_product_id"
+        ],
+        "type": "object"
+      },
+      "AccountAffiliateProgramQuestion": {
+        "properties": {
+          "field_type": {
+            "description": "The input type of the answer.",
+            "enum": [
+              "text"
+            ],
+            "example": "text",
+            "type": "string"
+          },
+          "id": {
+            "description": "Question ID, prefixed `field_`.",
+            "example": "field_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "name": {
+            "description": "The question, shown as the field label.",
+            "example": "Where do you post?",
+            "type": "string"
+          },
+          "order": {
+            "description": "The question's position on the application, starting at 0.",
+            "example": 0,
+            "type": "number"
+          },
+          "placeholder": {
+            "description": "Placeholder text shown in the empty answer field. `null` if none is set.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "required": {
+            "description": "Whether an applicant must answer this question.",
+            "example": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "field_type",
+          "placeholder",
+          "required",
+          "order"
+        ],
+        "type": "object"
+      },
       "AccountBalanceBreakdown": {
         "properties": {
           "available": {
@@ -1185,7 +1273,7 @@
             ]
           },
           "status": {
-            "description": "Where the card application stands. `approved` means cards can be issued. `needs_verification` means the applicant has not completed identity verification yet; `needs_information` means they did, but the documents were rejected for a fixable reason and must be resubmitted. `pending` and `manual_review` are in flight. `denied`, `locked`, and `canceled` are terminal.",
+            "description": "Where the card application stands. `approved` means cards can be issued. `needs_verification` means the applicant has not completed identity verification yet. `needs_information` means they did, but the documents were rejected for a fixable reason and must be resubmitted. `pending` and `manual_review` are in flight. `denied`, `locked`, and `canceled` are terminal.",
             "enum": [
               "approved",
               "pending",
@@ -6179,6 +6267,10 @@
             "description": "The account's Triple Whale integration, which pushes Whop ad spend to Triple Whale's Data-In API so it reports as a `whop` channel, and tags ad click-through URLs with `tw_source`/`tw_adid` so Triple Whale's pixel attributes conversions back to the right ad. `status` is `connected`, `not_connected`, or `requires_shop_domain` (Triple Whale keys records by shop, so spend only flows once `shop_domain` is set). `masked_api_key` shows the leading characters of the stored key; the full key is never returned. `shop_domain` is the shop spend is reported for.",
             "type": "object"
           },
+          "affiliate_program": {
+            "$ref": "#/components/schemas/AccountAffiliateProgram",
+            "description": "The account's affiliate program: its instructions, its application and the product it features for affiliates. `GET /accounts/{account_id}/affiliate_program` returns the same object without authentication."
+          },
           "cancellation_emails": {
             "description": "Whether Whop emails members when their membership is canceled or terminated. `true` by default. Set it to `false` to stop these emails while keeping the account's other customer emails. They also stop while the account's `send_customer_emails` is `false`.",
             "type": "boolean"
@@ -6378,7 +6470,8 @@
           "subscription_failure_behavior",
           "customer_tracking",
           "off_session_payment_rules",
-          "card_surcharge"
+          "card_surcharge",
+          "affiliate_program"
         ],
         "type": "object"
       },
@@ -59564,6 +59657,49 @@
       ],
       "x-whop-surface": "native"
     },
+    "/accounts/{account_id}/affiliate_program": {
+      "get": {
+        "description": "Retrieves the account's affiliate program. It holds the instructions for its affiliates, its affiliate application and the product it features for affiliates. This endpoint needs no authentication. To change the program, update the `affiliate_program` key of the account's preferences. To turn affiliates on or off, set `global_affiliate_status` and `member_affiliate_status` on each product.",
+        "operationId": "retrieveAccountAffiliateProgram",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountAffiliateProgram"
+                }
+              }
+            },
+            "description": "affiliate program retrieved"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "account not found"
+          }
+        },
+        "security": [],
+        "summary": "Retrieve Account Affiliate Program",
+        "tags": [
+          "Accounts"
+        ],
+        "x-whop-docs-subgroup": "Affiliate program"
+      },
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "The account ID, prefixed `biz_`.",
+          "in": "path",
+          "name": "account_id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "x-whop-surface": "native"
+    },
     "/accounts/{account_id}/customer_tracking": {
       "get": {
         "description": "Retrieves the branding and support contacts the account's hosted customer tracking page and tracking Element display. Public by design, so no authentication is required. Returns 404 unless the account has turned customer tracking on in its preferences. Responses are never cached.",
@@ -62008,6 +62144,10 @@
                       ],
                       "type": "object"
                     },
+                    "affiliate_program": {
+                      "$ref": "#/components/schemas/AccountAffiliateProgram",
+                      "description": "The account's affiliate program: its instructions, its application and the product it features for affiliates. `GET /accounts/{account_id}/affiliate_program` returns the same object without authentication."
+                    },
                     "cancellation_emails": {
                       "description": "Whether Whop emails members when their membership is canceled or terminated. `true` by default. Set it to `false` to stop these emails while keeping the account's other customer emails. They also stop while the account's `send_customer_emails` is `false`.",
                       "example": true,
@@ -62291,6 +62431,7 @@
                   },
                   "required": [
                     "card_surcharge",
+                    "affiliate_program",
                     "ads_payment_methods",
                     "ads_reporting_currency",
                     "ads_scheduling_timezone",
@@ -62356,6 +62497,11 @@
             "bearerAuth": [
               "company:update"
             ]
+          },
+          {
+            "bearerAuth": [
+              "affiliate:update"
+            ]
           }
         ],
         "summary": "Retrieve Account Preferences",
@@ -62375,7 +62521,7 @@
         }
       ],
       "patch": {
-        "description": "Updates the account's preferences. Each top-level key in the body replaces its stored value as a whole. Keys left out keep their current values.\n\nThe required scope depends on which preferences you update.\n\n- `ad_campaign:create`: `ads_payment_methods`, `ads_reporting_currency`, `ads_scheduling_timezone`, `ads_triple_whale_integration`.\n- `payout:account:update`: `cards_auto_top_up`, `cards_notifications`, `covers_subaccount_negative_balances`, `merchant_of_record`.\n- `payment:manage`: `off_session_payment_rules`.\n- `payment:dispute`: `dispute_fighter_enabled`.\n- `company:update`: `economic_intelligence_duration_key`, `economic_intelligence_auto_renew`, `review_request_emails`, `cancellation_emails`, `renewal_reminder_emails`, `failed_payment_emails`, `subaccount_notifications`, `subaccount_team_view_only`, `card_surcharge`.\n- `company:manage_checkout`: `feedback_options`, `customer_tracking`.\n\nTo update keys under more than one scope, the API key needs all of those scopes.\n",
+        "description": "Updates the account's preferences. Keys left out keep their current values. In `affiliate_program` and `ads_triple_whale_integration`, only the fields you send change. `customer_tracking`, `card_surcharge` and `ads_payment_methods` replace their stored value as a whole.\n\nThe required scope depends on which preferences you update.\n\n- `ad_campaign:create`: `ads_payment_methods`, `ads_reporting_currency`, `ads_scheduling_timezone`, `ads_triple_whale_integration`.\n- `payout:account:update`: `cards_auto_top_up`, `cards_notifications`, `covers_subaccount_negative_balances`, `merchant_of_record`.\n- `payment:manage`: `off_session_payment_rules`.\n- `payment:dispute`: `dispute_fighter_enabled`.\n- `company:update`: `economic_intelligence_duration_key`, `economic_intelligence_auto_renew`, `review_request_emails`, `cancellation_emails`, `renewal_reminder_emails`, `failed_payment_emails`, `subaccount_notifications`, `subaccount_team_view_only`, `card_surcharge`.\n- `company:manage_checkout`: `feedback_options`, `customer_tracking`.\n- `affiliate:update`: `affiliate_program`.\n\nTo update keys under more than one scope, the API key needs all of those scopes.\n",
         "operationId": "updateAccountPreferences",
         "parameters": [
           {
@@ -62466,6 +62612,75 @@
                         "description": "The exact shop domain in Triple Whale's Settings → Store. For Shopify, this is the `.myshopify.com` domain. For a custom sales platform, it is the domain Triple Whale assigned when the shop was set up. Whop strips a leading `https://` and a trailing `/`. What remains must be a bare hostname with no path or spaces. Whop validates it against Triple Whale before storing it, and the API key must have access to it. Omit to keep the stored domain. You can't clear a stored value, only overwrite it with a new domain.",
                         "example": "custom-store.example.com",
                         "type": "string"
+                      }
+                    },
+                    "type": "object"
+                  },
+                  "affiliate_program": {
+                    "additionalProperties": false,
+                    "description": "The account's affiliate program. Only the fields you send change, and fields left out keep their current values. To clear a field, set it to `null`. To turn affiliates on or off, set `global_affiliate_status` and `member_affiliate_status` on each product with `PATCH /products/{id}`. Requires the `affiliate:update` scope on your API key.",
+                    "properties": {
+                      "application_questions": {
+                        "description": "The questions the affiliate application asks, in order. A question with an `id` is updated, a question without one is added, and questions left out are removed. Up to 20 questions. Pass an empty array or `null` to remove every question.",
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "field_type": {
+                              "description": "The input type of the answer. Required for a new question.",
+                              "enum": [
+                                "text"
+                              ],
+                              "example": "text",
+                              "type": "string"
+                            },
+                            "id": {
+                              "description": "The ID of one of the account's questions, prefixed `field_`. Fields you leave out keep their values. An ID the account doesn't have is a `400`.",
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "name": {
+                              "description": "The question, shown as the field label. Required for a new question.",
+                              "type": "string"
+                            },
+                            "placeholder": {
+                              "description": "Placeholder text shown in the empty field. Pass `null` to clear it.",
+                              "type": [
+                                "string",
+                                "null"
+                              ]
+                            },
+                            "required": {
+                              "description": "Whether an answer is required. Defaults to `true` for a new question.",
+                              "type": "boolean"
+                            }
+                          },
+                          "type": "object"
+                        },
+                        "maxItems": 20,
+                        "type": [
+                          "array",
+                          "null"
+                        ]
+                      },
+                      "application_required": {
+                        "description": "Whether a person must apply and get approval to become an affiliate.",
+                        "type": "boolean"
+                      },
+                      "featured_product_id": {
+                        "description": "The product to feature for affiliates, prefixed `prod_`. It must belong to the account and allow global affiliates. Pass `null` to clear it.",
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      "instructions": {
+                        "description": "The instructions for the account's affiliates. Pass `null` or an empty string to clear them.",
+                        "type": [
+                          "string",
+                          "null"
+                        ]
                       }
                     },
                     "type": "object"
@@ -62596,7 +62811,7 @@
                     "type": "boolean"
                   },
                   "feedback_options": {
-                    "description": "Replaces the account's own cancel reasons, shown to members in this order when they cancel. Pass an option's `id` to keep it, for example when renaming it; options without an `id` are added, and options left out are removed. Pass an empty array to go back to Whop's default reasons. Members who already picked an option keep the label they saw. Requires the `company:manage_checkout` scope on your API key.",
+                    "description": "Replaces the account's own cancel reasons, shown to members in this order when they cancel. Pass an option's `id` to keep it, for example when renaming it. Options without an `id` are added, and options left out are removed. Pass an empty array to go back to Whop's default reasons. Members who already picked an option keep the label they saw. Requires the `company:manage_checkout` scope on your API key.",
                     "items": {
                       "properties": {
                         "category": {
@@ -62959,6 +63174,10 @@
                       ],
                       "type": "object"
                     },
+                    "affiliate_program": {
+                      "$ref": "#/components/schemas/AccountAffiliateProgram",
+                      "description": "The account's affiliate program: its instructions, its application and the product it features for affiliates. `GET /accounts/{account_id}/affiliate_program` returns the same object without authentication."
+                    },
                     "cancellation_emails": {
                       "description": "Whether Whop emails members when their membership is canceled or terminated. `true` by default. Set it to `false` to stop these emails while keeping the account's other customer emails. They also stop while the account's `send_customer_emails` is `false`.",
                       "example": true,
@@ -63240,6 +63459,7 @@
                   },
                   "required": [
                     "card_surcharge",
+                    "affiliate_program",
                     "ads_payment_methods",
                     "ads_reporting_currency",
                     "ads_scheduling_timezone",
@@ -63312,6 +63532,11 @@
           {
             "bearerAuth": [
               "company:update"
+            ]
+          },
+          {
+            "bearerAuth": [
+              "affiliate:update"
             ]
           }
         ],
@@ -182868,7 +183093,7 @@
     },
     "ad.updated": {
       "post": {
-        "description": "Sent when an ad's status, delivery_status, or content_review changes. A content_review change can leave the status as it was, such as new rules broken on a rejected ad. When Whop's content policy changes, Whop stops recommending ads reviewed under the old policy without an event. Each such ad sends ad.updated when Whop reviews it again. previous_attributes holds only the fields that changed, with the values they changed from. The payload carries no performance stats\n\nRequired permissions:\n - `webhook_receive:ads`",
+        "description": "Sent when an ad's status, delivery_status, content_review, or content changes. Its content is title, primary_texts, headlines, descriptions, call_to_action, url, url_parameters, and creatives. Content edits while its campaign is a draft send nothing. A content_review change can leave the status as it was, such as new rules broken on a rejected ad. When Whop's content policy changes, Whop stops recommending ads reviewed under the old policy without an event. Each such ad sends ad.updated when Whop reviews it again. previous_attributes holds only the fields that changed, with the values they changed from. The payload carries no performance stats\n\nRequired permissions:\n - `webhook_receive:ads`",
         "parameters": [
           {
             "in": "header",
@@ -183565,7 +183790,7 @@
     },
     "ad_campaign.updated": {
       "post": {
-        "description": "Sent when an ad campaign's status or delivery_status changes. previous_attributes carries the values they changed from; the payload carries no performance stats\n\nRequired permissions:\n - `webhook_receive:ad_campaigns`",
+        "description": "Sent when an ad campaign's status, delivery_status, budget_amount, budget_type, or settings change. Its settings are title, objective, special_ad_categories, budget_optimization, starts_at, ends_at, and desired_cost_per_result. Settings edits on a draft campaign send nothing. previous_attributes carries the values the fields changed from. The payload carries no performance stats\n\nRequired permissions:\n - `webhook_receive:ad_campaigns`",
         "parameters": [
           {
             "in": "header",
@@ -183938,7 +184163,7 @@
     },
     "ad_group.updated": {
       "post": {
-        "description": "Sent when an ad group's status, delivery_status, or budget changes. previous_attributes carries the values they changed from; the payload carries no performance stats\n\nRequired permissions:\n - `webhook_receive:ad_groups`",
+        "description": "Sent when an ad group's status, delivery_status, budget_amount, budget_type, or settings change. Its settings are title, conversion_event, bid_type, desired_cost_per_result, starts_at, ends_at, delivery_schedule, regions, demographics, audiences, languages, devices, and keywords. Settings edits while its campaign is a draft send nothing. previous_attributes carries the values the fields changed from. The payload carries no performance stats\n\nRequired permissions:\n - `webhook_receive:ad_groups`",
         "parameters": [
           {
             "in": "header",
