@@ -176,6 +176,33 @@ export const FLOWS: readonly Flow[] = [
 				does: "Stop one later.",
 				optional: true,
 			},
+			{
+				tool: "affiliates_unarchive",
+				does: "Bring an archived one back.",
+				optional: true,
+			},
+		],
+	},
+	{
+		group: "selling",
+		title: "Review waitlist signups",
+		steps: [
+			{
+				tool: "waitlist-entries_list",
+				does: "Pass `status: pending` and `product_id` for one product.",
+			},
+			{
+				tool: "waitlist-entries_approve",
+				does: "Let one in. A paid signup may be charged its saved payment method.",
+				optional: true,
+				choice: true,
+			},
+			{
+				tool: "waitlist-entries_deny",
+				does: "Turn one down.",
+				optional: true,
+				choice: true,
+			},
 		],
 	},
 	{
@@ -225,6 +252,11 @@ export const FLOWS: readonly Flow[] = [
 				optional: true,
 			},
 			{
+				tool: "channels_mark_unread",
+				does: "Mark one unread to come back to it.",
+				optional: true,
+			},
+			{
 				tool: "channels_reopen",
 				does: "Reopen a resolved support chat.",
 				optional: true,
@@ -241,6 +273,70 @@ export const FLOWS: readonly Flow[] = [
 				does: "Pass `kind: private` and `participant_user_ids` with their `user_` id.",
 			},
 			{ tool: "messages_create", does: "Send the message." },
+		],
+	},
+	{
+		group: "customers",
+		title: "Add or remove someone in a chat",
+		steps: [
+			{ tool: "channels_list", does: "Find the DM or support chat." },
+			{
+				tool: "channel-members_create",
+				does: "Add someone, such as a teammate, by their `user_` id.",
+				optional: true,
+				choice: true,
+			},
+			{
+				tool: "channel-members_list",
+				does: "Find the channel member id of someone to remove.",
+				optional: true,
+			},
+			{
+				tool: "channel-members_delete",
+				does: "Remove them with that id.",
+				optional: true,
+				choice: true,
+			},
+		],
+	},
+	{
+		group: "customers",
+		title: "Look after one customer",
+		steps: [
+			{
+				tool: "members_list",
+				does: "Find the customer. `query` matches a name or username.",
+			},
+			{
+				tool: "memberships_list",
+				does: "Pass `member_id` to see what they have.",
+				optional: true,
+			},
+			{
+				tool: "members_notes_create",
+				does: "Leave a note the team can see.",
+				optional: true,
+			},
+			{
+				tool: "members_update",
+				does: "Fix their name or store metadata.",
+				optional: true,
+			},
+			{
+				tool: "memberships_resync_access",
+				does: "Re-grant access when they paid but can't get in, including Discord roles.",
+				optional: true,
+			},
+			{
+				tool: "payments_list",
+				does: "Pass `member_id` to find the payment they need a receipt for.",
+				optional: true,
+			},
+			{
+				tool: "payments_generate_pdf",
+				does: "Get a receipt for one payment as a short-lived PDF link.",
+				optional: true,
+			},
 		],
 	},
 	{
@@ -445,8 +541,18 @@ export const FLOWS: readonly Flow[] = [
 				optional: true,
 			},
 			{
+				tool: "course-chapters_update",
+				does: "Rename a chapter.",
+				optional: true,
+			},
+			{
 				tool: "course-chapters_delete",
 				does: "Remove a chapter.",
+				optional: true,
+			},
+			{
+				tool: "courses_delete",
+				does: "Delete the whole course, with its lessons and student progress. This can't be undone.",
 				optional: true,
 			},
 		],
@@ -467,6 +573,75 @@ export const FLOWS: readonly Flow[] = [
 				does: "Take it away from a product's buyers.",
 				optional: true,
 				choice: true,
+			},
+			{
+				tool: "experiences_duplicate",
+				does: "Copy it to the same products. Posts, messages and lessons aren't copied.",
+				optional: true,
+				choice: true,
+			},
+			{
+				tool: "experiences_delete",
+				does: "Delete it, which removes every buyer's access.",
+				optional: true,
+				choice: true,
+			},
+		],
+	},
+	{
+		group: "content",
+		title: "Moderate a chat",
+		steps: [
+			{ tool: "experiences_list", does: "Find the chat." },
+			{
+				tool: "messages_list",
+				does: "Pass the chat's experience id as `channel_id`.",
+			},
+			{
+				tool: "messages_pin",
+				does: "Pin a message.",
+				optional: true,
+			},
+			{
+				tool: "messages_unpin",
+				does: "Unpin one.",
+				optional: true,
+			},
+			{
+				tool: "messages_delete",
+				does: "Remove a message.",
+				optional: true,
+			},
+			{
+				tool: "messages_update",
+				does: "Edit a message the user wrote.",
+				optional: true,
+			},
+			{
+				tool: "messages_react",
+				does: "React with an emoji.",
+				optional: true,
+			},
+		],
+	},
+	{
+		group: "content",
+		title: "Moderate a forum",
+		steps: [
+			{ tool: "experiences_list", does: "Find the forum." },
+			{
+				tool: "forum-posts_list",
+				does: "Read its posts, or pass `parent_id` for a post's comments.",
+			},
+			{
+				tool: "forum-posts_update",
+				does: "Edit a post, pin it with `is_pinned`, or set `visibility`.",
+				optional: true,
+			},
+			{
+				tool: "forums_update",
+				does: "Change `who_can_post` or `who_can_comment`, or add `banned_words`. Its id can be the forum's experience id.",
+				optional: true,
 			},
 		],
 	},

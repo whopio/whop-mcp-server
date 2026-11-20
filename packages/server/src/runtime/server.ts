@@ -380,12 +380,8 @@ export function createWhopMcpServer(
 		collectsIntent && asksForIntent ? withIntentContext(schema) : schema;
 	const listedOperations = compact
 		? operations
-				.filter((op) => listedOnSurface(op, options.surface))
-				.sort(
-					(a, b) =>
-						(a.core ?? 10_000 + (a.muse ?? 0)) -
-						(b.core ?? 10_000 + (b.muse ?? 0)),
-				)
+				.filter((op) => listedOnSurface(op))
+				.sort((a, b) => (a.core ?? 0) - (b.core ?? 0))
 		: operations;
 
 	const auditSink = options.auditSink ?? new InMemoryAuditSink();

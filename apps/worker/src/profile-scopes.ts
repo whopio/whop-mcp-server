@@ -334,7 +334,7 @@ export function expandMuseToWhopScopes(operations: OperationDef[]): string[] {
 	for (const operation of operations) {
 		if (!operationInSurface(operation, "muse")) continue;
 		const listedWrite =
-			listedOnSurface(operation, "muse") && !operation.annotations.readOnlyHint;
+			listedOnSurface(operation) && !operation.annotations.readOnlyHint;
 		for (const scope of operation.scopes) {
 			if (!GRANTABLE.has(scope) || MUSE_DENIED_WHOP_SCOPES.has(scope)) continue;
 			if (listedWrite || isReadNamedScope(scope)) requested.add(scope);

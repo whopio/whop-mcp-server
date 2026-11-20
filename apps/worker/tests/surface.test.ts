@@ -145,7 +145,7 @@ describe("per-route tool surfaces", () => {
 		}
 	});
 
-	it("serves /mcp's core tools plus the Muse list, and refunds as the only money writes, to a Muse grant", async () => {
+	it("serves /mcp's core tools, and refunds as the only money writes, to a Muse grant", async () => {
 		const muse = {
 			...props,
 			profile: "muse",
@@ -173,14 +173,9 @@ describe("per-route tool surfaces", () => {
 		const operationNames = new Set(
 			registry.operations.map((op) => op.toolName),
 		);
-		const museOnly = registry.operations
-			.filter((op) => op.muse !== undefined)
-			.sort((a, b) => (a.muse ?? 0) - (b.muse ?? 0))
-			.map((op) => op.toolName);
-		expect(names.filter((name) => operationNames.has(name))).toEqual([
-			...full.filter((name) => operationNames.has(name)),
-			...museOnly,
-		]);
+		expect(names.filter((name) => operationNames.has(name))).toEqual(
+			full.filter((name) => operationNames.has(name)),
+		);
 		const result = (await rpc(
 			"muse",
 			"/muse/mcp",

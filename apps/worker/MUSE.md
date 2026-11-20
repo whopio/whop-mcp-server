@@ -154,7 +154,6 @@ for approval on every use.
 | `shipments_create` | Adds a carrier tracking number to a customer's order | `shipment:create` |
 | `shipments_update` | Changes an order's tracking number | `shipment:create` |
 | `waitlist-entries_deny` | Turns down someone waiting to join a product | `plan:waitlist:manage` |
-| `products_unpublish` | Removes a product from the Whop marketplace | `access_pass:update` |
 | `products_delete` | Deletes a product | `access_pass:delete` |
 | `variants_delete` | Deletes a price from a product | `plan:delete` |
 | `promo-codes_delete` | Archives a promo code for good | `promo_code:delete` |

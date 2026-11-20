@@ -22,10 +22,8 @@ import {
 } from "./helpers.ts";
 
 const registry = buildRealRegistry();
-const TOOL_LIST_BUDGET_BYTES = 175_000;
-const MUSE_TOOL_LIST_BUDGET_BYTES = 200_000;
-const MAX_LISTED_OPERATIONS = 48;
-const MUSE_MAX_LISTED_OPERATIONS = 115;
+const TOOL_LIST_BUDGET_BYTES = 260_000;
+const MAX_LISTED_OPERATIONS = 100;
 const OPERATION_TOOLS = [
 	"search_operations",
 	"describe_operation",
@@ -82,18 +80,12 @@ describe("compact tool listing", () => {
 					});
 					const result = await client.listTools();
 					const bytes = new TextEncoder().encode(JSON.stringify(result)).length;
-					expect(bytes).toBeLessThanOrEqual(
-						surface === "muse"
-							? MUSE_TOOL_LIST_BUDGET_BYTES
-							: TOOL_LIST_BUDGET_BYTES,
-					);
+					expect(bytes).toBeLessThanOrEqual(TOOL_LIST_BUDGET_BYTES);
 					const listedOperations = result.tools.filter((tool) =>
 						registry.operations.some((op) => op.toolName === tool.name),
 					);
 					expect(listedOperations.length).toBeLessThanOrEqual(
-						surface === "muse"
-							? MUSE_MAX_LISTED_OPERATIONS
-							: MAX_LISTED_OPERATIONS,
+						MAX_LISTED_OPERATIONS,
 					);
 				});
 			}
@@ -231,19 +223,14 @@ describe("muse surface", () => {
 		return (await client.listTools()).tools;
 	}
 
-	it("lists /mcp's core tools, then its own muse list, and refunds as the only money writes", async () => {
+	it("lists the same tools as /mcp, with refunds as the only money writes", async () => {
 		const coreOnMcp = (await listed())
 			.map((tool) => tool.name)
 			.filter((name) => operationNames.has(name));
 		const onMuse = (await listed("muse"))
 			.map((tool) => tool.name)
 			.filter((name) => operationNames.has(name));
-		const museOnly = registry.operations
-			.filter((op) => op.muse !== undefined)
-			.sort((a, b) => (a.muse ?? 0) - (b.muse ?? 0))
-			.map((op) => op.toolName);
-		expect(onMuse).toEqual([...coreOnMcp, ...museOnly]);
-		for (const name of museOnly) expect(coreOnMcp).not.toContain(name);
+		expect(onMuse).toEqual(coreOnMcp);
 		const moneyOnMuse = registry.operations
 			.filter((op) => movesMoney(op) && onMuse.includes(op.toolName))
 			.map((op) => `${op.method.toUpperCase()} ${op.path}`)
@@ -274,9 +261,7 @@ describe("muse surface", () => {
 			surface: "muse",
 		});
 		const writes = reachable.filter((op) => !op.annotations.readOnlyHint);
-		expect(
-			writes.every((op) => op.core !== undefined || op.muse !== undefined),
-		).toBe(true);
+		expect(writes.every((op) => op.core !== undefined)).toBe(true);
 		expect(
 			reachable
 				.filter(movesMoney)

@@ -16,8 +16,7 @@ import type { OperationDef } from "../registry/types.ts";
  *                     business on Whop, including AI media and domains. No
  *                     one-off customer charges, refunds, or money movement.
  *   muse              the Muse connector listing: the core operations /mcp
- *                     lists plus the `muse` list in operation-overrides.yml,
- *                     minus writes that move money other than the refunds in
+ *                     lists, minus writes that move money other than the refunds in
  *                     MUSE_REFUND_WRITES, plus every read that read scopes
  *                     alone can run. Muse reviews and approves tools one by
  *                     one, so the only writes reachable are listed ones, and
@@ -368,12 +367,8 @@ export const MUSE_REFUND_WRITES: ReadonlySet<string> = new Set([
 	"POST /resolution_center_cases/{id}/accept",
 ]);
 
-export function listedOnSurface(
-	operation: OperationDef,
-	surface: SurfaceName | undefined,
-): boolean {
-	if (operation.core !== undefined) return true;
-	return surface === "muse" && operation.muse !== undefined;
+export function listedOnSurface(operation: OperationDef): boolean {
+	return operation.core !== undefined;
 }
 
 export function isSurfaceName(value: string): value is SurfaceName {
@@ -386,7 +381,7 @@ export function operationInSurface(
 ): boolean {
 	if (surface === "muse") {
 		if (operation.annotations.readOnlyHint) return runsOnReadScopes(operation);
-		if (!listedOnSurface(operation, "muse")) return false;
+		if (!listedOnSurface(operation)) return false;
 		return (
 			!movesMoney(operation) ||
 			MUSE_REFUND_WRITES.has(

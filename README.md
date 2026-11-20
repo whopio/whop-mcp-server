@@ -38,7 +38,7 @@ than placed in the client configuration or exposed to the model.
 
 ## Tools
 
-The hosted endpoint lists about 45 Whop operations as their own tools, picked
+The hosted endpoint lists about 95 Whop operations as their own tools, picked
 for the jobs creators ask an agent to do: payments, memberships, products,
 prices, checkout links, support chats, and courses. Every other operation your
 connection can use is reached through four tools:
@@ -58,7 +58,7 @@ leave optional inputs out of their listed schema to keep the listing small;
 
 The core list and those schema trims live in
 `packages/server/metadata/operation-overrides.yml`. A test keeps the hosted
-`tools/list` response under 175 KB for every permission profile. The local
+`tools/list` response under 260 KB for every permission profile. The local
 stdio adapter lists every operation.
 
 ## Access and safety

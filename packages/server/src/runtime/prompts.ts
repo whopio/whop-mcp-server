@@ -328,6 +328,49 @@ export const GUIDE_PROMPTS: readonly GuidePrompt[] = [
 	},
 	{
 		prompt: {
+			name: "manage_member",
+			title: "Look after a customer",
+			description:
+				"Look up one customer's memberships and payments, then add a note, fix their access or get a receipt.",
+			arguments: [
+				{
+					name: "member",
+					description: "The customer's name, username or email.",
+					required: true,
+				},
+				{
+					name: "request",
+					description:
+						'What they need, such as "can\'t get into Discord" or "wants a receipt".',
+					required: false,
+				},
+				BUSINESS_ARGUMENT,
+			],
+		},
+		requiredTools: [
+			"accounts_list",
+			"members_list",
+			"memberships_list",
+			"payments_list",
+			"members_notes_create",
+			"memberships_resync_access",
+			"payments_generate_pdf",
+		],
+		render: (args, n) =>
+			[
+				`Help me with this customer at ${business(args)}: ${args.member}${args.request ? `. They need: ${args.request}` : ""}`,
+				"",
+				`1. ${findBusiness(n)} Find the customer with ${n("members_list")} and query. If more than one could match, ask me which.`,
+				`2. Show their memberships (${n("memberships_list")} with member_id) and recent payments (${n("payments_list")} with member_id).`,
+				"3. Suggest what to do. The choices:",
+				`   - If they paid but can't get in, re-grant access with ${n("memberships_resync_access")}.`,
+				`   - For a receipt, get a PDF link for the payment with ${n("payments_generate_pdf")}. The link expires soon, so share it right away.`,
+				`   - Leave a note for my team with ${n("members_notes_create")}.`,
+				`4. Tell me what you'll do and ${ASK_FIRST} before each change.`,
+			].join("\n"),
+	},
+	{
+		prompt: {
 			name: "refund_payment",
 			title: "Refund a payment",
 			description: "Refund all or part of a customer's payment.",
@@ -458,6 +501,45 @@ export const GUIDE_PROMPTS: readonly GuidePrompt[] = [
 				`3. Show me the final text and where it will go, and ${ASK_FIRST}. Ask before setting is_mention, which notifies everyone there.`,
 				`4. In a forum, post with ${n("forum-posts_create")} (experience_id and content). In a chat, send it with ${n("messages_create")} (channel_id is the chat's experience id, and content).`,
 				"5. Tell me where it was posted.",
+			].join("\n"),
+	},
+	{
+		prompt: {
+			name: "moderate_community",
+			title: "Moderate the community",
+			description:
+				"Review recent posts and messages in a forum or chat, then pin, hide, remove or tighten who can post.",
+			arguments: [
+				{
+					name: "where",
+					description:
+						"The forum or chat to review. Leave empty to choose from a list.",
+					required: false,
+				},
+				BUSINESS_ARGUMENT,
+			],
+		},
+		requiredTools: [
+			"accounts_list",
+			"experiences_list",
+			"forum-posts_list",
+			"messages_list",
+			"forum-posts_update",
+			"forums_update",
+			"messages_pin",
+			"messages_delete",
+		],
+		render: (args, n) =>
+			[
+				`Help me moderate the community at ${business(args)}${args.where ? `, starting with "${args.where}"` : ""}.`,
+				"",
+				`1. ${findBusiness(n)}`,
+				`2. Find the forum or chat with ${n("experiences_list")}.${args.where ? "" : " If more than one fits, ask me which."}`,
+				`3. In a forum, read recent posts with ${n("forum-posts_list")}. In a chat, read recent messages with ${n("messages_list")} (channel_id is the chat's experience id).`,
+				"4. Point out spam, abuse, off-topic posts and anything worth pinning. Suggest what to do:",
+				`   - In a forum, pin, edit or hide a post with ${n("forum-posts_update")}, or limit who can post or comment, or add banned words, with ${n("forums_update")}.`,
+				`   - In a chat, pin a message with ${n("messages_pin")} or remove one with ${n("messages_delete")}.`,
+				`5. Show me each change and ${ASK_FIRST}. Removing a message can't be undone.`,
 			].join("\n"),
 	},
 	{
