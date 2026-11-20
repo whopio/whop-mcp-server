@@ -16018,6 +16018,17 @@
               "null"
             ]
           },
+          "automation": {
+            "description": "The automation that sent this message. `null` for a message no automation sent, a deleted message, or a caller without `automation:read` on the automation's account.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/MessageAutomation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "channel_id": {
             "example": "feed_xxxxxxxxxxxxxxxxxxxxxx",
             "type": "string"
@@ -16200,7 +16211,8 @@
           "author",
           "gifs",
           "embeds",
-          "external_message"
+          "external_message",
+          "automation"
         ],
         "type": "object"
       },
@@ -33176,6 +33188,23 @@
           "view_count",
           "reaction_counts",
           "poll_votes"
+        ],
+        "type": "object"
+      },
+      "MessageAutomation": {
+        "properties": {
+          "id": {
+            "description": "Automation ID, prefixed `ato_`.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The automation's name.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
         ],
         "type": "object"
       },
