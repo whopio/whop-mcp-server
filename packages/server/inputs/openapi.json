@@ -242,7 +242,7 @@
             ]
           },
           "collect_vat_id": {
-            "description": "Whether checkout shows a VAT/tax ID field for buyers to optionally enter. Does not require a VAT ID to purchase.",
+            "description": "The account's saved preference for offering optional buyer VAT/tax ID entry. Checkouts where Whop collects and remits tax offer entry automatically, regardless of this preference. Does not require a VAT ID to purchase.",
             "example": false,
             "type": "boolean"
           },
@@ -654,7 +654,7 @@
           "tax_collection_enabled_states": {
             "items": {
               "description": "US state codes (of the 50 states plus `DC`) where the account collects tax: the full set when Whop remits (`tax_remitted_by` `whop`), the configured subset when the account self-remits (`self`), and empty when neither. On update, send the complete list to replace it (only allowed when `self`).",
-              "example": "TX",
+              "example": "AL",
               "type": "string"
             },
             "type": "array"
@@ -674,7 +674,7 @@
               "none",
               null
             ],
-            "example": "self",
+            "example": "whop",
             "type": [
               "string",
               "null"
@@ -687,7 +687,7 @@
               "exclusive",
               null
             ],
-            "example": "inclusive",
+            "example": "exclusive",
             "type": [
               "string",
               "null"
@@ -1090,7 +1090,7 @@
               "inactive",
               "pending"
             ],
-            "example": "inactive",
+            "example": "active",
             "type": "string"
           },
           "instant_payout": {
@@ -1120,7 +1120,7 @@
               "inactive",
               "pending"
             ],
-            "example": "inactive",
+            "example": "active",
             "type": "string"
           },
           "transfer": {
@@ -1130,7 +1130,7 @@
               "inactive",
               "pending"
             ],
-            "example": "inactive",
+            "example": "active",
             "type": "string"
           }
         },
@@ -23513,6 +23513,16 @@
             "example": "expt_xxxxxxxxxxxxxx",
             "type": "string"
           },
+          "kind": {
+            "description": "The kind of experiment: `boolean` is a feature flag, `experiment` assigns its subjects to arms, `beforeafter` compares a change with the period before it.",
+            "enum": [
+              "boolean",
+              "experiment",
+              "beforeafter"
+            ],
+            "example": "experiment",
+            "type": "string"
+          },
           "metadata": {
             "additionalProperties": {
               "type": "string"
@@ -23547,6 +23557,15 @@
             ],
             "example": "draft",
             "type": "string"
+          },
+          "target_stats": {
+            "description": "The measures the experiment sets out to move, as the stats API reads them. `null` when there are none.",
+            "example": null,
+            "items": {
+              "$ref": "#/components/schemas/ExperimentStat"
+            },
+            "nullable": true,
+            "type": "array"
           },
           "updated_at": {
             "example": "2026-01-01T12:00:00.000Z",
@@ -23619,6 +23638,64 @@
         ],
         "type": "object"
       },
+      "ExperimentArmResults": {
+        "properties": {
+          "confidence_interval": {
+            "description": "The lower and upper bound of the confidence interval around `value`, in the same unit. `null` when unknown.",
+            "items": {
+              "example": 790.5,
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "nullable": true,
+            "type": "array"
+          },
+          "lift_confidence_interval": {
+            "description": "The lower and upper bound of the confidence interval around `lift_percentage`, in percentage points. `null` when unknown.",
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "nullable": true,
+            "type": "array"
+          },
+          "lift_percentage": {
+            "description": "This arm's change over the control, as a percentage of the control. `null` on the control, or when the control's value is zero.",
+            "nullable": true,
+            "type": "number"
+          },
+          "lift_unit": {
+            "description": "This arm's change over the control, in the reading's unit. `null` on the control.",
+            "nullable": true,
+            "type": "number"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "This arm's own parameters where they differ from the reading's. `null` when they do not.",
+            "example": {
+              "from": "2026-01-01T12:00:00.000Z",
+              "to": "2026-01-01T12:00:00.000Z"
+            },
+            "nullable": true,
+            "type": "object"
+          },
+          "value": {
+            "description": "The measure on this arm, in the reading's unit. `null` when unknown.",
+            "example": 840.0,
+            "nullable": true,
+            "type": "number"
+          }
+        },
+        "required": [
+          "value",
+          "confidence_interval"
+        ],
+        "type": "object"
+      },
       "ExperimentExposure": {
         "properties": {
           "configuration_revision": {
@@ -23669,6 +23746,61 @@
         ],
         "type": "object"
       },
+      "ExperimentReading": {
+        "additionalProperties": {
+          "$ref": "#/components/schemas/ExperimentArmResults"
+        },
+        "description": "A stat with its unit and its arms. `control` is always present. One more key per variant, named as the experiment's variants are, each with its lift over the control. A stat read against the period before the change has the one arm `after`.",
+        "properties": {
+          "control": {
+            "$ref": "#/components/schemas/ExperimentArmResults",
+            "description": "The control arm, the one arm every reading has: a test's control, or the period before a change."
+          },
+          "direction": {
+            "description": "Which way the measure is expected to move.",
+            "enum": [
+              "up",
+              "down"
+            ],
+            "example": "up",
+            "type": "string"
+          },
+          "estimate": {
+            "description": "The value the measure is expected to reach, in its own unit. `null` when there is no estimate.",
+            "example": 900.0,
+            "nullable": true,
+            "type": "number"
+          },
+          "metric": {
+            "description": "The stats metric, the key of `GET /stats/time_series/{metric}`.",
+            "example": "gross_revenue",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "The parameters of that metric beyond the account, as the stats API takes them.",
+            "example": {
+              "from": "2026-01-01",
+              "to": "2026-01-01"
+            },
+            "type": "object"
+          },
+          "unit": {
+            "description": "The unit of every arm's `value`, as the stats API names the metric's unit.",
+            "example": "currency",
+            "type": "string"
+          }
+        },
+        "required": [
+          "metric",
+          "params",
+          "unit",
+          "control"
+        ],
+        "type": "object"
+      },
       "ExperimentResourceReference": {
         "properties": {
           "id": {
@@ -23689,6 +23821,42 @@
         "required": [
           "object",
           "id"
+        ],
+        "type": "object"
+      },
+      "ExperimentStat": {
+        "properties": {
+          "direction": {
+            "description": "Which way the measure should move.",
+            "enum": [
+              "up",
+              "down"
+            ],
+            "example": "up",
+            "type": "string"
+          },
+          "estimate": {
+            "description": "The value the measure is expected to reach, in its own unit. `null` when there is no estimate.",
+            "nullable": true,
+            "type": "number"
+          },
+          "metric": {
+            "description": "The stats metric, the key of `GET /stats/time_series/{metric}`.",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "The parameters of that metric beyond the account, as the stats API takes them.",
+            "type": "object"
+          }
+        },
+        "required": [
+          "metric",
+          "params",
+          "estimate",
+          "direction"
         ],
         "type": "object"
       },
@@ -63422,7 +63590,7 @@
                     ]
                   },
                   "collect_vat_id": {
-                    "description": "Whether checkout shows a VAT/tax ID field for buyers to optionally enter. Does not require a VAT ID to purchase.",
+                    "description": "The account's saved preference for offering optional buyer VAT/tax ID entry. Checkouts where Whop collects and remits tax offer entry automatically, regardless of this preference. Does not require a VAT ID to purchase.",
                     "example": true,
                     "type": "boolean"
                   },
@@ -112155,7 +112323,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "experiment:read"
+            ]
           }
         ],
         "summary": "List Experiments",
@@ -112289,7 +112459,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "experiment:manage"
+            ]
           }
         ],
         "summary": "Create Experiment",
@@ -112446,7 +112618,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "experiment:read"
+            ]
           }
         ],
         "summary": "Retrieve Experiment",
@@ -112456,7 +112630,7 @@
       },
       "parameters": [
         {
-          "description": "Owning account ID. Required when id is a flag key; optional for an expt_ ID.",
+          "description": "Owning account ID. Required when `id` is a flag key, optional for an `expt_` ID.",
           "in": "query",
           "name": "account_id",
           "required": false,
@@ -112468,7 +112642,7 @@
           "$ref": "#/components/parameters/ApiVersionDate"
         },
         {
-          "description": "The experiment identifier — the `expt_` id or the flag_key handle.",
+          "description": "The experiment identifier, the `expt_` id or the `flag_key` handle.",
           "in": "path",
           "name": "id",
           "required": true,
@@ -112557,7 +112731,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "experiment:manage"
+            ]
           }
         ],
         "summary": "Update Experiment",
@@ -112570,7 +112746,7 @@
     "/experiments/{id}/activate": {
       "parameters": [
         {
-          "description": "Owning account ID. Required when id is a flag key; optional for an expt_ ID.",
+          "description": "Owning account ID. Required when `id` is a flag key, optional for an `expt_` ID.",
           "in": "query",
           "name": "account_id",
           "required": false,
@@ -112582,7 +112758,7 @@
           "$ref": "#/components/parameters/ApiVersionDate"
         },
         {
-          "description": "The experiment identifier — the `expt_` id or the flag_key handle.",
+          "description": "The experiment identifier, the `expt_` id or the `flag_key` handle.",
           "in": "path",
           "name": "id",
           "required": true,
@@ -112592,7 +112768,7 @@
         }
       ],
       "post": {
-        "description": "Starts (or resumes) an experiment or feature flag so evaluation begins serving it. Activating a draft stamps `started_at`; resuming a paused experiment keeps the original start. Only drafts and paused experiments can be activated. Requires `experiment:manage` on the owning account. Activating needs Economic Intelligence on for the owning account: while the account's `economic_intelligence` is `false`, this returns a `403` and the experiment keeps its status. Turn it on with `PATCH /accounts/:account_id/preferences`. Creating, editing, pausing and ending an experiment don't need it.",
+        "description": "Starts or resumes an experiment or feature flag so evaluation begins serving it. Activating a draft sets `started_at`. Activating a paused experiment keeps the original start. Only drafts and paused experiments can be activated. Requires `experiment:manage` on the owning account. Activating needs Economic Intelligence on for the owning account. When it is off, the request returns `403` and the experiment keeps its status. Turn it on with `PATCH /accounts/:account_id/preferences`. Creating, editing, pausing, and ending an experiment without a winner do not need it.",
         "operationId": "activateExperiment",
         "parameters": [
           {
@@ -112630,7 +112806,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "experiment:manage"
+            ]
           }
         ],
         "summary": "Activate Experiment",
@@ -112643,7 +112821,7 @@
     "/experiments/{id}/end": {
       "parameters": [
         {
-          "description": "Owning account ID. Required when id is a flag key; optional for an expt_ ID.",
+          "description": "Owning account ID. Required when `id` is a flag key, optional for an `expt_` ID.",
           "in": "query",
           "name": "account_id",
           "required": false,
@@ -112655,7 +112833,7 @@
           "$ref": "#/components/parameters/ApiVersionDate"
         },
         {
-          "description": "The experiment identifier — the `expt_` id or the flag_key handle.",
+          "description": "The experiment identifier, the `expt_` id or the `flag_key` handle.",
           "in": "path",
           "name": "id",
           "required": true,
@@ -112665,7 +112843,7 @@
         }
       ],
       "post": {
-        "description": "Concludes the experiment and records required `findings`. Pass `winning_arm` to serve the winning treatment to everyone; omit it when control won. Ended experiments cannot restart, but may be ended again to correct the winner. Requires `experiment:manage` on the owning account.",
+        "description": "Concludes the experiment and records required `findings`. Pass `winning_arm` to serve the winning treatment to everyone. Omit it when control won. Ended experiments cannot restart, but may be ended again to correct the winner. Requires `experiment:manage` on the owning account. Passing `winning_arm` needs Economic Intelligence on for the owning account, like activating. Ending without one does not.",
         "operationId": "endExperiment",
         "parameters": [
           {
@@ -112719,7 +112897,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "experiment:manage"
+            ]
           }
         ],
         "summary": "End Experiment",
@@ -112732,7 +112912,7 @@
     "/experiments/{id}/pause": {
       "parameters": [
         {
-          "description": "Owning account ID. Required when id is a flag key; optional for an expt_ ID.",
+          "description": "Owning account ID. Required when `id` is a flag key, optional for an `expt_` ID.",
           "in": "query",
           "name": "account_id",
           "required": false,
@@ -112744,7 +112924,7 @@
           "$ref": "#/components/parameters/ApiVersionDate"
         },
         {
-          "description": "The experiment identifier — the `expt_` id or the flag_key handle.",
+          "description": "The experiment identifier, the `expt_` id or the `flag_key` handle.",
           "in": "path",
           "name": "id",
           "required": true,
@@ -112778,7 +112958,9 @@
         },
         "security": [
           {
-            "bearerAuth": []
+            "bearerAuth": [
+              "experiment:manage"
+            ]
           }
         ],
         "summary": "Pause Experiment",
@@ -112786,6 +112968,156 @@
           "Experiments"
         ]
       },
+      "x-whop-surface": "native"
+    },
+    "/experiments/{id}/results": {
+      "get": {
+        "description": "Returns an experiment's results: one reading per target stat, with the arms it was read on. Requires `experiment:read` on the owning account, and the read scope of each target stat's metric, `stats:read` for most.",
+        "operationId": "getExperimentResults",
+        "parameters": [
+          {
+            "description": "Start of the reporting window, as an ISO 8601 date or timestamp. Defaults to the experiment's start date.",
+            "in": "query",
+            "name": "from",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "End of the reporting window, as an ISO 8601 date or timestamp. Defaults to today.",
+            "in": "query",
+            "name": "to",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "conclusion": {
+                      "description": "One sentence that states what the readings show. `null` until a reading exists.",
+                      "example": "Gross revenue rose 55.98% against the period before, outside the margin of error.",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "ended_at": {
+                      "description": "When the experiment concluded, as an ISO 8601 timestamp. `null` while still active.",
+                      "example": "2026-01-01T12:00:00.000Z",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "flag_key": {
+                      "description": "The experiment's flag_key.",
+                      "example": "pricing_page_change",
+                      "type": "string"
+                    },
+                    "from": {
+                      "description": "Start of the reporting window, as an ISO 8601 date.",
+                      "example": null,
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "name": {
+                      "description": "Display name.",
+                      "example": "Pricing page change",
+                      "type": "string"
+                    },
+                    "primary_stat": {
+                      "description": "The metric of the reading the experiment is judged on, one of the `metric` values in `stats`.",
+                      "example": "gross_revenue",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "started_at": {
+                      "description": "When the experiment began, as an ISO 8601 timestamp.",
+                      "example": "2026-01-01T12:00:00.000Z",
+                      "nullable": true,
+                      "type": "string"
+                    },
+                    "stats": {
+                      "description": "One reading per target stat, with the arms it was read on. `null` when there are none.",
+                      "items": {
+                        "$ref": "#/components/schemas/ExperimentReading"
+                      },
+                      "nullable": true,
+                      "type": "array"
+                    },
+                    "status": {
+                      "description": "Current lifecycle state.",
+                      "enum": [
+                        "draft",
+                        "active",
+                        "paused",
+                        "ended"
+                      ],
+                      "example": "ended",
+                      "type": "string"
+                    },
+                    "to": {
+                      "description": "End of the reporting window, as an ISO 8601 date.",
+                      "example": null,
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "flag_key",
+                    "name",
+                    "status"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "experiment results returned"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "experiment not found"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "experiment:read",
+              "stats:read"
+            ]
+          }
+        ],
+        "summary": "Get Experiment Results",
+        "tags": [
+          "Experiments"
+        ]
+      },
+      "parameters": [
+        {
+          "description": "Owning account ID. Required when `id` is a flag key, optional for an `expt_` ID.",
+          "in": "query",
+          "name": "account_id",
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "The experiment identifier, the `expt_` id or the `flag_key` handle.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
       "x-whop-surface": "native"
     },
     "/exports": {

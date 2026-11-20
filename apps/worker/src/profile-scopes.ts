@@ -81,6 +81,7 @@ export const WHOP_SCOPES = [
 	"forum:moderate",
 	"forum:post:create",
 	"forum:read",
+	"global:read",
 	"identity:read",
 	"identity:write",
 	"incorporation:read",

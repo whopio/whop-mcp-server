@@ -380,6 +380,10 @@
     "bot": true,
     "user": true
   },
+  "experiment:manage": {
+    "bot": true,
+    "user": true
+  },
   "experiment:read": {
     "bot": true,
     "user": true

@@ -72,6 +72,7 @@ describe("registry generation", () => {
 			"experiments_get",
 			"experiments_list",
 			"experiments_pause",
+			"experiments_results",
 			"experiments_update",
 		]);
 		for (const op of experiments) {
