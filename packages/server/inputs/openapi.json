@@ -164664,6 +164664,32 @@
               "minimum": 1,
               "type": "integer"
             }
+          },
+          {
+            "description": "Business ids (biz_...) to scope the series to; the series sums their figures. Available on metrics that list account_ids.",
+            "in": "query",
+            "name": "account_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "example": "biz_xxxxxxxxxxxxxx",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Runner user ids (user_...) to scope the series to; the series sums the figures of the campaigns they hold. Available on metrics that list runner_ids.",
+            "in": "query",
+            "name": "runner_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "example": "user_xxxxxxxxxxxxxx",
+                "type": "string"
+              },
+              "type": "array"
+            }
           }
         ],
         "responses": {
@@ -165654,6 +165680,32 @@
               "maximum": 50,
               "minimum": 1,
               "type": "integer"
+            }
+          },
+          {
+            "description": "Business ids (biz_...) to scope the series to; the series sums their figures. Available on metrics that list account_ids.",
+            "in": "query",
+            "name": "account_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "example": "biz_xxxxxxxxxxxxxx",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "description": "Runner user ids (user_...) to scope the series to; the series sums the figures of the campaigns they hold. Available on metrics that list runner_ids.",
+            "in": "query",
+            "name": "runner_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "example": "user_xxxxxxxxxxxxxx",
+                "type": "string"
+              },
+              "type": "array"
             }
           }
         ],
