@@ -103349,6 +103349,16 @@
                     "example": 50.0,
                     "type": "number"
                   },
+                  "currency": {
+                    "default": "usd",
+                    "description": "Bank account currency to set up for the destination. A USD account is always set up. Pass `cad` once to also set up a CAD account. After that, every request returns the details of all set-up currencies.",
+                    "enum": [
+                      "usd",
+                      "cad"
+                    ],
+                    "example": "usd",
+                    "type": "string"
+                  },
                   "destination": {
                     "description": "Account ID to fund, `biz_` or `user_`. Any business resolves without authentication; a user account resolves only for that same authenticated user.",
                     "example": "biz_xxxxxxxxxxxxxx",

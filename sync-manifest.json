@@ -1,10 +1,10 @@
 {
   "formatVersion": 1,
   "sourceRepository": "whopio/whop-monorepo",
-  "sourceCommit": "168003841e3f29865dedf490b5a2ba7a0a8315cf",
-  "openapiSha256": "67000eb1a9edde6a6950255dbd0a4ef02b220ecf4fb51225118da987d1963941",
+  "sourceCommit": "9a182be73eec26022de4bb61ac552ff661319b72",
+  "openapiSha256": "052e264a96afac56a3d162914fd3ba3570e7a72fbebed7ed524f80bc1febd664",
   "scopeDefinitionsSha256": "2d39ff5afde3c07ca14a9c3d2ebb959001937189eaa598734000276558215764",
-  "managedTreeSha256": "f84412bd31016341f3a952502351201eca8107ea3ad246c01cc7522199806f19",
+  "managedTreeSha256": "5ac5e6804d29a6d83ba903731f89a8f5783457c6592aec566ad4c2a29da5eda8",
   "lockfileSha256": "cbe1e018ccf4c322feeddf361fda148b4aeb90e713460a96e953947949ffbff9",
   "managedFiles": [
     ".cursor-plugin/plugin.json",
