@@ -24233,7 +24233,6 @@
               "promo_codes",
               "resolutions",
               "entries",
-              "leads",
               "invoices",
               "cancelation_reasons",
               "child_companies",
@@ -113768,7 +113767,6 @@
                 "promo_codes",
                 "resolutions",
                 "entries",
-                "leads",
                 "invoices",
                 "cancelation_reasons",
                 "child_companies",
@@ -113987,11 +113985,6 @@
           },
           {
             "bearerAuth": [
-              "lead:basic:export"
-            ]
-          },
-          {
-            "bearerAuth": [
               "member:basic:export"
             ]
           },
@@ -114153,7 +114146,6 @@
                       "promo_codes",
                       "resolutions",
                       "entries",
-                      "leads",
                       "invoices",
                       "cancelation_reasons",
                       "child_companies"
@@ -114274,11 +114266,6 @@
           {
             "bearerAuth": [
               "invoice:basic:export"
-            ]
-          },
-          {
-            "bearerAuth": [
-              "lead:basic:export"
             ]
           },
           {
@@ -114474,11 +114461,6 @@
           {
             "bearerAuth": [
               "invoice:basic:export"
-            ]
-          },
-          {
-            "bearerAuth": [
-              "lead:basic:export"
             ]
           },
           {

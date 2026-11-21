@@ -432,10 +432,6 @@
     "bot": true,
     "user": true
   },
-  "lead:basic:export": {
-    "bot": true,
-    "user": false
-  },
   "lead:basic:read": {
     "bot": true,
     "user": true
