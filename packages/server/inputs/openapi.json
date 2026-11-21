@@ -48295,14 +48295,15 @@
       "RecommendedActionChangedResource": {
         "properties": {
           "id": {
-            "description": "ID of the resource. A `variant` ID is prefixed `plan_`.",
+            "description": "ID of the resource. A `variant` ID is prefixed `plan_` and a `promo_code` ID `promo_`.",
             "example": "plan_xxxxxxxxxxxxxx",
             "type": "string"
           },
           "resource_type": {
             "description": "Type of the resource. New types can be added, so skip an entry whose `resource_type` you do not know.",
             "enum": [
-              "variant"
+              "variant",
+              "promo_code"
             ],
             "example": "variant",
             "type": "string"
