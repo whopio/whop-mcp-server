@@ -145817,7 +145817,24 @@
                                 ]
                               },
                               "message": {
-                                "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination; other callers get the generic catalog message.",
+                                "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination. Other callers get the generic catalog message.",
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "next_step": {
+                                "description": "What to do before a new payout can succeed. `withdraw_again` means that the payout method needs no change. `null` when the failure has no code from the error catalog, or when the account owner canceled the payout.",
+                                "enum": [
+                                  "update_payout_method",
+                                  "use_another_payout_method",
+                                  "complete_verification",
+                                  "withdraw_again",
+                                  "contact_bank",
+                                  "contact_support",
+                                  null
+                                ],
+                                "example": "update_payout_method",
                                 "type": [
                                   "string",
                                   "null"
@@ -145827,6 +145844,7 @@
                             "required": [
                               "code",
                               "message",
+                              "next_step",
                               "funds_returned_at"
                             ],
                             "type": [
@@ -146418,7 +146436,24 @@
                           ]
                         },
                         "message": {
-                          "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination; other callers get the generic catalog message.",
+                          "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination. Other callers get the generic catalog message.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "next_step": {
+                          "description": "What to do before a new payout can succeed. `withdraw_again` means that the payout method needs no change. `null` when the failure has no code from the error catalog, or when the account owner canceled the payout.",
+                          "enum": [
+                            "update_payout_method",
+                            "use_another_payout_method",
+                            "complete_verification",
+                            "withdraw_again",
+                            "contact_bank",
+                            "contact_support",
+                            null
+                          ],
+                          "example": "update_payout_method",
                           "type": [
                             "string",
                             "null"
@@ -146428,6 +146463,7 @@
                       "required": [
                         "code",
                         "message",
+                        "next_step",
                         "funds_returned_at"
                       ],
                       "type": [
@@ -149638,7 +149674,24 @@
                           ]
                         },
                         "message": {
-                          "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination; other callers get the generic catalog message.",
+                          "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination. Other callers get the generic catalog message.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "next_step": {
+                          "description": "What to do before a new payout can succeed. `withdraw_again` means that the payout method needs no change. `null` when the failure has no code from the error catalog, or when the account owner canceled the payout.",
+                          "enum": [
+                            "update_payout_method",
+                            "use_another_payout_method",
+                            "complete_verification",
+                            "withdraw_again",
+                            "contact_bank",
+                            "contact_support",
+                            null
+                          ],
+                          "example": "update_payout_method",
                           "type": [
                             "string",
                             "null"
@@ -149648,6 +149701,7 @@
                       "required": [
                         "code",
                         "message",
+                        "next_step",
                         "funds_returned_at"
                       ],
                       "type": [
@@ -150165,8 +150219,25 @@
                           ]
                         },
                         "message": {
-                          "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination; other callers get the generic catalog message.",
+                          "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination. Other callers get the generic catalog message.",
                           "example": "Canceled by the account owner",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "next_step": {
+                          "description": "What to do before a new payout can succeed. `withdraw_again` means that the payout method needs no change. `null` when the failure has no code from the error catalog, or when the account owner canceled the payout.",
+                          "enum": [
+                            "update_payout_method",
+                            "use_another_payout_method",
+                            "complete_verification",
+                            "withdraw_again",
+                            "contact_bank",
+                            "contact_support",
+                            null
+                          ],
+                          "example": "update_payout_method",
                           "type": [
                             "string",
                             "null"
@@ -150176,6 +150247,7 @@
                       "required": [
                         "code",
                         "message",
+                        "next_step",
                         "funds_returned_at"
                       ],
                       "type": [
@@ -150569,7 +150641,24 @@
                           ]
                         },
                         "message": {
-                          "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination; other callers get the generic catalog message.",
+                          "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination. Other callers get the generic catalog message.",
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "next_step": {
+                          "description": "What to do before a new payout can succeed. `withdraw_again` means that the payout method needs no change. `null` when the failure has no code from the error catalog, or when the account owner canceled the payout.",
+                          "enum": [
+                            "update_payout_method",
+                            "use_another_payout_method",
+                            "complete_verification",
+                            "withdraw_again",
+                            "contact_bank",
+                            "contact_support",
+                            null
+                          ],
+                          "example": "update_payout_method",
                           "type": [
                             "string",
                             "null"
@@ -150579,6 +150668,7 @@
                       "required": [
                         "code",
                         "message",
+                        "next_step",
                         "funds_returned_at"
                       ],
                       "type": [
@@ -195635,7 +195725,24 @@
                             ]
                           },
                           "message": {
-                            "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination; other callers get the generic catalog message.",
+                            "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination. Other callers get the generic catalog message.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "next_step": {
+                            "description": "What to do before a new payout can succeed. `withdraw_again` means that the payout method needs no change. `null` when the failure has no code from the error catalog, or when the account owner canceled the payout.",
+                            "enum": [
+                              "update_payout_method",
+                              "use_another_payout_method",
+                              "complete_verification",
+                              "withdraw_again",
+                              "contact_bank",
+                              "contact_support",
+                              null
+                            ],
+                            "example": "update_payout_method",
                             "type": [
                               "string",
                               "null"
@@ -195645,6 +195752,7 @@
                         "required": [
                           "code",
                           "message",
+                          "next_step",
                           "funds_returned_at"
                         ],
                         "type": [
@@ -195998,7 +196106,8 @@
                   "failure": {
                     "code": null,
                     "funds_returned_at": "2026-01-01T12:00:00.000Z",
-                    "message": null
+                    "message": null,
+                    "next_step": null
                   },
                   "fee_amount": "0.0",
                   "fee_paid_by": "self",
@@ -196156,7 +196265,24 @@
                             ]
                           },
                           "message": {
-                            "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination; other callers get the generic catalog message.",
+                            "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination. Other callers get the generic catalog message.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "next_step": {
+                            "description": "What to do before a new payout can succeed. `withdraw_again` means that the payout method needs no change. `null` when the failure has no code from the error catalog, or when the account owner canceled the payout.",
+                            "enum": [
+                              "update_payout_method",
+                              "use_another_payout_method",
+                              "complete_verification",
+                              "withdraw_again",
+                              "contact_bank",
+                              "contact_support",
+                              null
+                            ],
+                            "example": "update_payout_method",
                             "type": [
                               "string",
                               "null"
@@ -196166,6 +196292,7 @@
                         "required": [
                           "code",
                           "message",
+                          "next_step",
                           "funds_returned_at"
                         ],
                         "type": [
@@ -196673,7 +196800,24 @@
                             ]
                           },
                           "message": {
-                            "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination; other callers get the generic catalog message.",
+                            "description": "Human-readable explanation of the failure. Callers holding `payout:destination:read` may receive text personalized to the destination. Other callers get the generic catalog message.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "next_step": {
+                            "description": "What to do before a new payout can succeed. `withdraw_again` means that the payout method needs no change. `null` when the failure has no code from the error catalog, or when the account owner canceled the payout.",
+                            "enum": [
+                              "update_payout_method",
+                              "use_another_payout_method",
+                              "complete_verification",
+                              "withdraw_again",
+                              "contact_bank",
+                              "contact_support",
+                              null
+                            ],
+                            "example": "update_payout_method",
                             "type": [
                               "string",
                               "null"
@@ -196683,6 +196827,7 @@
                         "required": [
                           "code",
                           "message",
+                          "next_step",
                           "funds_returned_at"
                         ],
                         "type": [
