@@ -1192,13 +1192,13 @@
             "type": "string"
           },
           "run_ads": {
-            "description": "Launching ad campaigns through Whop Ads. `inactive` until the account's identity or business is verified, while a requested ads services agreement is awaiting the account's signature, and while the account is suspended from Whop Ads.",
+            "description": "Launching ad campaigns through Whop Ads. `inactive` while a requested ads services agreement is awaiting the account's signature, and while the account is suspended from Whop Ads.",
             "enum": [
               "active",
               "inactive",
               "pending"
             ],
-            "example": "inactive",
+            "example": "active",
             "type": "string"
           },
           "standard_payout": {
@@ -182185,7 +182185,7 @@
                     "crypto_deposit": "active",
                     "crypto_payout": "inactive",
                     "instant_payout": "inactive",
-                    "run_ads": "inactive",
+                    "run_ads": "active",
                     "standard_payout": "inactive",
                     "transfer": "inactive"
                   },
@@ -182514,7 +182514,7 @@
                     "crypto_deposit": "active",
                     "crypto_payout": "inactive",
                     "instant_payout": "inactive",
-                    "run_ads": "inactive",
+                    "run_ads": "active",
                     "standard_payout": "inactive",
                     "transfer": "inactive"
                   },
@@ -182976,7 +182976,7 @@
                     "crypto_deposit": "active",
                     "crypto_payout": "inactive",
                     "instant_payout": "inactive",
-                    "run_ads": "inactive",
+                    "run_ads": "active",
                     "standard_payout": "inactive",
                     "transfer": "inactive"
                   },
