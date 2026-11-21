@@ -7,7 +7,7 @@
         "name": "Api-Version-Date",
         "required": false,
         "schema": {
-          "example": "2026-11-19-2",
+          "example": "2026-11-20",
           "type": "string"
         }
       },
@@ -10773,9 +10773,10 @@
               "2026-11-17-3",
               "2026-11-19",
               "2026-11-19-1",
-              "2026-11-19-2"
+              "2026-11-19-2",
+              "2026-11-20"
             ],
-            "example": "2026-11-19-2",
+            "example": "2026-11-20",
             "type": "string"
           },
           "created_at": {
@@ -12980,7 +12981,7 @@
             "example": "biz_xxxxxxxxxxxxxx",
             "type": "string"
           },
-          "object": {
+          "resource_type": {
             "description": "What acted: a `user`, an `account` through one of its API keys, or an `app`.",
             "enum": [
               "user",
@@ -12992,7 +12993,7 @@
           }
         },
         "required": [
-          "object",
+          "resource_type",
           "id"
         ],
         "type": "object"
@@ -13263,7 +13264,7 @@
             "description": "Email address ID, prefixed `emaddr_`.",
             "type": "string"
           },
-          "object": {
+          "type": {
             "description": "Always `email_address`.",
             "enum": [
               "email_address"
@@ -13273,7 +13274,7 @@
           }
         },
         "required": [
-          "object",
+          "type",
           "id",
           "address"
         ],
@@ -13388,13 +13389,13 @@
         "type": "object"
       },
       "AutomationStepSender": {
-        "description": "Who a step's message comes from. `object` picks the shape: an `email_address` for an `email` step, a `user` on the team for a `message` step.",
+        "description": "Who a step's message comes from. `type` picks the shape: an `email_address` for an `email` step, a `user` on the team for a `message` step.",
         "discriminator": {
           "mapping": {
             "email_address": "#/components/schemas/AutomationStepEmailAddressSender",
             "user": "#/components/schemas/AutomationStepUserSender"
           },
-          "propertyName": "object"
+          "propertyName": "type"
         },
         "oneOf": [
           {
@@ -13418,7 +13419,7 @@
               "null"
             ]
           },
-          "object": {
+          "type": {
             "description": "Always `user`.",
             "enum": [
               "user"
@@ -13432,7 +13433,7 @@
           }
         },
         "required": [
-          "object",
+          "type",
           "id",
           "username",
           "name"
@@ -19107,6 +19108,105 @@
         ],
         "type": "string"
       },
+      "CreateAimerceExternalAccount": {
+        "description": "Connects the account's Aimerce shop with an API key and turns on the Aimerce tracking pixel. Requires the `company:manage_checkout` scope instead of `social_account:create`.",
+        "properties": {
+          "account_id": {
+            "description": "The account ID, prefixed `biz_`. For an account-scoped API key, omit this field to use its account.",
+            "type": "string"
+          },
+          "api_key": {
+            "description": "The account's Aimerce API key. Whop checks the key with Aimerce before connecting and never returns it. Connecting again replaces the saved key.",
+            "type": "string"
+          },
+          "platform": {
+            "description": "The platform to create the external account on.",
+            "enum": [
+              "aimerce"
+            ],
+            "example": "aimerce",
+            "type": "string"
+          }
+        },
+        "required": [
+          "platform",
+          "api_key"
+        ],
+        "title": "CreateAimerceExternalAccount",
+        "type": "object"
+      },
+      "CreateFacebookExternalAccount": {
+        "description": "Whop no longer creates Facebook pages, so this returns a `facebook_page_provisioning_retired` error.",
+        "properties": {
+          "account_id": {
+            "description": "The account ID, prefixed `biz_`. For an account-scoped API key, omit this field to use its account.",
+            "type": "string"
+          },
+          "platform": {
+            "description": "The platform to create the external account on.",
+            "enum": [
+              "facebook"
+            ],
+            "example": "facebook",
+            "type": "string"
+          }
+        },
+        "required": [
+          "platform"
+        ],
+        "title": "CreateFacebookExternalAccount",
+        "type": "object"
+      },
+      "CreateKlaviyoExternalAccount": {
+        "description": "Connects the account's existing Klaviyo account with a private API key.",
+        "properties": {
+          "account_id": {
+            "description": "The account ID, prefixed `biz_`. For an account-scoped API key, omit this field to use its account.",
+            "type": "string"
+          },
+          "api_key": {
+            "description": "A private Klaviyo API key with read access to Accounts. Whop checks the key with Klaviyo before connecting and never returns it. Connecting again replaces the saved key.",
+            "type": "string"
+          },
+          "platform": {
+            "description": "The platform to create the external account on.",
+            "enum": [
+              "klaviyo"
+            ],
+            "example": "klaviyo",
+            "type": "string"
+          }
+        },
+        "required": [
+          "platform",
+          "api_key"
+        ],
+        "title": "CreateKlaviyoExternalAccount",
+        "type": "object"
+      },
+      "CreateTiktokExternalAccount": {
+        "description": "Starts provisioning a Whop-managed TikTok account. Set the account's `logo` with [Update Account](/api-reference/accounts/update-account) before you call this endpoint. Whop returns an `id` you can use immediately. The rest of the profile appears after provisioning.",
+        "properties": {
+          "account_id": {
+            "description": "The account ID, prefixed `biz_`. For an account-scoped API key, omit this field to use its account.",
+            "example": "biz_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "platform": {
+            "description": "The platform to create the external account on.",
+            "enum": [
+              "tiktok"
+            ],
+            "example": "tiktok",
+            "type": "string"
+          }
+        },
+        "required": [
+          "platform"
+        ],
+        "title": "CreateTiktokExternalAccount",
+        "type": "object"
+      },
       "Currencies": {
         "description": "The available currencies on the platform",
         "enum": [
@@ -23615,21 +23715,21 @@
             "example": "all",
             "type": "string"
           },
-          "object": {
-            "description": "The type of object. Always `experience_notification_preference`.",
+          "scope": {
+            "$ref": "#/components/schemas/NotificationPreferenceScope",
+            "description": "What the preference applies to. Echo it back to `PATCH /users/me/preferences/notifications` to change this preference."
+          },
+          "type": {
+            "description": "Always `experience_notification_preference`.",
             "enum": [
               "experience_notification_preference"
             ],
             "example": "experience_notification_preference",
             "type": "string"
-          },
-          "scope": {
-            "$ref": "#/components/schemas/NotificationPreferenceScope",
-            "description": "What the preference applies to. Echo it back to `PATCH /users/me/preferences/notifications` to change this preference."
           }
         },
         "required": [
-          "object",
+          "type",
           "scope",
           "level"
         ],
@@ -31223,10 +31323,10 @@
             ]
           },
           "last_activity": {
-            "description": "What happened at `last_activity_at`. `object` says which kind of activity it is. `null` without `support_chat:read` on the account, or when `last_activity_at` is `null`.",
+            "description": "What happened at `last_activity_at`: a message in the member's support chat. `type` says which kind of activity it is. `null` without `support_chat:read` on the account, or when `last_activity_at` is `null`.",
             "oneOf": [
               {
-                "$ref": "#/components/schemas/MemberLastActivity"
+                "$ref": "#/components/schemas/MemberLastActivityMessage"
               },
               {
                 "type": "null"
@@ -31365,16 +31465,6 @@
         ],
         "type": "object"
       },
-      "MemberLastActivity": {
-        "$ref": "#/components/schemas/MemberLastActivityMessage",
-        "description": "What happened at the member's `last_activity_at`. `object` picks the shape: a `message` in their support chat.",
-        "discriminator": {
-          "mapping": {
-            "message": "#/components/schemas/MemberLastActivityMessage"
-          },
-          "propertyName": "object"
-        }
-      },
       "MemberLastActivityMessage": {
         "properties": {
           "author": {
@@ -31400,31 +31490,30 @@
             "description": "The message ID.",
             "type": "string"
           },
-          "object": {
-            "description": "Always `message`.",
-            "enum": [
-              "message"
-            ],
-            "example": "message",
-            "type": "string"
-          },
           "plain_content": {
             "description": "The message text without formatting. `null` when the message has no text, such as an attachment on its own.",
             "type": [
               "string",
               "null"
             ]
+          },
+          "type": {
+            "description": "Always `message`.",
+            "enum": [
+              "message"
+            ],
+            "example": "message",
+            "type": "string"
           }
         },
         "required": [
-          "object",
+          "type",
           "id",
           "channel_id",
           "author",
           "plain_content",
           "created_at"
         ],
-        "title": "Message",
         "type": "object"
       },
       "MemberLegacy": {
@@ -34143,7 +34232,11 @@
               "null"
             ]
           },
-          "object": {
+          "scope": {
+            "$ref": "#/components/schemas/NotificationPreferenceScope",
+            "description": "The scope that was written, resolved. `null` on a dimension means the preference is not narrowed there."
+          },
+          "type": {
             "description": "Which kind of preference was written: `experience_notification_preference` for an experience level, `notification_preference` for a topic override.",
             "enum": [
               "notification_preference",
@@ -34151,14 +34244,10 @@
             ],
             "example": "notification_preference",
             "type": "string"
-          },
-          "scope": {
-            "$ref": "#/components/schemas/NotificationPreferenceScope",
-            "description": "The scope that was written, resolved. `null` on a dimension means the preference is not narrowed there."
           }
         },
         "required": [
-          "object",
+          "type",
           "scope",
           "level"
         ],
@@ -48417,7 +48506,7 @@
           "changed_resources": {
             "items": {
               "$ref": "#/components/schemas/RecommendedActionChangedResource",
-              "description": "Resources besides the website that running the action changes. Each item's `object` names its type."
+              "description": "Resources besides the website that running the action changes. Each item's `resource_type` names its type."
             },
             "type": "array"
           },
@@ -48475,7 +48564,7 @@
           "changed_resources": {
             "items": {
               "$ref": "#/components/schemas/RecommendedActionChangedResource",
-              "description": "Resources besides the website that running the action changes. Each item's `object` names its type."
+              "description": "Resources besides the website that running the action changes. Each item's `resource_type` names its type."
             },
             "type": "array"
           },
@@ -50598,7 +50687,7 @@
         "type": "string"
       },
       "SearchRecord": {
-        "description": "The record a result points to. Its fields depend on `object`, and every type shares basics like `title` and `image_url`.",
+        "description": "The record a result points to. Its fields depend on `type`, and every type shares basics like `title` and `image_url`.",
         "discriminator": {
           "mapping": {
             "account": "#/components/schemas/SearchRecordAccount",
@@ -50610,7 +50699,7 @@
             "resolution_center_case": "#/components/schemas/SearchRecordResolutionCenterCase",
             "review": "#/components/schemas/SearchRecordReview"
           },
-          "propertyName": "object"
+          "propertyName": "type"
         },
         "oneOf": [
           {
@@ -50666,14 +50755,6 @@
               "null"
             ]
           },
-          "object": {
-            "description": "Always `account`: `account_id` itself or, when `include_subaccounts` is `true`, one of its subaccounts.",
-            "enum": [
-              "account"
-            ],
-            "example": "account",
-            "type": "string"
-          },
           "parent_account_id": {
             "description": "Platform account this subaccount belongs to, prefixed `biz_`. `null` when it isn't a subaccount.",
             "type": [
@@ -50694,10 +50775,18 @@
               "string",
               "null"
             ]
+          },
+          "type": {
+            "description": "Always `account`: `account_id` itself or, when `include_subaccounts` is `true`, one of its subaccounts.",
+            "enum": [
+              "account"
+            ],
+            "example": "account",
+            "type": "string"
           }
         },
         "required": [
-          "object",
+          "type",
           "id",
           "title",
           "subtitle",
@@ -50733,14 +50822,6 @@
               "null"
             ]
           },
-          "object": {
-            "description": "Always `affiliate`.",
-            "enum": [
-              "affiliate"
-            ],
-            "example": "affiliate",
-            "type": "string"
-          },
           "subtitle": {
             "description": "Line shown under the title, such as the account or product the record belongs to. Display text in your locale that can change without a version change. `null` when there's none.",
             "type": [
@@ -50758,10 +50839,18 @@
           "total_referrals_count": {
             "description": "Referrals credited to the affiliate, as on the affiliate resource.",
             "type": "integer"
+          },
+          "type": {
+            "description": "Always `affiliate`.",
+            "enum": [
+              "affiliate"
+            ],
+            "example": "affiliate",
+            "type": "string"
           }
         },
         "required": [
-          "object",
+          "type",
           "id",
           "title",
           "subtitle",
@@ -50809,14 +50898,6 @@
               "null"
             ]
           },
-          "object": {
-            "description": "Always `member`.",
-            "enum": [
-              "member"
-            ],
-            "example": "member",
-            "type": "string"
-          },
           "status": {
             "description": "`joined` while the member is part of the account, `left` after they leave.",
             "enum": [
@@ -50842,6 +50923,14 @@
               "null"
             ]
           },
+          "type": {
+            "description": "Always `member`.",
+            "enum": [
+              "member"
+            ],
+            "example": "member",
+            "type": "string"
+          },
           "username": {
             "description": "The user's username. `null` when the buyer is another business.",
             "example": "danaortiz",
@@ -50852,7 +50941,7 @@
           }
         },
         "required": [
-          "object",
+          "type",
           "id",
           "title",
           "subtitle",
@@ -50890,14 +50979,6 @@
               "null"
             ]
           },
-          "object": {
-            "description": "Always `membership`.",
-            "enum": [
-              "membership"
-            ],
-            "example": "membership",
-            "type": "string"
-          },
           "product_id": {
             "description": "Product the membership is for, prefixed `prod_`.",
             "type": "string"
@@ -50933,10 +51014,18 @@
               "string",
               "null"
             ]
+          },
+          "type": {
+            "description": "Always `membership`.",
+            "enum": [
+              "membership"
+            ],
+            "example": "membership",
+            "type": "string"
           }
         },
         "required": [
-          "object",
+          "type",
           "id",
           "title",
           "subtitle",
@@ -50981,14 +51070,6 @@
               "string",
               "null"
             ]
-          },
-          "object": {
-            "description": "Always `payment`.",
-            "enum": [
-              "payment"
-            ],
-            "example": "payment",
-            "type": "string"
           },
           "paid_at": {
             "description": "When the money was collected, as an ISO 8601 timestamp. `null` while it has not been.",
@@ -51043,10 +51124,18 @@
                 "type": "null"
               }
             ]
+          },
+          "type": {
+            "description": "Always `payment`.",
+            "enum": [
+              "payment"
+            ],
+            "example": "payment",
+            "type": "string"
           }
         },
         "required": [
-          "object",
+          "type",
           "id",
           "title",
           "subtitle",
@@ -51189,14 +51278,6 @@
               "null"
             ]
           },
-          "object": {
-            "description": "Always `promo_code`.",
-            "enum": [
-              "promo_code"
-            ],
-            "example": "promo_code",
-            "type": "string"
-          },
           "promo_duration_months": {
             "description": "Billing intervals the discount applies to. Never `null`.",
             "type": "integer"
@@ -51223,10 +51304,18 @@
               "string",
               "null"
             ]
+          },
+          "type": {
+            "description": "Always `promo_code`.",
+            "enum": [
+              "promo_code"
+            ],
+            "example": "promo_code",
+            "type": "string"
           }
         },
         "required": [
-          "object",
+          "type",
           "id",
           "title",
           "subtitle",
@@ -51265,14 +51354,6 @@
               "null"
             ]
           },
-          "object": {
-            "description": "Always `resolution_center_case`.",
-            "enum": [
-              "resolution_center_case"
-            ],
-            "example": "resolution_center_case",
-            "type": "string"
-          },
           "subtitle": {
             "description": "Line shown under the title, such as the account or product the record belongs to. Display text in your locale that can change without a version change. `null` when there's none.",
             "type": [
@@ -51286,10 +51367,18 @@
               "string",
               "null"
             ]
+          },
+          "type": {
+            "description": "Always `resolution_center_case`.",
+            "enum": [
+              "resolution_center_case"
+            ],
+            "example": "resolution_center_case",
+            "type": "string"
           }
         },
         "required": [
-          "object",
+          "type",
           "id",
           "title",
           "subtitle",
@@ -51328,14 +51417,6 @@
               "null"
             ]
           },
-          "object": {
-            "description": "Always `review`.",
-            "enum": [
-              "review"
-            ],
-            "example": "review",
-            "type": "string"
-          },
           "subtitle": {
             "description": "Line shown under the title, such as the account or product the record belongs to. Display text in your locale that can change without a version change. `null` when there's none.",
             "type": [
@@ -51349,10 +51430,18 @@
               "string",
               "null"
             ]
+          },
+          "type": {
+            "description": "Always `review`.",
+            "enum": [
+              "review"
+            ],
+            "example": "review",
+            "type": "string"
           }
         },
         "required": [
-          "object",
+          "type",
           "id",
           "title",
           "subtitle",
@@ -55727,17 +55816,17 @@
             "example": "all",
             "type": "string"
           },
-          "object": {
-            "description": "The type of object. Always `notification_preference`.",
+          "scope": {
+            "$ref": "#/components/schemas/NotificationPreferenceScope",
+            "description": "What the preference applies to. Echo it back to `PATCH /users/me/preferences/notifications` to change this preference."
+          },
+          "type": {
+            "description": "Always `notification_preference`.",
             "enum": [
               "notification_preference"
             ],
             "example": "notification_preference",
             "type": "string"
-          },
-          "scope": {
-            "$ref": "#/components/schemas/NotificationPreferenceScope",
-            "description": "What the preference applies to. Echo it back to `PATCH /users/me/preferences/notifications` to change this preference."
           },
           "updated_at": {
             "description": "When the preference was last changed, as an ISO 8601 timestamp.",
@@ -55746,7 +55835,7 @@
           }
         },
         "required": [
-          "object",
+          "type",
           "id",
           "scope",
           "level",
@@ -57290,7 +57379,7 @@
           },
           "api_version_date": {
             "description": "The dated API version (Api-Version-Date) that v1 payloads for this endpoint are pinned to: events serialize exactly like a REST read at this version (the native serializer where the resource has one). Null when unpinned — legacy (v2/v5) webhooks, and v1 webhooks on the legacy payload shape.",
-            "example": "2026-11-19-2",
+            "example": "2026-01-01",
             "type": [
               "string",
               "null"
@@ -57892,7 +57981,7 @@
           },
           "api_version_date": {
             "description": "The dated API version (Api-Version-Date) that v1 payloads for this endpoint are pinned to: events serialize exactly like a REST read at this version (the native serializer where the resource has one). Null when unpinned — legacy (v2/v5) webhooks, and v1 webhooks on the legacy payload shape.",
-            "example": "2026-11-19-2",
+            "example": "2026-01-01",
             "type": [
               "string",
               "null"
@@ -58302,7 +58391,7 @@
     "termsOfService": "https://whop.com/tos-developer-api/",
     "title": "Whop API",
     "version": "1.0.0",
-    "x-api-version-date": "2026-11-19-2"
+    "x-api-version-date": "2026-11-20"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -76789,9 +76878,10 @@
                       "2026-11-17-3",
                       "2026-11-19",
                       "2026-11-19-1",
-                      "2026-11-19-2"
+                      "2026-11-19-2",
+                      "2026-11-20"
                     ],
-                    "example": "2026-11-19-2",
+                    "example": "2026-11-20",
                     "type": "string"
                   },
                   "expires_at": {
@@ -77265,9 +77355,10 @@
                       "2026-11-17-3",
                       "2026-11-19",
                       "2026-11-19-1",
-                      "2026-11-19-2"
+                      "2026-11-19-2",
+                      "2026-11-20"
                     ],
-                    "example": "2026-11-19-2",
+                    "example": "2026-11-20",
                     "type": "string"
                   },
                   "expires_at": {
@@ -114694,110 +114785,26 @@
             "application/json": {
               "schema": {
                 "discriminator": {
+                  "mapping": {
+                    "aimerce": "#/components/schemas/CreateAimerceExternalAccount",
+                    "facebook": "#/components/schemas/CreateFacebookExternalAccount",
+                    "klaviyo": "#/components/schemas/CreateKlaviyoExternalAccount",
+                    "tiktok": "#/components/schemas/CreateTiktokExternalAccount"
+                  },
                   "propertyName": "platform"
                 },
                 "oneOf": [
                   {
-                    "description": "Whop no longer creates Facebook pages, so this returns a `facebook_page_provisioning_retired` error.",
-                    "properties": {
-                      "account_id": {
-                        "description": "The Account (biz_ identifier) to create the external account for. An account-scoped API key may omit this to default to its own account. Account API keys cannot update their own account's branding through Update Account; use a user-authenticated path.",
-                        "example": "biz_xxxxxxxxxxxxxx",
-                        "type": "string"
-                      },
-                      "platform": {
-                        "description": "The platform to create the external account on.",
-                        "enum": [
-                          "facebook"
-                        ],
-                        "example": "facebook",
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "platform"
-                    ],
-                    "title": "CreateFacebookExternalAccount",
-                    "type": "object"
+                    "$ref": "#/components/schemas/CreateFacebookExternalAccount"
                   },
                   {
-                    "description": "Provisions a Whop-managed TikTok account for the account. Requires the account's `logo`; configure it with [Update Account](/api-reference/accounts/update-account). The account is returned before TikTok has created it — its `id` is usable right away, and the rest of the profile fills in once provisioning finishes.",
-                    "properties": {
-                      "account_id": {
-                        "description": "The Account (biz_ identifier) to create the external account for. An account-scoped API key may omit this to default to its own account. Account API keys cannot update their own account's branding through Update Account; use a user-authenticated path.",
-                        "example": "biz_xxxxxxxxxxxxxx",
-                        "type": "string"
-                      },
-                      "platform": {
-                        "description": "The platform to create the external account on.",
-                        "enum": [
-                          "tiktok"
-                        ],
-                        "example": "tiktok",
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "platform"
-                    ],
-                    "title": "CreateTiktokExternalAccount",
-                    "type": "object"
+                    "$ref": "#/components/schemas/CreateTiktokExternalAccount"
                   },
                   {
-                    "description": "Connects the account's existing Klaviyo account with a private API key.",
-                    "properties": {
-                      "account_id": {
-                        "description": "The Account (biz_ identifier) to create the external account for. An account-scoped API key may omit this to default to its own account. Account API keys cannot update their own account's branding through Update Account; use a user-authenticated path.",
-                        "example": "biz_xxxxxxxxxxxxxx",
-                        "type": "string"
-                      },
-                      "api_key": {
-                        "description": "A private Klaviyo API key with read access to Accounts. Whop checks the key with Klaviyo before connecting and never returns it. Connecting again replaces the saved key.",
-                        "type": "string"
-                      },
-                      "platform": {
-                        "description": "The platform to create the external account on.",
-                        "enum": [
-                          "klaviyo"
-                        ],
-                        "example": "klaviyo",
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "platform",
-                      "api_key"
-                    ],
-                    "title": "CreateKlaviyoExternalAccount",
-                    "type": "object"
+                    "$ref": "#/components/schemas/CreateKlaviyoExternalAccount"
                   },
                   {
-                    "description": "Connects the account's Aimerce shop with an API key and turns on the Aimerce tracking pixel. Requires the `company:manage_checkout` scope instead of `social_account:create`.",
-                    "properties": {
-                      "account_id": {
-                        "description": "The Account (biz_ identifier) to create the external account for. An account-scoped API key may omit this to default to its own account. Account API keys cannot update their own account's branding through Update Account; use a user-authenticated path.",
-                        "example": "biz_xxxxxxxxxxxxxx",
-                        "type": "string"
-                      },
-                      "api_key": {
-                        "description": "The account's Aimerce API key. Whop checks the key with Aimerce before connecting and never returns it. Connecting again replaces the saved key.",
-                        "type": "string"
-                      },
-                      "platform": {
-                        "description": "The platform to create the external account on.",
-                        "enum": [
-                          "aimerce"
-                        ],
-                        "example": "aimerce",
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "platform",
-                      "api_key"
-                    ],
-                    "title": "CreateAimerceExternalAccount",
-                    "type": "object"
+                    "$ref": "#/components/schemas/CreateAimerceExternalAccount"
                   }
                 ]
               }
@@ -161332,7 +161339,7 @@
     },
     "/search": {
       "get": {
-        "description": "Searches one account's records in one call. `account` rows are `account_id` itself and, when you send `include_subaccounts`, its subaccounts; every other row belongs to one of those accounts.\n\nEach `object` needs its own read permission on the record's account, and rows you can't read are left out without an error: `account` (`biz_`, `company:basic:read`), `member` (`mber_`, `member:basic:read`), `membership` (`mem_`, `member:basic:read`), `payment` (`pay_`, `payment:basic:read`), `affiliate` (`aff_`, `affiliate:basic:read`), `review` (`rev_`, `company:basic:read`), `resolution_center_case` (`reso_`, `payment:resolution_center_case:read`) and `promo_code` (`promo_`, `promo_code:basic:read`). A query containing `@` also needs `member:email:read`, and a phone match `member:phone:read`. An invoice's number finds the invoice as its `payment`.\n\n`query` is trimmed and has to be 2 to 250 characters; a full card number returns a `400`. `data` comes identifier matches first, such as a pasted ID, email address, card digits or invoice number, newest first within each kind of match. Every query of 3 or more characters is also ranked, and ranked rows follow, best match first. Each record appears once, and `match_reason` says why it matched. [Search](/api-reference/search/search) lists the query shapes and match reasons.\n\n`first` caps the rows, 20 by default and up to 100. There is no cursor yet, so the response is a single page. Search ranks; to filter one resource or page through every match, use its list endpoint, such as `GET /payments?query=`.",
+        "description": "Searches one account's records in one call. `account` rows include the account in `account_id`. Use `include_subaccounts` to include its subaccounts. Every other row belongs to one of those accounts.\n\nEach `type` needs its own read permission on the record's account, and rows you can't read are left out without an error: `account` (`biz_`, `company:basic:read`), `member` (`mber_`, `member:basic:read`), `membership` (`mem_`, `member:basic:read`), `payment` (`pay_`, `payment:basic:read`), `affiliate` (`aff_`, `affiliate:basic:read`), `review` (`rev_`, `company:basic:read`), `resolution_center_case` (`reso_`, `payment:resolution_center_case:read`) and `promo_code` (`promo_`, `promo_code:basic:read`). A query containing `@` also needs `member:email:read`, and a phone match `member:phone:read`. An invoice's number finds the invoice as its `payment`.\n\n`query` must be 2 to 250 characters after trimming. A full card number returns a `400`. `data` lists identifier matches first, such as an ID, email address, card digits or invoice number. Within each identifier match type, the newest records appear first. Queries of 3 or more characters also return ranked results after identifier matches, best match first. Each record appears once. `match_reason` explains why a record matched. [Search](/api-reference/search/search) lists the query shapes and match reasons.\n\n`first` limits the response to 20 rows by default and up to 100. Search returns a single page. To filter one resource or page through every match, use its list endpoint, such as `GET /payments?query=`.",
         "operationId": "listSearchResults",
         "parameters": [
           {
@@ -163110,110 +163117,26 @@
             "application/json": {
               "schema": {
                 "discriminator": {
+                  "mapping": {
+                    "aimerce": "#/components/schemas/CreateAimerceExternalAccount",
+                    "facebook": "#/components/schemas/CreateFacebookExternalAccount",
+                    "klaviyo": "#/components/schemas/CreateKlaviyoExternalAccount",
+                    "tiktok": "#/components/schemas/CreateTiktokExternalAccount"
+                  },
                   "propertyName": "platform"
                 },
                 "oneOf": [
                   {
-                    "description": "Whop no longer creates Facebook pages, so this returns a `facebook_page_provisioning_retired` error.",
-                    "properties": {
-                      "account_id": {
-                        "description": "The Account (biz_ identifier) to create the external account for. An account-scoped API key may omit this to default to its own account. Account API keys cannot update their own account's branding through Update Account; use a user-authenticated path.",
-                        "example": "biz_xxxxxxxxxxxxxx",
-                        "type": "string"
-                      },
-                      "platform": {
-                        "description": "The platform to create the external account on.",
-                        "enum": [
-                          "facebook"
-                        ],
-                        "example": "facebook",
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "platform"
-                    ],
-                    "title": "CreateFacebookExternalAccount",
-                    "type": "object"
+                    "$ref": "#/components/schemas/CreateFacebookExternalAccount"
                   },
                   {
-                    "description": "Provisions a Whop-managed TikTok account for the account. Requires the account's `logo`; configure it with [Update Account](/api-reference/accounts/update-account). The account is returned before TikTok has created it — its `id` is usable right away, and the rest of the profile fills in once provisioning finishes.",
-                    "properties": {
-                      "account_id": {
-                        "description": "The Account (biz_ identifier) to create the external account for. An account-scoped API key may omit this to default to its own account. Account API keys cannot update their own account's branding through Update Account; use a user-authenticated path.",
-                        "example": "biz_xxxxxxxxxxxxxx",
-                        "type": "string"
-                      },
-                      "platform": {
-                        "description": "The platform to create the external account on.",
-                        "enum": [
-                          "tiktok"
-                        ],
-                        "example": "tiktok",
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "platform"
-                    ],
-                    "title": "CreateTiktokExternalAccount",
-                    "type": "object"
+                    "$ref": "#/components/schemas/CreateTiktokExternalAccount"
                   },
                   {
-                    "description": "Connects the account's existing Klaviyo account with a private API key.",
-                    "properties": {
-                      "account_id": {
-                        "description": "The Account (biz_ identifier) to create the external account for. An account-scoped API key may omit this to default to its own account. Account API keys cannot update their own account's branding through Update Account; use a user-authenticated path.",
-                        "example": "biz_xxxxxxxxxxxxxx",
-                        "type": "string"
-                      },
-                      "api_key": {
-                        "description": "A private Klaviyo API key with read access to Accounts. Whop checks the key with Klaviyo before connecting and never returns it. Connecting again replaces the saved key.",
-                        "type": "string"
-                      },
-                      "platform": {
-                        "description": "The platform to create the external account on.",
-                        "enum": [
-                          "klaviyo"
-                        ],
-                        "example": "klaviyo",
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "platform",
-                      "api_key"
-                    ],
-                    "title": "CreateKlaviyoExternalAccount",
-                    "type": "object"
+                    "$ref": "#/components/schemas/CreateKlaviyoExternalAccount"
                   },
                   {
-                    "description": "Connects the account's Aimerce shop with an API key and turns on the Aimerce tracking pixel. Requires the `company:manage_checkout` scope instead of `social_account:create`.",
-                    "properties": {
-                      "account_id": {
-                        "description": "The Account (biz_ identifier) to create the external account for. An account-scoped API key may omit this to default to its own account. Account API keys cannot update their own account's branding through Update Account; use a user-authenticated path.",
-                        "example": "biz_xxxxxxxxxxxxxx",
-                        "type": "string"
-                      },
-                      "api_key": {
-                        "description": "The account's Aimerce API key. Whop checks the key with Aimerce before connecting and never returns it. Connecting again replaces the saved key.",
-                        "type": "string"
-                      },
-                      "platform": {
-                        "description": "The platform to create the external account on.",
-                        "enum": [
-                          "aimerce"
-                        ],
-                        "example": "aimerce",
-                        "type": "string"
-                      }
-                    },
-                    "required": [
-                      "platform",
-                      "api_key"
-                    ],
-                    "title": "CreateAimerceExternalAccount",
-                    "type": "object"
+                    "$ref": "#/components/schemas/CreateAimerceExternalAccount"
                   }
                 ]
               }
@@ -180522,7 +180445,7 @@
                 "properties": {
                   "api_version_date": {
                     "description": "The dated API version (Api-Version-Date) to pin this webhook's payloads to. Omit to leave the webhook unpinned, tracking the current payload shape.",
-                    "example": "2026-11-19-2",
+                    "example": "2026-01-01",
                     "type": [
                       "string",
                       "null"
@@ -180867,7 +180790,7 @@
                 "properties": {
                   "api_version_date": {
                     "description": "The dated API version (Api-Version-Date) to pin this webhook's payloads to. Only valid for `v1` webhooks. Omit to leave the current pin unchanged, or pass `null` to unpin and track the current payload shape.",
-                    "example": "2026-11-19-2",
+                    "example": "2026-01-01",
                     "type": [
                       "string",
                       "null"
@@ -182200,7 +182123,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -182529,7 +182452,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -182858,7 +182781,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "disabled_at": "2026-01-01T12:00:00.000Z",
@@ -182991,7 +182914,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -183326,7 +183249,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "ad_campaign": {
                     "id": "adcamp_xxxxxxxxxxxxxx"
@@ -183656,7 +183579,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -184023,7 +183946,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -184396,7 +184319,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "ad_campaign": {
                     "id": "adcamp_xxxxxxxxxxxxxx"
@@ -184799,7 +184722,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxx2",
@@ -184945,7 +184868,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxx2",
@@ -185091,7 +185014,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -185512,7 +185435,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -185933,7 +185856,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -186354,7 +186277,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -186775,7 +186698,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -186944,7 +186867,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -187113,7 +187036,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -187282,7 +187205,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -187451,7 +187374,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -187592,7 +187515,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -187733,7 +187656,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -187874,7 +187797,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -188015,7 +187938,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -188156,7 +188079,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "audience": {
                     "type": "channel",
@@ -188413,7 +188336,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "audience": {
                     "type": "channel",
@@ -188684,7 +188607,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "completed": true,
                   "course": {
@@ -188828,7 +188751,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "amount": "75000000000",
                   "available_at": null,
@@ -188969,7 +188892,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "acceptable": true,
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -189161,7 +189084,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "acceptable": false,
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -189353,7 +189276,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": null,
                   "amount": 25.0,
@@ -189494,7 +189417,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -189639,7 +189562,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -189784,7 +189707,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -189929,7 +189852,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -190074,7 +189997,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -190219,7 +190142,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -190364,7 +190287,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -190509,7 +190432,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "events": [
                     {
@@ -190932,7 +190855,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "download_url": "https://s3.amazonaws.com/uploads/exports/members-export.csv",
@@ -191062,7 +190985,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "download_url": null,
@@ -191192,7 +191115,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "amount": "512345000000",
                   "available_at": "2026-01-01T12:00:00.000Z",
@@ -191332,7 +191255,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "id": "idpf_xxxxxxxxxxxxxx"
                 },
@@ -191465,7 +191388,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -191649,7 +191572,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -191833,7 +191756,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -192017,7 +191940,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -192201,7 +192124,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -192385,7 +192308,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "balances": [
                     {
@@ -192529,7 +192452,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -192694,7 +192617,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -192859,7 +192782,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -193035,7 +192958,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -193211,7 +193134,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -193387,7 +193310,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -193695,7 +193618,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -194003,7 +193926,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -194311,7 +194234,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -194619,7 +194542,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -194920,7 +194843,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -195228,7 +195151,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -195536,7 +195459,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -196061,7 +195984,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -196582,7 +196505,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -197099,7 +197022,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "address": {
                     "city": "Austin",
@@ -197241,7 +197164,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_reference": "4483",
                   "bank_verification_state": null,
@@ -197848,7 +197771,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -198164,7 +198087,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -198480,7 +198403,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -198796,7 +198719,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -198959,7 +198882,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -199122,7 +199045,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -199285,7 +199208,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -199448,7 +199371,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -199611,7 +199534,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "amount": 50.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -199781,7 +199704,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "amount": 50.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -199951,7 +199874,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -200125,7 +200048,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -200295,7 +200218,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -200465,7 +200388,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -200615,7 +200538,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -200762,7 +200685,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -200952,7 +200875,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "carrier": "ups",
@@ -201085,7 +201008,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "carrier": "ups",
@@ -201218,7 +201141,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "amount": {
                     "amount": "-1234.56",
@@ -201404,7 +201327,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -201646,7 +201569,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "amount": {
                     "amount": "250.00",
@@ -202036,7 +201959,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "amount": {
                     "amount": "250.00",
@@ -202426,7 +202349,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "amount": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -202804,7 +202727,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-19-2",
+                "api_version_date": "2026-11-20",
                 "data": {
                   "id": "verf_xxxxxxxxxxxxxx",
                   "last_error_code": null,
