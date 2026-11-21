@@ -175361,6 +175361,13 @@
                                   },
                                   "type": "array"
                                 },
+                                "session_url": {
+                                  "description": "Hosted verification session URL for the owner to complete their own identity checks. Expires 7 days after creation. `null` unless the business review waits on this owner to start or finish a hosted session.",
+                                  "type": [
+                                    "string",
+                                    "null"
+                                  ]
+                                },
                                 "status": {
                                   "description": "Where the owner's own verification stands, in the same states as `status`. `action_required` when their documents need sending again.",
                                   "enum": [
@@ -175384,6 +175391,7 @@
                                 "last_name",
                                 "date_of_birth",
                                 "status",
+                                "session_url",
                                 "required_documents",
                                 "rejected_checks"
                               ],
@@ -176571,6 +176579,13 @@
                             },
                             "type": "array"
                           },
+                          "session_url": {
+                            "description": "Hosted verification session URL for the owner to complete their own identity checks. Expires 7 days after creation. `null` unless the business review waits on this owner to start or finish a hosted session.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "status": {
                             "description": "Where the owner's own verification stands, in the same states as `status`. `action_required` when their documents need sending again.",
                             "enum": [
@@ -176594,6 +176609,7 @@
                           "last_name",
                           "date_of_birth",
                           "status",
+                          "session_url",
                           "required_documents",
                           "rejected_checks"
                         ],
@@ -177150,6 +177166,14 @@
                             },
                             "type": "array"
                           },
+                          "session_url": {
+                            "description": "Hosted verification session URL for the owner to complete their own identity checks. Expires 7 days after creation. `null` unless the business review waits on this owner to start or finish a hosted session.",
+                            "example": null,
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "status": {
                             "description": "Where the owner's own verification stands, in the same states as `status`. `action_required` when their documents need sending again.",
                             "enum": [
@@ -177173,6 +177197,7 @@
                           "last_name",
                           "date_of_birth",
                           "status",
+                          "session_url",
                           "required_documents",
                           "rejected_checks"
                         ],
@@ -177784,6 +177809,13 @@
                             },
                             "type": "array"
                           },
+                          "session_url": {
+                            "description": "Hosted verification session URL for the owner to complete their own identity checks. Expires 7 days after creation. `null` unless the business review waits on this owner to start or finish a hosted session.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "status": {
                             "description": "Where the owner's own verification stands, in the same states as `status`. `action_required` when their documents need sending again.",
                             "enum": [
@@ -177807,6 +177839,7 @@
                           "last_name",
                           "date_of_birth",
                           "status",
+                          "session_url",
                           "required_documents",
                           "rejected_checks"
                         ],
@@ -179162,6 +179195,13 @@
                             },
                             "type": "array"
                           },
+                          "session_url": {
+                            "description": "Hosted verification session URL for the owner to complete their own identity checks. Expires 7 days after creation. `null` unless the business review waits on this owner to start or finish a hosted session.",
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
                           "status": {
                             "description": "Where the owner's own verification stands, in the same states as `status`. `action_required` when their documents need sending again.",
                             "enum": [
@@ -179185,6 +179225,7 @@
                           "last_name",
                           "date_of_birth",
                           "status",
+                          "session_url",
                           "required_documents",
                           "rejected_checks"
                         ],
