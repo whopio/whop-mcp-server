@@ -27113,9 +27113,41 @@
               "null"
             ]
           },
+          "quote_accepted_at": {
+            "description": "When the customer accepted and signed the quote, as an ISO 8601 timestamp. An edit to the draft clears it, unless the edit changes only `recipient_emails`. `null` when the quote was not accepted.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "quote_sent_at": {
             "description": "When the draft was last emailed to its recipients as a quote, as an ISO 8601 timestamp. A quote stays a draft and cannot be paid. It is not issued on its `due_at`. `null` when the invoice was never sent as a quote.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quote_signature_url": {
+            "description": "A link to the signature the customer drew, as a PNG image with a transparent background. The link expires after a short time. `null` when the quote was not accepted, and for a credential without the member:basic:read permission.",
+            "example": "https://whop-assets-example.s3.amazonaws.com/xxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quote_signer_email": {
+            "description": "The email address of the Whop user who signed the quote. `null` when the quote was not accepted, when the signer was not signed in to Whop, and without the member:email:read permission.",
             "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "quote_signer_name": {
+            "description": "The full name the customer typed to sign the quote. `null` when the quote was not accepted, and for a credential without the member:basic:read permission.",
+            "example": "Dana Whitfield",
             "type": [
               "string",
               "null"
@@ -27237,6 +27269,10 @@
           "scheduled_collection_method",
           "sends_on_due_date",
           "quote_sent_at",
+          "quote_accepted_at",
+          "quote_signer_name",
+          "quote_signer_email",
+          "quote_signature_url",
           "customer_name",
           "recipient_emails",
           "email_address",
