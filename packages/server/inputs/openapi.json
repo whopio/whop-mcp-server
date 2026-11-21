@@ -141214,7 +141214,7 @@
                         ]
                       },
                       "auto_capture_after_minutes": {
-                        "description": "Minutes after authorization at which Whop captures the hold automatically unless it has been voided. Requires `capture: false`. Between 5 and 5760 (4 days).",
+                        "description": "Minutes after authorization at which Whop captures the hold automatically unless it has been voided. Requires `capture: false`. Between 5 and 5760 (4 days), or 5 and 1440 (1 day) for `card_present`.",
                         "example": 60,
                         "maximum": 5760,
                         "minimum": 5,
@@ -141286,7 +141286,7 @@
                         ]
                       },
                       "capture": {
-                        "description": "Whether to capture a card payment immediately. Defaults to true. Pass false to place an authorization hold that must be captured in full within five days via the capture endpoint, or automatically after `auto_capture_after_minutes`.",
+                        "description": "Whether to capture a card payment immediately. Defaults to true. Pass false to place an authorization hold that must be captured in full within five days via the capture endpoint, or automatically after `auto_capture_after_minutes`. With a `card_present` `payment_method`, false holds the sale so its line items can change after the tap with `PATCH /payments/{id}`. Capture it for its total, or Whop captures it after `auto_capture_after_minutes` (10 by default).",
                         "example": false,
                         "type": [
                           "boolean",
@@ -143463,6 +143463,95 @@
             "application/json": {
               "schema": {
                 "properties": {
+                  "line_items": {
+                    "description": "The line items of an in-person payment, changed after the reader reads the card and before the payment is captured. The list replaces the current one. Send each line already on the payment back with its `id`, and add a line with a one-time `variant`. Only lines added this way can change or be left out, and leaving one out removes it. Added lines aren't taxed. On an open payment, change them before you confirm the payment on the reader, within Stripe's 30 seconds. On a payment created with `capture: false`, change them before you capture, then capture the payment for its new `total`. Off by default. Contact Whop support to turn it on for your account.",
+                    "items": {
+                      "additionalProperties": false,
+                      "oneOf": [
+                        {
+                          "example": {
+                            "variant": {
+                              "initial_price": 5.0,
+                              "product": {
+                                "external_identifier": "delivery-fee",
+                                "title": "Delivery fee"
+                              }
+                            }
+                          },
+                          "required": [
+                            "id"
+                          ]
+                        },
+                        {
+                          "example": {
+                            "variant": {
+                              "initial_price": 5.0,
+                              "product": {
+                                "external_identifier": "delivery-fee",
+                                "title": "Delivery fee"
+                              }
+                            }
+                          },
+                          "required": [
+                            "variant"
+                          ]
+                        }
+                      ],
+                      "properties": {
+                        "id": {
+                          "description": "A line already on the payment, prefixed `li_`, kept as it is.",
+                          "example": "li_xxxxxxxxxxxxxx",
+                          "type": "string"
+                        },
+                        "variant": {
+                          "additionalProperties": false,
+                          "description": "A one-time line to add. A payment carries one added line per product, so a line for a product that already has one replaces it.",
+                          "properties": {
+                            "initial_price": {
+                              "description": "The line's price in the payment's currency, at most two decimal places. 0 takes the product's added line off.",
+                              "example": 5.0,
+                              "minimum": 0,
+                              "multipleOf": 0.01,
+                              "type": "number"
+                            },
+                            "product": {
+                              "additionalProperties": false,
+                              "description": "The product the line belongs to. It is found by `external_identifier` and created hidden when the account has none, so it never shows in the store.",
+                              "properties": {
+                                "external_identifier": {
+                                  "description": "Your identifier for the product.",
+                                  "example": "delivery-fee",
+                                  "maxLength": 255,
+                                  "minLength": 1,
+                                  "type": "string"
+                                },
+                                "title": {
+                                  "description": "The product's name, also the line's label on the receipt.",
+                                  "example": "Delivery fee",
+                                  "maxLength": 30,
+                                  "minLength": 1,
+                                  "type": "string"
+                                }
+                              },
+                              "required": [
+                                "external_identifier",
+                                "title"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "initial_price",
+                            "product"
+                          ],
+                          "type": "object"
+                        }
+                      },
+                      "type": "object"
+                    },
+                    "maxItems": 55,
+                    "type": "array"
+                  },
                   "return_url": {
                     "description": "Where the buyer continues after completing an off-site step. An absolute https URL without credentials, at most 2,048 characters. Only for payments created with a `confirmation_token`, and only until the buyer has returned. Omit it to leave it unchanged.",
                     "example": "https://shinetime.example/checkout/thanks",
@@ -143550,7 +143639,7 @@
                 }
               }
             },
-            "description": "shipping address replaced"
+            "description": "line items changed after the card was read"
           },
           "400": {
             "content": {
@@ -143596,7 +143685,7 @@
         }
       ],
       "post": {
-        "description": "Captures the full amount of a card payment created with `capture: false`. The payment must still be in `requires_capture` before `capture_expires_at`. Partial capture, multiple captures, capturing more than the authorized amount, and tips are not supported.",
+        "description": "Captures a card payment created with `capture: false` for its `total`. The payment must still be in `requires_capture` before `capture_expires_at`. An in-person payment's total can move away from its authorized amount when its line items change after the card was authorized. Above it, Whop captures the difference where Stripe allows it for the merchant's category, and otherwise raises the authorization first, which the card can decline. Capturing more or less than the authorized amount is off by default. Contact Whop support to turn it on for your account. Multiple captures are not supported.",
         "operationId": "capturePayment",
         "parameters": [
           {
@@ -143612,6 +143701,41 @@
             "$ref": "#/components/parameters/IdempotencyKey"
           }
         ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "amount": {
+                    "description": "The amount to capture, in the payment's currency. It must equal the payment's `total`, and defaults to it. The total moves away from the authorized amount when its line items change after the card was authorized. Capturing more or less than the authorized amount is off by default. Contact Whop support to turn it on for your account.",
+                    "example": 25.0,
+                    "minimum": 0,
+                    "multipleOf": 0.01,
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "metadata": {
+                    "additionalProperties": {
+                      "type": "string"
+                    },
+                    "description": "Keys and values added to the payment's `metadata` once it is captured, such as the file of the buyer's signature. Only for an in-person payment created with `capture: false`.",
+                    "example": {
+                      "signature_file_id": "file_xxxxxxxxxxxxxx"
+                    },
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                  }
+                },
+                "required": [],
+                "type": "object"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
@@ -143621,7 +143745,7 @@
                 }
               }
             },
-            "description": "Payment captured"
+            "description": "Payment captured for its total, with metadata"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized",
