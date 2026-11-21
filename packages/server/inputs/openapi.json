@@ -36953,6 +36953,17 @@
               }
             ]
           },
+          "crypto": {
+            "description": "Crypto payments only: the on-chain transaction that the buyer sent.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PaymentInstrumentCrypto"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "display_name": {
             "description": "Buyer-facing instrument name — \"Visa •••• 4242\" when the card surfaced, else the method's own name (\"Klarna\").",
             "example": "Visa •••• 4242",
@@ -36981,6 +36992,7 @@
           "display_name",
           "icons",
           "card",
+          "crypto",
           "installment_count"
         ],
         "type": "object"
@@ -37043,6 +37055,21 @@
           "exp_month",
           "exp_year",
           "network_transaction_id"
+        ],
+        "type": "object"
+      },
+      "PaymentInstrumentCrypto": {
+        "properties": {
+          "transaction_hash": {
+            "description": "The hash of the on-chain transaction that the buyer sent to pay. Use it to find the payment from a hash that the buyer gives you. Null until the payment provider reports the transaction.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "transaction_hash"
         ],
         "type": "object"
       },
@@ -193423,6 +193450,7 @@
                       "last4": "4242",
                       "network_transaction_id": null
                     },
+                    "crypto": null,
                     "display_name": "Visa •••• 4242",
                     "icons": {
                       "card": {
@@ -193730,6 +193758,7 @@
                       "last4": "4242",
                       "network_transaction_id": null
                     },
+                    "crypto": null,
                     "display_name": "Visa •••• 4242",
                     "icons": {
                       "card": {
@@ -194037,6 +194066,7 @@
                       "last4": "4242",
                       "network_transaction_id": null
                     },
+                    "crypto": null,
                     "display_name": "Visa •••• 4242",
                     "icons": {
                       "card": {
@@ -194344,6 +194374,7 @@
                       "last4": "4242",
                       "network_transaction_id": null
                     },
+                    "crypto": null,
                     "display_name": "Visa •••• 4242",
                     "icons": {
                       "card": {
@@ -194644,6 +194675,7 @@
                   "paid_at": null,
                   "payment_instrument": {
                     "card": null,
+                    "crypto": null,
                     "display_name": "ACH",
                     "icons": {
                       "card": {
@@ -194951,6 +194983,7 @@
                       "last4": "4242",
                       "network_transaction_id": null
                     },
+                    "crypto": null,
                     "display_name": "Visa •••• 4242",
                     "icons": {
                       "card": {
@@ -195258,6 +195291,7 @@
                       "last4": "4242",
                       "network_transaction_id": null
                     },
+                    "crypto": null,
                     "display_name": "Visa •••• 4242",
                     "icons": {
                       "card": {
@@ -200739,6 +200773,7 @@
                       "last4": "4242",
                       "network_transaction_id": null
                     },
+                    "crypto": null,
                     "display_name": "Card •••• 4242",
                     "icons": {
                       "card": {
