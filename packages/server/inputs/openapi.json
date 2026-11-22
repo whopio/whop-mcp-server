@@ -29759,6 +29759,13 @@
             "additionalProperties": true,
             "description": "Source of this ledger activity. Platform markup fees use object platform_fee and the ledger activity ID.",
             "properties": {
+              "account_id": {
+                "description": "ID of the account that runs the ad campaign (ad_campaign sources only).",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
               "amount_float": {
                 "description": "Payout amount as a decimal number in the destination currency (payout sources only; requires payout:withdrawal:read).",
                 "example": 1500.0,
@@ -30001,6 +30008,13 @@
               "status": {
                 "description": "Lifecycle status. On payout sources this is the payout status (requires payout:withdrawal:read); on airdrop_link sources it is the claim-link status (ungated); on payment and top-up sources it is the friendly payment status such as succeeded/pending/failed (ungated); on bank_deposit sources it is succeeded, reversal_in_progress or reversed (ungated).",
                 "example": "fully_claimed",
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "title": {
+                "description": "Name of the ad campaign the spend, payout, or funding belongs to (ad_campaign sources only).",
                 "type": [
                   "string",
                   "null"
@@ -117025,8 +117039,11 @@
                 "enum": [
                   "account_settlement",
                   "ad_affiliate_payout_received",
+                  "ad_balance_funding_receipt",
                   "ad_budget_release",
                   "ad_campaign_budget",
+                  "ad_funding_disbursement",
+                  "ad_income_receipt",
                   "ad_publisher_payout",
                   "ad_publisher_payout_received",
                   "ad_spend_charge",
@@ -117517,8 +117534,11 @@
                 "enum": [
                   "account_settlement",
                   "ad_affiliate_payout_received",
+                  "ad_balance_funding_receipt",
                   "ad_budget_release",
                   "ad_campaign_budget",
+                  "ad_funding_disbursement",
+                  "ad_income_receipt",
                   "ad_publisher_payout",
                   "ad_publisher_payout_received",
                   "ad_spend_charge",
@@ -201749,6 +201769,7 @@
                     "title": "Shine Time Auto Detailing"
                   },
                   "source": {
+                    "account_id": "some_string",
                     "amount_float": 1500.0,
                     "card_brand": "some_string",
                     "chain": "plasma",
@@ -201801,6 +201822,7 @@
                     "risk_review_hold": true,
                     "sender_address": "0x8a4de51b9c37f2e6a0d1b8c94e5f7a2d3c6b0e19",
                     "status": "fully_claimed",
+                    "title": "some_string",
                     "to_amount": "500.0",
                     "to_currency": "usd",
                     "trace_code": null,
