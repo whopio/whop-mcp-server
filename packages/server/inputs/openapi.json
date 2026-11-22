@@ -148,7 +148,7 @@
       "Account": {
         "properties": {
           "ads_spend_usd": {
-            "description": "Lifetime charged ad spend for the account, in USD. Computed only on `list` for callers with `stats:read` on the account; `null` otherwise.",
+            "description": "Lifetime charged ad spend for the account, in USD. Computed only on `list` for callers with `stats:read` on the account, and `null` otherwise.",
             "example": 0.0,
             "type": [
               "number",
@@ -393,6 +393,20 @@
               "null"
             ]
           },
+          "merchant_of_record": {
+            "description": "The merchant of record for the account's payments. `whop` means Whop is the merchant of record and the account can switch. `null` means Whop is the merchant of record and the account cannot switch. `pending` means the account switched and waits for approval. Checkout takes no payments until then. `required_actions` lists what the account must answer, or says that it was not approved. `account` means the account is the merchant of record. Switch with `merchant_of_record` on `PATCH /accounts/{id}/preferences`. Whop sends `account.updated` when this value changes.",
+            "enum": [
+              "whop",
+              "pending",
+              "account",
+              null
+            ],
+            "example": "pending",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "metadata": {
             "description": "Arbitrary key/value metadata supplied at account creation.",
             "example": {
@@ -576,7 +590,7 @@
           "rewards": {
             "items": {
               "$ref": "#/components/schemas/AccountPartnerReward",
-              "description": "Business rewards attached through this account's active referral link, with account-specific progress and ledger status. Present on retrieve responses; empty without both balance and stats read access."
+              "description": "Business rewards attached through this account's active referral link, with account-specific progress and ledger status. Present on retrieve responses. Empty without both balance and stats read access."
             },
             "type": "array"
           },
@@ -622,6 +636,14 @@
               "description": "Account social links."
             },
             "type": "array"
+          },
+          "statement_descriptor": {
+            "description": "The text on buyers' card statements for this account's payments, up to 22 characters. While Whop is the merchant of record, it starts with `WHOP*`. Whop drops the `WHOP*` prefix when the account is its own merchant of record and can take card payments. It keeps the prefix if fewer than five characters or no letters would remain. A product or payment descriptor takes precedence. `null` uses a descriptor made from the account's title.",
+            "example": "KODARA",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "status": {
             "description": "Whether the account can operate on Whop: `active` or `suspended`. Computed on `list`, `retrieve`, `me`, and `suspend`; `null` otherwise.",
@@ -764,7 +786,7 @@
             "type": "object"
           },
           "volume_l30d_usd": {
-            "description": "Volume through the account in the last 30 days (GMV from paid receipts), normalized to USD. Computed only on `list` for callers with `stats:read` on the account; `null` otherwise.",
+            "description": "Volume through the account in the last 30 days (GMV from paid receipts), normalized to USD. Computed only on `list` for callers with `stats:read` on the account, and `null` otherwise.",
             "example": 0.0,
             "type": [
               "number",
@@ -772,7 +794,7 @@
             ]
           },
           "volume_usd": {
-            "description": "Lifetime volume through the account — sales plus transfers received — normalized to USD. Computed only on `list` for callers with `stats:read` on the account; `null` otherwise.",
+            "description": "Lifetime volume through the account (sales plus transfers received), normalized to USD. Computed only on `list` for callers with `stats:read` on the account, and `null` otherwise.",
             "type": [
               "number",
               "null"
@@ -834,6 +856,8 @@
           "other_industry_description",
           "require_2fa",
           "three_ds_level",
+          "statement_descriptor",
+          "merchant_of_record",
           "collect_vat_id",
           "target_audience",
           "dispute_fighter_enabled",
@@ -6462,7 +6486,7 @@
             "type": "array"
           },
           "merchant_of_record": {
-            "description": "The merchant of record for the account's payments. `whop` means Whop is the merchant of record and the account can switch. `null` means Whop is the merchant of record and the account's business category cannot switch. `pending` means the account switched and waits for approval. Checkout takes no payments until then. `account` means the account is the merchant of record.",
+            "description": "The merchant of record for the account's payments. `whop` means Whop is the merchant of record and the account can switch. `null` means Whop is the merchant of record and the account cannot switch. `pending` means the account switched and waits for approval. Checkout takes no payments until then. `account` means the account is the merchant of record.",
             "enum": [
               "whop",
               "pending",
@@ -62606,7 +62630,7 @@
                       "type": "array"
                     },
                     "merchant_of_record": {
-                      "description": "The merchant of record for the account's payments. `whop` means Whop is the merchant of record and the account can switch. `null` means Whop is the merchant of record and the account's business category cannot switch. `pending` means the account switched and waits for approval. Checkout takes no payments until then. `account` means the account is the merchant of record.",
+                      "description": "The merchant of record for the account's payments. `whop` means Whop is the merchant of record and the account can switch. `null` means Whop is the merchant of record and the account cannot switch. `pending` means the account switched and waits for approval. Checkout takes no payments until then. `account` means the account is the merchant of record.",
                       "enum": [
                         "whop",
                         "pending",
@@ -63105,7 +63129,7 @@
                     "type": "array"
                   },
                   "merchant_of_record": {
-                    "description": "Set it to `account` to make the account the merchant of record. Only some business categories can switch. The business must be verified. The switch cannot be undone. The response shows `pending` until approval. Checkout takes no payments until then. After the switch, the account accepts only card, Apple Pay, Google Pay and crypto payments. PayPal, buy now pay later and local payment methods stop. Requires the `payout:account:update` scope on your API key.",
+                    "description": "Set it to `account` to make the account the merchant of record. Only some business categories can switch. A subaccount can also switch when Whop has approved its platform. Its business category must not be prohibited. The business must be verified. The switch cannot be undone. The response shows `pending` until approval. Checkout takes no payments until then. After the switch, the account accepts only card, Apple Pay, Google Pay and crypto payments. PayPal, buy now pay later and local payment methods stop. Requires the `payout:account:update` scope on your API key.",
                     "enum": [
                       "account"
                     ],
@@ -63634,7 +63658,7 @@
                       "type": "array"
                     },
                     "merchant_of_record": {
-                      "description": "The merchant of record for the account's payments. `whop` means Whop is the merchant of record and the account can switch. `null` means Whop is the merchant of record and the account's business category cannot switch. `pending` means the account switched and waits for approval. Checkout takes no payments until then. `account` means the account is the merchant of record.",
+                      "description": "The merchant of record for the account's payments. `whop` means Whop is the merchant of record and the account can switch. `null` means Whop is the merchant of record and the account cannot switch. `pending` means the account switched and waits for approval. Checkout takes no payments until then. `account` means the account is the merchant of record.",
                       "enum": [
                         "whop",
                         "pending",
@@ -64455,6 +64479,14 @@
                       "type": "object"
                     },
                     "type": "array"
+                  },
+                  "statement_descriptor": {
+                    "description": "The text on buyers' card statements for this account's payments. It must be 5 to 22 characters with at least one letter, using only A-Z and 0-9 after any `WHOP*` prefix. It must start with `WHOP*` while Whop is the merchant of record. Once the account has switched to being its own merchant of record (`merchant_of_record` in account preferences), it can be set without the prefix. `null` clears it. Requires the `payout:account:update` scope.",
+                    "example": "WHOP*KODARA",
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "store_page_config": {
                     "description": "Account store page display configuration.",
@@ -141939,7 +141971,7 @@
                         ]
                       },
                       "statement_descriptor": {
-                        "description": "Overrides the text on the buyer's card statement for this payment only. Takes precedence over the product's and account's custom descriptors, and changes neither. Must start with `WHOP*` unless the business processes as the merchant of record. For businesses processing as the merchant of record, omit the `WHOP*` prefix; the descriptor appears as provided. Must be 5-22 characters, contain at least one letter, and use only Latin letters, numbers, spaces, underscores, hyphens, or asterisks.",
+                        "description": "Overrides the text on the buyer's card statement for this payment only. Takes precedence over the product's and account's custom descriptors, and changes neither. Must start with `WHOP*` unless the business processes as the merchant of record. For a business processing as the merchant of record, Whop removes a `WHOP*` prefix when at least 5 characters, including a letter, remain. Must be 5-22 characters, contain at least one letter, and use only Latin letters, numbers, spaces, underscores, hyphens, or asterisks.",
                         "example": "WHOP*SHINETIME",
                         "type": [
                           "string",
@@ -182437,6 +182469,7 @@
                   "invoice_prefix": "SHINE",
                   "level": null,
                   "logo_url": null,
+                  "merchant_of_record": null,
                   "metadata": {
                     "external_id": "shop_4417",
                     "region": "austin"
@@ -182520,6 +182553,7 @@
                       "website": "instagram"
                     }
                   ],
+                  "statement_descriptor": null,
                   "status": "active",
                   "status_reason": null,
                   "store_page_config": {
@@ -182766,6 +182800,7 @@
                   "invoice_prefix": "SHINE",
                   "level": null,
                   "logo_url": null,
+                  "merchant_of_record": null,
                   "metadata": {
                     "external_id": "shop_4417",
                     "region": "austin"
@@ -182849,6 +182884,7 @@
                       "website": "instagram"
                     }
                   ],
+                  "statement_descriptor": null,
                   "status": "active",
                   "status_reason": null,
                   "store_page_config": {
@@ -183228,6 +183264,7 @@
                   "invoice_prefix": "SHINE",
                   "level": null,
                   "logo_url": null,
+                  "merchant_of_record": null,
                   "metadata": {
                     "external_id": "shop_4417",
                     "region": "austin"
@@ -183311,6 +183348,7 @@
                       "website": "instagram"
                     }
                   ],
+                  "statement_descriptor": null,
                   "status": "active",
                   "status_reason": null,
                   "store_page_config": {
