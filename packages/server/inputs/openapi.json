@@ -18343,6 +18343,14 @@
             "example": "file",
             "type": "string"
           },
+          "optimized_url": {
+            "description": "URL to the optimized file. `null` when no optimized version is available.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "removed_by_moderation": {
             "description": "Whether moderation removed the file. When `true`, `url` serves a replacement image. `filename`, `size` and `content_type` still describe the original file.",
             "example": false,
@@ -18419,6 +18427,7 @@
           "content_type",
           "size",
           "url",
+          "optimized_url",
           "removed_by_moderation",
           "upload_status",
           "visibility",
@@ -22584,6 +22593,14 @@
             "example": "file",
             "type": "string"
           },
+          "optimized_url": {
+            "description": "URL to the optimized file. `null` when no optimized version is available.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "removed_by_moderation": {
             "description": "Whether moderation removed the file. When `true`, `url` serves a replacement image. `filename`, `size` and `content_type` still describe the original file.",
             "example": false,
@@ -22662,6 +22679,7 @@
           "content_type",
           "size",
           "url",
+          "optimized_url",
           "removed_by_moderation",
           "upload_status",
           "visibility",
