@@ -10716,6 +10716,7 @@
               "payment.failed",
               "membership.activated",
               "membership.trial_ending_soon",
+              "membership.cancel_at_period_end_changed",
               "member.created",
               "invoice.created",
               "invoice.paid",
@@ -10859,6 +10860,7 @@
               "payment.failed",
               "membership.activated",
               "membership.trial_ending_soon",
+              "membership.cancel_at_period_end_changed",
               "member.created",
               "invoice.created",
               "invoice.paid",
@@ -10941,7 +10943,7 @@
           },
           "config": {
             "$ref": "#/components/schemas/AutomationStepConfig",
-            "description": "The step's settings for its `action_type`: `delay_seconds` for a `wait`, `sender_id` for an `email` or `message`. Writing it replaces the whole object."
+            "description": "The step's settings for its `action_type`: `delay_seconds` for a `wait`, and `sender_id` and `attachment_ids` for an `email` or `message`. Writing it replaces the whole object, except that a step keeps its `attachment_ids` when the write leaves them out."
           },
           "created_at": {
             "description": "When the step was created, as an ISO 8601 timestamp.",
@@ -11037,7 +11039,7 @@
             "$ref": "#/components/schemas/AutomationStepMessageConfig"
           }
         ],
-        "description": "The step's settings for its `action_type`: `delay_seconds` for a `wait`, and `sender_id` for an `email` or a `message`. Writing it replaces the whole object."
+        "description": "The step's settings for its `action_type`: `delay_seconds` for a `wait`, and `sender_id` and `attachment_ids` for an `email` or a `message`. Writing it replaces the whole object, except that a step keeps its `attachment_ids` when the write leaves them out."
       },
       "AutomationStepEmailAddressSender": {
         "properties": {
@@ -11068,6 +11070,13 @@
       },
       "AutomationStepEmailConfig": {
         "properties": {
+          "attachment_ids": {
+            "items": {
+              "description": "Files attached to the email, as IDs prefixed `file_`.",
+              "type": "string"
+            },
+            "type": "array"
+          },
           "sender_id": {
             "description": "The mailbox the email comes from, prefixed `emaddr_`: an email address on the account whose domain can send email. Naming one needs what `/email_addresses` asks to use it. `null` sends from the account's name through Whop.",
             "example": null,
@@ -11085,6 +11094,13 @@
       },
       "AutomationStepMessageConfig": {
         "properties": {
+          "attachment_ids": {
+            "items": {
+              "description": "Files sent with the message, as IDs prefixed `file_`.",
+              "type": "string"
+            },
+            "type": "array"
+          },
           "sender_id": {
             "description": "The team member the message comes from, as a user ID prefixed `user_`. Only that member can name themselves. `null` sends as the account owner.",
             "example": null,
@@ -81200,6 +81216,7 @@
                 "payment.failed",
                 "membership.activated",
                 "membership.trial_ending_soon",
+                "membership.cancel_at_period_end_changed",
                 "member.created",
                 "invoice.created",
                 "invoice.paid",
@@ -81393,6 +81410,7 @@
                       "payment.failed",
                       "membership.activated",
                       "membership.trial_ending_soon",
+                      "membership.cancel_at_period_end_changed",
                       "member.created",
                       "invoice.created",
                       "invoice.paid",
@@ -81578,6 +81596,7 @@
                       "payment.failed",
                       "membership.activated",
                       "membership.trial_ending_soon",
+                      "membership.cancel_at_period_end_changed",
                       "member.created",
                       "invoice.created",
                       "invoice.paid",
