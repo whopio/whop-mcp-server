@@ -187064,7 +187064,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "CourseLessonInteraction Completed",
+        "summary": "Course Lesson Interaction Completed",
         "tags": [
           "Course lesson interactions"
         ],
@@ -189700,7 +189700,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "IdentityProfile Updated",
+        "summary": "Identity Profile Updated",
         "tags": [
           "Verifications"
         ],
@@ -190765,7 +190765,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "LedgerAccount Funds Available",
+        "summary": "Ledger Account Funds Available",
         "tags": [
           "Ledger accounts"
         ],
@@ -195541,7 +195541,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "PayoutAccount Status Updated",
+        "summary": "Payout Account Status Updated",
         "tags": [
           "Payout accounts"
         ],
@@ -196147,7 +196147,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "PayoutMethod Created",
+        "summary": "Payout Method Created",
         "tags": [
           "Payouts"
         ],
@@ -198424,7 +198424,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "ResolutionCenterCase Created",
+        "summary": "Resolution Center Case Created",
         "tags": [
           "Resolution Center Cases"
         ],
@@ -198594,7 +198594,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "ResolutionCenterCase Decided",
+        "summary": "Resolution Center Case Decided",
         "tags": [
           "Resolution Center Cases"
         ],
@@ -198764,7 +198764,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "ResolutionCenterCase Updated",
+        "summary": "Resolution Center Case Updated",
         "tags": [
           "Resolution Center Cases"
         ],
@@ -198915,7 +198915,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "SetupIntent Canceled",
+        "summary": "Setup Intent Canceled",
         "tags": [
           "Setup Intents"
         ],
@@ -199063,7 +199063,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "SetupIntent Requires Action",
+        "summary": "Setup Intent Requires Action",
         "tags": [
           "Setup Intents"
         ],
@@ -199254,7 +199254,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "SetupIntent Succeeded",
+        "summary": "Setup Intent Succeeded",
         "tags": [
           "Setup Intents"
         ],
