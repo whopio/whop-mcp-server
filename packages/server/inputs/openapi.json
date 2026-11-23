@@ -24912,6 +24912,43 @@
               "null"
             ]
           },
+          "quote_amount_paid": {
+            "description": "How much of the quote its paid invoices in `quote_invoice_ids` cover, before tax. `null` when the invoice was never sent as a quote.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "quote_amount_remaining": {
+            "description": "How much of the quote is not yet billed: its line items before tax, minus every invoice in `quote_invoice_ids`. `null` when the invoice was never sent as a quote.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "quote_invoice_ids": {
+            "items": {
+              "description": "The invoices that bill this quote, such as a deposit and then the balance, oldest first, each prefixed `pay_`. Empty when the quote was never billed.",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "quote_payment_url": {
+            "description": "Where the customer pays the next unpaid invoice in `quote_invoice_ids`. Only returned when the quote is read with its customer `token`. `null` otherwise, and when nothing is waiting to be paid.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "quote_sent_at": {
             "description": "When the draft was last emailed to its recipients as a quote, as an ISO 8601 timestamp. A quote stays a draft and cannot be paid. It is not issued on its `due_at`. `null` when the invoice was never sent as a quote.",
             "example": "2026-01-01T12:00:00.000Z",
@@ -25064,6 +25101,10 @@
           "quote_signer_name",
           "quote_signer_email",
           "quote_signature_url",
+          "quote_invoice_ids",
+          "quote_amount_remaining",
+          "quote_amount_paid",
+          "quote_payment_url",
           "customer_name",
           "recipient_emails",
           "email_address",
@@ -25546,7 +25587,7 @@
         "properties": {
           "description": {
             "description": "Text shown under the item on the invoice, its email, and its PDF, read from the variant's `description`. A custom charge sets it with the item's `description`. A product variant keeps its own. Null when the variant has none or has since been deleted.",
-            "example": null,
+            "example": "Deposit toward invoice #xxxxxxxx: $225.00 of $750.00, $525.00 left after this",
             "type": [
               "string",
               "null"
@@ -25584,7 +25625,7 @@
           },
           "label": {
             "description": "The item's name as shown at checkout (the product title, else the variant title).",
-            "example": "Ceramic Coating Package",
+            "example": "Deposit",
             "type": [
               "string",
               "null"
