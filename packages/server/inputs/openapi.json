@@ -639,7 +639,7 @@
           },
           "statement_descriptor": {
             "description": "The text on buyers' card statements for this account's payments, up to 22 characters. While Whop is the merchant of record, it starts with `WHOP*`. Whop drops the `WHOP*` prefix when the account is its own merchant of record and can take card payments. It keeps the prefix if fewer than five characters or no letters would remain. A product or payment descriptor takes precedence. `null` uses a descriptor made from the account's title.",
-            "example": "KODARA",
+            "example": "BUSINESS",
             "type": [
               "string",
               "null"
@@ -62277,7 +62277,7 @@
                   },
                   "statement_descriptor": {
                     "description": "The text on buyers' card statements for this account's payments. It must be 5 to 22 characters with at least one letter, using only A-Z and 0-9 after any `WHOP*` prefix. It must start with `WHOP*` while Whop is the merchant of record. Once the account has switched to being its own merchant of record (`merchant_of_record` in account preferences), it can be set without the prefix. `null` clears it. Requires the `payout:account:update` scope.",
-                    "example": "WHOP*KODARA",
+                    "example": "WHOP*BUSINESS",
                     "type": [
                       "string",
                       "null"
