@@ -22041,9 +22041,22 @@
       },
       "ExternalAccount": {
         "properties": {
+          "connection_status": {
+            "description": "Connection health of the external account. `reconnect_required` means the platform refused Whop's access, and the owner must connect the account again. `active` means Whop has not seen a refusal. Whop checks only Stripe connections for a refusal. `null` when Whop holds no access for the account, for example a claimed profile.",
+            "enum": [
+              null,
+              "active",
+              "reconnect_required"
+            ],
+            "example": "active",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "external_id": {
             "description": "The platform-specific ID for this external account.",
-            "example": "555222",
+            "example": "creator-id",
             "type": [
               "string",
               "null"
@@ -22056,7 +22069,7 @@
           },
           "name": {
             "description": "The display name of the external account on the platform.",
-            "example": "Valentine Tromp",
+            "example": "Allene Balistreri",
             "type": [
               "string",
               "null"
@@ -22093,14 +22106,15 @@
               "snapchat",
               "klaviyo",
               "quickbooks",
-              "aimerce"
+              "aimerce",
+              "stripe"
             ],
-            "example": "instagram",
+            "example": "tiktok",
             "type": "string"
           },
           "profile_picture_url": {
             "description": "The URL where the profile picture of the external account can be accessed.",
-            "example": "http://zboncak.example/greg_mcclure",
+            "example": "https://api.whop.com/valencia",
             "type": [
               "string",
               "null"
@@ -22116,7 +22130,7 @@
           },
           "url": {
             "description": "The URL where the external account can be accessed on the platform. Null while a Whop-owned account is still being provisioned.",
-            "example": "https://instagram.com/shinetimeaustin",
+            "example": "https://tiktok.com/@creator",
             "type": [
               "string",
               "null"
@@ -22124,7 +22138,7 @@
           },
           "username": {
             "description": "The username of the external account on the platform. Null while a Whop-owned account is still being provisioned, and on platforms without usernames, such as Klaviyo.",
-            "example": "shinetimeaustin",
+            "example": "creator",
             "type": [
               "string",
               "null"
@@ -22147,6 +22161,7 @@
           "external_id",
           "scopes",
           "partnership_status",
+          "connection_status",
           "parent_external_account"
         ],
         "type": "object"
@@ -22186,7 +22201,8 @@
               "snapchat",
               "klaviyo",
               "quickbooks",
-              "aimerce"
+              "aimerce",
+              "stripe"
             ],
             "example": "facebook",
             "type": "string"
@@ -50832,7 +50848,8 @@
               "snapchat",
               "klaviyo",
               "quickbooks",
-              "aimerce"
+              "aimerce",
+              "stripe"
             ],
             "example": "instagram",
             "type": "string"
@@ -50927,7 +50944,8 @@
               "snapchat",
               "klaviyo",
               "quickbooks",
-              "aimerce"
+              "aimerce",
+              "stripe"
             ],
             "example": "facebook",
             "type": "string"
@@ -112461,7 +112479,7 @@
             }
           },
           {
-            "description": "Only return external accounts for the platform that is specified. An `aimerce` account is returned only with this filter, which requires the `company:manage_checkout` scope instead of `social_account:read`.",
+            "description": "Only return external accounts for the platform that is specified. An `aimerce` account is returned only with this filter, which requires the `company:manage_checkout` scope instead of `social_account:read`. A `stripe` account is also returned only with this filter, which requires the `payout:account:update` scope.",
             "in": "query",
             "name": "platform",
             "required": false,
@@ -112478,7 +112496,8 @@
                 "snapchat",
                 "klaviyo",
                 "quickbooks",
-                "aimerce"
+                "aimerce",
+                "stripe"
               ],
               "type": "string"
             }
@@ -112776,13 +112795,14 @@
                     "type": "string"
                   },
                   "platform": {
-                    "description": "The platform to connect the external account on. Use `tiktok` to connect the authenticated user’s TikTok profile, `linkedin` for their LinkedIn profile, `youtube` for their YouTube channel, or `x` for their X profile. Use `quickbooks` to connect the account’s QuickBooks Online company: pass `account_id`, and the user picks the company in QuickBooks.",
+                    "description": "The platform to connect the external account on. Use `tiktok` to connect the authenticated user’s TikTok profile, `linkedin` for their LinkedIn profile, `youtube` for their YouTube channel, or `x` for their X profile. Use `quickbooks` to connect the account’s QuickBooks Online company: pass `account_id`, and the user picks the company in QuickBooks. Use `stripe` to let Whop read the past payments of the account’s Stripe account: pass `account_id`, and the user installs Whop’s app in Stripe. It requires the `payout:account:update` scope instead of `social_account:create`.",
                     "enum": [
                       "tiktok",
                       "linkedin",
                       "youtube",
                       "x",
-                      "quickbooks"
+                      "quickbooks",
+                      "stripe"
                     ],
                     "example": "quickbooks",
                     "type": "string"
@@ -161037,7 +161057,7 @@
             }
           },
           {
-            "description": "Only return external accounts for the platform that is specified. An `aimerce` account is returned only with this filter, which requires the `company:manage_checkout` scope instead of `social_account:read`.",
+            "description": "Only return external accounts for the platform that is specified. An `aimerce` account is returned only with this filter, which requires the `company:manage_checkout` scope instead of `social_account:read`. A `stripe` account is also returned only with this filter, which requires the `payout:account:update` scope.",
             "in": "query",
             "name": "platform",
             "required": false,
@@ -161054,7 +161074,8 @@
                 "snapchat",
                 "klaviyo",
                 "quickbooks",
-                "aimerce"
+                "aimerce",
+                "stripe"
               ],
               "type": "string"
             }
@@ -161338,13 +161359,14 @@
                     "type": "string"
                   },
                   "platform": {
-                    "description": "The platform to connect the external account on. Use `tiktok` to connect the authenticated user’s TikTok profile, `linkedin` for their LinkedIn profile, `youtube` for their YouTube channel, or `x` for their X profile. Use `quickbooks` to connect the account’s QuickBooks Online company: pass `account_id`, and the user picks the company in QuickBooks.",
+                    "description": "The platform to connect the external account on. Use `tiktok` to connect the authenticated user’s TikTok profile, `linkedin` for their LinkedIn profile, `youtube` for their YouTube channel, or `x` for their X profile. Use `quickbooks` to connect the account’s QuickBooks Online company: pass `account_id`, and the user picks the company in QuickBooks. Use `stripe` to let Whop read the past payments of the account’s Stripe account: pass `account_id`, and the user installs Whop’s app in Stripe. It requires the `payout:account:update` scope instead of `social_account:create`.",
                     "enum": [
                       "tiktok",
                       "linkedin",
                       "youtube",
                       "x",
-                      "quickbooks"
+                      "quickbooks",
+                      "stripe"
                     ],
                     "example": "quickbooks",
                     "type": "string"
