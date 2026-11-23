@@ -28456,6 +28456,36 @@
         ],
         "type": "string"
       },
+      "LiveStreamClosed": {
+        "description": "The last event of a live read's stream.",
+        "properties": {
+          "event": {
+            "const": "stream.closed",
+            "type": "string"
+          },
+          "reason": {
+            "description": "Why the stream ended. `not_live`: the read does not stream, or stopped streaming. `unreadable`: the stream could not keep the read current. `reconnect`: open the stream again for a fresh snapshot.",
+            "enum": [
+              "not_live",
+              "unreadable",
+              "reconnect"
+            ],
+            "type": "string"
+          },
+          "status": {
+            "description": "The HTTP status of the read's answer, for a `not_live` close. On a success status, the last snapshot is the read's current answer. Any other status is the error the read answers with.",
+            "type": [
+              "integer",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "event",
+          "reason"
+        ],
+        "type": "object"
+      },
       "Livestream": {
         "properties": {
           "created_at": {
@@ -163863,7 +163893,7 @@
                           "type": "array"
                         },
                         "totals": {
-                          "description": "Whole-window aggregates, present when the metric computes them. Don't derive these from `points`: a rate is measured across the whole window, not averaged across its points, and whole-window unique people are distinct across every bucket.",
+                          "description": "Whole-window aggregates, present when the metric computes them. Don't derive these from `points`. A rate is measured across the whole window, not averaged across its points. Whole-window unique people are distinct across every bucket.",
                           "items": {
                             "properties": {
                               "comparison": {
@@ -163912,6 +163942,172 @@
                     "data"
                   ],
                   "type": "object"
+                }
+              },
+              "text/event-stream": {
+                "schema": {
+                  "description": "With `Accept: text/event-stream`, the read answers as a stream of events. The first `stream.snapshot` event is the read's current answer. Another follows each time that answer changes. A `stream.closed` event ends the stream.",
+                  "discriminator": {
+                    "mapping": {
+                      "stream.closed": "#/components/schemas/LiveStreamClosed"
+                    },
+                    "propertyName": "event"
+                  },
+                  "oneOf": [
+                    {
+                      "allOf": [
+                        {
+                          "properties": {
+                            "data": {
+                              "properties": {
+                                "complete": {
+                                  "description": "Present for webhook_deliveries. False while older deliveries are still being counted in the background: the points cover what is counted so far. Responses are cached for up to a minute, so wait a minute before requesting the same range again.",
+                                  "example": false,
+                                  "nullable": true,
+                                  "type": "boolean"
+                                },
+                                "currency": {
+                                  "description": "ISO currency the values are denominated in. Present for currency-unit metrics: the convert_to currency, or usd.",
+                                  "example": "usd",
+                                  "nullable": true,
+                                  "type": "string"
+                                },
+                                "data_as_of": {
+                                  "description": "Present for metrics computed on a schedule. When the values were computed, as an ISO 8601 timestamp.",
+                                  "nullable": true,
+                                  "type": "string"
+                                },
+                                "points": {
+                                  "description": "One entry per period, oldest first.",
+                                  "items": {
+                                    "properties": {
+                                      "breakdown": {
+                                        "description": "Present only when broken down: one entry per property value in this period.",
+                                        "items": {
+                                          "properties": {
+                                            "name": {
+                                              "description": "The property value, for example usd or visa.",
+                                              "example": "success",
+                                              "type": "string"
+                                            },
+                                            "steps": {
+                                              "description": "Present for the funnel metric. People reaching each step in order, starting with the entry step.",
+                                              "items": {
+                                                "$ref": "#/components/schemas/FunnelStepResult"
+                                              },
+                                              "type": "array"
+                                            },
+                                            "value": {
+                                              "description": "The metric's value for this entry.",
+                                              "example": 5,
+                                              "nullable": true,
+                                              "type": "number"
+                                            }
+                                          },
+                                          "required": [
+                                            "name",
+                                            "value"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "steps": {
+                                        "description": "Present for the funnel metric. People reaching each step in order, starting with the entry step.",
+                                        "items": {
+                                          "$ref": "#/components/schemas/FunnelStepResult"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "timestamp": {
+                                        "description": "Unix timestamp (seconds) of the period start.",
+                                        "example": 1767268800,
+                                        "type": "integer"
+                                      },
+                                      "value": {
+                                        "description": "The metric's value for this period, in the metric's unit. For `funnel`, the final-step conversion percentage.",
+                                        "example": 3,
+                                        "nullable": true,
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "timestamp",
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "type": "array"
+                                },
+                                "totals": {
+                                  "description": "Whole-window aggregates, present when the metric computes them. Don't derive these from `points`. A rate is measured across the whole window, not averaged across its points. Whole-window unique people are distinct across every bucket.",
+                                  "items": {
+                                    "properties": {
+                                      "comparison": {
+                                        "$ref": "#/components/schemas/FunnelComparison"
+                                      },
+                                      "confidence_interval": {
+                                        "$ref": "#/components/schemas/FunnelConfidenceInterval",
+                                        "description": "Funnel only. The Wilson interval for final conversion, present when confidence_level or compare_to is supplied."
+                                      },
+                                      "name": {
+                                        "description": "The property value this total is for, or the metric's name when it isn't split by a property.",
+                                        "example": "wins",
+                                        "type": "string"
+                                      },
+                                      "steps": {
+                                        "description": "Present for the funnel metric. People reaching each step in order, starting with the entry step.",
+                                        "items": {
+                                          "$ref": "#/components/schemas/FunnelStepResult"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "value": {
+                                        "description": "The metric's whole-window value for this entry.",
+                                        "example": 4,
+                                        "nullable": true,
+                                        "type": "number"
+                                      }
+                                    },
+                                    "required": [
+                                      "name",
+                                      "value"
+                                    ],
+                                    "type": "object"
+                                  },
+                                  "nullable": true,
+                                  "type": "array"
+                                }
+                              },
+                              "required": [
+                                "points"
+                              ],
+                              "type": "object"
+                            }
+                          },
+                          "required": [
+                            "data"
+                          ],
+                          "type": "object"
+                        },
+                        {
+                          "properties": {
+                            "event": {
+                              "const": "stream.snapshot",
+                              "type": "string"
+                            }
+                          },
+                          "required": [
+                            "event"
+                          ],
+                          "type": "object"
+                        }
+                      ]
+                    },
+                    {
+                      "$ref": "#/components/schemas/LiveStreamClosed"
+                    }
+                  ]
                 }
               }
             },
@@ -164879,7 +165075,7 @@
                           "type": "array"
                         },
                         "totals": {
-                          "description": "Whole-window aggregates, present when the metric computes them. Don't derive these from `points`: a rate is measured across the whole window, not averaged across its points, and whole-window unique people are distinct across every bucket.",
+                          "description": "Whole-window aggregates, present when the metric computes them. Don't derive these from `points`. A rate is measured across the whole window, not averaged across its points. Whole-window unique people are distinct across every bucket.",
                           "items": {
                             "properties": {
                               "comparison": {
