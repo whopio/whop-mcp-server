@@ -7,7 +7,7 @@
         "name": "Api-Version-Date",
         "required": false,
         "schema": {
-          "example": "2026-11-20",
+          "example": "2026-11-22",
           "type": "string"
         }
       },
@@ -5269,7 +5269,7 @@
             ]
           },
           "cost_per_result": {
-            "description": "Spend divided by Whop pixel-attributed results; null when nothing Whop-attributable is being optimized for.",
+            "description": "Spend divided by Whop pixel-attributed results. For `impressions`, it's the spend per 1,000 impressions. `null` when nothing Whop-attributable is being optimized for.",
             "example": 12.68842105263158,
             "type": [
               "number",
@@ -5433,7 +5433,7 @@
             "type": "number"
           },
           "result_event": {
-            "description": "The Whop pixel conversion event whose attributed count represents results — the optimization goal, or the highest-volume attributed event for campaigns that budget per ad group. Null when the goal isn't a Whop-attributed event.",
+            "description": "The Whop pixel event whose attributed count represents results. It's the optimization goal, or the highest-volume attributed event for a campaign that budgets per ad group. `impressions` counts reported impressions. `null` when the goal isn't a Whop-attributed event.",
             "enum": [
               "purchase",
               "lead",
@@ -5445,6 +5445,7 @@
               "add_to_cart",
               "custom",
               "messaging_conversation",
+              "impressions",
               null
             ],
             "example": "purchase",
@@ -5794,7 +5795,7 @@
             ]
           },
           "cost_per_result": {
-            "description": "Spend divided by Whop pixel-attributed results; null when nothing Whop-attributable is being optimized for.",
+            "description": "Spend divided by Whop pixel-attributed results. For `impressions`, it's the spend per 1,000 impressions. `null` when nothing Whop-attributable is being optimized for.",
             "example": 40.0,
             "type": [
               "number",
@@ -5879,7 +5880,7 @@
             "type": "string"
           },
           "desired_cost_per_result": {
-            "description": "The cost per result, in USD, the advertiser wants this campaign to achieve. A target only: it is not a bid, cost cap, or bid cap, and doesn't change how the campaign's ads bid. `null` when no target is set.",
+            "description": "The cost per result, in USD, the advertiser wants this campaign to achieve. A target only: it is not a bid, cost cap, or bid cap, and doesn't change how the campaign's ads bid. An ad group's own `desired_cost_per_result` overrides it. For an `awareness` campaign, it's the cost per 1,000 impressions. `null` when no target is set.",
             "example": 4.5,
             "type": [
               "number",
@@ -5935,7 +5936,7 @@
             "type": "number"
           },
           "objective": {
-            "description": "The goal the campaign optimizes toward. `awareness` appears only on campaigns created before it was retired; those campaigns can't launch.",
+            "description": "The goal the campaign optimizes toward. `awareness` optimizes for impressions. `engagement` appears only on campaigns created before it was retired.",
             "enum": [
               "awareness",
               "traffic",
@@ -5966,7 +5967,7 @@
             "type": "number"
           },
           "result_event": {
-            "description": "The Whop pixel conversion event whose attributed count represents results — the optimization goal, or the highest-volume attributed event for campaigns that budget per ad group. Null when the goal isn't a Whop-attributed event.",
+            "description": "The Whop pixel event whose attributed count represents results. It's the optimization goal, or the highest-volume attributed event for a campaign that budgets per ad group. `impressions` counts reported impressions. `null` when the goal isn't a Whop-attributed event.",
             "enum": [
               "purchase",
               "lead",
@@ -5978,6 +5979,7 @@
               "add_to_cart",
               "custom",
               "messaging_conversation",
+              "impressions",
               null
             ],
             "example": "custom",
@@ -6076,7 +6078,7 @@
             "type": "number"
           },
           "target_cost_per_result": {
-            "description": "The desired cost per result for `target_result_event`, in USD. `null` when none is set.",
+            "description": "The desired cost per result for `target_result_event`, in USD. For `impressions`, it's the cost per 1,000 impressions. `null` when none is set or the ad groups set different ones.",
             "example": null,
             "type": [
               "number",
@@ -6605,7 +6607,7 @@
             ]
           },
           "cost_per_result": {
-            "description": "Spend divided by Whop pixel-attributed results; null when nothing Whop-attributable is being optimized for.",
+            "description": "Spend divided by Whop pixel-attributed results. For `impressions`, it's the spend per 1,000 impressions. `null` when nothing Whop-attributable is being optimized for.",
             "example": 40.0,
             "type": [
               "number",
@@ -6704,7 +6706,7 @@
             "description": "Age, gender, and automatic-audience targeting."
           },
           "desired_cost_per_result": {
-            "description": "Cost per result to aim for (`average_target`) or never exceed (`maximum_target`). `null` for `minimum_cost` bidding.",
+            "description": "The cost per result the advertiser wants for this ad group, in USD. For an `awareness` campaign, it's the cost per 1,000 impressions. `null` when the ad group uses its campaign's `desired_cost_per_result`.",
             "example": 40.0,
             "type": [
               "number",
@@ -6809,7 +6811,7 @@
             "description": "Locations targeted and excluded."
           },
           "result_event": {
-            "description": "The Whop pixel conversion event whose attributed count represents results — the optimization goal, or the highest-volume attributed event for campaigns that budget per ad group. Null when the goal isn't a Whop-attributed event.",
+            "description": "The Whop pixel event whose attributed count represents results. It's the optimization goal, or the highest-volume attributed event for a campaign that budgets per ad group. `impressions` counts reported impressions. `null` when the goal isn't a Whop-attributed event.",
             "enum": [
               "purchase",
               "lead",
@@ -6821,6 +6823,7 @@
               "add_to_cart",
               "custom",
               "messaging_conversation",
+              "impressions",
               null
             ],
             "example": "custom",
@@ -8555,9 +8558,10 @@
               "2026-11-19",
               "2026-11-19-1",
               "2026-11-19-2",
-              "2026-11-20"
+              "2026-11-20",
+              "2026-11-22"
             ],
-            "example": "2026-11-20",
+            "example": "2026-11-22",
             "type": "string"
           },
           "created_at": {
@@ -56230,7 +56234,7 @@
     "termsOfService": "https://whop.com/tos-developer-api/",
     "title": "Whop API",
     "version": "1.0.0",
-    "x-api-version-date": "2026-11-20"
+    "x-api-version-date": "2026-11-22"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -63775,7 +63779,7 @@
                     "type": "string"
                   },
                   "desired_cost_per_result": {
-                    "description": "The cost per result, in USD, you want this campaign to achieve. A target only: it is not a bid, cost cap, or bid cap, and doesn't change how the campaign's ads bid. Ad groups set cost and bid caps with their own `desired_cost_per_result`. Omit or send `null` for no target.",
+                    "description": "The cost per result, in USD, you want this campaign to achieve. A target only: it is not a bid, cost cap, or bid cap, and doesn't change how the campaign's ads bid. An ad group's own `desired_cost_per_result` overrides it. For an `awareness` campaign, it's the cost per 1,000 impressions. Omit or send `null` for no target.",
                     "example": 4.5,
                     "type": [
                       "number",
@@ -63790,8 +63794,8 @@
                   "objective": {
                     "description": "The goal the campaign optimizes toward.",
                     "enum": [
+                      "awareness",
                       "traffic",
-                      "engagement",
                       "leads",
                       "sales"
                     ],
@@ -64055,7 +64059,7 @@
                     "type": "string"
                   },
                   "desired_cost_per_result": {
-                    "description": "The cost per result, in USD, you want this campaign to achieve. A target only: it is not a bid, cost cap, or bid cap, and doesn't change how the campaign's ads bid. Ad groups set cost and bid caps with their own `desired_cost_per_result`. `null` clears it.",
+                    "description": "The cost per result, in USD, you want this campaign to achieve. A target only: it is not a bid, cost cap, or bid cap, and doesn't change how the campaign's ads bid. An ad group's own `desired_cost_per_result` overrides it. For an `awareness` campaign, it's the cost per 1,000 impressions. `null` clears it.",
                     "type": [
                       "number",
                       "null"
@@ -65016,9 +65020,12 @@
                     "description": "Age, gender, and automatic-audience targeting."
                   },
                   "desired_cost_per_result": {
-                    "description": "Cost per result to aim for (`average_target`) or never exceed (`maximum_target`).",
+                    "description": "The cost per result you want for this ad group, in USD. For an `awareness` campaign, it's the cost per 1,000 impressions. `null` uses the campaign's `desired_cost_per_result`.",
                     "example": 35.0,
-                    "type": "number"
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   },
                   "devices": {
                     "$ref": "#/components/schemas/AdGroupDevicesBody",
@@ -65541,9 +65548,12 @@
                     "description": "Age, gender, and automatic-audience targeting."
                   },
                   "desired_cost_per_result": {
-                    "description": "Cost per result to aim for (`average_target`) or never exceed (`maximum_target`).",
+                    "description": "The cost per result you want for this ad group, in USD. For an `awareness` campaign, it's the cost per 1,000 impressions. `null` uses the campaign's `desired_cost_per_result`.",
                     "example": 35.0,
-                    "type": "number"
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   },
                   "devices": {
                     "$ref": "#/components/schemas/AdGroupDevicesBody",
@@ -74746,9 +74756,10 @@
                       "2026-11-19",
                       "2026-11-19-1",
                       "2026-11-19-2",
-                      "2026-11-20"
+                      "2026-11-20",
+                      "2026-11-22"
                     ],
-                    "example": "2026-11-20",
+                    "example": "2026-11-22",
                     "type": "string"
                   },
                   "expires_at": {
@@ -75223,9 +75234,10 @@
                       "2026-11-19",
                       "2026-11-19-1",
                       "2026-11-19-2",
-                      "2026-11-20"
+                      "2026-11-20",
+                      "2026-11-22"
                     ],
-                    "example": "2026-11-20",
+                    "example": "2026-11-22",
                     "type": "string"
                   },
                   "expires_at": {
@@ -165781,6 +165793,14 @@
                       },
                       "type": "object"
                     },
+                    "mid_market_rate": {
+                      "description": "Mid-market exchange rate for a fiat pair, before the FX charge, as a decimal string. `rate` is after the FX charge. `null` for a crypto pair.",
+                      "example": null,
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
                     "object": {
                       "enum": [
                         "swap_quote"
@@ -165827,6 +165847,7 @@
                     "amount_in",
                     "amount_out",
                     "rate",
+                    "mid_market_rate",
                     "fee_bps",
                     "from_token",
                     "to_token",
@@ -180220,7 +180241,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -180551,7 +180572,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -180882,7 +180903,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "disabled_at": "2026-01-01T12:00:00.000Z",
@@ -181015,7 +181036,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -181352,7 +181373,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "ad_campaign": {
                     "id": "adcamp_xxxxxxxxxxxxxx"
@@ -181682,7 +181703,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -181832,7 +181853,7 @@
                         "type": "string"
                       },
                       "desired_cost_per_result": {
-                        "description": "The cost per result, in USD, the advertiser wants this campaign to achieve. A target only: it is not a bid, cost cap, or bid cap, and doesn't change how the campaign's ads bid. `null` when no target is set.",
+                        "description": "The cost per result, in USD, the advertiser wants this campaign to achieve. A target only: it is not a bid, cost cap, or bid cap, and doesn't change how the campaign's ads bid. An ad group's own `desired_cost_per_result` overrides it. For an `awareness` campaign, it's the cost per 1,000 impressions. `null` when no target is set.",
                         "example": 4.5,
                         "type": [
                           "number",
@@ -181860,7 +181881,7 @@
                         "type": "array"
                       },
                       "objective": {
-                        "description": "The goal the campaign optimizes toward. `awareness` appears only on campaigns created before it was retired; those campaigns can't launch.",
+                        "description": "The goal the campaign optimizes toward. `awareness` optimizes for impressions. `engagement` appears only on campaigns created before it was retired.",
                         "enum": [
                           "awareness",
                           "traffic",
@@ -181911,7 +181932,7 @@
                         "type": "string"
                       },
                       "target_cost_per_result": {
-                        "description": "The desired cost per result for `target_result_event`, in USD. `null` when none is set.",
+                        "description": "The desired cost per result for `target_result_event`, in USD. For `impressions`, it's the cost per 1,000 impressions. `null` when none is set or the ad groups set different ones.",
                         "example": null,
                         "type": [
                           "number",
@@ -182049,7 +182070,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -182202,7 +182223,7 @@
                         "type": "string"
                       },
                       "desired_cost_per_result": {
-                        "description": "The cost per result, in USD, the advertiser wants this campaign to achieve. A target only: it is not a bid, cost cap, or bid cap, and doesn't change how the campaign's ads bid. `null` when no target is set.",
+                        "description": "The cost per result, in USD, the advertiser wants this campaign to achieve. A target only: it is not a bid, cost cap, or bid cap, and doesn't change how the campaign's ads bid. An ad group's own `desired_cost_per_result` overrides it. For an `awareness` campaign, it's the cost per 1,000 impressions. `null` when no target is set.",
                         "example": 4.5,
                         "type": [
                           "number",
@@ -182230,7 +182251,7 @@
                         "type": "array"
                       },
                       "objective": {
-                        "description": "The goal the campaign optimizes toward. `awareness` appears only on campaigns created before it was retired; those campaigns can't launch.",
+                        "description": "The goal the campaign optimizes toward. `awareness` optimizes for impressions. `engagement` appears only on campaigns created before it was retired.",
                         "enum": [
                           "awareness",
                           "traffic",
@@ -182281,7 +182302,7 @@
                         "type": "string"
                       },
                       "target_cost_per_result": {
-                        "description": "The desired cost per result for `target_result_event`, in USD. `null` when none is set.",
+                        "description": "The desired cost per result for `target_result_event`, in USD. For `impressions`, it's the cost per 1,000 impressions. `null` when none is set or the ad groups set different ones.",
                         "example": null,
                         "type": [
                           "number",
@@ -182422,7 +182443,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "ad_campaign": {
                     "id": "adcamp_xxxxxxxxxxxxxx"
@@ -182612,7 +182633,7 @@
                         "description": "Age, gender, and automatic-audience targeting."
                       },
                       "desired_cost_per_result": {
-                        "description": "Cost per result to aim for (`average_target`) or never exceed (`maximum_target`). `null` for `minimum_cost` bidding.",
+                        "description": "The cost per result the advertiser wants for this ad group, in USD. For an `awareness` campaign, it's the cost per 1,000 impressions. `null` when the ad group uses its campaign's `desired_cost_per_result`.",
                         "example": 40.0,
                         "type": [
                           "number",
@@ -182825,7 +182846,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxx2",
@@ -182971,7 +182992,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxx2",
@@ -183117,7 +183138,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -183538,7 +183559,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -183959,7 +183980,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -184380,7 +184401,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -184801,7 +184822,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -184970,7 +184991,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -185139,7 +185160,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -185308,7 +185329,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -185477,7 +185498,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -185618,7 +185639,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -185759,7 +185780,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -185900,7 +185921,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -186041,7 +186062,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -186182,7 +186203,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "audience": {
                     "type": "channel",
@@ -186439,7 +186460,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "audience": {
                     "type": "channel",
@@ -186710,7 +186731,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "completed": true,
                   "course": {
@@ -186854,7 +186875,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "amount": "75000000000",
                   "available_at": null,
@@ -186995,7 +187016,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "acceptable": true,
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -187187,7 +187208,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "acceptable": false,
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -187379,7 +187400,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": null,
                   "amount": 25.0,
@@ -187520,7 +187541,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -187665,7 +187686,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -187810,7 +187831,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -187955,7 +187976,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -188100,7 +188121,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -188245,7 +188266,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -188390,7 +188411,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -188535,7 +188556,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "events": [
                     {
@@ -188958,7 +188979,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "download_url": "https://s3.amazonaws.com/uploads/exports/members-export.csv",
@@ -189088,7 +189109,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "download_url": null,
@@ -189218,7 +189239,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "amount": "512345000000",
                   "available_at": "2026-01-01T12:00:00.000Z",
@@ -189358,7 +189379,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "id": "idpf_xxxxxxxxxxxxxx"
                 },
@@ -189491,7 +189512,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -189675,7 +189696,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -189859,7 +189880,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -190043,7 +190064,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -190227,7 +190248,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -190411,7 +190432,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "balances": [
                     {
@@ -190555,7 +190576,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -190720,7 +190741,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -190885,7 +190906,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -191061,7 +191082,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -191237,7 +191258,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -191413,7 +191434,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -191721,7 +191742,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -192029,7 +192050,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -192337,7 +192358,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -192645,7 +192666,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -192946,7 +192967,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -193254,7 +193275,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -193562,7 +193583,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -194105,7 +194126,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -194645,7 +194666,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -195180,7 +195201,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "address": {
                     "city": "Austin",
@@ -195322,7 +195343,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_reference": "4483",
                   "bank_verification_state": null,
@@ -195929,7 +195950,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -196245,7 +196266,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -196561,7 +196582,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -196877,7 +196898,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -197040,7 +197061,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -197203,7 +197224,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -197366,7 +197387,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -197529,7 +197550,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -197692,7 +197713,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "amount": 50.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -197862,7 +197883,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "amount": 50.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -198032,7 +198053,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -198206,7 +198227,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -198376,7 +198397,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -198546,7 +198567,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -198696,7 +198717,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -198843,7 +198864,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -199033,7 +199054,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "carrier": "ups",
@@ -199166,7 +199187,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "carrier": "ups",
@@ -199299,7 +199320,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "amount": {
                     "amount": "-1234.56",
@@ -199485,7 +199506,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -199729,7 +199750,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "amount": {
                     "amount": "250.00",
@@ -200119,7 +200140,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "amount": {
                     "amount": "250.00",
@@ -200509,7 +200530,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "amount": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -200887,7 +200908,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-20",
+                "api_version_date": "2026-11-22",
                 "data": {
                   "id": "verf_xxxxxxxxxxxxxx",
                   "last_error_code": null,
