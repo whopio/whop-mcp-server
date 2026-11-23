@@ -3812,6 +3812,13 @@
       },
       "AccountPartner": {
         "properties": {
+          "badges": {
+            "items": {
+              "$ref": "#/components/schemas/UserBadge",
+              "description": "Public badges for the user, in display order. Empty when the user has no badges or is suspended."
+            },
+            "type": "array"
+          },
           "email": {
             "description": "Email address for contacting the partner. Null when the partner has not added their own email address.",
             "type": [
@@ -3862,6 +3869,7 @@
           "username",
           "name",
           "profile_picture",
+          "badges",
           "email",
           "whop_partner_verified_at",
           "referring_account"
@@ -29757,6 +29765,13 @@
       },
       "MemberUser": {
         "properties": {
+          "badges": {
+            "items": {
+              "$ref": "#/components/schemas/UserBadge",
+              "description": "Public badges for the user, in display order. Empty when the user has no badges or is suspended."
+            },
+            "type": "array"
+          },
           "city": {
             "description": "The user's city, derived from their IP address. `null` when unknown or the user turned off location sharing.",
             "example": "Austin",
@@ -29809,6 +29824,7 @@
           "username",
           "name",
           "profile_picture",
+          "badges",
           "city",
           "state",
           "country"
@@ -44544,6 +44560,13 @@
       },
       "ProductAffiliateUser": {
         "properties": {
+          "badges": {
+            "items": {
+              "$ref": "#/components/schemas/UserBadge",
+              "description": "Public badges for the user, in display order. Empty when the user has no badges or is suspended."
+            },
+            "type": "array"
+          },
           "email": {
             "description": "The affiliate's email address. Requires the `member:email:read` scope; `null` without it.",
             "example": "marcus@shinetime.example",
@@ -44580,6 +44603,7 @@
           "username",
           "name",
           "profile_picture",
+          "badges",
           "email"
         ],
         "type": "object"
@@ -52833,6 +52857,13 @@
       },
       "User": {
         "properties": {
+          "badges": {
+            "items": {
+              "$ref": "#/components/schemas/UserBadge",
+              "description": "Public badges for the user, in display order. Empty when the user has no badges or is suspended."
+            },
+            "type": "array"
+          },
           "balance": {
             "description": "The user's balance: personal cash + other holdings + deposits still in flight, plus account balances for accounts they own. Computed only on the self view (retrieved with the reserved id `me`) for callers with balance-read scope; `null` otherwise, or when `include_balance=false`.",
             "oneOf": [
@@ -53071,6 +53102,7 @@
           "cards",
           "trading",
           "level",
+          "badges",
           "followers_count",
           "verified_at",
           "verification",
@@ -53081,6 +53113,23 @@
           "city",
           "state",
           "country"
+        ],
+        "type": "object"
+      },
+      "UserBadge": {
+        "properties": {
+          "type": {
+            "description": "Badge category. `whop_team` identifies a Whop team member. `verified_partner` identifies a verified member of the Whop Partners program.",
+            "enum": [
+              "whop_team",
+              "verified_partner"
+            ],
+            "example": "verified_partner",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
         ],
         "type": "object"
       },
@@ -54013,6 +54062,13 @@
       },
       "UserSummary": {
         "properties": {
+          "badges": {
+            "items": {
+              "$ref": "#/components/schemas/UserBadge",
+              "description": "Public badges for the user, in display order. Empty when the user has no badges or is suspended."
+            },
+            "type": "array"
+          },
           "id": {
             "description": "User ID, prefixed `user_`.",
             "example": "user_xxxxxxxxxxxxxx",
@@ -54040,7 +54096,8 @@
           "id",
           "username",
           "name",
-          "profile_picture"
+          "profile_picture",
+          "badges"
         ],
         "type": "object"
       },
@@ -180401,6 +180458,7 @@
                   "other_business_description": null,
                   "other_industry_description": null,
                   "owner": {
+                    "badges": [],
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
@@ -180732,6 +180790,7 @@
                   "other_business_description": null,
                   "other_industry_description": null,
                   "owner": {
+                    "badges": [],
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
@@ -181196,6 +181255,7 @@
                   "other_business_description": null,
                   "other_industry_description": null,
                   "owner": {
+                    "badges": [],
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
@@ -190712,6 +190772,7 @@
                     "display_decimals": 2
                   },
                   "user": {
+                    "badges": [],
                     "city": null,
                     "country": null,
                     "id": "user_xxxxxxxxxxxxxx",
@@ -190877,6 +190938,7 @@
                     "display_decimals": 2
                   },
                   "user": {
+                    "badges": [],
                     "city": null,
                     "country": null,
                     "id": "user_xxxxxxxxxxxxxx",
@@ -191711,6 +191773,7 @@
                     "display_decimals": 2
                   },
                   "user": {
+                    "badges": [],
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
@@ -192019,6 +192082,7 @@
                     "display_decimals": 2
                   },
                   "user": {
+                    "badges": [],
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
@@ -192327,6 +192391,7 @@
                     "display_decimals": 2
                   },
                   "user": {
+                    "badges": [],
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
@@ -192635,6 +192700,7 @@
                     "display_decimals": 2
                   },
                   "user": {
+                    "badges": [],
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
@@ -192936,6 +193002,7 @@
                     "display_decimals": 2
                   },
                   "user": {
+                    "badges": [],
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
@@ -193244,6 +193311,7 @@
                     "display_decimals": 2
                   },
                   "user": {
+                    "badges": [],
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
@@ -193552,6 +193620,7 @@
                     "display_decimals": 2
                   },
                   "user": {
+                    "badges": [],
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
@@ -198691,6 +198760,7 @@
                   "three_ds_verified": false,
                   "updated_at": "2026-01-01T12:00:00.000Z",
                   "user": {
+                    "badges": [],
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
@@ -198838,6 +198908,7 @@
                   "three_ds_verified": false,
                   "updated_at": "2026-01-01T12:00:00.000Z",
                   "user": {
+                    "badges": [],
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
@@ -199028,6 +199099,7 @@
                   "three_ds_verified": false,
                   "updated_at": "2026-01-01T12:00:00.000Z",
                   "user": {
+                    "badges": [],
                     "id": "user_xxxxxxxxxxxxxx",
                     "name": "Marcus Webb",
                     "profile_picture": {
@@ -199676,6 +199748,14 @@
                     "claim_url": "https://whop.com/claim",
                     "created_at": "2026-01-01T12:00:00.000Z",
                     "created_by_user": {
+                      "badges": [
+                        {
+                          "type": "verified_partner"
+                        },
+                        {
+                          "type": "verified_partner"
+                        }
+                      ],
                       "id": "user_xxxxxxxxxxxxxx",
                       "name": "Dana Whitfield",
                       "profile_picture": {
