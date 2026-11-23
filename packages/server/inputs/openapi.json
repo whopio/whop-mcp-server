@@ -64473,88 +64473,6 @@
       },
       "x-whop-surface": "native"
     },
-    "/ad_campaigns/{id}/retry_payment": {
-      "parameters": [
-        {
-          "$ref": "#/components/parameters/ApiVersionDate"
-        },
-        {
-          "description": "The ad campaign ID.",
-          "in": "path",
-          "name": "id",
-          "required": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
-      "post": {
-        "deprecated": true,
-        "description": "Queues a background payment retry for the campaign's entire account, including other campaigns with failed payments. The returned campaign does not confirm payment success; read `delivery_status` and `issues` for the outcome. Deprecated: API versions 2026-09-22 and later return `410 Gone`; use `POST /accounts/:id/retry_ads_payment` instead.",
-        "operationId": "retryAdCampaignPayment",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/IdempotencyKey"
-          }
-        ],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AdCampaign"
-                }
-              }
-            },
-            "description": "payment retry queued on earlier API versions"
-          },
-          "400": {
-            "$ref": "#/components/responses/InvalidParameters",
-            "description": "campaign is not in payment_failed status"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized",
-            "description": "unauthenticated"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden",
-            "description": "missing campaign update permission"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound",
-            "description": "ad campaign not found"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "410": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/V1ErrorResponse"
-                }
-              }
-            },
-            "description": "campaign payment retries are deprecated"
-          }
-        },
-        "security": [
-          {
-            "bearerAuth": [
-              "ad_campaign:update"
-            ]
-          }
-        ],
-        "summary": "Retry a Failed Ad Campaign Payment",
-        "tags": [
-          "Ad Campaigns"
-        ],
-        "x-whop-deprecated-since": "2026-09-22",
-        "x-whop-removed-in": "2026-09-22",
-        "x-whop-successor": "POST /accounts/{account_id}/retry_ads_payment"
-      },
-      "x-whop-surface": "native"
-    },
     "/ad_campaigns/{id}/unpause": {
       "parameters": [
         {
@@ -66298,13 +66216,17 @@
             ]
           }
         ],
-        "summary": "List ad pixels",
+        "summary": "List Ad Pixels",
         "tags": [
           "Ad Pixels"
         ],
         "x-whop-credentials": [
           "oauth_token",
           "user_api_key"
+        ],
+        "x-whop-docs": "gated",
+        "x-whop-docs-groups": [
+          "oasp"
         ]
       },
       "parameters": [
@@ -66395,13 +66317,17 @@
             ]
           }
         ],
-        "summary": "Create an ad pixel",
+        "summary": "Create an Ad Pixel",
         "tags": [
           "Ad Pixels"
         ],
         "x-whop-credentials": [
           "oauth_token",
           "user_api_key"
+        ],
+        "x-whop-docs": "gated",
+        "x-whop-docs-groups": [
+          "oasp"
         ]
       },
       "x-whop-surface": "native"
@@ -66443,13 +66369,17 @@
             ]
           }
         ],
-        "summary": "Delete an ad pixel",
+        "summary": "Delete an Ad Pixel",
         "tags": [
           "Ad Pixels"
         ],
         "x-whop-credentials": [
           "oauth_token",
           "user_api_key"
+        ],
+        "x-whop-docs": "gated",
+        "x-whop-docs-groups": [
+          "oasp"
         ]
       },
       "get": {
@@ -66476,13 +66406,17 @@
             ]
           }
         ],
-        "summary": "Retrieve an ad pixel",
+        "summary": "Retrieve an Ad Pixel",
         "tags": [
           "Ad Pixels"
         ],
         "x-whop-credentials": [
           "oauth_token",
           "user_api_key"
+        ],
+        "x-whop-docs": "gated",
+        "x-whop-docs-groups": [
+          "oasp"
         ]
       },
       "parameters": [
@@ -66545,13 +66479,17 @@
             ]
           }
         ],
-        "summary": "Update an ad pixel",
+        "summary": "Update an Ad Pixel",
         "tags": [
           "Ad Pixels"
         ],
         "x-whop-credentials": [
           "oauth_token",
           "user_api_key"
+        ],
+        "x-whop-docs": "gated",
+        "x-whop-docs-groups": [
+          "oasp"
         ]
       },
       "x-whop-surface": "native"
@@ -180684,7 +180622,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "Account Financing approved",
+        "summary": "Account Financing Approved",
         "tags": [
           "Financing Applications"
         ]
@@ -181016,7 +180954,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "Account Financing denied",
+        "summary": "Account Financing Denied",
         "tags": [
           "Financing Applications"
         ]
@@ -181149,7 +181087,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "Account Financing disabled",
+        "summary": "Account Financing Disabled",
         "tags": [
           "Financing Applications"
         ]
@@ -181826,7 +181764,7 @@
     },
     "ad_campaign.payment_failed": {
       "post": {
-        "description": "Sent when an ad campaign's payment fails and its ads stop delivering. The payload carries no performance stats; read the campaign for those\n\nRequired permissions:\n - `webhook_receive:ad_campaigns`",
+        "description": "Sent when an ad campaign's payment fails and its ads stop delivering. The payload carries no performance stats. Read the campaign for those\n\nRequired permissions:\n - `webhook_receive:ad_campaigns`",
         "parameters": [
           {
             "in": "header",
@@ -182184,7 +182122,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "Ad Campaign Payment failed",
+        "summary": "Ad Campaign Payment Failed",
         "tags": [
           "Ad Campaigns"
         ]
@@ -189362,7 +189300,7 @@
     },
     "financial_activity.funds_available": {
       "post": {
-        "description": "Sent when a settlement moves one release date's pending funds into the account's available balance — one event per release date that cleared, carrying that settlement's ledger line. Its posted_at is the release date at midnight UTC, the same value as settlement_time_at on every payment it clears\n\nRequired permissions:\n - `webhook_receive:financial_activity`",
+        "description": "Sent when a settlement moves one release date's pending funds into the account's available balance. Each release date that cleared sends one event, carrying that settlement's ledger line. Its posted_at is the release date at midnight UTC, the same value as settlement_time_at on every payment it clears\n\nRequired permissions:\n - `webhook_receive:financial_activity`",
         "parameters": [
           {
             "in": "header",
@@ -189493,7 +189431,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "Financial Activity Funds available",
+        "summary": "Financial Activity Funds Available",
         "tags": [
           "Ledgers"
         ]
@@ -189994,7 +189932,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "Invoice Marked uncollectible",
+        "summary": "Invoice Marked Uncollectible",
         "tags": [
           "Invoices"
         ],
@@ -190362,7 +190300,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "Invoice Past due",
+        "summary": "Invoice Past Due",
         "tags": [
           "Invoices"
         ],
@@ -190690,7 +190628,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "LedgerAccount Funds available",
+        "summary": "LedgerAccount Funds Available",
         "tags": [
           "Ledger accounts"
         ],
@@ -191373,7 +191311,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "Membership Trial ending soon",
+        "summary": "Membership Trial Ending Soon",
         "tags": [
           "Memberships"
         ],
@@ -193097,7 +193035,7 @@
     },
     "payment.requires_action": {
       "post": {
-        "description": "Sent when the bank asks the buyer to verify an off-session charge, such as a subscription renewal or a saved-card payment your server made. `data.recovery_url` is the Whop link where the buyer signs in and completes 3D Secure; the event is only sent while that link exists, so it is null only when you lack `member:basic:read`. Then handle `payment.succeeded` or `payment.failed` for the outcome.\n\nRequired permissions:\n - `payment:basic:read`\n - `plan:basic:read`\n - `access_pass:basic:read`\n - `member:email:read`\n - `member:basic:read`\n - `member:phone:read`\n - `promo_code:basic:read`\n - `shipment:basic:read`\n - `payment:dispute:read`\n - `payment:resolution_center_case:read`\n - `webhook_receive:payments`",
+        "description": "Sent when the bank asks the buyer to verify an off-session charge, such as a subscription renewal or a saved-card payment your server made. `data.recovery_url` is the Whop link where the buyer signs in and completes 3D Secure. Whop sends the event only while that link exists. `data.recovery_url` is null only when you lack `member:basic:read`. Then handle `payment.succeeded` or `payment.failed` for the outcome.\n\nRequired permissions:\n - `payment:basic:read`\n - `plan:basic:read`\n - `access_pass:basic:read`\n - `member:email:read`\n - `member:basic:read`\n - `member:phone:read`\n - `promo_code:basic:read`\n - `shipment:basic:read`\n - `payment:dispute:read`\n - `payment:resolution_center_case:read`\n - `webhook_receive:payments`",
         "parameters": [
           {
             "in": "header",
@@ -193396,7 +193334,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "Payment Requires action",
+        "summary": "Payment Requires Action",
         "tags": [
           "Payments"
         ],
@@ -195466,7 +195404,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "PayoutAccount Status updated",
+        "summary": "PayoutAccount Status Updated",
         "tags": [
           "Payout accounts"
         ],
@@ -198988,7 +198926,7 @@
             "description": "Return a 200 status to indicate that the data was received successfully"
           }
         },
-        "summary": "SetupIntent Requires action",
+        "summary": "SetupIntent Requires Action",
         "tags": [
           "Setup Intents"
         ],

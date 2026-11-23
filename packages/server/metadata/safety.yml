@@ -124,7 +124,6 @@ rules:
         - POST /deposits
         - POST /deposits/{id}/reverse
         - POST /company_token_transactions
-        - POST /ad_campaigns/{id}/retry_payment
         - POST /bounties
         - POST /bounties/{id}/cancel
     set:
