@@ -177654,6 +177654,136 @@
       },
       "x-whop-surface": "native"
     },
+    "/verifications/{id}/generate_document_url": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        }
+      ],
+      "post": {
+        "description": "Generates a short-lived link to download one image that a person sent for an individual verification. Use the `identity_document` and `selfie` fields of the verification to know which images exist.",
+        "operationId": "generateVerificationDocumentUrl",
+        "parameters": [
+          {
+            "description": "Verification profile ID, prefixed `idpf_`.",
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "document": {
+                    "description": "Image to download. Use the side of the document type on the verification, or `selfie`.",
+                    "enum": [
+                      "id_card_front",
+                      "id_card_back",
+                      "drivers_front",
+                      "drivers_back",
+                      "residence_permit_front",
+                      "residence_permit_back",
+                      "passport_front",
+                      "selfie"
+                    ],
+                    "example": "passport_front",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "document"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "document": {
+                      "description": "Image that the link downloads.",
+                      "enum": [
+                        "id_card_front",
+                        "id_card_back",
+                        "drivers_front",
+                        "drivers_back",
+                        "residence_permit_front",
+                        "residence_permit_back",
+                        "passport_front",
+                        "selfie"
+                      ],
+                      "example": "passport_front",
+                      "type": "string"
+                    },
+                    "expires_at": {
+                      "description": "When the link stops working, as an ISO 8601 timestamp. Generate a new link after that.",
+                      "example": "2026-06-01T12:01:00.000Z",
+                      "type": "string"
+                    },
+                    "url": {
+                      "description": "A short-lived link to download the image. Anyone holding the link can download the image until it expires.",
+                      "example": "https://content.whop.com/document",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "document",
+                    "url",
+                    "expires_at"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "link generated"
+          },
+          "400": {
+            "$ref": "#/components/responses/InvalidParameters",
+            "description": "the document is not valid, or the verification is not an individual verification"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized",
+            "description": "missing or invalid authentication"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden",
+            "description": "credential lacks the identity-read scope"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound",
+            "description": "no verification with that ID is visible to the credential, or the verification does not have that image"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "identity:read"
+            ]
+          }
+        ],
+        "summary": "Generate Verification Document URL",
+        "tags": [
+          "Verifications"
+        ]
+      },
+      "x-whop-surface": "native"
+    },
     "/waitlist_entries": {
       "get": {
         "description": "Lists the waitlist signups you can see. `waitlist_entry:read` returns your own signups, and `plan:waitlist:read` returns signups to the seller accounts you are authorized on; with both, you get both sets. Signups submitted on behalf of an account are not in this list; pass `buyer_account_id` to list them instead, which needs `waitlist_entry:read` on that account. Account credentials see the signups submitted to their own account, and pass their own account as `buyer_account_id` to see the ones it submitted.",
