@@ -21585,6 +21585,16 @@
             "nullable": true,
             "type": "string"
           },
+          "decision_mode": {
+            "description": "How the experiment is decided. `autopilot` ends it as soon as a result is outside the margin of error, shipping the arm that won or keeping control if it lost. If its window passes with no clear result, `autopilot` keeps control. `require_approval` leaves every arm serving for the owner to end. `null` leaves it to the owner.",
+            "enum": [
+              "autopilot",
+              "require_approval"
+            ],
+            "example": "autopilot",
+            "nullable": true,
+            "type": "string"
+          },
           "ended_at": {
             "description": "When the experiment stopped collecting data, as an ISO 8601 timestamp. `null` while still running.",
             "example": "2026-01-01T12:00:00.000Z",
@@ -110797,6 +110807,16 @@
                     },
                     "type": "object"
                   },
+                  "decision_mode": {
+                    "description": "How the experiment is decided. `autopilot` ends it as soon as a result is outside the margin of error, shipping the arm that won or keeping control if it lost. If its window passes with no clear result, `autopilot` keeps control. `require_approval` leaves every arm serving for the owner to end. Omit to leave it to the owner. Not accepted on feature flags.",
+                    "enum": [
+                      "autopilot",
+                      "require_approval"
+                    ],
+                    "example": "autopilot",
+                    "nullable": true,
+                    "type": "string"
+                  },
                   "flag_key": {
                     "description": "Developer-chosen handle referenced from code, used in evaluation and results calls. Interchangeable with the returned `expt_` id anywhere the API takes an experiment identifier.",
                     "example": "checkout_redesign_v2",
@@ -111106,6 +111126,16 @@
                       }
                     },
                     "type": "object"
+                  },
+                  "decision_mode": {
+                    "description": "How the experiment is decided. `autopilot` ends it as soon as a result is outside the margin of error, shipping the arm that won or keeping control if it lost. If its window passes with no clear result, `autopilot` keeps control. `require_approval` leaves every arm serving for the owner to end. Send `null` to leave it to the owner. Not accepted on feature flags. Omit to leave unchanged.",
+                    "enum": [
+                      "autopilot",
+                      "require_approval"
+                    ],
+                    "example": "autopilot",
+                    "nullable": true,
+                    "type": "string"
                   },
                   "hypothesis": {
                     "description": "Omit to leave unchanged. Send an empty string to clear it. Not accepted on feature flags. When setting it, structure it as \"If we [change] for [cohort], then [measurable behavior] will [increase/decrease], resulting in [business outcome], because [evidence]. Created by [name].\" same as on create.",
