@@ -31,10 +31,6 @@
     "bot": true,
     "user": false
   },
-  "ad_campaign:stats:read": {
-    "bot": true,
-    "user": false
-  },
   "ad_campaign:update": {
     "bot": true,
     "user": true
@@ -42,10 +38,6 @@
   "ad_pixel:manage": {
     "bot": false,
     "user": true
-  },
-  "ad_publisher:read": {
-    "bot": true,
-    "user": false
   },
   "affiliate:basic:read": {
     "bot": true,
@@ -80,10 +72,6 @@
     "user": false
   },
   "airdrop_link:manage": {
-    "bot": true,
-    "user": false
-  },
-  "app_authorization:read": {
     "bot": true,
     "user": false
   },
