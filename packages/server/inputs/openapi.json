@@ -177877,6 +177877,19 @@
             }
           },
           {
+            "description": "Only return signups for variants on any of these products, prefixed `prod_`. Unknown IDs match nothing.",
+            "in": "query",
+            "name": "product_ids",
+            "required": false,
+            "schema": {
+              "items": {
+                "example": "prod_xxxxxxxxxxxxx",
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
             "description": "List the signups submitted on behalf of this account, prefixed `biz_`, instead of your own and seller signups. Requires `waitlist_entry:read` on the account. The other filters still apply.",
             "in": "query",
             "name": "buyer_account_id",
