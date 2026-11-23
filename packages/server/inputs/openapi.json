@@ -5224,7 +5224,7 @@
           },
           "content_review": {
             "$ref": "#/components/schemas/AdContentReview",
-            "description": "Whop's content review of this ad: whether it has finished, which ad networks it is recommended for, and the content rules it breaks."
+            "description": "Whop's content review of this ad: whether it has finished and the content rules it breaks."
           },
           "cost_per_added_to_cart": {
             "description": "Spend divided by attributed add-to-cart events; null when they are not the goal and none are attributed.",
@@ -6206,13 +6206,6 @@
       },
       "AdContentReview": {
         "properties": {
-          "networks": {
-            "items": {
-              "$ref": "#/components/schemas/AdContentReviewNetwork",
-              "description": "Whether each network can run the ad. Empty until the review finishes."
-            },
-            "type": "array"
-          },
           "status": {
             "description": "`reviewed` once Whop content review finishes, `in_review` while it runs, `not_reviewed` when it never ran.",
             "enum": [
@@ -6226,39 +6219,14 @@
           "tags": {
             "items": {
               "$ref": "#/components/schemas/AdContentReviewTag",
-              "description": "Every rule the review found the ad breaks, on any network. Empty when it breaks none or the review hasn't finished."
+              "description": "Every content rule the review found the ad breaks. Empty when it breaks none or the review hasn't finished."
             },
             "type": "array"
           }
         },
         "required": [
           "status",
-          "networks",
           "tags"
-        ],
-        "type": "object"
-      },
-      "AdContentReviewNetwork": {
-        "properties": {
-          "recommended": {
-            "description": "Whether the ad passes Whop's content policy and this network's.",
-            "type": "boolean"
-          },
-          "title": {
-            "description": "The network. `whop` is Whop's own content policy, which every other network also requires.",
-            "enum": [
-              "whop",
-              "meta",
-              "tiktok",
-              "google"
-            ],
-            "example": "whop",
-            "type": "string"
-          }
-        },
-        "required": [
-          "title",
-          "recommended"
         ],
         "type": "object"
       },
@@ -6268,13 +6236,6 @@
             "description": "The evidence the review recorded for this rule.",
             "type": "string"
           },
-          "restrictions": {
-            "items": {
-              "$ref": "#/components/schemas/AdContentReviewTagRestriction",
-              "description": "Each network whose content policy this rule keeps the ad off, and what that network requires when the rule is conditional there."
-            },
-            "type": "array"
-          },
           "title": {
             "description": "The rule Whop content review found the ad breaks.",
             "type": "string"
@@ -6282,64 +6243,7 @@
         },
         "required": [
           "title",
-          "message",
-          "restrictions"
-        ],
-        "type": "object"
-      },
-      "AdContentReviewTagRestriction": {
-        "properties": {
-          "condition": {
-            "description": "What the network requires before it allows this content. `null` when the network doesn't allow it at all.",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "country": {
-            "description": "The targeted country the condition applies in, as an ISO 3166-1 alpha-2 code. `null` when the condition isn't tied to a country.",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "kind": {
-            "description": "The kind of condition the network sets. `null` when the network doesn't allow the content at all, and on reviews saved before kinds were recorded.",
-            "enum": [
-              "product",
-              "country",
-              "age",
-              "certification",
-              "disclosure",
-              "ad_format",
-              "audience",
-              "schedule",
-              "unconfirmed",
-              null
-            ],
-            "example": "product",
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "network": {
-            "description": "The network whose content policy keeps the ad off. `whop` is Whop's own policy, which keeps it off every network.",
-            "enum": [
-              "whop",
-              "meta",
-              "tiktok",
-              "google"
-            ],
-            "example": "whop",
-            "type": "string"
-          }
-        },
-        "required": [
-          "network",
-          "kind",
-          "country",
-          "condition"
+          "message"
         ],
         "type": "object"
       },
@@ -181620,7 +181524,6 @@
                   },
                   "call_to_action": null,
                   "content_review": {
-                    "networks": [],
                     "status": "not_reviewed",
                     "tags": []
                   },
@@ -181726,7 +181629,7 @@
                       },
                       "content_review": {
                         "$ref": "#/components/schemas/AdContentReview",
-                        "description": "Whop's content review of this ad: whether it has finished, which ad networks it is recommended for, and the content rules it breaks."
+                        "description": "Whop's content review of this ad: whether it has finished and the content rules it breaks."
                       },
                       "created_at": {
                         "description": "When the ad was created, as an ISO 8601 timestamp.",
