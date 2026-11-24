@@ -46358,7 +46358,7 @@
             "description": "What kind of change the action makes. New values can be added, so skip an action whose type you do not know.",
             "enum": [
               "add_cancel_offer",
-              "create_email_automation",
+              "create_message_automation",
               "improve_landing_page",
               "fix_broken_website",
               "clone_and_ab_test_site"
