@@ -32813,10 +32813,29 @@
             "example": "2026-01-01T12:00:00.000Z",
             "type": "string"
           },
+          "expires_at": {
+            "description": "When a lead offer stops taking a response, as an ISO 8601 timestamp. `null` for other request types.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "id": {
             "description": "Partner referral request ID, prefixed `prfr_`.",
             "example": "prfr_xxxxxxxxxxxxxx",
             "type": "string"
+          },
+          "lead": {
+            "description": "The business's signup answers on a lead offer. Only the partner it was offered to sees them. `null` for anyone else and for other request types.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/PartnerReferralRequestLead"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "max_redemptions": {
             "description": "Maximum permitted redemptions, when limited.",
@@ -32836,10 +32855,10 @@
           },
           "partner": {
             "$ref": "#/components/schemas/UserSummary",
-            "description": "Public profile of the requesting partner."
+            "description": "Public profile of the partner associated with this referral request."
           },
           "referring_account": {
-            "description": "Business the partner sent this request on behalf of, when the referral belongs to their team. `null` for a personal referral.",
+            "description": "The partner's team account that this referral counts toward. `null` for a personal referral. A lead offer counts toward the partner-mode team where the partner earned the most in the last 30 days, or the newest on a tie. It is set when the offer is made.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/AccountSummary"
@@ -32854,7 +32873,8 @@
             "enum": [
               "manual",
               "ownership_transfer",
-              "link"
+              "link",
+              "lead"
             ],
             "example": "manual",
             "type": "string"
@@ -32867,7 +32887,7 @@
             "type": "array"
           },
           "status": {
-            "description": "The approval state, or null for requests without an approval process.",
+            "description": "The approval state, or `null` for requests without an approval process. A lead offer that gets no answer before `expires_at` becomes `cancelled`.",
             "enum": [
               "pending",
               "accepted",
@@ -32875,7 +32895,21 @@
               "cancelled",
               null
             ],
-            "example": "accepted",
+            "example": "cancelled",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status_reason": {
+            "description": "Why the request reached its status. `expired` means a lead offer got no answer before `expires_at`. `passed` means the partner turned down a lead offer. `withdrawn` means the partner cancelled their own request. `null` for any other status.",
+            "enum": [
+              "expired",
+              "passed",
+              "withdrawn",
+              null
+            ],
+            "example": "withdrawn",
             "type": [
               "string",
               "null"
@@ -32907,13 +32941,65 @@
           "max_redemptions",
           "authorized_user_id",
           "member_id",
+          "expires_at",
           "created_at",
           "updated_at",
           "user",
+          "lead",
+          "status_reason",
           "account",
           "referring_account",
           "partner",
           "rewards"
+        ],
+        "type": "object"
+      },
+      "PartnerReferralRequestLead": {
+        "properties": {
+          "business_type": {
+            "description": "What the business sells, as the owner picked it at signup, such as `education` or `coaching_and_courses`. `null` when they skipped it.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "country": {
+            "description": "The business's country as a two-letter ISO 3166-1 code, such as `us`.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "migrating_from": {
+            "description": "The platform the owner said they are moving from, such as `stripe`, or `none`. `null` when the form did not ask.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserSummary",
+            "description": "The business owner. A partner messages them with this user's ID."
+          },
+          "signed_up_at": {
+            "description": "When the business was created, as an ISO 8601 timestamp.",
+            "type": "string"
+          },
+          "website": {
+            "description": "The business's website. `null` when the business has none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "owner",
+          "business_type",
+          "migrating_from",
+          "country",
+          "website",
+          "signed_up_at"
         ],
         "type": "object"
       },
@@ -130515,7 +130601,7 @@
             }
           },
           {
-            "description": "Only the referral links created for memberships on this business's team, prefixed `biz_`. Needs read access to the business: its owner sees every member's links, a manager the links of the people reporting to them, and other members only their own.",
+            "description": "Only the referral links created for memberships on this business's team, prefixed `biz_`. Needs read access to the business: its owner sees every member's links, a manager the links of the people reporting to them, and other members only their own. With `request_type=lead`, it lists your lead offers that count toward this team, plus your personal lead offers.",
             "in": "query",
             "name": "referring_account_id",
             "required": false,
@@ -130547,7 +130633,8 @@
               "enum": [
                 "manual",
                 "ownership_transfer",
-                "link"
+                "link",
+                "lead"
               ],
               "type": "string"
             }
