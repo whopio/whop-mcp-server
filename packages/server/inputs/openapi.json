@@ -47496,6 +47496,13 @@
             "example": 249.0,
             "type": "number"
           },
+          "answers": {
+            "items": {
+              "$ref": "#/components/schemas/ResolutionCenterCaseAnswer",
+              "description": "The customer's answers to the questions asked when they opened the case, in the order asked. Empty for a case opened without them."
+            },
+            "type": "array"
+          },
           "available_actions": {
             "items": {
               "description": "What you can do to this case right now, named for the endpoint that does it. Resolved for the calling credential, so a merchant and a customer reading the same case see their own options.",
@@ -47592,7 +47599,8 @@
               "product_not_received",
               "not_as_described",
               "product_unacceptable",
-              "subscription_canceled"
+              "subscription_canceled",
+              "credit_not_processed"
             ],
             "example": "product_not_received",
             "type": "string"
@@ -47663,6 +47671,7 @@
           "closed_at",
           "buyer",
           "payment",
+          "answers",
           "created_at",
           "updated_at"
         ],
@@ -47685,6 +47694,57 @@
         ],
         "type": "string"
       },
+      "ResolutionCenterCaseAnswer": {
+        "properties": {
+          "attachments": {
+            "items": {
+              "$ref": "#/components/schemas/ResolutionAttachment",
+              "description": "Files the customer added to this answer, such as screenshots."
+            },
+            "type": "array"
+          },
+          "id": {
+            "description": "Unique identifier for the answer, prefixed `inrqi_`.",
+            "example": "inrqi_xxxxxxxxxxxxxx",
+            "type": "string"
+          },
+          "question": {
+            "description": "The question this answers. Which questions a case asks depends on its `reason` and on earlier answers.",
+            "enum": [
+              "purchased",
+              "recognizes_purchase",
+              "complaint_kind",
+              "missing_items",
+              "expected_by",
+              "promised",
+              "promised_link",
+              "received_instead",
+              "quality_issue",
+              "contacted_merchant",
+              "contacted_on",
+              "merchant_reply",
+              "extra"
+            ],
+            "example": "expected_by",
+            "type": "string"
+          },
+          "value": {
+            "description": "The customer's answer. Choice questions hold one of their fixed values, and `contacted_on` holds an ISO 8601 date. `null` when an optional question was skipped.",
+            "example": "January 5",
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "question",
+          "value",
+          "attachments"
+        ],
+        "type": "object"
+      },
       "ResolutionCenterCaseCustomerResponses": {
         "description": "The types of responses a customer can make to a resolution.",
         "enum": [
@@ -47701,7 +47761,8 @@
           "item_not_received",
           "significantly_not_as_described",
           "unauthorized_transaction",
-          "product_unacceptable"
+          "product_unacceptable",
+          "credit_not_processed"
         ],
         "type": "string"
       },
@@ -157390,7 +157451,8 @@
                   "product_not_received",
                   "not_as_described",
                   "product_unacceptable",
-                  "subscription_canceled"
+                  "subscription_canceled",
+                  "credit_not_processed"
                 ],
                 "example": "fraudulent",
                 "type": "string"
@@ -157754,7 +157816,7 @@
         ]
       },
       "post": {
-        "description": "Opens a case, as the customer, against one of your own payments. Provide the payment (`receipt_id`), the `reason`, and a `message`.",
+        "description": "Opens a case, as the customer, against one of your own payments. Provide the payment (`receipt_id`), the `reason`, and a `message`. Send `answers` to record the customer's answers to the questions for that reason.",
         "operationId": "createResolutionCenterCase",
         "parameters": [
           {
@@ -157769,6 +157831,59 @@
             "application/json": {
               "schema": {
                 "properties": {
+                  "answers": {
+                    "description": "The customer's answers to the questions for this `reason`. Every required question needs an answer, and a question the reason does not ask is refused.",
+                    "items": {
+                      "properties": {
+                        "attachments": {
+                          "description": "Up to 5 files for this answer, by existing file `id` or `direct_upload_id`.",
+                          "items": {
+                            "properties": {
+                              "direct_upload_id": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "example": "file_xxxxxxxxxxxxxx",
+                                "type": "string"
+                              }
+                            },
+                            "type": "object"
+                          },
+                          "type": "array"
+                        },
+                        "question": {
+                          "description": "The question this answers.",
+                          "enum": [
+                            "purchased",
+                            "recognizes_purchase",
+                            "complaint_kind",
+                            "missing_items",
+                            "expected_by",
+                            "promised",
+                            "promised_link",
+                            "received_instead",
+                            "quality_issue",
+                            "contacted_merchant",
+                            "contacted_on",
+                            "merchant_reply",
+                            "extra"
+                          ],
+                          "example": "purchased",
+                          "type": "string"
+                        },
+                        "value": {
+                          "description": "The answer, up to 500 characters. A choice question takes one of its fixed values, and `contacted_on` takes an ISO 8601 date. `purchased`, `missing_items`, `promised`, `received_instead`, `quality_issue` and `merchant_reply` need at least 20 characters.",
+                          "example": "Ceramic Coating appointment",
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "question"
+                      ],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
                   "attachments": {
                     "items": {
                       "properties": {
@@ -157797,7 +157912,8 @@
                       "product_not_received",
                       "not_as_described",
                       "product_unacceptable",
-                      "subscription_canceled"
+                      "subscription_canceled",
+                      "credit_not_processed"
                     ],
                     "example": "product_not_received",
                     "type": "string"
@@ -157828,7 +157944,7 @@
                 }
               }
             },
-            "description": "case opened"
+            "description": "case opened with answers"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized",
@@ -157930,7 +158046,8 @@
                   "product_not_received",
                   "not_as_described",
                   "product_unacceptable",
-                  "subscription_canceled"
+                  "subscription_canceled",
+                  "credit_not_processed"
                 ],
                 "example": "fraudulent",
                 "type": "string"
@@ -158247,6 +158364,10 @@
                         "reason": {
                           "description": "How many of the matching cases were opened for each reason. Every reason is present, including those with a count of zero.",
                           "properties": {
+                            "credit_not_processed": {
+                              "example": 0,
+                              "type": "integer"
+                            },
                             "fraudulent": {
                               "example": 0,
                               "type": "integer"
@@ -158273,7 +158394,8 @@
                             "product_not_received",
                             "not_as_described",
                             "product_unacceptable",
-                            "subscription_canceled"
+                            "subscription_canceled",
+                            "credit_not_processed"
                           ],
                           "type": "object"
                         },
@@ -198583,6 +198705,7 @@
                     "title": "Shine Time Auto Detailing"
                   },
                   "amount": 0.0,
+                  "answers": [],
                   "available_actions": [
                     "accept",
                     "deny",
@@ -198757,6 +198880,7 @@
                     "title": "Shine Time Auto Detailing"
                   },
                   "amount": 0.0,
+                  "answers": [],
                   "available_actions": [],
                   "buyer": {
                     "email": "marcus@shinetime.example",
@@ -198927,6 +199051,7 @@
                     "title": "Shine Time Auto Detailing"
                   },
                   "amount": 0.0,
+                  "answers": [],
                   "available_actions": [],
                   "buyer": {
                     "email": "marcus@shinetime.example",
