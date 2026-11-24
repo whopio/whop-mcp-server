@@ -41490,6 +41490,95 @@
         ],
         "type": "object"
       },
+      "PaymentRegisterDiscount": {
+        "discriminator": {
+          "mapping": {
+            "flat_amount": "#/components/schemas/PaymentRegisterDiscountFlatAmount",
+            "percentage": "#/components/schemas/PaymentRegisterDiscountPercentage"
+          },
+          "propertyName": "type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/PaymentRegisterDiscountPercentage"
+          },
+          {
+            "$ref": "#/components/schemas/PaymentRegisterDiscountFlatAmount"
+          }
+        ]
+      },
+      "PaymentRegisterDiscountFlatAmount": {
+        "additionalProperties": false,
+        "description": "Takes a fixed amount off.",
+        "properties": {
+          "amount_off": {
+            "additionalProperties": false,
+            "description": "The amount taken off, in the currency of the sale.",
+            "properties": {
+              "amount": {
+                "description": "The amount in major units, as a decimal string. For example, `\"2.50\"` is two dollars fifty. It must be more than 0. It can't have more decimal places than the currency.",
+                "example": "2.50",
+                "type": [
+                  "string",
+                  "number"
+                ]
+              },
+              "currency": {
+                "description": "Three-letter ISO 4217 currency code. It must be the currency of the sale.",
+                "example": "usd",
+                "type": "string"
+              }
+            },
+            "required": [
+              "amount",
+              "currency"
+            ],
+            "type": "object"
+          },
+          "type": {
+            "description": "The kind of discount.",
+            "enum": [
+              "flat_amount"
+            ],
+            "example": "flat_amount",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "amount_off"
+        ],
+        "title": "PaymentRegisterDiscountFlatAmount",
+        "type": "object"
+      },
+      "PaymentRegisterDiscountPercentage": {
+        "additionalProperties": false,
+        "description": "Takes a percentage off.",
+        "properties": {
+          "percentage": {
+            "description": "The percentage taken off. It must be more than 0 and at most 100. Whop rounds the amount to the smallest unit of the currency, half up.",
+            "example": 10,
+            "exclusiveMinimum": 0,
+            "maximum": 100,
+            "multipleOf": 0.01,
+            "type": "number"
+          },
+          "type": {
+            "description": "The kind of discount.",
+            "enum": [
+              "percentage"
+            ],
+            "example": "percentage",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "percentage"
+        ],
+        "title": "PaymentRegisterDiscountPercentage",
+        "type": "object"
+      },
       "PaymentRule": {
         "properties": {
           "account_id": {
@@ -46160,6 +46249,17 @@
       },
       "ReceiptLineItem": {
         "properties": {
+          "discount_amount": {
+            "description": "The amount taken off this item's `subtotal` by discounts and the promo code, before tax. Returns `null` when no discount was recorded for the item.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "id": {
             "description": "Line item ID, prefixed `li_`. Null when the payment predates item snapshots and the item is read from the payment's variant.",
             "example": "li_xxxxxxxxxxxxxx",
@@ -46170,7 +46270,7 @@
           },
           "label": {
             "description": "The item's name as shown at checkout (the product title, else the variant title).",
-            "example": "Ceramic Coating Package",
+            "example": "Credit card surcharge",
             "type": [
               "string",
               "null"
@@ -46186,7 +46286,7 @@
           },
           "product_title": {
             "description": "The product's current title, or `null` when the item has no product.",
-            "example": "Ceramic Coating Package",
+            "example": "Credit card surcharge",
             "type": [
               "string",
               "null"
@@ -46226,7 +46326,7 @@
           },
           "variant_title": {
             "description": "The variant's current title, or `null` when the variant has been deleted or has no title.",
-            "example": "Ceramic Coating — Full Vehicle",
+            "example": "Credit card surcharge",
             "type": [
               "string",
               "null"
@@ -46242,6 +46342,7 @@
           "label",
           "quantity",
           "subtotal",
+          "discount_amount",
           "sku"
         ],
         "type": "object"
@@ -139540,6 +139641,17 @@
                           "null"
                         ]
                       },
+                      "discount": {
+                        "description": "A discount typed at the register for the whole payment. It comes off what the payment costs after line discounts and the promo code, and can't be more than that amount. Discounts can't bring the payment to zero. Only with a `card_present` `payment_method`, and requires `payment:manage` on the account. Whop takes each line's discount off the line, then the promo code, then the payment's `discount`. Tax is calculated on the discounted amounts.",
+                        "oneOf": [
+                          {
+                            "$ref": "#/components/schemas/PaymentRegisterDiscount"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ]
+                      },
                       "email": {
                         "description": "The buyer's email, resolving or creating the user the payment belongs to. With `confirmation_token` it overrides the email the token carries, and is ignored when the token was created by a signed-in buyer; with a `card_present` `payment_method` it names a buyer the point of sale already knows, otherwise the sale belongs to a guest until a buyer is attached; with a `paypal` `payment_method` it names the buyer, and when it and `member_id` are both omitted the buyer is the PayPal account that approves the payment. Ignored with `member_id`.",
                         "example": "dana@shinetime.example",
@@ -139578,6 +139690,17 @@
                             }
                           ],
                           "properties": {
+                            "discount": {
+                              "description": "A discount typed at the register for this line. It comes off the line's price for its full quantity, and can't be more than that price. Only with a `card_present` `payment_method`, and requires `payment:manage` on the account. Whop takes each line's discount off the line, then the promo code, then the payment's `discount`. Tax is calculated on the discounted amounts.",
+                              "oneOf": [
+                                {
+                                  "$ref": "#/components/schemas/PaymentRegisterDiscount"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
                             "quantity": {
                               "description": "How many units of the variant to purchase. Defaults to 1; more than 1 requires the variant to allow multiple quantities.",
                               "example": 1,
@@ -187778,6 +187901,7 @@
                   "issuer_comments": [],
                   "line_items": [
                     {
+                      "discount_amount": null,
                       "id": null,
                       "label": "Ceramic Coating Package",
                       "product_id": "prod_xxxxxxxxxxxxxx",
@@ -187970,6 +188094,7 @@
                   "issuer_comments": [],
                   "line_items": [
                     {
+                      "discount_amount": null,
                       "id": null,
                       "label": "Ceramic Coating Package",
                       "product_id": "prod_xxxxxxxxxxxxxx",
@@ -192198,6 +192323,7 @@
                   "last_payment_attempt_at": null,
                   "line_items": [
                     {
+                      "discount_amount": null,
                       "id": null,
                       "label": "Ceramic Coating Package",
                       "product_id": "prod_xxxxxxxxxxxxxx",
@@ -192507,6 +192633,7 @@
                   "last_payment_attempt_at": null,
                   "line_items": [
                     {
+                      "discount_amount": null,
                       "id": null,
                       "label": "Ceramic Coating Package",
                       "product_id": "prod_xxxxxxxxxxxxxx",
@@ -192816,6 +192943,7 @@
                   "last_payment_attempt_at": null,
                   "line_items": [
                     {
+                      "discount_amount": null,
                       "id": null,
                       "label": "Ceramic Coating Package",
                       "product_id": "prod_xxxxxxxxxxxxxx",
@@ -193125,6 +193253,7 @@
                   "last_payment_attempt_at": "2026-01-01T12:00:00.000Z",
                   "line_items": [
                     {
+                      "discount_amount": null,
                       "id": null,
                       "label": "Ceramic Coating Package",
                       "product_id": "prod_xxxxxxxxxxxxxx",
@@ -193434,6 +193563,7 @@
                   "last_payment_attempt_at": null,
                   "line_items": [
                     {
+                      "discount_amount": null,
                       "id": null,
                       "label": "Ceramic Coating Package",
                       "product_id": "prod_xxxxxxxxxxxxxx",
@@ -193736,6 +193866,7 @@
                   "last_payment_attempt_at": null,
                   "line_items": [
                     {
+                      "discount_amount": null,
                       "id": null,
                       "label": "Ceramic Coating Package",
                       "product_id": "prod_xxxxxxxxxxxxxx",
@@ -194045,6 +194176,7 @@
                   "last_payment_attempt_at": null,
                   "line_items": [
                     {
+                      "discount_amount": null,
                       "id": null,
                       "label": "Ceramic Coating Package",
                       "product_id": "prod_xxxxxxxxxxxxxx",
@@ -198813,6 +198945,7 @@
                   "id": "reso_xxxxxxxxxxxxxx",
                   "line_items": [
                     {
+                      "discount_amount": null,
                       "id": null,
                       "label": "Ceramic Coating Package",
                       "product_id": "prod_xxxxxxxxxxxxxx",
@@ -198984,6 +199117,7 @@
                   "id": "reso_xxxxxxxxxxxxxx",
                   "line_items": [
                     {
+                      "discount_amount": null,
                       "id": null,
                       "label": "Ceramic Coating Package",
                       "product_id": "prod_xxxxxxxxxxxxxx",
@@ -199155,6 +199289,7 @@
                   "id": "reso_xxxxxxxxxxxxxx",
                   "line_items": [
                     {
+                      "discount_amount": null,
                       "id": null,
                       "label": "Ceramic Coating Package",
                       "product_id": "prod_xxxxxxxxxxxxxx",
