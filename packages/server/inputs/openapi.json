@@ -24840,6 +24840,25 @@
               }
             ]
           },
+          "quote_deposit_amount": {
+            "description": "How much is billed as a deposit when the customer signs, before tax. `null` when the quote has no deposit.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/Money"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "quote_deposit_percentage": {
+            "description": "The share of the quote billed as a deposit when the customer signs, such as `30` for 30%. `null` when the deposit is a fixed amount or there is none.",
+            "example": null,
+            "type": [
+              "number",
+              "null"
+            ]
+          },
           "quote_invoice_ids": {
             "items": {
               "description": "The invoices that bill this quote, such as a deposit and then the balance, oldest first, each prefixed `pay_`. Empty when the quote was never billed.",
@@ -25011,6 +25030,8 @@
           "quote_amount_remaining",
           "quote_amount_paid",
           "quote_payment_url",
+          "quote_deposit_percentage",
+          "quote_deposit_amount",
           "customer_name",
           "recipient_emails",
           "email_address",
@@ -25531,7 +25552,7 @@
           },
           "label": {
             "description": "The item's name as shown at checkout (the product title, else the variant title).",
-            "example": "Deposit",
+            "example": "Deposit (30%)",
             "type": [
               "string",
               "null"
