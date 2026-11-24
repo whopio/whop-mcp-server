@@ -83886,7 +83886,7 @@
         "operationId": "listCards",
         "parameters": [
           {
-            "description": "The owning account ID (a biz_ identifier). Provide this or user_id.",
+            "description": "The owning account ID: a biz_ identifier for a business, or a user_ identifier for a personal account. Provide this or user_id.",
             "in": "query",
             "name": "account_id",
             "required": false,
@@ -84259,7 +84259,7 @@
               "schema": {
                 "properties": {
                   "account_id": {
-                    "description": "The owning account ID (a biz_ identifier). Provide this or user_id.",
+                    "description": "The owning account ID: a biz_ identifier for a business, or a user_ identifier for a personal account. Provide this or user_id.",
                     "example": "biz_xxxxxxxxxxxxxx",
                     "type": "string"
                   },
@@ -85094,7 +85094,7 @@
         "operationId": "retrieveCard",
         "parameters": [
           {
-            "description": "The owning account ID (a biz_ identifier). Provide this or user_id.",
+            "description": "The owning account ID: a biz_ identifier for a business, or a user_ identifier for a personal account. Provide this or user_id.",
             "in": "query",
             "name": "account_id",
             "required": false,
@@ -85453,7 +85453,7 @@
               "schema": {
                 "properties": {
                   "account_id": {
-                    "description": "The owning account ID (a biz_ identifier). Provide this or user_id.",
+                    "description": "The owning account ID: a biz_ identifier for a business, or a user_ identifier for a personal account. Provide this or user_id.",
                     "example": "biz_xxxxxxxxxxxxxx",
                     "type": "string"
                   },
