@@ -27503,7 +27503,7 @@
           },
           "source": {
             "additionalProperties": true,
-            "description": "Source of this ledger activity. Platform markup fees use object platform_fee and the ledger activity ID.",
+            "description": "Source of this ledger activity. Platform markup fees use object platform_fee and the ledger activity ID. Treasury pay-ins use object `crypto_offramp` and an ID prefixed `cofr_`. With `include_resource=false`, a treasury pay-in's source and a deposit's `bank_deposit_id` can be null.",
             "properties": {
               "account_id": {
                 "description": "ID of the account that runs the ad campaign (ad_campaign sources only).",
@@ -27513,12 +27513,16 @@
                 ]
               },
               "amount_float": {
-                "description": "Payout amount as a decimal number in the destination currency (payout sources only; requires payout:withdrawal:read).",
+                "description": "Payout amount as a decimal number in the destination currency. Present only on `withdrawal` sources. Requires `payout:withdrawal:read`.",
                 "example": 1500.0,
                 "type": [
                   "number",
                   "null"
                 ]
+              },
+              "bank_deposit_id": {
+                "description": "ID of the bank deposit that this on-chain deposit delivered, prefixed `vbt_`. Present only on onchain_transaction sources for bank deposits.",
+                "type": "string"
               },
               "card_brand": {
                 "description": "Card brand used by the payment source.",
@@ -27791,7 +27795,7 @@
                 ]
               },
               "tx_hash": {
-                "description": "On-chain transaction hash (onchain_transaction and swap sources only).",
+                "description": "On-chain transaction hash (onchain_transaction, swap, and crypto_offramp sources only). On crypto_offramp sources, this is the wallet send that funded the pay-in.",
                 "example": "0x5d84a1c7e2f9b036d48c5a7e1b9f2d6c3a8e0b4f7c1d9e5a2b6f8c0d3e7a1b52",
                 "type": [
                   "string",
@@ -200271,6 +200275,7 @@
                   "source": {
                     "account_id": "some_string",
                     "amount_float": 1500.0,
+                    "bank_deposit_id": "some_string",
                     "card_brand": "some_string",
                     "chain": "plasma",
                     "claim_url": "https://whop.com/claim",
