@@ -22,17 +22,20 @@ export function enforceAccountBinding(
 	principal: PrincipalContext,
 ): Record<string, unknown> {
 	const bound = principal.accountId;
-	// "platform" is the stats API's Whop-wide aggregate mode, not a business, so
-	// the account boundary does not apply; the API decides who reads it.
-	const platformStats =
-		["stats_get", "stats_time-series_get"].includes(operation.toolName) &&
-		args.account_id === "platform";
+	// mode=public, spelled account_id=platform until the API refuses that, reads all of Whop
+	// and not a business, so the account boundary does not apply; the API decides who reads it.
+	const statsRead = ["stats_get", "stats_time-series_get"].includes(
+		operation.toolName,
+	);
+	const platformStats = statsRead && args.account_id === "platform";
 
 	checkAccountFields(
 		platformStats ? { ...args, account_id: undefined } : args,
 		bound,
 		"$",
 	);
+
+	if (statsRead && args.mode === "public") return args;
 
 	if (operation.requiresAccount && !bound && !operation.accountParam) {
 		throw new WhopMcpError(

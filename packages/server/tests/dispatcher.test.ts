@@ -541,6 +541,22 @@ describe("dispatcher", () => {
 
 	for (const toolName of ["stats_time-series_get"]) {
 		for (const metric of ["businesses", "gmv_usd", "gross_revenue"]) {
+			it(`reads ${metric} in public mode through ${toolName} without the bound account`, async () => {
+				const { fetch, requests } = fakeFetch();
+				await makeDispatcher(fetch).dispatch(
+					findOperation(registry, toolName),
+					{
+						metric,
+						mode: "public",
+						from: "2026-10-01",
+						to: "2026-10-18",
+					},
+					principal,
+				);
+				expect(requests[0].url).toContain("mode=public");
+				expect(requests[0].url).not.toContain("account_id");
+			});
+
 			it(`passes the platform stats sentinel through ${toolName} for ${metric} when an account is bound`, async () => {
 				const { fetch, requests } = fakeFetch();
 				await makeDispatcher(fetch).dispatch(

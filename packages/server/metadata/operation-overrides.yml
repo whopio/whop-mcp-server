@@ -110,6 +110,7 @@ overrides:
       - convert_to
       - currency
       - interval
+      - mode
       - product
       - time_zone
       - user_id
