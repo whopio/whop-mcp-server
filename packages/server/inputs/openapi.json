@@ -24736,6 +24736,14 @@
               "null"
             ]
           },
+          "issued_at": {
+            "description": "When the invoice was issued, as an ISO 8601 timestamp. This is when it left draft, which can be after `created_at` for an invoice drafted or scheduled ahead. `null` while the invoice is a draft, and for invoices issued before this field was introduced.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "line_items": {
             "items": {
               "$ref": "#/components/schemas/InvoiceLineItem"
@@ -25063,6 +25071,7 @@
           "metadata",
           "created_at",
           "updated_at",
+          "issued_at",
           "paid_at"
         ],
         "type": "object"
@@ -164140,7 +164149,7 @@
             }
           },
           {
-            "description": "Business ids (biz_...) to scope the series to; the series sums their figures. Available on metrics that list account_ids.",
+            "description": "Business ids (biz_...) to scope the series to. The series sums their figures. On a metric that lists account as a breakdown, it replaces account_id and takes at most 50 ids. On such a metric, breakdown_by=account returns an entry for each id. Available on metrics that list account_ids.",
             "in": "query",
             "name": "account_ids",
             "required": false,
@@ -165323,7 +165332,7 @@
             }
           },
           {
-            "description": "Business ids (biz_...) to scope the series to; the series sums their figures. Available on metrics that list account_ids.",
+            "description": "Business ids (biz_...) to scope the series to. The series sums their figures. On a metric that lists account as a breakdown, it replaces account_id and takes at most 50 ids. On such a metric, breakdown_by=account returns an entry for each id. Available on metrics that list account_ids.",
             "in": "query",
             "name": "account_ids",
             "required": false,
