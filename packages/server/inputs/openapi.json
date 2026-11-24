@@ -3689,12 +3689,12 @@
           },
           "current": {
             "description": "The level that applies: the highest the owner reached this month or in the 5 months before, from `0` up to `10`.",
-            "example": 1,
+            "example": 0,
             "type": "integer"
           },
           "points": {
             "description": "Points earned this month by the owner and their accounts, rounded down. An account whose month nets below zero counts as zero.",
-            "example": 41500,
+            "example": 0,
             "type": "integer"
           },
           "points_by_source": {
@@ -32365,7 +32365,7 @@
         "properties": {
           "actions": {
             "description": "Points earned from eligible actions on Whop, rounded toward zero.",
-            "example": 500,
+            "example": 0,
             "type": "integer"
           },
           "ads": {
@@ -32375,7 +32375,7 @@
           },
           "cards": {
             "description": "Points from captured Whop Card spend, net of refunds: 10 for every dollar, rounded toward zero.",
-            "example": 40000,
+            "example": 0,
             "type": "integer"
           },
           "partners": {
@@ -32385,7 +32385,7 @@
           },
           "trading": {
             "description": "Points from perpetual trading volume filled through Whop: 1 for every dollar traded, rounded toward zero.",
-            "example": 1000,
+            "example": 0,
             "type": "integer"
           }
         },
@@ -53102,7 +53102,7 @@
             "type": "string"
           },
           "level": {
-            "description": "The user's Whop Level, counted across every account they own. `current` is public, and is `0` for another user with no account in Whop Levels. The points and spend fields are populated only when you retrieve yourself with the reserved id `me` and have balance-read scope. `null` on lists, when the user hides their level, and for yourself when you have no account in Whop Levels.",
+            "description": "The user's Whop Level, counted across every account they own. `current` is public, and is `0` for a user with no points yet. The points and spend fields are populated only when you retrieve yourself with the reserved id `me` and have balance-read scope. `null` on lists and when the user hides their level.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/UserLevel"
