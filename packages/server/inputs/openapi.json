@@ -51107,6 +51107,14 @@
       },
       "StorefrontAccount": {
         "properties": {
+          "banner_image_url": {
+            "description": "Account banner image URL. `null` when the account has not set one.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "id": {
             "description": "Account ID, prefixed `biz_`.",
             "example": "biz_xxxxxxxxxxxxxx",
@@ -51135,7 +51143,8 @@
           "id",
           "title",
           "route",
-          "logo_url"
+          "logo_url",
+          "banner_image_url"
         ],
         "type": "object"
       },
@@ -81839,7 +81848,7 @@
                         "type": "array"
                       },
                       {
-                        "description": "Filters with the names and meaning of `GET /members` query parameters: `access_level`, `status`, `most_recent_actions`, `membership_status`, `product_ids`, `variant_ids`, `promo_code_ids`, `user_ids`, `query`, `created_before`, and `created_after`.",
+                        "description": "Filters with the names and meaning of `GET /members` query parameters: `access_level`, `status`, `most_recent_actions`, `membership_status`, `product_ids`, `variant_ids`, `promo_code_ids`, `user_ids`, `query`, `metadata`, `created_before`, and `created_after`.",
                         "type": "object"
                       }
                     ]
@@ -126065,6 +126074,22 @@
               },
               "type": "array"
             }
+          },
+          {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "JSON-encoded object of key and value pairs. Only returns members whose own metadata holds every pair with exactly that value, for example `{\"utm_source\":\"twitter\"}`. Takes up to 5 keys. Only the account's newest 50,000 members are searched, and a search that takes over 5 seconds returns a 400. Stored numbers and true or false values match their text. Nested query keys such as `metadata[utm_source]=twitter` also work.",
+            "in": "query",
+            "name": "metadata",
+            "required": false
           },
           {
             "description": "Search members by name or username. An exact email address also matches when the credential holds the member:email:read scope.",
@@ -182169,6 +182194,7 @@
                 "api_version_date": "2026-11-23-3",
                 "data": {
                   "account": {
+                    "banner_image_url": null,
                     "id": "biz_xxxxxxxxxxxxxx",
                     "logo_url": null,
                     "route": "biz_xxxxxxxxxxxxxx",
@@ -182536,6 +182562,7 @@
                 "api_version_date": "2026-11-23-3",
                 "data": {
                   "account": {
+                    "banner_image_url": null,
                     "id": "biz_xxxxxxxxxxxxxx",
                     "logo_url": null,
                     "route": "biz_xxxxxxxxxxxxxx",
@@ -191374,6 +191401,7 @@
                 "api_version_date": "2026-11-23-3",
                 "data": {
                   "account": {
+                    "banner_image_url": null,
                     "id": "biz_xxxxxxxxxxxxxx",
                     "logo_url": null,
                     "route": "biz_xxxxxxxxxxxxxx",
@@ -191550,6 +191578,7 @@
                 "api_version_date": "2026-11-23-3",
                 "data": {
                   "account": {
+                    "banner_image_url": null,
                     "id": "biz_xxxxxxxxxxxxxx",
                     "logo_url": null,
                     "route": "biz_xxxxxxxxxxxxxx",
@@ -191726,6 +191755,7 @@
                 "api_version_date": "2026-11-23-3",
                 "data": {
                   "account": {
+                    "banner_image_url": null,
                     "id": "biz_xxxxxxxxxxxxxx",
                     "logo_url": null,
                     "route": "biz_xxxxxxxxxxxxxx",
