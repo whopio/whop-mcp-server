@@ -4102,6 +4102,15 @@
             "$ref": "#/components/schemas/AccountAffiliateProgram",
             "description": "The account's affiliate program: its instructions, its application and the product it features for affiliates. `GET /accounts/{account_id}/affiliate_program` returns the same object without authentication."
           },
+          "apple_iap_fee_payer": {
+            "description": "Who pays Apple's 30% fee on one-time purchases made in the Whop iOS app. `buyer` (the default) adds about 43% to the iOS price, so the buyer pays the fee. `company` keeps the product's own price, and the fee comes out of the sale.",
+            "enum": [
+              "buyer",
+              "company"
+            ],
+            "example": "buyer",
+            "type": "string"
+          },
           "cancellation_emails": {
             "description": "Whether Whop emails members when their membership is canceled or terminated. `true` by default. Set it to `false` to stop these emails while keeping the account's other customer emails. They also stop while the account's `send_customer_emails` is `false`.",
             "type": "boolean"
@@ -4302,6 +4311,7 @@
           "customer_tracking",
           "off_session_payment_rules",
           "card_surcharge",
+          "apple_iap_fee_payer",
           "affiliate_program"
         ],
         "type": "object"
@@ -60468,6 +60478,15 @@
                       "$ref": "#/components/schemas/AccountAffiliateProgram",
                       "description": "The account's affiliate program: its instructions, its application and the product it features for affiliates. `GET /accounts/{account_id}/affiliate_program` returns the same object without authentication."
                     },
+                    "apple_iap_fee_payer": {
+                      "description": "Who pays Apple's 30% fee on one-time purchases made in the Whop iOS app. `buyer` (the default) adds about 43% to the iOS price, so the buyer pays the fee. `company` keeps the product's own price, and the fee comes out of the sale.",
+                      "enum": [
+                        "buyer",
+                        "company"
+                      ],
+                      "example": "buyer",
+                      "type": "string"
+                    },
                     "cancellation_emails": {
                       "description": "Whether Whop emails members when their membership is canceled or terminated. `true` by default. Set it to `false` to stop these emails while keeping the account's other customer emails. They also stop while the account's `send_customer_emails` is `false`.",
                       "example": true,
@@ -60780,7 +60799,8 @@
                     "subaccount_team_view_only",
                     "subscription_failure_behavior",
                     "customer_tracking",
-                    "off_session_payment_rules"
+                    "off_session_payment_rules",
+                    "apple_iap_fee_payer"
                   ],
                   "type": "object"
                 }
@@ -60841,7 +60861,7 @@
         }
       ],
       "patch": {
-        "description": "Updates the account's preferences. Keys left out keep their current values. In `affiliate_program` and `ads_triple_whale_integration`, only the fields you send change. `customer_tracking`, `card_surcharge` and `ads_payment_methods` replace their stored value as a whole.\n\nThe required scope depends on which preferences you update.\n\n- `ad_campaign:create`: `ads_payment_methods`, `ads_reporting_currency`, `ads_scheduling_timezone`, `ads_triple_whale_integration`.\n- `payout:account:update`: `cards_auto_top_up`, `cards_notifications`, `covers_subaccount_negative_balances`, `merchant_of_record`.\n- `payment:manage`: `off_session_payment_rules`.\n- `payment:dispute`: `dispute_fighter_enabled`.\n- `company:update`: `economic_intelligence_duration_key`, `economic_intelligence_auto_renew`, `review_request_emails`, `cancellation_emails`, `renewal_reminder_emails`, `failed_payment_emails`, `subaccount_notifications`, `subaccount_team_view_only`, `card_surcharge`.\n- `company:manage_checkout`: `feedback_options`, `customer_tracking`.\n- `affiliate:update`: `affiliate_program`.\n\nTo update keys under more than one scope, the API key needs all of those scopes.\n",
+        "description": "Updates the account's preferences. Keys left out keep their current values. In `affiliate_program` and `ads_triple_whale_integration`, only the fields you send change. `customer_tracking`, `card_surcharge` and `ads_payment_methods` replace their stored value as a whole.\n\nThe required scope depends on which preferences you update.\n\n- `ad_campaign:create`: `ads_payment_methods`, `ads_reporting_currency`, `ads_scheduling_timezone`, `ads_triple_whale_integration`.\n- `payout:account:update`: `cards_auto_top_up`, `cards_notifications`, `covers_subaccount_negative_balances`, `merchant_of_record`.\n- `payment:manage`: `off_session_payment_rules`.\n- `payment:dispute`: `dispute_fighter_enabled`.\n- `company:update`: `economic_intelligence_duration_key`, `economic_intelligence_auto_renew`, `review_request_emails`, `cancellation_emails`, `renewal_reminder_emails`, `failed_payment_emails`, `subaccount_notifications`, `subaccount_team_view_only`, `card_surcharge`, `apple_iap_fee_payer`.\n- `company:manage_checkout`: `feedback_options`, `customer_tracking`.\n- `affiliate:update`: `affiliate_program`.\n\nTo update keys under more than one scope, the API key needs all of those scopes.\n",
         "operationId": "updateAccountPreferences",
         "parameters": [
           {
@@ -61004,6 +61024,15 @@
                       }
                     },
                     "type": "object"
+                  },
+                  "apple_iap_fee_payer": {
+                    "description": "Who pays Apple's 30% fee on one-time purchases made in the Whop iOS app. Set it to `company` to sell at the product's own price and pay the fee from the sale. Set it to `buyer` to add about 43% to the iOS price, so the buyer pays the fee. Requires the `company:update` scope on your API key.",
+                    "enum": [
+                      "buyer",
+                      "company"
+                    ],
+                    "example": "company",
+                    "type": "string"
                   },
                   "cancellation_emails": {
                     "description": "Whether Whop emails members when their membership is canceled or terminated. Set it to `false` to stop these emails while keeping the account's other customer emails. Requires the `company:update` scope on your API key.",
@@ -61498,6 +61527,15 @@
                       "$ref": "#/components/schemas/AccountAffiliateProgram",
                       "description": "The account's affiliate program: its instructions, its application and the product it features for affiliates. `GET /accounts/{account_id}/affiliate_program` returns the same object without authentication."
                     },
+                    "apple_iap_fee_payer": {
+                      "description": "Who pays Apple's 30% fee on one-time purchases made in the Whop iOS app. `buyer` (the default) adds about 43% to the iOS price, so the buyer pays the fee. `company` keeps the product's own price, and the fee comes out of the sale.",
+                      "enum": [
+                        "buyer",
+                        "company"
+                      ],
+                      "example": "buyer",
+                      "type": "string"
+                    },
                     "cancellation_emails": {
                       "description": "Whether Whop emails members when their membership is canceled or terminated. `true` by default. Set it to `false` to stop these emails while keeping the account's other customer emails. They also stop while the account's `send_customer_emails` is `false`.",
                       "example": true,
@@ -61808,7 +61846,8 @@
                     "subaccount_team_view_only",
                     "subscription_failure_behavior",
                     "customer_tracking",
-                    "off_session_payment_rules"
+                    "off_session_payment_rules",
+                    "apple_iap_fee_payer"
                   ],
                   "type": "object"
                 }
