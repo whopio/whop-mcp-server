@@ -18,6 +18,7 @@ import {
 	buildRealRegistry,
 	fakeFetch,
 	principalFixture,
+	registryName,
 	staticCredential,
 } from "./helpers.ts";
 
@@ -82,7 +83,9 @@ describe("compact tool listing", () => {
 					const bytes = new TextEncoder().encode(JSON.stringify(result)).length;
 					expect(bytes).toBeLessThanOrEqual(TOOL_LIST_BUDGET_BYTES);
 					const listedOperations = result.tools.filter((tool) =>
-						registry.operations.some((op) => op.toolName === tool.name),
+						registry.operations.some(
+							(op) => op.toolName === registryName(tool.name),
+						),
 					);
 					expect(listedOperations.length).toBeLessThanOrEqual(
 						MAX_LISTED_OPERATIONS,
@@ -94,7 +97,9 @@ describe("compact tool listing", () => {
 
 	it("lists only core operations plus the operation tools", async () => {
 		const client = await connect();
-		const names = (await client.listTools()).tools.map((tool) => tool.name);
+		const names = (await client.listTools()).tools.map((tool) =>
+			registryName(tool.name),
+		);
 		const core = registry.operations
 			.filter((op) => op.core)
 			.map((op) => op.toolName);
@@ -108,7 +113,9 @@ describe("compact tool listing", () => {
 
 	it("lists core operations in the order the core list gives", async () => {
 		const client = await connect();
-		const names = (await client.listTools()).tools.map((tool) => tool.name);
+		const names = (await client.listTools()).tools.map((tool) =>
+			registryName(tool.name),
+		);
 		const listedCore = names.filter((name) =>
 			registry.operations.some((op) => op.toolName === name && op.core),
 		);
@@ -126,7 +133,9 @@ describe("compact tool listing", () => {
 
 	it("lists every operation and no operation tools in full mode", async () => {
 		const client = await connect({ toolListing: "full" });
-		const names = (await client.listTools()).tools.map((tool) => tool.name);
+		const names = (await client.listTools()).tools.map((tool) =>
+			registryName(tool.name),
+		);
 		expect(names).toContain("payouts_list");
 		for (const name of OPERATION_TOOLS) expect(names).not.toContain(name);
 	});
@@ -146,13 +155,17 @@ describe("compact tool listing", () => {
 		const { fetch, requests } = fakeFetch();
 		const client = await connect({ fetch });
 		const tools = (await client.listTools()).tools;
-		const stats = tools.find((entry) => entry.name === "stats_time-series_get");
+		const stats = tools.find(
+			(entry) => registryName(entry.name) === "stats_time-series_get",
+		);
 		expect(stats?.inputSchema.properties).toHaveProperty("interval");
 		expect(stats?.inputSchema.properties).toHaveProperty("metric");
 		expect(stats?.inputSchema.properties).not.toHaveProperty("steps");
 		expect(stats?.inputSchema.additionalProperties).toBe(true);
 		expect(stats?.description).toContain("describe_operation");
-		const payments = tools.find((entry) => entry.name === "payments_list");
+		const payments = tools.find(
+			(entry) => registryName(entry.name) === "payments_list",
+		);
 		expect(payments?.inputSchema.properties).not.toHaveProperty(
 			"payment_methods",
 		);
@@ -190,13 +203,13 @@ describe("compact tool listing", () => {
 			principal: principalFixture({ principalType: "user", accountId: null }),
 		});
 		const listed = (await unbound.listTools()).tools.find(
-			(tool) => tool.name === "promo-codes_create",
+			(tool) => registryName(tool.name) === "promo-codes_create",
 		);
 		expect(listed?.inputSchema.required).toContain("account_id");
 
 		const bound = await connect();
 		const boundListed = (await bound.listTools()).tools.find(
-			(tool) => tool.name === "promo-codes_create",
+			(tool) => registryName(tool.name) === "promo-codes_create",
 		);
 		expect(boundListed?.inputSchema.required).not.toContain("account_id");
 	});
@@ -204,7 +217,7 @@ describe("compact tool listing", () => {
 	it("keeps full listings unchanged by listed-schema overrides", async () => {
 		const client = await connect({ toolListing: "full" });
 		const tool = (await client.listTools()).tools.find(
-			(entry) => entry.name === "stats_time-series_get",
+			(entry) => registryName(entry.name) === "stats_time-series_get",
 		);
 		expect(tool?.inputSchema.properties).toHaveProperty("steps");
 		expect(tool?.inputSchema.additionalProperties).toBe(false);
@@ -225,7 +238,7 @@ describe("muse surface", () => {
 
 	it("lists the same tools as /mcp, with refunds as the only money writes", async () => {
 		const coreOnMcp = (await listed())
-			.map((tool) => tool.name)
+			.map((tool) => registryName(tool.name))
 			.filter((name) => operationNames.has(name));
 		const onMuse = (await listed("muse"))
 			.map((tool) => tool.name)

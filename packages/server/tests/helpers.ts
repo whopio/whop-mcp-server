@@ -113,3 +113,27 @@ export function findOperation(
 	if (!op) throw new Error(`No operation named ${toolName} in registry`);
 	return op;
 }
+
+let namesRegistry: RegistryManifest | undefined;
+
+/**
+ * The registry name behind a listed tool name. Routes other than Muse list
+ * verb names; tests read listings back in registry names, which the core list,
+ * flows and surfaces use too.
+ */
+export function registryName(name: string): string {
+	namesRegistry ??= buildRealRegistry();
+	return (
+		namesRegistry.operations.find((op) => op.verbName === name)?.toolName ??
+		name
+	);
+}
+
+/** The name a route other than Muse lists an operation under. */
+export function listedName(toolName: string): string {
+	namesRegistry ??= buildRealRegistry();
+	return (
+		namesRegistry.operations.find((op) => op.toolName === toolName)?.verbName ??
+		toolName
+	);
+}

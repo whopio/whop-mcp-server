@@ -7,11 +7,13 @@ import { FLOWS } from "../src/runtime/flows.ts";
 import { GUIDE_PROMPTS } from "../src/runtime/prompts.ts";
 import { GUIDE_URIS, readResource } from "../src/runtime/resources.ts";
 import { createWhopMcpServer } from "../src/runtime/server.ts";
+import { REGISTRY_NAMING } from "../src/runtime/tool-names.ts";
 import { toolReach } from "../src/runtime/tool-reach.ts";
 import {
 	buildRealRegistry,
 	fakeFetch,
 	principalFixture,
+	registryName,
 	staticCredential,
 } from "./helpers.ts";
 
@@ -21,7 +23,7 @@ const userPrincipal = principalFixture({
 	accountId: null,
 });
 const toolNames = registry.operations
-	.map((op) => op.toolName)
+	.flatMap((op) => [op.toolName, op.verbName])
 	.sort((a, b) => b.length - a.length);
 const writes = new Set(
 	registry.operations
@@ -102,7 +104,10 @@ function mentions(text: string): { tool: string; after: string }[] {
 		);
 		for (const match of rest.matchAll(pattern)) {
 			const end = match.index + tool.length;
-			found.push({ tool, after: rest.slice(end, end + 40) });
+			found.push({
+				tool: registryName(tool),
+				after: rest.slice(end, end + 40),
+			});
 		}
 		rest = rest.replace(pattern, " ".repeat(tool.length));
 	}
@@ -155,7 +160,7 @@ describe("prompts and resources", () => {
 		for (const surface of GUIDED_SURFACES) {
 			const client = await connect({ surface });
 			const listed = new Set(
-				(await client.listTools()).tools.map((tool) => tool.name),
+				(await client.listTools()).tools.map((tool) => registryName(tool.name)),
 			);
 			for (const { source, text } of await allGuideText(client)) {
 				if (surface === "muse") {
@@ -260,7 +265,7 @@ describe("prompts and resources", () => {
 			principal: { ...userPrincipal, scopes: ["member:basic:read"] },
 		});
 		const listed = new Set(
-			(await client.listTools()).tools.map((tool) => tool.name),
+			(await client.listTools()).tools.map((tool) => registryName(tool.name)),
 		);
 		const { prompts } = await client.listPrompts();
 		expect(prompts.length).toBeLessThan(GUIDE_PROMPTS.length);
@@ -291,6 +296,7 @@ describe("prompts and resources", () => {
 			[],
 			[],
 			["memberships_list", "payments_list", "members_list"],
+			REGISTRY_NAMING,
 		);
 		const text = readResource("whop://guides/customers", reach)?.text ?? "";
 		expect(text).toContain("## Who churned, and what did they pay?");

@@ -86,7 +86,14 @@ async function listToolNames(
 	const result = (await rpc(surface, path, "tools/list", undefined, grant)) as {
 		tools: { name: string }[];
 	};
-	return result.tools.map((tool) => tool.name);
+	return result.tools.map((tool) => registryName(tool.name));
+}
+
+// Routes other than Muse list verb names; these tests compare registry names.
+function registryName(name: string): string {
+	return (
+		registry.operations.find((op) => op.verbName === name)?.toolName ?? name
+	);
 }
 
 async function describeOperation(

@@ -61,6 +61,25 @@ The core list and those schema trims live in
 `tools/list` response under 260 KB for every permission profile. The local
 stdio adapter lists every operation.
 
+### Tool names
+
+Tools are named verb first, after what they do: `list_payments`,
+`get_ad_campaign`, `submit_app_product_for_review`. Each name comes from the
+operation's OpenAPI operationId (`listPayments`), with `retrieve` read as
+`get` and every list plural. Where that reads badly, a `verbName` in
+`operation-overrides.yml` sets the name.
+
+Every operation also keeps its registry name, such as `payments_list`, which
+matches the public CLI's `whop payments list` and is what Whop AI, audit
+events and API attribution use. Every route accepts both names, in a direct
+call and in `describe_operation` and the `call_*_operation` tools. `/muse/mcp`
+lists the registry names, because Muse approved its tools under them; the other
+routes list the verb names, and their descriptions, instructions, guides and
+errors name tools the same way. The generator fails if a verb name matches
+another operation's registry name. Each audit event's `calledAs`
+(`registry_name` or `verb_name`) records which name the client used, so the
+registry names can stop being accepted once nothing calls them.
+
 ## Access and safety
 
 ### Full-admin scope

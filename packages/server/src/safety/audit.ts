@@ -14,7 +14,15 @@ export interface AuditEvent {
 	errorCode?: string;
 	upstreamStatus?: number;
 	via?: "call_read_operation" | "call_write_operation";
+	/**
+	 * Which name the client called the tool by. toolName is always the registry
+	 * name, so this is what shows who still calls a registry name on a route
+	 * that lists verb names.
+	 */
+	calledAs?: CalledAs;
 }
+
+export type CalledAs = "registry_name" | "verb_name";
 
 export interface AuditSink {
 	record(event: AuditEvent): Promise<void>;

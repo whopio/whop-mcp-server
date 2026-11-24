@@ -61,8 +61,16 @@ export interface ToolAnnotations {
 }
 
 export interface OperationDef {
-	/** Stable public MCP tool name, e.g. "accounts_me". */
+	/**
+	 * Stable registry name, e.g. "accounts_me", shared with the public CLI and
+	 * Whop AI. Muse lists tools under it, and every route still accepts it.
+	 */
 	toolName: string;
+	/**
+	 * The verb-first name the other hosted routes list, e.g.
+	 * "get_requesting_account".
+	 */
+	verbName: string;
 	/** The operationId as authored in the canonical OpenAPI contract. */
 	openapiOperationId: string;
 	method: HttpMethod;

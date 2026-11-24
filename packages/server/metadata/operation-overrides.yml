@@ -11,6 +11,8 @@
 #                     the full schema, so required inputs cannot be omitted
 #   listedSchemaOnly: the only optional inputs compact listings show, for an
 #                     operation with too many filters to omit one by one
+#   verbName:         the verb-first tool name the hosted routes list, when
+#                     the one read from the operationId reads badly
 #
 # The top-level `core` list names the operations compact tool listings show
 # directly. Every other visible operation is reached through search_operations
@@ -29,6 +31,7 @@
 
 overrides:
   "POST /claim_links/{id}/claim":
+    verbName: redeem_claim_link
     principals: [user]
 
   # "Call this first" sent agents straight into a 403: a user token is bound to
@@ -535,6 +538,89 @@ overrides:
     description: >-
       Post in a community forum, or comment on a post, with optional
       attachments, a poll, a paywall or pinning.
+
+  # Verb names that the operationId gets wrong or puts in an awkward order.
+  # Every other operation's verb name comes from its operationId.
+  "POST /channels/{id}/accept":
+    verbName: accept_message_request
+  "POST /channels/{id}/reopen":
+    verbName: reopen_support_channel
+  "POST /channels/{id}/resolve":
+    verbName: resolve_support_channel
+  "POST /disputes/{id}/submit":
+    verbName: submit_dispute_evidence
+  "POST /domains/{id}/check":
+    verbName: refresh_domain_status
+  "POST /memberships/{id}/transfer":
+    verbName: create_membership_transfer_link
+  "POST /memberships/invite":
+    verbName: send_membership_invite
+  "POST /partners":
+    verbName: enroll_in_partner_program
+  "GET /partners/{id}":
+    verbName: get_my_partner_profile
+  "GET /partners/businesses":
+    verbName: list_referred_businesses
+  "GET /partners/businesses/{id}":
+    verbName: get_referred_business
+  "PATCH /partners/businesses/{id}":
+    verbName: update_referred_business
+  "GET /partners/businesses/{id}/earnings":
+    verbName: list_referred_business_earnings
+  "POST /partners/businesses/{id}/accept_commission_advance":
+    verbName: accept_referred_business_commission_advance
+  "POST /partners/businesses/{id}/resend_invite":
+    verbName: resend_referred_business_invite
+  "POST /products/{id}/publish":
+    verbName: submit_app_product_for_review
+  "DELETE /promo_codes/{id}":
+    verbName: archive_promo_code
+  "GET /stats/reports":
+    verbName: list_stats_reports
+  "GET /search":
+    verbName: search_account_records
+  "POST /ad_stats":
+    verbName: report_ad_stats
+  "POST /cashback_rules/payout":
+    verbName: pay_out_cashback
+  "GET /trades/candles":
+    verbName: list_trade_candles
+  "GET /trades/markets":
+    verbName: list_trade_markets
+  "GET /payout_methods":
+    verbName: list_account_payout_methods
+  "POST /audiences/{id}/add_people":
+    verbName: add_people_to_audience
+  "POST /memberships/{id}/apply_promo_code":
+    verbName: apply_promo_code_to_membership
+  "POST /memberships/{id}/assign_affiliate":
+    verbName: assign_membership_affiliate
+  "POST /memberships/{id}/resync_access":
+    verbName: resync_membership_access
+  "POST /affiliates/{id}/overrides":
+    verbName: create_affiliate_override
+  "GET /affiliates/{id}/overrides":
+    verbName: list_affiliate_overrides
+  "GET /affiliates/{id}/overrides/{override_id}":
+    verbName: get_affiliate_override
+  "PATCH /affiliates/{id}/overrides/{override_id}":
+    verbName: update_affiliate_override
+  "DELETE /affiliates/{id}/overrides/{override_id}":
+    verbName: delete_affiliate_override
+  "GET /payments/{payment_id}/status":
+    verbName: get_payment_status
+  "GET /setup_intents/{setup_intent_id}/status":
+    verbName: get_setup_intent_status
+  "PATCH /payments/{payment_id}/return_url":
+    verbName: update_payment_return_url
+  "PATCH /setup_intents/{setup_intent_id}/return_url":
+    verbName: update_setup_intent_return_url
+  "GET /identity_profiles/{id}/verifications":
+    verbName: list_identity_profile_verifications
+  "POST /course_lessons/{lesson_id}/mark_as_completed":
+    verbName: complete_course_lesson
+  "POST /course_lessons/{lesson_id}/submit_assessment":
+    verbName: submit_course_lesson_assessment
 
 core:
   - "GET /accounts"

@@ -35,9 +35,16 @@ import { chatGptTools } from "./chatgpt-compat.ts";
 import type { McpRequestContext } from "./mcp-context.ts";
 import { docsTools } from "./docs.ts";
 import { feedbackTools } from "./feedback.ts";
-import { type OperationCallVia, operationTools } from "./operation-tools.ts";
+import { type OperationCall, operationTools } from "./operation-tools.ts";
 import { getPrompt, listedPrompts } from "./prompts.ts";
 import { listedResources, readResource } from "./resources.ts";
+import {
+	calledAs,
+	operationsByName,
+	REGISTRY_NAMING,
+	type ToolNaming,
+	verbNaming,
+} from "./tool-names.ts";
 import { toolReach } from "./tool-reach.ts";
 
 export const SERVER_NAME = "whop";
@@ -89,8 +96,10 @@ const CHATGPT_BUILTIN_HINTS: Record<
 
 // A signed-in user on this route isn't bound to one business, and search takes
 // no account, so it can't reach what the shared text promises.
-const CHATGPT_SEARCH_DESCRIPTION =
-	"Matches a keyword against the newest public Whop marketplace listings and, by payment ID or status, the most recent sales across every business the signed-in user can read. It takes no business, so it can't narrow to one business or see its products, variants or members. For those, call products_list, variants_list or members_list with account_id, or search_list to look up one account's records. Returns result IDs for use with fetch.";
+function chatgptSearchDescription(naming: ToolNaming): string {
+	const n = naming.name;
+	return `Matches a keyword against the newest public Whop marketplace listings and, by payment ID or status, the most recent sales across every business the signed-in user can read. It takes no business, so it can't narrow to one business or see its products, variants or members. For those, call ${n("products_list")}, ${n("variants_list")} or ${n("members_list")} with account_id, or ${n("search_list")} to look up one account's records. Returns result IDs for use with fetch.`;
+}
 
 const CHATGPT_CONNECTION_STATUS_DESCRIPTION =
 	"Shows who is signed in, the selected account, the permission profile, and how many tools are available. Never returns credentials.";
@@ -98,13 +107,14 @@ const CHATGPT_CONNECTION_STATUS_DESCRIPTION =
 function listedBuiltin(
 	definition: ToolDefinition,
 	surface: SurfaceName | undefined,
+	naming: ToolNaming,
 ): ToolDefinition {
 	if (surface !== "chatgpt") return definition;
 	const hints = CHATGPT_BUILTIN_HINTS[definition.name];
 	return {
 		...definition,
 		...(definition.name === "search"
-			? { description: CHATGPT_SEARCH_DESCRIPTION }
+			? { description: chatgptSearchDescription(naming) }
 			: {}),
 		...(definition.name === "connection_status"
 			? { description: CHATGPT_CONNECTION_STATUS_DESCRIPTION }
@@ -329,6 +339,7 @@ function jsonContent(value: unknown): {
 function errorContentFor(
 	error: WhopMcpError,
 	surface: SurfaceName | undefined,
+	naming: ToolNaming,
 ): {
 	content: { type: "text"; text: string }[];
 	isError: boolean;
@@ -336,6 +347,9 @@ function errorContentFor(
 	const result = error.toResult() as { error: Record<string, unknown> };
 	// OpenAI's response rule names request IDs. The audit event keeps this one.
 	if (surface === "chatgpt") delete result.error.request_id;
+	if (typeof result.error.message === "string") {
+		result.error.message = naming.inText(result.error.message);
+	}
 	return {
 		content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
 		isError: true,
@@ -362,13 +376,18 @@ export function createWhopMcpServer(
 	options: CreateWhopMcpServerOptions,
 ): WhopMcpServer {
 	const { registry, principal } = options;
+	// Muse reviewed and approved its tools under their registry names.
+	const naming =
+		options.surface === "muse"
+			? REGISTRY_NAMING
+			: verbNaming(registry.operations);
 	const errorContent = (error: WhopMcpError) =>
-		errorContentFor(error, options.surface);
+		errorContentFor(error, options.surface, naming);
 	const operations = visibleOperations(registry, principal, {
 		nativeOnly: options.nativeOnly,
 		surface: options.surface,
 	});
-	const byName = new Map(operations.map((op) => [op.toolName, op]));
+	const byName = operationsByName(operations);
 	const compact = options.toolListing === "compact";
 	// Muse approves each tool and bars collecting more data than a tool needs,
 	// so its route offers only read-only operation tools and no intent fields.
@@ -401,10 +420,15 @@ export function createWhopMcpServer(
 			? chatGptTools(operations, dispatcher, principal, options.surface)
 			: []),
 		...(options.feedback
-			? feedbackTools(dispatcher, principal, {
-					clientName: options.clientName,
-					pluginSource: options.pluginSource,
-				})
+			? feedbackTools(
+					dispatcher,
+					principal,
+					{
+						clientName: options.clientName,
+						pluginSource: options.pluginSource,
+					},
+					naming,
+				)
 			: []),
 		...(options.docs
 			? docsTools({ fetch: options.fetch, timeoutMs: options.timeoutMs })
@@ -414,7 +438,7 @@ export function createWhopMcpServer(
 					operations,
 					executeOperation,
 					(operation) => withAccountRequirement(operation, principal),
-					{ readOnly: reviewedToolsOnly },
+					{ readOnly: reviewedToolsOnly, naming },
 				)
 			: []),
 		{
@@ -444,14 +468,16 @@ export function createWhopMcpServer(
 				tools: {},
 				...(options.promptsAndResources && { prompts: {}, resources: {} }),
 			},
-			instructions: buildInstructions(
-				principal,
-				options.surface,
-				operations,
-				listedOperations,
-				builtins,
-				collectsIntent,
-				options.promptsAndResources ?? false,
+			instructions: naming.inText(
+				buildInstructions(
+					principal,
+					options.surface,
+					operations,
+					listedOperations,
+					builtins,
+					collectsIntent,
+					options.promptsAndResources ?? false,
+				),
 			),
 		},
 	);
@@ -459,10 +485,12 @@ export function createWhopMcpServer(
 	server.setRequestHandler(ListToolsRequestSchema, async () => ({
 		tools: [
 			...listedOperations.map((op) => ({
-				name: op.toolName,
-				description: compact
-					? listedToolDescription(op, options.surface)
-					: toolDescription(op, options.surface),
+				name: naming.name(op.toolName),
+				description: naming.inText(
+					compact
+						? listedToolDescription(op, options.surface)
+						: toolDescription(op, options.surface),
+				),
 				inputSchema: intentSchema(
 					compact
 						? listedInputSchema(op, principal)
@@ -495,13 +523,19 @@ export function createWhopMcpServer(
 						) as ToolDefinition["inputSchema"],
 					},
 					options.surface,
+					naming,
 				),
 			),
 		],
 	}));
 
 	if (options.promptsAndResources) {
-		const reach = toolReach(operations, listedOperations, builtinByName.keys());
+		const reach = toolReach(
+			operations,
+			listedOperations,
+			builtinByName.keys(),
+			naming,
+		);
 		server.setRequestHandler(ListPromptsRequestSchema, async () => ({
 			prompts: listedPrompts(reach),
 		}));
@@ -529,7 +563,7 @@ export function createWhopMcpServer(
 		const operation = builtin ? undefined : byName.get(name);
 		try {
 			const { arguments: args, context } = splitIntent(
-				name,
+				operation?.toolName ?? name,
 				rawArgs,
 				builtin ? builtin.asksForIntent === true : operation !== undefined,
 			);
@@ -544,7 +578,11 @@ export function createWhopMcpServer(
 				};
 			}
 			if (operation) {
-				return jsonContent(await executeOperation(operation, args, context));
+				return jsonContent(
+					await executeOperation(operation, args, context, {
+						calledAs: calledAs(operation, name),
+					}),
+				);
 			}
 		} catch (error) {
 			return errorContent(
@@ -575,10 +613,10 @@ export function createWhopMcpServer(
 		operation: OperationDef,
 		rawArgs: Record<string, unknown>,
 		mcpRequestContext: McpRequestContext | undefined,
-		via?: OperationCallVia,
+		call: OperationCall,
 	): Promise<unknown> {
 		try {
-			return await callOperation(operation, rawArgs, mcpRequestContext, via);
+			return await callOperation(operation, rawArgs, mcpRequestContext, call);
 		} catch (error) {
 			const failure =
 				error instanceof WhopMcpError
@@ -596,7 +634,7 @@ export function createWhopMcpServer(
 						errorCode: failure.code,
 						upstreamStatus: failure.status,
 						requestId: failure.requestId,
-						...(via ? { via } : {}),
+						...call,
 					},
 				),
 			);
@@ -608,7 +646,7 @@ export function createWhopMcpServer(
 		operation: OperationDef,
 		rawArgs: Record<string, unknown>,
 		intentContext: McpRequestContext | undefined,
-		via?: OperationCallVia,
+		call: OperationCall,
 	): Promise<unknown> {
 		const suppliedKey = rawArgs[IDEMPOTENCY_KEY_FIELD];
 		const idempotencyKey =
@@ -633,7 +671,7 @@ export function createWhopMcpServer(
 					clientName: options.clientName,
 					pluginSource: options.pluginSource,
 					requestId: result.requestId,
-					...(via ? { via } : {}),
+					...call,
 				},
 			),
 		);

@@ -94,19 +94,20 @@ async function capabilities(
 describe("route table", () => {
 	it("serves each route its own surface and listing", async () => {
 		const full = await toolNames("/mcp", "admin");
-		expect(full).toContain("payments_refund");
+		expect(full).toContain("refund_payment");
 		expect(full).toContain("search_operations");
-		expect(full).not.toContain("transfers_create");
+		expect(full).not.toContain("payments_refund");
+		expect(full).not.toContain("create_transfer");
 		const claude = await toolNames("/claude/mcp", "admin");
-		expect(claude).toContain("payments_refund");
+		expect(claude).toContain("refund_payment");
 		expect(claude).toContain("search_operations");
-		expect(claude).not.toContain("media_generate");
-		expect(claude).not.toContain("transfers_create");
+		expect(claude).not.toContain("generate_media_asset");
+		expect(claude).not.toContain("create_transfer");
 		const chatgpt = await toolNames("/chatgpt/mcp", "chatgpt");
-		expect(chatgpt).toContain("media_generate");
-		expect(chatgpt).toContain("domains_create");
-		expect(chatgpt).not.toContain("payments_refund");
-		expect(chatgpt).not.toContain("transfers_create");
+		expect(chatgpt).toContain("generate_media_asset");
+		expect(chatgpt).toContain("create_domain");
+		expect(chatgpt).not.toContain("refund_payment");
+		expect(chatgpt).not.toContain("create_transfer");
 		expect(chatgpt).not.toContain("search_operations");
 		const muse = await toolNames("/muse/mcp", "muse");
 		expect(muse).toContain("payments_list");

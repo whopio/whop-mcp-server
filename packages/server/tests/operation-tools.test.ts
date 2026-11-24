@@ -11,6 +11,7 @@ import {
 	buildRealRegistry,
 	fakeFetch,
 	principalFixture,
+	registryName,
 	staticCredential,
 } from "./helpers.ts";
 
@@ -61,7 +62,7 @@ async function searchNames(client: Client, query: string): Promise<string[]> {
 	const body = JSON.parse(text(result)) as {
 		operations: { name: string }[];
 	};
-	return body.operations.map((operation) => operation.name);
+	return body.operations.map((operation) => registryName(operation.name));
 }
 
 describe("search_operations", () => {
@@ -132,7 +133,7 @@ describe("search_operations", () => {
 			operations: { name: string; input_schema?: { required?: string[] } }[];
 		};
 		const promoCodes = body.operations.find(
-			(operation) => operation.name === "promo-codes_create",
+			(operation) => registryName(operation.name) === "promo-codes_create",
 		);
 		expect(promoCodes?.input_schema?.required).toContain("account_id");
 	});

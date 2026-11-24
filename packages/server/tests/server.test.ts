@@ -18,11 +18,26 @@ import {
 import {
 	buildRealRegistry,
 	fakeFetch,
+	listedName,
 	principalFixture,
+	registryName,
 	staticCredential,
 } from "./helpers.ts";
 
 const registry = buildRealRegistry();
+
+// Reads a listing back in registry names, which these tests are written in.
+// tool-names.test.ts covers the names each route lists.
+async function listTools(client: Client) {
+	const listing = await client.listTools();
+	return {
+		...listing,
+		tools: listing.tools.map((tool) => ({
+			...tool,
+			name: registryName(tool.name),
+		})),
+	};
+}
 const TEST_INTENT = "Show me my products";
 const TEST_INTENT_ID = "123e4567-e89b-42d3-a456-426614174000";
 
@@ -96,7 +111,7 @@ function decodeMcpContext(value: string): Record<string, unknown> {
 describe("MCP contract", () => {
 	it("initializes and lists tools including connection_status", async () => {
 		const client = await connect();
-		const { tools } = await client.listTools();
+		const { tools } = await listTools(client);
 		const names = tools.map((t) => t.name);
 		expect(names).toContain("accounts_me");
 		expect(names).toContain("connection_status");
@@ -129,7 +144,7 @@ describe("MCP contract", () => {
 		const client = await connect({
 			principal: principalFixture({ permissionProfile: "read_only" }),
 		});
-		const { tools } = await client.listTools();
+		const { tools } = await listTools(client);
 		const registryTools = tools.filter((t) => t.name !== "connection_status");
 		expect(registryTools.length).toBeGreaterThan(100);
 		for (const tool of registryTools) {
@@ -145,7 +160,7 @@ describe("MCP contract", () => {
 				scopes: granted,
 			}),
 		});
-		const { tools } = await client.listTools();
+		const { tools } = await listTools(client);
 		expect(tools.length).toBeLessThan(registry.operations.length + 1);
 		for (const tool of tools) {
 			if (tool.name === "connection_status") continue;
@@ -166,7 +181,7 @@ describe("MCP contract", () => {
 				scopes: ["support_chat:message:create", "dms:channel:manage"],
 			}),
 		});
-		const { tools } = await client.listTools();
+		const { tools } = await listTools(client);
 		expect(tools.map((tool) => tool.name)).toContain("messages_create");
 		expect(tools.map((tool) => tool.name)).not.toContain(
 			"channel-members_delete",
@@ -180,7 +195,7 @@ describe("MCP contract", () => {
 				scopes: ["dms:channel:manage", "support_chat:read"],
 			}),
 		});
-		const { tools } = await client.listTools();
+		const { tools } = await listTools(client);
 		expect(tools.map((tool) => tool.name)).toContain("channel-members_delete");
 	});
 
@@ -272,7 +287,7 @@ describe("MCP contract", () => {
 					permissionProfile: "read_only",
 				}),
 			});
-			const { tools } = await client.listTools();
+			const { tools } = await listTools(client);
 			expect(
 				tools
 					.filter((tool) => tool.name.startsWith("stats_"))
@@ -386,7 +401,7 @@ describe("MCP contract", () => {
 		const client = await connect({
 			principal: principalFixture({ principalType: "user", accountId: null }),
 		});
-		const names = (await client.listTools()).tools.map((t) => t.name);
+		const names = (await listTools(client)).tools.map((t) => t.name);
 		expect(names).not.toContain("accounts_me");
 		expect(names).not.toContain("account-links_create");
 		expect(names).toContain("accounts_list");
@@ -400,7 +415,7 @@ describe("MCP contract", () => {
 				scopes: ["openid", "payment:basic:read"],
 			}),
 		});
-		const names = (await client.listTools()).tools.map((t) => t.name);
+		const names = (await listTools(client)).tools.map((t) => t.name);
 		expect(names).toContain("payments_list");
 		expect(names).not.toContain("ad-pixels_list");
 		expect(names).not.toContain("payments_refund");
@@ -444,7 +459,7 @@ describe("MCP contract", () => {
 			body: { id: "sint_1", status: "requires_action" },
 		}));
 		const client = await connect({ fetch });
-		const { tools } = await client.listTools();
+		const { tools } = await listTools(client);
 		const tool = tools.find(
 			(candidate) => candidate.name === operation.toolName,
 		)!;
@@ -471,7 +486,7 @@ describe("MCP contract", () => {
 	it("does not describe a two-step flow to the model", async () => {
 		const client = await connect();
 		expect(client.getInstructions()).not.toMatch(/two-step|confirmation/i);
-		const { tools } = await client.listTools();
+		const { tools } = await listTools(client);
 		const refund = tools.find((t) => t.name === "payments_refund")!;
 		expect(refund.description).not.toMatch(/two-step|confirmation token/i);
 	});
@@ -506,7 +521,7 @@ describe("MCP contract", () => {
 			const client = await connect({
 				principal: principalFixture({ accountId }),
 			});
-			const { tools } = await client.listTools();
+			const { tools } = await listTools(client);
 			return tools.find((t) => t.name === "accounts_preferences")?.inputSchema
 				.required;
 		};
@@ -603,7 +618,7 @@ describe("claude_directory surface", () => {
 
 	it("hides media generation and money-out tools but keeps selling", async () => {
 		const client = await connect({ surface: "claude_directory" });
-		const names = (await client.listTools()).tools.map((t) => t.name);
+		const names = (await listTools(client)).tools.map((t) => t.name);
 		for (const hidden of [
 			"media_generate",
 			"transfers_create",
@@ -681,7 +696,7 @@ describe("chatgpt surface", () => {
 				surface,
 				principal: principalFixture({ principalType: "user", accountId: null }),
 			});
-			const { tools } = await client.listTools();
+			const { tools } = await listTools(client);
 			return new Map(
 				tools.map((tool) => [tool.name, tool.annotations?.destructiveHint]),
 			);
@@ -716,7 +731,7 @@ describe("chatgpt surface", () => {
 				surface,
 				principal: principalFixture({ principalType: "user", accountId: null }),
 			});
-			const { tools } = await client.listTools();
+			const { tools } = await listTools(client);
 			return new Map(
 				tools.map((tool) => [tool.name, tool.annotations?.openWorldHint]),
 			);
@@ -746,7 +761,7 @@ describe("chatgpt surface", () => {
 				surface,
 				principal: principalFixture({ principalType: "user", accountId: null }),
 			});
-			const { tools } = await client.listTools();
+			const { tools } = await listTools(client);
 			return new Map(
 				tools.map((tool) => [
 					tool.name,
@@ -790,7 +805,7 @@ describe("chatgpt surface", () => {
 			chatGptCompat: true,
 			principal: principalFixture({ principalType: "user", accountId: null }),
 		});
-		return (await client.listTools()).tools;
+		return (await listTools(client)).tools;
 	};
 
 	it("gives every listed tool OpenAI's three hints as booleans", async () => {
@@ -874,7 +889,7 @@ describe("chatgpt surface", () => {
 	// Holds whether or not this route collects intent, so that commit can revert.
 	const connectAsRoute = async (options: Parameters<typeof connect>[0]) => {
 		const client = await connect({ ...options, includeIntent: false });
-		const { tools } = await client.listTools();
+		const { tools } = await listTools(client);
 		const accountsGet = tools.find((tool) => tool.name === "accounts_get");
 		return accountsGet?.inputSchema.properties?.intent
 			? withTestIntent(client)
@@ -891,7 +906,7 @@ describe("chatgpt surface", () => {
 				status: parseResult(
 					await client.callTool({ name: "connection_status", arguments: {} }),
 				),
-				description: (await client.listTools()).tools.find(
+				description: (await listTools(client)).tools.find(
 					(tool) => tool.name === "connection_status",
 				)?.description,
 				instructions: client.getInstructions(),
@@ -1019,7 +1034,7 @@ describe("chatgpt surface", () => {
 				fetch: fakeFetch().fetch,
 				principal: principalFixture({ principalType: "user", accountId: null }),
 			});
-			const { tools } = await client.listTools();
+			const { tools } = await listTools(client);
 			return {
 				instructions: client.getInstructions(),
 				tools,
@@ -1065,7 +1080,7 @@ describe("chatgpt surface", () => {
 				fetch: fakeFetch().fetch,
 				principal: principalFixture({ principalType: "user", accountId: null }),
 			});
-			const { tools } = await client.listTools();
+			const { tools } = await listTools(client);
 			return {
 				instructions: client.getInstructions(),
 				names: tools.map((tool) => tool.name),
@@ -1159,7 +1174,7 @@ describe("chatgpt surface", () => {
 			includeIntent: false,
 			principal: principalFixture({ principalType: "user", accountId: null }),
 		});
-		const { tools } = await client.listTools();
+		const { tools } = await listTools(client);
 		expect(JSON.stringify(tools)).not.toContain("intent_id");
 		expect(client.getInstructions()).not.toContain("intent_id");
 
@@ -1236,7 +1251,7 @@ describe("direct execution and policy hooks", () => {
 			principal: principalFixture(),
 			fetch: fakeFetch().fetch,
 		});
-		const { tools } = await client.listTools();
+		const { tools } = await listTools(client);
 		const refund = tools.find((t) => t.name === "payments_refund")!;
 		const properties = Object.keys(
 			(refund.inputSchema as { properties: Record<string, unknown> })
@@ -1272,7 +1287,7 @@ describe("direct execution and policy hooks", () => {
 			nativeOnly: true,
 			fetch: fakeFetch().fetch,
 		});
-		const { tools } = await client.listTools();
+		const { tools } = await listTools(client);
 		const nativeBusinessOps = registry.operations.filter(
 			(op) => op.surface === "native" && op.principals.includes("business"),
 		);
@@ -1326,7 +1341,7 @@ describe("lists that need a business for a user token", () => {
 		async (name) => {
 			const { fetch, requests } = fakeFetch();
 			const client = await connect({ principal: userPrincipal, fetch });
-			const tool = (await client.listTools()).tools.find(
+			const tool = (await listTools(client)).tools.find(
 				(candidate) => candidate.name === name,
 			);
 			expect(tool?.inputSchema.required).toContain("account_id");
@@ -1335,7 +1350,7 @@ describe("lists that need a business for a user token", () => {
 				await client.callTool({ name, arguments: {} }),
 			);
 			expect(JSON.stringify(missing)).toContain("account_required");
-			expect(JSON.stringify(missing)).toContain("accounts_list");
+			expect(JSON.stringify(missing)).toContain(listedName("accounts_list"));
 			expect(requests).toHaveLength(0);
 
 			const result = await client.callTool({

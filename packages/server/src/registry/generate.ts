@@ -168,6 +168,34 @@ export function groupNameForTag(tag: string): string {
 	return tag.toLowerCase().replace(/\s+/g, "-");
 }
 
+const VERB_NAME_SYNONYMS: Record<string, string> = { retrieve: "get" };
+const UNCOUNTED_NOUN =
+	/(s|people|history|media|activity|feed|data|series|analytics|intelligence)$/;
+
+function plural(word: string): string {
+	if (UNCOUNTED_NOUN.test(word)) return word;
+	return word.endsWith("y") ? `${word.slice(0, -1)}ies` : `${word}s`;
+}
+
+/**
+ * The verb-first tool name the hosted routes list (`list_payments`), read from
+ * the OpenAPI operationId (`listPayments`). Lists are always plural, since
+ * some operationIds name the collection in the singular (`listCourse`).
+ * operation-overrides.yml's `verbName` replaces it where the operationId reads
+ * badly or doesn't say what the operation does.
+ */
+export function inferVerbName(openapiOperationId: string): string {
+	const [verb = "", ...rest] = openapiOperationId
+		.replace(/([a-z0-9])([A-Z])/g, "$1_$2")
+		.replace(/-/g, "_")
+		.toLowerCase()
+		.split("_");
+	const words = [VERB_NAME_SYNONYMS[verb] ?? verb, ...rest];
+	const last = words.length - 1;
+	if (words[0] === "list" && last > 0) words[last] = plural(words[last] ?? "");
+	return words.join("_");
+}
+
 export interface SafetyRule {
 	name: string;
 	match: {
@@ -191,6 +219,7 @@ export interface OperationOverride {
 	requiresAccount?: boolean;
 	listedSchemaOmit?: string[];
 	listedSchemaOnly?: string[];
+	verbName?: string;
 }
 
 export interface ScopeDefinition {
@@ -645,6 +674,7 @@ function buildOperation(
 
 	return sortKeys({
 		toolName,
+		verbName: override?.verbName ?? inferVerbName(openapiOperationId),
 		openapiOperationId,
 		method,
 		path,
@@ -826,6 +856,22 @@ export function buildRegistry(
 		}
 		seenToolNames.set(operation.toolName, key);
 		operations.push(operation);
+	}
+
+	// Routes that list verb names still answer to the registry names, so the two
+	// share one namespace.
+	const nameOwners = new Map(
+		operations.map((op) => [op.toolName, operationKey(op.method, op.path)]),
+	);
+	for (const operation of operations) {
+		const key = operationKey(operation.method, operation.path);
+		const owner = nameOwners.get(operation.verbName);
+		if (owner && owner !== key) {
+			fail(
+				`Tool name "${operation.verbName}" from ${key} is already used by ${owner}. Set a verbName for one of them in operation-overrides.yml.`,
+			);
+		}
+		nameOwners.set(operation.verbName, key);
 	}
 
 	const exposedKeys = new Set(

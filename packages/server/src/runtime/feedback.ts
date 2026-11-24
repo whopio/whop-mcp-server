@@ -7,6 +7,7 @@ import {
 import type { Dispatcher } from "./dispatcher.ts";
 import { redactText } from "./errors.ts";
 import type { McpRequestContext } from "./mcp-context.ts";
+import { REGISTRY_NAMING, type ToolNaming } from "./tool-names.ts";
 
 export interface FeedbackSubmission {
 	id: string;
@@ -70,55 +71,60 @@ const annotations = {
 	openWorldHint: true,
 };
 
-export const FEEDBACK_TOOLS: ToolDefinition[] = [
-	{
-		name: "report_feedback",
-		description:
-			"Report a problem with Whop or these tools (wrong result, confusing error, docs gap, odd API behavior) for Whop engineers to review. One per call. Returns a receipt only; nothing comes back. Never include credentials, secrets, personal data or payment details.",
-		inputSchema: {
-			type: "object",
-			properties: {
-				content: contentProperty(
-					"products_update cannot set a post-checkout redirect for prod_abc123, though checkout-configurations_create has redirect_url.",
-				),
-				...commonProperties,
-				severity: {
-					type: "string",
-					enum: ["blocked", "degraded", "cosmetic"],
-					description:
-						"Impact: blocked (could not finish), degraded (needed a slower path) or cosmetic (worked but confusing).",
+function feedbackDefinitions(naming: ToolNaming): ToolDefinition[] {
+	const n = naming.name;
+	return [
+		{
+			name: "report_feedback",
+			description:
+				"Report a problem with Whop or these tools (wrong result, confusing error, docs gap, odd API behavior) for Whop engineers to review. One per call. Returns a receipt only; nothing comes back. Never include credentials, secrets, personal data or payment details.",
+			inputSchema: {
+				type: "object",
+				properties: {
+					content: contentProperty(
+						`${n("products_update")} cannot set a post-checkout redirect for prod_abc123, though ${n("checkout-configurations_create")} has redirect_url.`,
+					),
+					...commonProperties,
+					severity: {
+						type: "string",
+						enum: ["blocked", "degraded", "cosmetic"],
+						description:
+							"Impact: blocked (could not finish), degraded (needed a slower path) or cosmetic (worked but confusing).",
+					},
+					workaround: {
+						type: "string",
+						minLength: 1,
+						maxLength: 4000,
+						pattern: "\\S",
+						description: "What worked instead, if anything.",
+					},
 				},
-				workaround: {
-					type: "string",
-					minLength: 1,
-					maxLength: 4000,
-					pattern: "\\S",
-					description: "What worked instead, if anything.",
+				required: ["content"],
+				additionalProperties: false,
+			},
+			annotations,
+		},
+		{
+			name: "ask_question",
+			description:
+				"Record a question about Whop the tools and docs could not answer, for Whop's internal review. Returns a receipt only: no answer will ever come back, so do not wait or ask again. Never include credentials, secrets, personal data or payment details.",
+			inputSchema: {
+				type: "object",
+				properties: {
+					content: contentProperty(
+						"Can a plan renew at a different price than it started at? The plans docs only cover new purchases.",
+					),
+					...commonProperties,
 				},
+				required: ["content"],
+				additionalProperties: false,
 			},
-			required: ["content"],
-			additionalProperties: false,
+			annotations,
 		},
-		annotations,
-	},
-	{
-		name: "ask_question",
-		description:
-			"Record a question about Whop the tools and docs could not answer, for Whop's internal review. Returns a receipt only: no answer will ever come back, so do not wait or ask again. Never include credentials, secrets, personal data or payment details.",
-		inputSchema: {
-			type: "object",
-			properties: {
-				content: contentProperty(
-					"Can a plan renew at a different price than it started at? The plans docs only cover new purchases.",
-				),
-				...commonProperties,
-			},
-			required: ["content"],
-			additionalProperties: false,
-		},
-		annotations,
-	},
-];
+	];
+}
+
+export const FEEDBACK_TOOLS = feedbackDefinitions(REGISTRY_NAMING);
 
 type FeedbackAttribution = { clientName?: string; pluginSource?: string };
 
@@ -126,8 +132,9 @@ export function feedbackTools(
 	dispatcher: Dispatcher,
 	principal: PrincipalContext,
 	attribution: FeedbackAttribution,
+	naming: ToolNaming,
 ): BuiltinTool[] {
-	return FEEDBACK_TOOLS.map((definition) => ({
+	return feedbackDefinitions(naming).map((definition) => ({
 		definition,
 		asksForIntent: true,
 		call: async (args, _signal, mcpRequestContext) =>

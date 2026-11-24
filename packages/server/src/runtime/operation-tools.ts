@@ -1,4 +1,5 @@
 import type { JsonSchema, OperationDef } from "../registry/types.ts";
+import type { CalledAs } from "../safety/audit.ts";
 import {
 	type BuiltinTool,
 	type ToolDefinition,
@@ -6,6 +7,7 @@ import {
 } from "./builtin-tool.ts";
 import { WhopMcpError } from "./errors.ts";
 import type { McpRequestContext } from "./mcp-context.ts";
+import { calledAs, operationsByName, type ToolNaming } from "./tool-names.ts";
 
 export const SEARCH_OPERATIONS_TOOL = "search_operations";
 export const DESCRIBE_OPERATION_TOOL = "describe_operation";
@@ -16,11 +18,17 @@ export type OperationCallVia =
 	| typeof CALL_READ_OPERATION_TOOL
 	| typeof CALL_WRITE_OPERATION_TOOL;
 
+/** How the client reached an operation, as its audit event records it. */
+export interface OperationCall {
+	calledAs: CalledAs;
+	via?: OperationCallVia;
+}
+
 export type OperationExecutor = (
 	operation: OperationDef,
 	args: Record<string, unknown>,
 	mcpRequestContext: McpRequestContext | undefined,
-	via: OperationCallVia,
+	call: OperationCall,
 ) => Promise<unknown>;
 
 const DEFAULT_SEARCH_LIMIT = 10;
@@ -153,7 +161,10 @@ function indexOperation(operation: OperationDef): IndexedOperation {
 	return {
 		operation,
 		fields: {
-			name: new Set(tokenize(operation.toolName)),
+			name: new Set([
+				...tokenize(operation.toolName),
+				...tokenize(operation.verbName),
+			]),
 			group: new Set(tokenize(operation.group)),
 			summary: new Set(tokenize(operation.summary)),
 			path: new Set(tokenize(operation.path)),
@@ -185,9 +196,9 @@ function score(entry: IndexedOperation, terms: string[][]): number {
 	return total;
 }
 
-function operationSummary(operation: OperationDef) {
+function operationSummary(operation: OperationDef, naming: ToolNaming) {
 	return {
-		name: operation.toolName,
+		name: naming.name(operation.toolName),
 		summary: operation.summary ?? null,
 		method: operation.method.toUpperCase(),
 		path: operation.path,
@@ -199,22 +210,30 @@ function operationSummary(operation: OperationDef) {
 	};
 }
 
-function operationDetail(operation: OperationDef, inputSchema: JsonSchema) {
+function operationDetail(
+	operation: OperationDef,
+	inputSchema: JsonSchema,
+	naming: ToolNaming,
+) {
 	return {
-		...operationSummary(operation),
-		description: operation.description ?? null,
+		...operationSummary(operation, naming),
+		description:
+			operation.description === undefined
+				? null
+				: naming.inText(operation.description),
 		input_schema: inputSchema,
 	};
 }
 
-const NAME_PROPERTY: JsonSchema = {
-	type: "string",
-	minLength: 1,
-	maxLength: 200,
-	pattern: "\\S",
-	description:
-		"The operation name, exactly as search_operations returned it (for example payouts_list).",
-};
+function nameProperty(naming: ToolNaming): JsonSchema {
+	return {
+		type: "string",
+		minLength: 1,
+		maxLength: 200,
+		pattern: "\\S",
+		description: `The operation name, exactly as search_operations returned it (for example ${naming.name("payouts_list")}).`,
+	};
+}
 
 function searchDescription(operationCount: number, readOnly: boolean): string {
 	if (readOnly) {
@@ -255,29 +274,34 @@ const SEARCH_DEFINITION: ToolDefinition = {
 	},
 };
 
-const DESCRIBE_DEFINITION: ToolDefinition = {
-	name: DESCRIBE_OPERATION_TOOL,
-	description:
-		"Returns one Whop operation's description, input schema and safety hints, including fields that listed tools leave out. Use it before calling an operation whose inputs you have not seen.",
-	inputSchema: {
-		type: "object",
-		properties: { name: NAME_PROPERTY },
-		required: ["name"],
-		additionalProperties: false,
-	},
-	annotations: {
-		title: "Describe a Whop operation",
-		readOnlyHint: true,
-		destructiveHint: false,
-		idempotentHint: true,
-		openWorldHint: false,
-	},
-};
+function describeDefinition(naming: ToolNaming): ToolDefinition {
+	return {
+		name: DESCRIBE_OPERATION_TOOL,
+		description:
+			"Returns one Whop operation's description, input schema and safety hints, including fields that listed tools leave out. Use it before calling an operation whose inputs you have not seen.",
+		inputSchema: {
+			type: "object",
+			properties: { name: nameProperty(naming) },
+			required: ["name"],
+			additionalProperties: false,
+		},
+		annotations: {
+			title: "Describe a Whop operation",
+			readOnlyHint: true,
+			destructiveHint: false,
+			idempotentHint: true,
+			openWorldHint: false,
+		},
+	};
+}
 
-function callDefinition(via: OperationCallVia): ToolDefinition {
+function callDefinition(
+	via: OperationCallVia,
+	naming: ToolNaming,
+): ToolDefinition {
 	const write = via === CALL_WRITE_OPERATION_TOOL;
 	const properties: Record<string, JsonSchema> = {
-		name: NAME_PROPERTY,
+		name: nameProperty(naming),
 		arguments: {
 			type: "object",
 			description:
@@ -324,9 +348,8 @@ export function operationTools(
 	visibleOperations: OperationDef[],
 	execute: OperationExecutor,
 	inputSchemaFor: (operation: OperationDef) => JsonSchema,
-	options: { readOnly?: boolean } = {},
+	{ readOnly, naming }: { readOnly: boolean; naming: ToolNaming },
 ): BuiltinTool[] {
-	const readOnly = options.readOnly ?? false;
 	const searchable = readOnly
 		? visibleOperations.filter((op) => op.annotations.readOnlyHint)
 		: visibleOperations;
@@ -334,8 +357,9 @@ export function operationTools(
 		...SEARCH_DEFINITION,
 		description: searchDescription(searchable.length, readOnly),
 	};
+	const describe = describeDefinition(naming);
 	const index = searchable.map(indexOperation);
-	const byName = new Map(visibleOperations.map((op) => [op.toolName, op]));
+	const byName = operationsByName(visibleOperations);
 
 	function lookup(name: string): OperationDef {
 		const operation = byName.get(name);
@@ -349,14 +373,15 @@ export function operationTools(
 	}
 
 	function callTool(via: OperationCallVia): BuiltinTool {
-		const definition = callDefinition(via);
+		const definition = callDefinition(via, naming);
 		const write = via === CALL_WRITE_OPERATION_TOOL;
 		return {
 			definition,
 			asksForIntent: true,
 			call: async (args, _signal, mcpRequestContext) => {
 				validateToolArgs(definition, args);
-				const operation = lookup(args.name as string);
+				const name = args.name as string;
+				const operation = lookup(name);
 				if (operation.annotations.readOnlyHint === write) {
 					const other = write
 						? CALL_READ_OPERATION_TOOL
@@ -380,7 +405,7 @@ export function operationTools(
 						...mcpRequestContext,
 						toolName: operation.toolName,
 					},
-					via,
+					{ calledAs: calledAs(operation, name), via },
 				);
 				return JSON.stringify(result, null, 2);
 			},
@@ -420,8 +445,9 @@ export function operationTools(
 							? operationDetail(
 									entry.operation,
 									inputSchemaFor(entry.operation),
+									naming,
 								)
-							: operationSummary(entry.operation),
+							: operationSummary(entry.operation, naming),
 					);
 				return JSON.stringify(
 					matches.length
@@ -437,12 +463,12 @@ export function operationTools(
 			},
 		},
 		{
-			definition: DESCRIBE_DEFINITION,
+			definition: describe,
 			call: async (args) => {
-				validateToolArgs(DESCRIBE_DEFINITION, args);
+				validateToolArgs(describe, args);
 				const operation = lookup(args.name as string);
 				return JSON.stringify(
-					operationDetail(operation, inputSchemaFor(operation)),
+					operationDetail(operation, inputSchemaFor(operation), naming),
 					null,
 					2,
 				);

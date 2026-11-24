@@ -1,4 +1,5 @@
 import type { OperationDef } from "../registry/types.ts";
+import type { ToolNaming } from "./tool-names.ts";
 import {
 	CALL_READ_OPERATION_TOOL,
 	CALL_WRITE_OPERATION_TOOL,
@@ -16,12 +17,14 @@ export interface ToolReach {
 	writes: ReadonlySet<string>;
 	/** Operations that aren't listed but run through an operation tool. */
 	bySearch: ReadonlyMap<string, CallVia>;
+	naming: ToolNaming;
 }
 
 export function toolReach(
 	operations: readonly OperationDef[],
 	listedOperations: readonly OperationDef[],
 	builtinNames: Iterable<string>,
+	naming: ToolNaming,
 ): ToolReach {
 	const builtins = new Set(builtinNames);
 	const listed = new Set([
@@ -41,7 +44,7 @@ export function toolReach(
 			: CALL_WRITE_OPERATION_TOOL;
 		if (builtins.has(via)) bySearch.set(op.toolName, via);
 	}
-	return { listed, writes, bySearch };
+	return { listed, writes, bySearch, naming };
 }
 
 export function canReach(reach: ToolReach, tool: string): boolean {
@@ -63,11 +66,12 @@ export class ToolNamer {
 
 	name = (tool: string): string => {
 		const code = (text: string) => (this.markdown ? `\`${text}\`` : text);
-		if (this.reach.listed.has(tool)) return code(tool);
+		const shown = code(this.reach.naming.name(tool));
+		if (this.reach.listed.has(tool)) return shown;
 		const via = this.reach.bySearch.get(tool);
-		if (!via) return `${code(tool)} (not available on this connection)`;
+		if (!via) return `${shown} (not available on this connection)`;
 		this.vias.add(via);
-		return `${code(tool)} (through ${code(via)})`;
+		return `${shown} (through ${code(via)})`;
 	};
 
 	/** Appends how to run the unlisted tools the text named, if it named any. */
