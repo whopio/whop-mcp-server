@@ -26584,6 +26584,7 @@
               "payment_unreconciled_clearing",
               "payment_unreconciled_reversal",
               "settlement_shortfall_loss",
+              "psp_error_loss",
               "fx_settlement_gain_loss",
               "settlement_rounding_variance",
               "psp_payout_settlement",
@@ -51592,6 +51593,14 @@
               "null"
             ]
           },
+          "suspension_explanation_markdown": {
+            "description": "The same sentence as `suspension_explanation`, with each link kept as Markdown, such as `[community guidelines](https://whop.com/guidelines)`. `null` when `suspension_explanation` is `null`.",
+            "example": "The email we sent you explains why.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "suspension_reason": {
             "description": "Sentence shown to the account holder for this suspension, such as `We cannot support your business due to fraudulent activity.` It is in the request's locale. A personal account suspended without a current `suspension_code` can show the reason it was given at the time. `null` when the account is not suspended.",
             "example": "We cannot support your business.",
@@ -51607,6 +51616,7 @@
           "suspended_at",
           "suspension_reason",
           "suspension_explanation",
+          "suspension_explanation_markdown",
           "suspension_code",
           "platform_name",
           "suspension_country",
@@ -116177,6 +116187,7 @@
                               "psp_dispute_fee",
                               "psp_dispute_management_fee",
                               "psp_dispute_payable",
+                              "psp_error_loss",
                               "psp_external_account_connection_fee",
                               "psp_fixed_fee",
                               "psp_fx_adjustment",
