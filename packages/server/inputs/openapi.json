@@ -164186,7 +164186,7 @@
                                   "properties": {
                                     "name": {
                                       "description": "The property value, for example usd or visa.",
-                                      "example": "success",
+                                      "example": "visa",
                                       "type": "string"
                                     },
                                     "steps": {
@@ -164198,7 +164198,7 @@
                                     },
                                     "value": {
                                       "description": "The metric's value for this entry.",
-                                      "example": 5,
+                                      "example": 150.0,
                                       "nullable": true,
                                       "type": "number"
                                     }
@@ -164333,7 +164333,7 @@
                                           "properties": {
                                             "name": {
                                               "description": "The property value, for example usd or visa.",
-                                              "example": "success",
+                                              "example": "visa",
                                               "type": "string"
                                             },
                                             "steps": {
@@ -164345,7 +164345,7 @@
                                             },
                                             "value": {
                                               "description": "The metric's value for this entry.",
-                                              "example": 5,
+                                              "example": 150.0,
                                               "nullable": true,
                                               "type": "number"
                                             }
