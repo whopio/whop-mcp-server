@@ -196,7 +196,7 @@
           },
           "business_type": {
             "description": "High-level business category for the account. See the [business types and industries glossary](/api-reference/accounts/account#business-types-and-industries-glossary) for valid values.",
-            "example": "software",
+            "example": "services",
             "type": [
               "string",
               "null"
@@ -359,7 +359,7 @@
           },
           "industry_type": {
             "description": "Specific industry vertical for the account. See the [business types and industries glossary](/api-reference/accounts/account#business-types-and-industries-glossary) for valid values.",
-            "example": "trading",
+            "example": "car_detailing",
             "type": [
               "string",
               "null"
@@ -540,8 +540,8 @@
             "description": "Tax classification code applied by default to the account's products, with `id`, `name`, and `product_type`. `null` when no default is set.",
             "example": {
               "id": "ptc_xxxxxxxxxxxxxx",
-              "name": "General - Digital Goods",
-              "product_type": "digital"
+              "name": "Services",
+              "product_type": "services"
             },
             "type": [
               "object",
@@ -4920,7 +4920,7 @@
           },
           "title": {
             "description": "Account display name.",
-            "example": "Acme Bookkeeping",
+            "example": "Second Account",
             "type": "string"
           }
         },
@@ -7942,7 +7942,7 @@
               },
               "name": {
                 "description": "The display name set on the user's Whop profile. Null if the user has not set a name.",
-                "example": "Jane Smith",
+                "example": "Dana Whitfield",
                 "type": [
                   "string",
                   "null"
@@ -7950,7 +7950,7 @@
               },
               "username": {
                 "description": "The unique username chosen by the user for their Whop profile. Null if the user has not set a username.",
-                "example": "janesmith",
+                "example": "danawhitfield",
                 "type": [
                   "string",
                   "null"
@@ -8094,7 +8094,7 @@
               },
               "name": {
                 "description": "The display name set on the user's Whop profile. Null if the user has not set a name.",
-                "example": "Jane Smith",
+                "example": "Dana Whitfield",
                 "type": [
                   "string",
                   "null"
@@ -8102,7 +8102,7 @@
               },
               "username": {
                 "description": "The unique username chosen by the user for their Whop profile. Null if the user has not set a username.",
-                "example": "janesmith",
+                "example": "danawhitfield",
                 "type": [
                   "string",
                   "null"
@@ -9635,7 +9635,7 @@
           },
           "external_id": {
             "description": "Your app's own identifier for this installation, such as the ID of the linked account in another system, or `null` when none is set. At most 255 characters and unique across your app's installations, so you can find an installation with `GET /app_installations?external_id=`; setting one another installation already has returns a `409`. Only the app and its developer see it; for the account the app is installed on it is always `null`.",
-            "example": "acme-books",
+            "example": "shine-time-austin",
             "type": [
               "string",
               "null"
@@ -10319,7 +10319,7 @@
               },
               "title": {
                 "description": "The display name of the company shown to customers.",
-                "example": "Pickaxe",
+                "example": "Shine Time Auto Detailing",
                 "type": "string"
               }
             },
@@ -10356,7 +10356,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -10364,7 +10364,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -10398,7 +10398,7 @@
               },
               "title": {
                 "description": "The display name of the company shown to customers.",
-                "example": "Pickaxe",
+                "example": "Shine Time Auto Detailing",
                 "type": "string"
               }
             },
@@ -10435,7 +10435,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -10443,7 +10443,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -10992,7 +10992,7 @@
           },
           "html": {
             "description": "The email's HTML, with Whop's footer. Its unsubscribe link is a placeholder until the email is sent. `null` unless an `email` step sends.",
-            "example": "<html><body><p>Hi there</p><table role=\"presentation\" data-whop-footer width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:32px 0 0;border-top:1px solid #e6e6e6;\">\n<tr><td style=\"padding:20px 16px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#6f6f6f;\">\n<p style=\"margin:0 0 8px;\">You&#39;re receiving this because you bought from Batman1. <a href=\"{{whop_unsubscribe_url}}\" style=\"color:#6f6f6f;text-decoration:underline;\">Unsubscribe from Batman1 marketing communications</a>.</p>\n<p style=\"margin:0 0 8px;\">Problem with your order? <a href=\"https://whop.com/@me/settings/resolution-center/\" style=\"color:#6f6f6f;text-decoration:underline;\">Open a case in the Resolution Center</a>.</p>\n<p style=\"margin:0;font-weight:600;color:#9a9a9a;\">Sent with Whop</p>\n<!--whop:open-pixel-->\n</td></tr>\n</table>\n\n</body></html>",
+            "example": "<html><body><p>Hi there</p><table role=\"presentation\" data-whop-footer width=\"100%\" cellpadding=\"0\" cellspacing=\"0\" style=\"margin:32px 0 0;border-top:1px solid #e6e6e6;\">\n<tr><td style=\"padding:20px 16px;text-align:center;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:18px;color:#6f6f6f;\">\n<p style=\"margin:0 0 8px;\">You&#39;re receiving this because you bought from Shine Time Auto Detailing. <a href=\"{{whop_unsubscribe_url}}\" style=\"color:#6f6f6f;text-decoration:underline;\">Unsubscribe from Shine Time Auto Detailing marketing communications</a>.</p>\n<p style=\"margin:0 0 8px;\">Problem with your order? <a href=\"https://whop.com/@me/settings/resolution-center/\" style=\"color:#6f6f6f;text-decoration:underline;\">Open a case in the Resolution Center</a>.</p>\n<p style=\"margin:0;font-weight:600;color:#9a9a9a;\">Sent with Whop</p>\n<!--whop:open-pixel-->\n</td></tr>\n</table>\n\n</body></html>",
             "type": [
               "string",
               "null"
@@ -11026,7 +11026,7 @@
           },
           "subject": {
             "description": "The email's subject. `null` unless an `email` step sends.",
-            "example": "How's the kettle?",
+            "example": "How is your ceramic coating?",
             "type": [
               "string",
               "null"
@@ -11034,7 +11034,7 @@
           },
           "text": {
             "description": "The message as plain text: the message on a `message` step, or the email's plain-text version with Whop's footer. `null` unless the step sends.",
-            "example": "Hi there\n\n--\nYou're receiving this because you bought from Batman1. Unsubscribe from Batman1 marketing communications: {{whop_unsubscribe_url}}\nProblem with your order? Open a case in the Resolution Center: https://whop.com/@me/settings/resolution-center/\nSent with Whop",
+            "example": "Hi there\n\n--\nYou're receiving this because you bought from Shine Time Auto Detailing. Unsubscribe from Shine Time Auto Detailing marketing communications: {{whop_unsubscribe_url}}\nProblem with your order? Open a case in the Resolution Center: https://whop.com/@me/settings/resolution-center/\nSent with Whop",
             "type": [
               "string",
               "null"
@@ -12987,7 +12987,7 @@
           },
           "merchant_name": {
             "description": "The enriched or raw name of the merchant where the purchase was made.",
-            "example": "Acme Corporation",
+            "example": "Lone Star Detail Supply",
             "type": [
               "string",
               "null"
@@ -13137,7 +13137,7 @@
           },
           "merchant_name": {
             "description": "The enriched or raw name of the merchant where the purchase was made.",
-            "example": "Acme Corporation",
+            "example": "Lone Star Detail Supply",
             "type": [
               "string",
               "null"
@@ -13240,7 +13240,7 @@
           },
           "description": {
             "description": "Optional description of the cashback rule.",
-            "example": "Cloud cashback",
+            "example": "Detailing equipment cashback",
             "type": [
               "string",
               "null"
@@ -13282,7 +13282,7 @@
           },
           "merchant_name": {
             "description": "Raw merchant name reported by the card provider. Null matches any merchant name. When set, matches together with any MCC filter; not a substring or enriched display-name match.",
-            "example": "ACME CLOUD",
+            "example": "AUSTIN DETAIL SUPPLY",
             "type": [
               "string",
               "null"
@@ -14809,7 +14809,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -14817,7 +14817,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -14935,7 +14935,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -14943,7 +14943,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -15151,7 +15151,7 @@
                       },
                       "title": {
                         "description": "The display name of the lesson shown to students. Maximum 120 characters.",
-                        "example": "Understanding Candlestick Patterns",
+                        "example": "Preparing Paint for Ceramic Coating",
                         "type": "string"
                       },
                       "video_asset": {
@@ -15250,7 +15250,7 @@
           },
           "description": {
             "description": "A brief summary of the course content and objectives. Null if no description has been set.",
-            "example": "Learn advanced trading strategies from industry experts.",
+            "example": "Learn paint correction and ceramic coating techniques from experienced detailers.",
             "type": [
               "string",
               "null"
@@ -15334,7 +15334,7 @@
           },
           "tagline": {
             "description": "A short marketing tagline displayed beneath the course title. Null if no tagline has been set.",
-            "example": "Master the fundamentals in 30 days",
+            "example": "Learn to protect a showroom finish",
             "type": [
               "string",
               "null"
@@ -15394,7 +15394,7 @@
           },
           "title": {
             "description": "The display name of the course shown to students. Null if no title has been set.",
-            "example": "Introduction to Technical Analysis",
+            "example": "Introduction to Ceramic Coating",
             "type": [
               "string",
               "null"
@@ -15473,7 +15473,7 @@
                 },
                 "title": {
                   "description": "The display name of the lesson shown to students. Maximum 120 characters.",
-                  "example": "Understanding Candlestick Patterns",
+                  "example": "Preparing Paint for Ceramic Coating",
                   "type": "string"
                 }
               },
@@ -15711,7 +15711,7 @@
           },
           "content": {
             "description": "The Markdown content body of the lesson. Null if the lesson has no text content.",
-            "example": "In this lesson, we will cover the basics of technical analysis...",
+            "example": "In this lesson, we will cover washing, decontamination, and paint preparation before ceramic coating.",
             "type": [
               "string",
               "null"
@@ -15829,7 +15829,7 @@
           },
           "title": {
             "description": "The display name of the lesson shown to students. Maximum 120 characters.",
-            "example": "Understanding Candlestick Patterns",
+            "example": "Preparing Paint for Ceramic Coating",
             "type": "string"
           },
           "video_asset": {
@@ -15995,7 +15995,7 @@
               },
               "title": {
                 "description": "The display name of the course shown to students. Null if no title has been set.",
-                "example": "Introduction to Technical Analysis",
+                "example": "Introduction to Ceramic Coating",
                 "type": [
                   "string",
                   "null"
@@ -16044,7 +16044,7 @@
               },
               "title": {
                 "description": "The display name of the lesson shown to students. Maximum 120 characters.",
-                "example": "Understanding Candlestick Patterns",
+                "example": "Preparing Paint for Ceramic Coating",
                 "type": "string"
               }
             },
@@ -16065,7 +16065,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -16073,7 +16073,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -16137,7 +16137,7 @@
               },
               "title": {
                 "description": "The display name of the lesson shown to students. Maximum 120 characters.",
-                "example": "Understanding Candlestick Patterns",
+                "example": "Preparing Paint for Ceramic Coating",
                 "type": "string"
               }
             },
@@ -16158,7 +16158,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -16166,7 +16166,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -16192,7 +16192,7 @@
         "properties": {
           "content": {
             "description": "The Markdown content body of the lesson. Null if the lesson has no text content.",
-            "example": "In this lesson, we will cover the basics of technical analysis...",
+            "example": "In this lesson, we will cover washing, decontamination, and paint preparation before ceramic coating.",
             "type": [
               "string",
               "null"
@@ -16267,7 +16267,7 @@
           },
           "title": {
             "description": "The display name of the lesson shown to students. Maximum 120 characters.",
-            "example": "Understanding Candlestick Patterns",
+            "example": "Preparing Paint for Ceramic Coating",
             "type": "string"
           },
           "visibility": {
@@ -16326,7 +16326,7 @@
           },
           "description": {
             "description": "A brief summary of the course content and objectives. Null if no description has been set.",
-            "example": "Learn advanced trading strategies from industry experts.",
+            "example": "Learn paint correction and ceramic coating techniques from experienced detailers.",
             "type": [
               "string",
               "null"
@@ -16410,7 +16410,7 @@
           },
           "tagline": {
             "description": "A short marketing tagline displayed beneath the course title. Null if no tagline has been set.",
-            "example": "Master the fundamentals in 30 days",
+            "example": "Learn to protect a showroom finish",
             "type": [
               "string",
               "null"
@@ -16470,7 +16470,7 @@
           },
           "title": {
             "description": "The display name of the course shown to students. Null if no title has been set.",
-            "example": "Introduction to Technical Analysis",
+            "example": "Introduction to Ceramic Coating",
             "type": [
               "string",
               "null"
@@ -16560,7 +16560,7 @@
               },
               "title": {
                 "description": "The display name of the course shown to students. Null if no title has been set.",
-                "example": "Introduction to Technical Analysis",
+                "example": "Introduction to Ceramic Coating",
                 "type": [
                   "string",
                   "null"
@@ -16605,7 +16605,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -16633,7 +16633,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -16702,7 +16702,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -16730,7 +16730,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -17676,7 +17676,7 @@
                   },
                   "name": {
                     "description": "The user's display name shown on their public profile.",
-                    "example": "John Doe",
+                    "example": "Marcus Webb",
                     "type": [
                       "string",
                       "null"
@@ -17684,7 +17684,7 @@
                   },
                   "username": {
                     "description": "The user's unique username shown on their public profile.",
-                    "example": "johndoe42",
+                    "example": "marcuswebb",
                     "type": "string"
                   }
                 },
@@ -18488,7 +18488,7 @@
           },
           "customer_name": {
             "description": "The customer's full name from their payment details, included in the evidence packet sent to the payment processor. Editable before submission.",
-            "example": "Jane Doe",
+            "example": "Dana Whitfield",
             "type": [
               "string",
               "null"
@@ -18517,7 +18517,7 @@
           },
           "notes": {
             "description": "Additional freeform notes submitted by the company as part of the dispute evidence.",
-            "example": "Customer used the product for 3 months before disputing.",
+            "example": "The ceramic coating was completed and the vehicle collected before the dispute.",
             "type": [
               "string",
               "null"
@@ -18764,7 +18764,7 @@
                   },
                   "name": {
                     "description": "The user's display name shown on their public profile.",
-                    "example": "John Doe",
+                    "example": "Marcus Webb",
                     "type": [
                       "string",
                       "null"
@@ -18772,7 +18772,7 @@
                   },
                   "username": {
                     "description": "The user's unique username shown on their public profile.",
-                    "example": "johndoe42",
+                    "example": "marcuswebb",
                     "type": "string"
                   }
                 },
@@ -18838,7 +18838,7 @@
               },
               "title": {
                 "description": "The display name of the product shown to customers on the product page and in search results.",
-                "example": "Pickaxe Analytics",
+                "example": "Ceramic Coating Package",
                 "type": "string"
               }
             },
@@ -18853,7 +18853,7 @@
           },
           "product_description": {
             "description": "A description of the product or service provided, submitted as dispute evidence.",
-            "example": "Monthly subscription to premium analytics dashboard.",
+            "example": "Monthly membership for maintenance washes and interior vacuuming.",
             "type": [
               "string",
               "null"
@@ -19211,7 +19211,7 @@
               },
               "title": {
                 "description": "The display name of the product shown to customers on the product page and in search results.",
-                "example": "Pickaxe Analytics",
+                "example": "Ceramic Coating Package",
                 "type": "string"
               }
             },
@@ -20997,7 +20997,7 @@
               },
               "title": {
                 "description": "The display name of the product shown to customers on the product page and in search results.",
-                "example": "Pickaxe Analytics",
+                "example": "Ceramic Coating Package",
                 "type": "string"
               }
             },
@@ -21032,7 +21032,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -21040,7 +21040,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -21129,12 +21129,12 @@
               },
               "route": {
                 "description": "URL slug for the account's store page. For example, `pickaxe` in whop.com/pickaxe.",
-                "example": "pickaxe",
+                "example": "shine-time-auto-detailing",
                 "type": "string"
               },
               "title": {
                 "description": "The display name of the company shown to customers.",
-                "example": "Pickaxe",
+                "example": "Shine Time Auto Detailing",
                 "type": "string"
               }
             },
@@ -21182,7 +21182,7 @@
           },
           "name": {
             "description": "The display name of this experience shown to users in the product navigation. Maximum 255 characters.",
-            "example": "Trading Signals Chat",
+            "example": "Detailing Tips Chat",
             "type": "string"
           },
           "order": {
@@ -21204,13 +21204,13 @@
                   "type": "string"
                 },
                 "route": {
-                  "description": "URL slug in the product's public link, e.g. `pickaxe-analytics` in whop.com/company/pickaxe-analytics.",
-                  "example": "pickaxe-analytics",
+                  "description": "URL slug in the product's public link, e.g. `ceramic-coating-package` in whop.com/company/ceramic-coating-package.",
+                  "example": "ceramic-coating-package",
                   "type": "string"
                 },
                 "title": {
                   "description": "The display name of the product shown to customers on the product page and in search results.",
-                  "example": "Pickaxe Analytics",
+                  "example": "Ceramic Coating Package",
                   "type": "string"
                 }
               },
@@ -21299,12 +21299,12 @@
               },
               "route": {
                 "description": "URL slug for the account's store page. For example, `pickaxe` in whop.com/pickaxe.",
-                "example": "pickaxe",
+                "example": "shine-time-auto-detailing",
                 "type": "string"
               },
               "title": {
                 "description": "The display name of the company shown to customers.",
-                "example": "Pickaxe",
+                "example": "Shine Time Auto Detailing",
                 "type": "string"
               }
             },
@@ -21352,7 +21352,7 @@
           },
           "name": {
             "description": "The display name of this experience shown to users in the product navigation. Maximum 255 characters.",
-            "example": "Trading Signals Chat",
+            "example": "Detailing Tips Chat",
             "type": "string"
           },
           "order": {
@@ -21486,7 +21486,7 @@
           },
           "hypothesis": {
             "description": "Hypothesis for this experiment. `null` when none is set, and always `null` for feature flags.",
-            "example": "Users will convert more",
+            "example": "Showing ceramic coating photos will increase detailing bookings",
             "nullable": true,
             "type": "string"
           },
@@ -23258,7 +23258,7 @@
               },
               "name": {
                 "description": "The display name of this experience shown to users in the product navigation. Maximum 255 characters.",
-                "example": "Trading Signals Chat",
+                "example": "Detailing Tips Chat",
                 "type": "string"
               }
             },
@@ -23323,7 +23323,7 @@
               },
               "name": {
                 "description": "The display name of this experience shown to users in the product navigation. Maximum 255 characters.",
-                "example": "Trading Signals Chat",
+                "example": "Detailing Tips Chat",
                 "type": "string"
               }
             },
@@ -23410,7 +23410,7 @@
           },
           "content": {
             "description": "The body of the forum post in Markdown format. Null if the post is paywalled and the current user does not have access.",
-            "example": "## My Strategy\n\nHere are the key steps...",
+            "example": "## Ceramic Coating Care\n\nHere are the key steps...",
             "type": [
               "string",
               "null"
@@ -23455,7 +23455,7 @@
           },
           "title": {
             "description": "The headline of the forum post. Null if the post has no title.",
-            "example": "Weekly Market Analysis - February 2025",
+            "example": "Ceramic Coating Care - February 2025",
             "type": [
               "string",
               "null"
@@ -23477,7 +23477,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -23485,7 +23485,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -23577,7 +23577,7 @@
           },
           "content": {
             "description": "The body of the forum post in Markdown format. Null if the post is paywalled and the current user does not have access.",
-            "example": "## My Strategy\n\nHere are the key steps...",
+            "example": "## Ceramic Coating Care\n\nHere are the key steps...",
             "type": [
               "string",
               "null"
@@ -23622,7 +23622,7 @@
           },
           "title": {
             "description": "The headline of the forum post. Null if the post has no title.",
-            "example": "Weekly Market Analysis - February 2025",
+            "example": "Ceramic Coating Care - February 2025",
             "type": [
               "string",
               "null"
@@ -23644,7 +23644,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -23652,7 +23652,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -24135,7 +24135,7 @@
                 },
                 "title": {
                   "description": "The display name of the company shown to customers.",
-                  "example": "Pickaxe",
+                  "example": "Shine Time Auto Detailing",
                   "type": "string"
                 }
               },
@@ -24461,7 +24461,7 @@
                 },
                 "title": {
                   "description": "The display name of the company shown to customers.",
-                  "example": "Pickaxe",
+                  "example": "Shine Time Auto Detailing",
                   "type": "string"
                 }
               },
@@ -25134,7 +25134,7 @@
               },
               "title": {
                 "description": "The display name of the company shown to customers.",
-                "example": "Pickaxe",
+                "example": "Shine Time Auto Detailing",
                 "type": "string"
               }
             },
@@ -25168,7 +25168,7 @@
               },
               "description": {
                 "description": "A text description of the plan visible to customers. Maximum 1000 characters. Null if no description is set.",
-                "example": "Monthly access to all premium analytics dashboards and data exports.",
+                "example": "Monthly maintenance washes, interior vacuuming, and a quarterly sealant top-up.",
                 "type": [
                   "string",
                   "null"
@@ -25222,7 +25222,7 @@
           },
           "customer_name": {
             "description": "The full name of the customer this invoice is addressed to. Null if no name is on file.",
-            "example": "Jane Doe",
+            "example": "Dana Whitfield",
             "type": [
               "string",
               "null"
@@ -25431,7 +25431,7 @@
               },
               "title": {
                 "description": "The display name of the product shown to customers on the product page and in search results.",
-                "example": "Pickaxe Analytics",
+                "example": "Ceramic Coating Package",
                 "type": "string"
               }
             },
@@ -25478,7 +25478,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -25486,7 +25486,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -25840,7 +25840,7 @@
                   },
                   "name": {
                     "description": "The user's display name shown on their public profile.",
-                    "example": "John Doe",
+                    "example": "Marcus Webb",
                     "type": [
                       "string",
                       "null"
@@ -25853,7 +25853,7 @@
                   },
                   "username": {
                     "description": "The user's unique username shown on their public profile.",
-                    "example": "johndoe42",
+                    "example": "marcuswebb",
                     "type": "string"
                   }
                 },
@@ -25879,12 +25879,12 @@
                   },
                   "route": {
                     "description": "URL slug for the account's store page. For example, `pickaxe` in whop.com/pickaxe.",
-                    "example": "pickaxe",
+                    "example": "shine-time-auto-detailing",
                     "type": "string"
                   },
                   "title": {
                     "description": "The display name of the company shown to customers.",
-                    "example": "Pickaxe",
+                    "example": "Shine Time Auto Detailing",
                     "type": "string"
                   },
                   "typename": {
@@ -27933,7 +27933,7 @@
               },
               "title": {
                 "description": "The display name of the company shown to customers.",
-                "example": "Pickaxe",
+                "example": "Shine Time Auto Detailing",
                 "type": "string"
               }
             },
@@ -27967,7 +27967,7 @@
               },
               "description": {
                 "description": "A text description of the plan visible to customers. Maximum 1000 characters. Null if no description is set.",
-                "example": "Monthly access to all premium analytics dashboards and data exports.",
+                "example": "Monthly maintenance washes, interior vacuuming, and a quarterly sealant top-up.",
                 "type": [
                   "string",
                   "null"
@@ -28021,7 +28021,7 @@
           },
           "customer_name": {
             "description": "The full name of the customer this invoice is addressed to. Null if no name is on file.",
-            "example": "Jane Doe",
+            "example": "Dana Whitfield",
             "type": [
               "string",
               "null"
@@ -28230,7 +28230,7 @@
               },
               "title": {
                 "description": "The display name of the product shown to customers on the product page and in search results.",
-                "example": "Pickaxe Analytics",
+                "example": "Ceramic Coating Package",
                 "type": "string"
               }
             },
@@ -28277,7 +28277,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -28285,7 +28285,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -28454,7 +28454,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -28462,7 +28462,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -28623,7 +28623,7 @@
           },
           "title": {
             "description": "Display title of the livestream. `Untitled Livestream` when the host did not set one.",
-            "example": "Live edit: blue hour",
+            "example": "Live detail: ceramic coating",
             "type": "string"
           }
         },
@@ -28711,7 +28711,7 @@
         "properties": {
           "content": {
             "description": "Message text, with whitespace collapsed and cut to at most 280 characters.",
-            "example": "how do I get these presets??",
+            "example": "How do I book a ceramic coating?",
             "type": "string"
           },
           "id": {
@@ -28721,7 +28721,7 @@
           },
           "user_name": {
             "description": "Display name of the person who sent the message. `null` when their account no longer exists.",
-            "example": "Maya Chen",
+            "example": "Dana Whitfield",
             "type": [
               "string",
               "null"
@@ -28739,7 +28739,7 @@
         "properties": {
           "description": {
             "description": "One sentence on what happened and how chat reacted, in at most 140 characters.",
-            "example": "Elena showed her new preset pack and chat asked how to get it.",
+            "example": "Marcus demonstrated a ceramic coating and answered questions about booking a detail.",
             "type": "string"
           },
           "end_offset_seconds": {
@@ -28758,7 +28758,7 @@
           },
           "title": {
             "description": "What happened on stream, in at most 60 characters.",
-            "example": "Elena reveals the blue hour preset pack",
+            "example": "Marcus demonstrates the ceramic coating process",
             "type": "string"
           }
         },
@@ -30348,7 +30348,7 @@
               },
               "title": {
                 "description": "The display name of the company shown to customers.",
-                "example": "Pickaxe",
+                "example": "Shine Time Auto Detailing",
                 "type": "string"
               }
             },
@@ -30565,7 +30565,7 @@
               },
               "title": {
                 "description": "The display name of the product shown to customers on the product page and in search results.",
-                "example": "Pickaxe Analytics",
+                "example": "Ceramic Coating Package",
                 "type": "string"
               }
             },
@@ -30639,7 +30639,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -30651,7 +30651,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -30765,7 +30765,7 @@
               },
               "title": {
                 "description": "The display name of the company shown to customers.",
-                "example": "Pickaxe",
+                "example": "Shine Time Auto Detailing",
                 "type": "string"
               }
             },
@@ -30954,7 +30954,7 @@
               },
               "title": {
                 "description": "The display name of the product shown to customers on the product page and in search results.",
-                "example": "Pickaxe Analytics",
+                "example": "Ceramic Coating Package",
                 "type": "string"
               }
             },
@@ -31028,7 +31028,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -31040,7 +31040,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -31337,7 +31337,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -31345,7 +31345,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -31668,7 +31668,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -31676,7 +31676,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -33431,7 +33431,7 @@
         "properties": {
           "display_name": {
             "description": "The account's name, or its email address when it has none, for passkey pickers that show one.",
-            "example": "Jack Sharkey the 1st",
+            "example": "Marcus Webb",
             "type": "string"
           },
           "id": {
@@ -34365,7 +34365,7 @@
           },
           "name": {
             "description": "Name on the payment method.",
-            "example": "Buyer Name",
+            "example": "Dana Whitfield",
             "type": [
               "string",
               "null"
@@ -34851,7 +34851,7 @@
                   },
                   "description": {
                     "description": "Product description.",
-                    "example": "Quoted, then sent with the payment.",
+                    "example": "Two-stage paint correction with a three-year ceramic coating.",
                     "type": [
                       "string",
                       "null"
@@ -34885,7 +34885,7 @@
                   },
                   "headline": {
                     "description": "Product headline.",
-                    "example": "Product headline",
+                    "example": "A showroom finish that lasts three years",
                     "type": [
                       "string",
                       "null"
@@ -34900,7 +34900,7 @@
                   },
                   "redirect_purchase_url": {
                     "description": "Where to redirect the buyer after purchase.",
-                    "example": "https://example.com/thanks",
+                    "example": "https://shinetime.example/thanks",
                     "type": [
                       "string",
                       "null"
@@ -34915,7 +34915,7 @@
                   },
                   "title": {
                     "description": "Product title.",
-                    "example": "Quoted again",
+                    "example": "Ceramic Coating Package",
                     "pattern": "\\S",
                     "type": "string"
                   },
@@ -35577,7 +35577,7 @@
                 },
                 "notes": {
                   "description": "Additional freeform notes submitted by the company as part of the dispute evidence.",
-                  "example": "Customer used the product for 3 months before disputing.",
+                  "example": "The ceramic coating was completed and the vehicle collected before the dispute.",
                   "type": [
                     "string",
                     "null"
@@ -36160,13 +36160,13 @@
                 ]
               },
               "route": {
-                "description": "URL slug in the product's public link, e.g. `pickaxe-analytics` in whop.com/company/pickaxe-analytics.",
-                "example": "pickaxe-analytics",
+                "description": "URL slug in the product's public link, e.g. `ceramic-coating-package` in whop.com/company/ceramic-coating-package.",
+                "example": "ceramic-coating-package",
                 "type": "string"
               },
               "title": {
                 "description": "The display name of the product shown to customers on the product page and in search results.",
-                "example": "Pickaxe Analytics",
+                "example": "Ceramic Coating Package",
                 "type": "string"
               }
             },
@@ -36632,7 +36632,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -36640,7 +36640,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -37660,13 +37660,13 @@
                 ]
               },
               "route": {
-                "description": "URL slug in the product's public link, e.g. `pickaxe-analytics` in whop.com/company/pickaxe-analytics.",
-                "example": "pickaxe-analytics",
+                "description": "URL slug in the product's public link, e.g. `ceramic-coating-package` in whop.com/company/ceramic-coating-package.",
+                "example": "ceramic-coating-package",
                 "type": "string"
               },
               "title": {
                 "description": "The display name of the product shown to customers on the product page and in search results.",
-                "example": "Pickaxe Analytics",
+                "example": "Ceramic Coating Package",
                 "type": "string"
               }
             },
@@ -37959,7 +37959,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -37967,7 +37967,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -44563,8 +44563,8 @@
             "description": "Tax classification code for this product, or `null` if no tax code is set.",
             "example": {
               "id": "ptc_xxxxxxxxxxxxxx",
-              "name": "General - Digital Goods",
-              "product_type": "digital"
+              "name": "Services",
+              "product_type": "services"
             },
             "type": [
               "object",
@@ -44742,7 +44742,7 @@
           },
           "name": {
             "description": "Display name.",
-            "example": "Jack Sharkey the 2nd",
+            "example": "Dana Whitfield",
             "type": [
               "string",
               "null"
@@ -44754,7 +44754,7 @@
           },
           "username": {
             "description": "Public username.",
-            "example": "random-username-2-xxxxxxxx",
+            "example": "danawhitfield",
             "type": "string"
           }
         },
@@ -44869,12 +44869,12 @@
               },
               "route": {
                 "description": "URL slug for the account's store page. For example, `pickaxe` in whop.com/pickaxe.",
-                "example": "pickaxe",
+                "example": "shine-time-auto-detailing",
                 "type": "string"
               },
               "title": {
                 "description": "The display name of the company shown to customers.",
-                "example": "Pickaxe",
+                "example": "Shine Time Auto Detailing",
                 "type": "string"
               }
             },
@@ -44897,7 +44897,7 @@
           },
           "custom_cta_url": {
             "description": "An optional URL that the call-to-action button links to instead of the default checkout flow. Null if no custom URL is set.",
-            "example": "https://example.com/signup",
+            "example": "https://shinetime.example/book",
             "type": [
               "string",
               "null"
@@ -44905,7 +44905,7 @@
           },
           "custom_statement_descriptor": {
             "description": "Custom bank statement descriptor for product purchases. Maximum 22 characters, including required `WHOP*` prefix.",
-            "example": "PICKAXE",
+            "example": "SHINE",
             "type": [
               "string",
               "null"
@@ -44913,7 +44913,7 @@
           },
           "description": {
             "description": "A brief summary of what the product offers, displayed on product pages and search results.",
-            "example": "Track your revenue, members, and growth in real time.",
+            "example": "Two-stage paint correction, a three-year ceramic coating, and sealed wheel faces.",
             "type": [
               "string",
               "null"
@@ -44976,7 +44976,7 @@
           },
           "headline": {
             "description": "A short marketing headline displayed prominently on the product's product page.",
-            "example": "Real-time data analytics for creators",
+            "example": "A showroom finish that lasts three years",
             "type": [
               "string",
               "null"
@@ -45022,7 +45022,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -45030,7 +45030,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -45050,8 +45050,8 @@
                 "type": "string"
               },
               "name": {
-                "description": "Human-readable name of this tax classification, such as 'Digital - SaaS'.",
-                "example": "Digital - SaaS",
+                "description": "Human-readable name of this tax classification, such as 'Services'.",
+                "example": "Services",
                 "type": "string"
               },
               "product_type": {
@@ -45075,13 +45075,13 @@
             "type": "integer"
           },
           "route": {
-            "description": "URL slug in the product's public link, e.g. `pickaxe-analytics` in whop.com/company/pickaxe-analytics.",
-            "example": "pickaxe-analytics",
+            "description": "URL slug in the product's public link, e.g. `ceramic-coating-package` in whop.com/company/ceramic-coating-package.",
+            "example": "ceramic-coating-package",
             "type": "string"
           },
           "title": {
             "description": "The display name of the product shown to customers on the product page and in search results.",
-            "example": "Pickaxe Analytics",
+            "example": "Ceramic Coating Package",
             "type": "string"
           },
           "updated_at": {
@@ -45164,7 +45164,7 @@
           },
           "description": {
             "description": "Written description displayed on the product page. `null` if none is set.",
-            "example": "empower rich infrastructures",
+            "example": "A cotton tee for Unlimited Wash Club members.",
             "type": [
               "string",
               "null"
@@ -45194,7 +45194,7 @@
           },
           "headline": {
             "description": "Short marketing headline displayed on product page.",
-            "example": "thought leadership",
+            "example": "customer journey",
             "type": [
               "string",
               "null"
@@ -45425,7 +45425,7 @@
           },
           "amount_off": {
             "description": "Discount amount. Percentage discounts are represented as a decimal fraction.",
-            "example": 0.25,
+            "example": 0.1,
             "type": "number"
           },
           "churned_users_only": {
@@ -45435,7 +45435,7 @@
           },
           "code": {
             "description": "Code entered at checkout.",
-            "example": "affiliate25",
+            "example": "welcome",
             "type": [
               "string",
               "null"
@@ -45600,7 +45600,7 @@
           },
           "promo_duration_months": {
             "description": "Billing intervals the discount applies to.",
-            "example": 3,
+            "example": 1,
             "type": [
               "integer",
               "null"
@@ -45627,7 +45627,7 @@
           },
           "stock": {
             "description": "Maximum uses when stock is limited.",
-            "example": 200,
+            "example": 25,
             "type": "integer"
           },
           "unlimited_stock": {
@@ -45642,7 +45642,7 @@
           },
           "uses": {
             "description": "Memberships that used the promo code.",
-            "example": 0,
+            "example": 1,
             "type": "integer"
           }
         },
@@ -45699,7 +45699,7 @@
           },
           "name": {
             "description": "Display name of the affiliate.",
-            "example": "Jack Sharkey the 3rd",
+            "example": "Dana Whitfield",
             "type": [
               "string",
               "null"
@@ -45712,7 +45712,7 @@
           },
           "username": {
             "description": "Public username of the affiliate.",
-            "example": "newpromoaffiliate",
+            "example": "danawhitfield",
             "type": [
               "string",
               "null"
@@ -45997,7 +45997,7 @@
           },
           "title": {
             "description": "Product display name.",
-            "example": "Ceramic Coating Package",
+            "example": "Ceramic Coating Masterclass",
             "type": "string"
           }
         },
@@ -46166,7 +46166,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -46174,7 +46174,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -46224,7 +46224,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -46232,7 +46232,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -46475,7 +46475,7 @@
           },
           "title": {
             "description": "What the action does, written for the account owner.",
-            "example": "Lead your home page with member results",
+            "example": "Lead your home page with before and after detailing photos",
             "type": "string"
           },
           "type": {
@@ -46774,7 +46774,7 @@
           },
           "title": {
             "description": "One sentence for the account owner about what the step changes, such as `Add a one-time wash button in the hero`.",
-            "example": "Put the Pro bundle package on sale through the website",
+            "example": "Offer the Ceramic Coating Package on the website",
             "type": "string"
           }
         },
@@ -47255,7 +47255,7 @@
                   },
                   "name": {
                     "description": "The user's display name shown on their public profile.",
-                    "example": "John Doe",
+                    "example": "Marcus Webb",
                     "type": [
                       "string",
                       "null"
@@ -47263,7 +47263,7 @@
                   },
                   "username": {
                     "description": "The user's unique username shown on their public profile.",
-                    "example": "johndoe42",
+                    "example": "marcuswebb",
                     "type": "string"
                   }
                 },
@@ -47913,7 +47913,7 @@
               },
               "title": {
                 "description": "The display name of the company shown to customers.",
-                "example": "Pickaxe",
+                "example": "Shine Time Auto Detailing",
                 "type": "string"
               }
             },
@@ -48117,7 +48117,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -48125,7 +48125,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -48170,7 +48170,7 @@
               },
               "title": {
                 "description": "The display name of the company shown to customers.",
-                "example": "Pickaxe",
+                "example": "Shine Time Auto Detailing",
                 "type": "string"
               }
             },
@@ -48263,7 +48263,7 @@
               },
               "name": {
                 "description": "The user's display name shown on their public profile.",
-                "example": "John Doe",
+                "example": "Marcus Webb",
                 "type": [
                   "string",
                   "null"
@@ -48271,7 +48271,7 @@
               },
               "username": {
                 "description": "The user's unique username shown on their public profile.",
-                "example": "johndoe42",
+                "example": "marcuswebb",
                 "type": "string"
               }
             },
@@ -49096,7 +49096,7 @@
           },
           "title": {
             "description": "Record name, such as a customer's name or a promo code. Display text in your locale that can change without a version change, so show it rather than parse it. `null` when the record has no name.",
-            "example": "Dana Ortiz",
+            "example": "Marcus Webb",
             "type": [
               "string",
               "null"
@@ -49231,7 +49231,7 @@
           },
           "description": {
             "description": "Short text about the record, such as an account's headline or a case's reason. Display text in your locale that can change without a version change. `null` when there's none.",
-            "example": "Dana Ortiz",
+            "example": "Marcus Webb",
             "type": [
               "string",
               "null"
@@ -49287,7 +49287,7 @@
           },
           "title": {
             "description": "Record name, such as a customer's name or a promo code. Display text in your locale that can change without a version change, so show it rather than parse it. `null` when the record has no name.",
-            "example": "Dana Ortiz - Ceramic Coating Masterclass",
+            "example": "Marcus Webb - Ceramic Coating Masterclass",
             "type": [
               "string",
               "null"
@@ -55518,7 +55518,7 @@
           },
           "title": {
             "description": "Product display name.",
-            "example": "Persevering actuating local...",
+            "example": "Ceramic Coating Package",
             "type": "string"
           }
         },
@@ -55570,7 +55570,7 @@
           },
           "title": {
             "description": "Variant display name shown to customers. `null` if no title has been set.",
-            "example": null,
+            "example": "Unlimited Wash Club",
             "type": [
               "string",
               "null"
@@ -56428,7 +56428,7 @@
           },
           "url": {
             "description": "Destination URL where webhook payloads are delivered via HTTP POST.",
-            "example": "https://example.com/shine-time/whop",
+            "example": "https://shinetime.example/whop",
             "type": "string"
           },
           "webhook_secret": {
@@ -63455,7 +63455,7 @@
                           "type": "array"
                         },
                         "ssn": {
-                          "description": "The founder's US Social Security Number. Leave empty if the founder is not a US resident. Non-US founders can request expedited EIN processing via the `expedite_ein` option.",
+                          "description": "The founder's US Social Security Number. Leave empty if the founder is not a US resident. Non-Austin ceramic coating customers can request expedited EIN processing via the `expedite_ein` option.",
                           "example": "123-45-6789",
                           "type": "string"
                         }
@@ -86203,7 +86203,7 @@
                 "properties": {
                   "description": {
                     "description": "Optional description of the rule.",
-                    "example": "Software cashback",
+                    "example": "Detailing supplies cashback",
                     "maxLength": 255,
                     "type": [
                       "string",
@@ -86230,7 +86230,7 @@
                   },
                   "merchant_name": {
                     "description": "Raw merchant name reported by the card provider, not the enriched display name. Omit or set null to match any merchant name. Supplied names must contain a non-whitespace character and match together with any MCC filter.",
-                    "example": "ACME SOFTWARE",
+                    "example": "LONE STAR DETAIL SUPPLY",
                     "maxLength": 128,
                     "minLength": 1,
                     "type": [
@@ -86601,7 +86601,7 @@
                 "properties": {
                   "description": {
                     "description": "Description of the rule. Set null to clear it.",
-                    "example": "Cloud cashback",
+                    "example": "Detailing equipment cashback",
                     "maxLength": 255,
                     "type": [
                       "string",
@@ -86630,7 +86630,7 @@
                   },
                   "merchant_name": {
                     "description": "Raw merchant name reported by the card provider. Set null to match any merchant name. Supplied names must contain a non-whitespace character and match together with any MCC filter. Clearing both filters requires an existing scoped_account_id.",
-                    "example": "ACME CLOUD",
+                    "example": "AUSTIN DETAIL SUPPLY",
                     "maxLength": 128,
                     "minLength": 1,
                     "type": [
@@ -98142,7 +98142,7 @@
                         },
                         "title": {
                           "description": "The display name of the lesson shown to students. Maximum 120 characters.",
-                          "example": "Understanding Candlestick Patterns",
+                          "example": "Preparing Paint for Ceramic Coating",
                           "type": "string"
                         }
                       },
@@ -98197,7 +98197,7 @@
                         },
                         "name": {
                           "description": "The user's display name shown on their public profile.",
-                          "example": "John Doe",
+                          "example": "Marcus Webb",
                           "type": [
                             "string",
                             "null"
@@ -98205,7 +98205,7 @@
                         },
                         "username": {
                           "description": "The user's unique username shown on their public profile.",
-                          "example": "johndoe42",
+                          "example": "marcuswebb",
                           "type": "string"
                         }
                       },
@@ -111171,7 +111171,7 @@
                   },
                   "hypothesis": {
                     "description": "Required for full experiments; rejected on feature flags. Structure it as \"If we [change] for [cohort], then [measurable behavior] will [increase/decrease], resulting in [business outcome], because [evidence]. Created by [name].\" Evidence should be something real — a baseline number, a funnel breakdown — not a guess, and [name] is you, not something to leave blank.",
-                    "example": "If we send a blueprint nudge email 30 minutes after business creation, then GTV within 10 hours will increase among newly created businesses, resulting in more new business operators generating GTV within 10 hours, because operators currently land on an empty dashboard with no concrete next step. Created by Jane Doe.",
+                    "example": "If we show before and after detailing photos to Austin drivers, then ceramic coating bookings will increase. Customers can see the finish before choosing a package. Created by Marcus Webb.",
                     "nullable": true,
                     "type": "string"
                   },
@@ -111486,7 +111486,7 @@
                   },
                   "hypothesis": {
                     "description": "Omit to leave unchanged. Send an empty string to clear it. Not accepted on feature flags. When setting it, structure it as \"If we [change] for [cohort], then [measurable behavior] will [increase/decrease], resulting in [business outcome], because [evidence]. Created by [name].\" same as on create.",
-                    "example": "If we send a blueprint nudge email 30 minutes after business creation, then GTV within 10 hours will increase among newly created businesses, resulting in more new business operators generating GTV within 10 hours, because operators currently land on an empty dashboard with no concrete next step. Created by Jane Doe.",
+                    "example": "If we show before and after detailing photos to Austin drivers, then ceramic coating bookings will increase. Customers can see the finish before choosing a package. Created by Marcus Webb.",
                     "nullable": true,
                     "type": "string"
                   },
@@ -123213,7 +123213,7 @@
                             },
                             "redirect_url": {
                               "description": "Where the customer is sent after paying for this variant. Must be a valid URL that is not another Whop checkout link.",
-                              "example": " https://example.com/thanks ",
+                              "example": " https://shinetime.example/thanks ",
                               "type": [
                                 "string",
                                 "null"
@@ -123995,7 +123995,7 @@
                             },
                             "redirect_url": {
                               "description": "Where the customer is sent after paying for this variant. Must be a valid URL that is not another Whop checkout link.",
-                              "example": " https://example.com/thanks ",
+                              "example": " https://shinetime.example/thanks ",
                               "type": [
                                 "string",
                                 "null"
@@ -126614,13 +126614,13 @@
                   },
                   "email": {
                     "description": "The email address of the person to add. If no Whop user has it, one is created.",
-                    "example": "jane@example.com",
+                    "example": "dana@shinetime.example",
                     "format": "email",
                     "type": "string"
                   },
                   "name": {
                     "description": "The name of the person to add. Ignored when a user on Whop already exists for this email address.",
-                    "example": "Jane Doe",
+                    "example": "Dana Whitfield",
                     "type": "string"
                   }
                 },
@@ -145686,7 +145686,7 @@
                                 "type": "string"
                               },
                               "email": {
-                                "example": "jane.doe@example.com",
+                                "example": "dana@shinetime.example",
                                 "format": "email",
                                 "type": "string"
                               },
@@ -146167,12 +146167,12 @@
                       },
                       "first_name": {
                         "description": "Recipient's first name, at most 120 UTF-8 bytes. The trimmed full name, including a space between the names, must be at most 100 characters and cannot contain angle brackets or double quotes.",
-                        "example": "Jane",
+                        "example": "Dana",
                         "type": "string"
                       },
                       "last_name": {
                         "description": "Recipient's last name, at most 120 UTF-8 bytes. The combined full name follows the same 100-character limit as a Whop user name.",
-                        "example": "Doe",
+                        "example": "Whitfield",
                         "type": "string"
                       }
                     },
@@ -146351,16 +146351,16 @@
                           "type": "string"
                         },
                         "email": {
-                          "example": "jane.doe@example.com",
+                          "example": "dana@shinetime.example",
                           "format": "email",
                           "type": "string"
                         },
                         "first_name": {
-                          "example": "Jane",
+                          "example": "Dana",
                           "type": "string"
                         },
                         "last_name": {
-                          "example": "Doe",
+                          "example": "Whitfield",
                           "type": "string"
                         }
                       },
@@ -146837,7 +146837,7 @@
                           "type": "string"
                         },
                         "email": {
-                          "example": "jane.doe@example.com",
+                          "example": "dana@shinetime.example",
                           "format": "email",
                           "type": "string"
                         },
@@ -156391,7 +156391,7 @@
                             "traffic_percent": 50,
                             "type": "website_ab_test"
                           },
-                          "reasoning": "Visitors who reach your pricing section buy at 4.1%, but 62% leave the home page before they scroll to it. Moving member results above the fold shows the payoff first.",
+                          "reasoning": "Visitors who reach your pricing section buy at 4.1%, but 62% leave the home page before they scroll to it. Showing before and after detailing photos first helps drivers see the finish.",
                           "run_by_user_id": null,
                           "run_ended_at": null,
                           "run_started_at": null,
@@ -156408,7 +156408,7 @@
                               }
                             }
                           ],
-                          "title": "Lead your home page with member results",
+                          "title": "Lead your home page with before and after detailing photos",
                           "type": "improve_landing_page",
                           "updated_at": "2026-11-17T05:14:02.907Z",
                           "workflow": {
@@ -156422,7 +156422,7 @@
                                 "error": null,
                                 "operation": "updatePlan",
                                 "status": "pending",
-                                "title": "Put the Starter bundle package on sale through the website"
+                                "title": "Offer the Interior Deep Clean package on the website"
                               },
                               {
                                 "arguments": {
@@ -156432,7 +156432,7 @@
                                 "error": null,
                                 "operation": "updatePlan",
                                 "status": "pending",
-                                "title": "Put the Pro bundle package on sale through the website"
+                                "title": "Offer the Ceramic Coating Package on the website"
                               },
                               {
                                 "arguments": {
@@ -156450,7 +156450,7 @@
                                   "metadata": {
                                     "page_paths": "/"
                                   },
-                                  "name": "Lead your home page with member results",
+                                  "name": "Lead your home page with before and after detailing photos",
                                   "related_resource": {
                                     "id": "app_Wq81LmZr0aXk",
                                     "object": "app"
@@ -156625,7 +156625,7 @@
                         "traffic_percent": 50,
                         "type": "website_ab_test"
                       },
-                      "reasoning": "Visitors who reach your pricing section buy at 4.1%, but 62% leave the home page before they scroll to it. Moving member results above the fold shows the payoff first.",
+                      "reasoning": "Visitors who reach your pricing section buy at 4.1%, but 62% leave the home page before they scroll to it. Showing before and after detailing photos first helps drivers see the finish.",
                       "run_by_user_id": null,
                       "run_ended_at": null,
                       "run_started_at": null,
@@ -156642,7 +156642,7 @@
                           }
                         }
                       ],
-                      "title": "Lead your home page with member results",
+                      "title": "Lead your home page with before and after detailing photos",
                       "type": "improve_landing_page",
                       "updated_at": "2026-11-17T05:14:02.907Z",
                       "workflow": {
@@ -156656,7 +156656,7 @@
                             "error": null,
                             "operation": "updatePlan",
                             "status": "pending",
-                            "title": "Put the Starter bundle package on sale through the website"
+                            "title": "Offer the Interior Deep Clean package on the website"
                           },
                           {
                             "arguments": {
@@ -156666,7 +156666,7 @@
                             "error": null,
                             "operation": "updatePlan",
                             "status": "pending",
-                            "title": "Put the Pro bundle package on sale through the website"
+                            "title": "Offer the Ceramic Coating Package on the website"
                           },
                           {
                             "arguments": {
@@ -156684,7 +156684,7 @@
                               "metadata": {
                                 "page_paths": "/"
                               },
-                              "name": "Lead your home page with member results",
+                              "name": "Lead your home page with before and after detailing photos",
                               "related_resource": {
                                 "id": "app_Wq81LmZr0aXk",
                                 "object": "app"
@@ -156830,7 +156830,7 @@
                             },
                             "title": {
                               "description": "The step's title. It can't be changed.",
-                              "example": "Put the Starter bundle package on sale through the website",
+                              "example": "Offer the Interior Deep Clean package on the website",
                               "type": "string"
                             }
                           },
@@ -156951,7 +156951,7 @@
                         "traffic_percent": 50,
                         "type": "website_ab_test"
                       },
-                      "reasoning": "Visitors who reach your pricing section buy at 4.1%, but 62% leave the home page before they scroll to it. Moving member results above the fold shows the payoff first.",
+                      "reasoning": "Visitors who reach your pricing section buy at 4.1%, but 62% leave the home page before they scroll to it. Showing before and after detailing photos first helps drivers see the finish.",
                       "run_by_user_id": null,
                       "run_ended_at": null,
                       "run_started_at": null,
@@ -156968,7 +156968,7 @@
                           }
                         }
                       ],
-                      "title": "Lead your home page with member results",
+                      "title": "Lead your home page with before and after detailing photos",
                       "type": "improve_landing_page",
                       "updated_at": "2026-11-17T15:40:27.006Z",
                       "workflow": {
@@ -156982,7 +156982,7 @@
                             "error": null,
                             "operation": "updatePlan",
                             "status": "pending",
-                            "title": "Put the Starter bundle package on sale through the website"
+                            "title": "Offer the Interior Deep Clean package on the website"
                           },
                           {
                             "arguments": {
@@ -156992,7 +156992,7 @@
                             "error": null,
                             "operation": "updatePlan",
                             "status": "pending",
-                            "title": "Put the Pro bundle package on sale through the website"
+                            "title": "Offer the Ceramic Coating Package on the website"
                           },
                           {
                             "arguments": {
@@ -157010,7 +157010,7 @@
                               "metadata": {
                                 "page_paths": "/"
                               },
-                              "name": "Lead your home page with member results",
+                              "name": "Lead your home page with before and after detailing photos",
                               "related_resource": {
                                 "id": "app_Wq81LmZr0aXk",
                                 "object": "app"
@@ -157147,7 +157147,7 @@
                         "traffic_percent": 50,
                         "type": "website_ab_test"
                       },
-                      "reasoning": "Visitors who reach your pricing section buy at 4.1%, but 62% leave the home page before they scroll to it. Moving member results above the fold shows the payoff first.",
+                      "reasoning": "Visitors who reach your pricing section buy at 4.1%, but 62% leave the home page before they scroll to it. Showing before and after detailing photos first helps drivers see the finish.",
                       "run_by_user_id": "user_Hn4kP0sQ2wEr",
                       "run_ended_at": null,
                       "run_started_at": "2026-11-17T15:02:11.540Z",
@@ -157164,7 +157164,7 @@
                           }
                         }
                       ],
-                      "title": "Lead your home page with member results",
+                      "title": "Lead your home page with before and after detailing photos",
                       "type": "improve_landing_page",
                       "updated_at": "2026-11-17T15:02:11.540Z",
                       "workflow": {
@@ -157178,7 +157178,7 @@
                             "error": null,
                             "operation": "updatePlan",
                             "status": "succeeded",
-                            "title": "Put the Starter bundle package on sale through the website"
+                            "title": "Offer the Interior Deep Clean package on the website"
                           },
                           {
                             "arguments": {
@@ -157188,7 +157188,7 @@
                             "error": null,
                             "operation": "updatePlan",
                             "status": "running",
-                            "title": "Put the Pro bundle package on sale through the website"
+                            "title": "Offer the Ceramic Coating Package on the website"
                           },
                           {
                             "arguments": {
@@ -157206,7 +157206,7 @@
                               "metadata": {
                                 "page_paths": "/"
                               },
-                              "name": "Lead your home page with member results",
+                              "name": "Lead your home page with before and after detailing photos",
                               "related_resource": {
                                 "id": "app_Wq81LmZr0aXk",
                                 "object": "app"
@@ -165815,17 +165815,17 @@
                       },
                       "business_description": {
                         "description": "What the business sells and what customers receive. Optional with a video. Must contain at least 30 words if provided.",
-                        "example": "answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer",
+                        "example": "Shine Time Auto Detailing provides mobile ceramic coating, paint correction, and interior cleaning for drivers in Austin. Customers choose a package, book an appointment, and receive a completed vehicle detail with before and after photos.",
                         "type": "string"
                       },
                       "business_fulfillment": {
                         "description": "How purchases are delivered and customers supported. Optional with a video. Must contain at least 30 words if provided.",
-                        "example": "answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer",
+                        "example": "We record each booking with the customer name, vehicle, scheduled arrival time, and selected detailing package. After the work is complete, we send before and after photos and a receipt, then confirm collection with the customer.",
                         "type": "string"
                       },
                       "business_remediation": {
                         "description": "Optional explanation of why the suspension should be reconsidered and what changed. Must contain at least 30 words if provided.",
-                        "example": "answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer answer",
+                        "example": "We reviewed every disputed appointment and contacted the affected customers to confirm whether their detailing service was completed. We refunded missed bookings, updated arrival reminders, and now retain signed completion records and photos for every ceramic coating job.",
                         "type": "string"
                       },
                       "evidence_file_ids": {
@@ -179982,7 +179982,7 @@
                   },
                   "url": {
                     "description": "The URL to send the webhook to.",
-                    "example": "https://example.com/shine-time/whop-updated",
+                    "example": "https://shinetime.example/whop-updated",
                     "type": "string"
                   }
                 },
@@ -187202,8 +187202,8 @@
                     "updated_at": "2023-12-01T05:00:00.401Z",
                     "user": {
                       "id": "user_xxxxxxxxxxxxx",
-                      "name": "John Doe",
-                      "username": "johndoe42"
+                      "name": "Marcus Webb",
+                      "username": "marcuswebb"
                     },
                     "view_count": 42
                   },
@@ -187459,8 +187459,8 @@
                     "updated_at": "2023-12-01T05:00:00.401Z",
                     "user": {
                       "id": "user_xxxxxxxxxxxxx",
-                      "name": "John Doe",
-                      "username": "johndoe42"
+                      "name": "Marcus Webb",
+                      "username": "marcuswebb"
                     },
                     "view_count": 42
                   },
@@ -187470,8 +187470,8 @@
                     "resource_id": "some_string",
                     "user": {
                       "id": "user_xxxxxxxxxxxxx",
-                      "name": "John Doe",
-                      "username": "johndoe42"
+                      "name": "Marcus Webb",
+                      "username": "marcuswebb"
                     }
                   },
                   "reason": "message_reaction"
@@ -187676,7 +187676,7 @@
                       "id": "exp_xxxxxxxxxxxxxx"
                     },
                     "id": "cors_xxxxxxxxxxxxx",
-                    "title": "Introduction to Technical Analysis"
+                    "title": "Introduction to Ceramic Coating"
                   },
                   "created_at": "2023-12-01T05:00:00.401Z",
                   "id": "crsli_xxxxxxxxxxxx",
@@ -187685,12 +187685,12 @@
                       "id": "chap_xxxxxxxxxxxxx"
                     },
                     "id": "lesn_xxxxxxxxxxxxx",
-                    "title": "Understanding Candlestick Patterns"
+                    "title": "Preparing Paint for Ceramic Coating"
                   },
                   "user": {
                     "id": "user_xxxxxxxxxxxxx",
-                    "name": "John Doe",
-                    "username": "johndoe42"
+                    "name": "Marcus Webb",
+                    "username": "marcuswebb"
                   }
                 },
                 "id": "msg_xxxxxxxxxxxxxxxxxxxxxxxx",
@@ -191521,7 +191521,7 @@
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "buyer_account_id": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
-                  "display_name": "Jack Sharkey the 151st",
+                  "display_name": "Marcus Webb",
                   "earnings_usd": {
                     "last_24_hours": "0.00",
                     "last_30_days": "0.00",
@@ -191687,7 +191687,7 @@
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "buyer_account_id": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
-                  "display_name": "Jack Sharkey the 153rd",
+                  "display_name": "Marcus Webb",
                   "earnings_usd": {
                     "last_24_hours": "0.00",
                     "last_30_days": "0.00",
@@ -196662,7 +196662,7 @@
                             "type": "string"
                           },
                           "email": {
-                            "example": "jane.doe@example.com",
+                            "example": "dana@shinetime.example",
                             "format": "email",
                             "type": "string"
                           },
