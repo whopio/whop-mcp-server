@@ -162117,6 +162117,14 @@
                             "example": "ad_xxxxxxxxxxxxxx_average_result_seconds",
                             "type": "string"
                           },
+                          "modes": {
+                            "description": "The values of the mode parameter that the metric takes. owner reads the account or user named. global reads all of Whop.",
+                            "items": {
+                              "example": "global",
+                              "type": "string"
+                            },
+                            "type": "array"
+                          },
                           "name": {
                             "description": "Human-readable display name for the metric.",
                             "example": "Average seconds to an ad campaign getting a first result",
@@ -162513,6 +162521,18 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "description": "Whose figures the report reads, one of the modes the report has. `global` reads all of Whop with nothing left out.",
+            "in": "query",
+            "name": "mode",
+            "required": false,
+            "schema": {
+              "enum": [
+                "owner"
+              ],
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -162890,6 +162910,19 @@
             "name": "after",
             "required": false,
             "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "description": "Whose figures the report reads, one of the modes the report has. `global` reads all of Whop with nothing left out.",
+            "in": "query",
+            "name": "mode",
+            "required": false,
+            "schema": {
+              "enum": [
+                "global",
+                "trends"
+              ],
               "type": "string"
             }
           }
@@ -163450,6 +163483,14 @@
                             "description": "The metric's key. Pass it to GET /stats/time_series/{metric} to query its values.",
                             "example": "ad_xxxxxxxxxxxxxx_average_result_seconds",
                             "type": "string"
+                          },
+                          "modes": {
+                            "description": "The values of the mode parameter that the metric takes. owner reads the account or user named. global reads all of Whop.",
+                            "items": {
+                              "example": "global",
+                              "type": "string"
+                            },
+                            "type": "array"
                           },
                           "name": {
                             "description": "Human-readable display name for the metric.",
@@ -164306,6 +164347,20 @@
               "maximum": 500,
               "minimum": 1,
               "type": "integer"
+            }
+          },
+          {
+            "description": "Whose figures the metric reads, one of the modes the metric lists. `global` reads all of Whop and takes no account_id. Without it, the metric reads the account or user named.",
+            "in": "query",
+            "name": "mode",
+            "required": false,
+            "schema": {
+              "enum": [
+                "global",
+                "owner",
+                "trends"
+              ],
+              "type": "string"
             }
           },
           {
@@ -165489,6 +165544,20 @@
               "maximum": 500,
               "minimum": 1,
               "type": "integer"
+            }
+          },
+          {
+            "description": "Whose figures the metric reads, one of the modes the metric lists. `global` reads all of Whop and takes no account_id. Without it, the metric reads the account or user named.",
+            "in": "query",
+            "name": "mode",
+            "required": false,
+            "schema": {
+              "enum": [
+                "global",
+                "owner",
+                "trends"
+              ],
+              "type": "string"
             }
           },
           {
