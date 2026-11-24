@@ -1,4 +1,4 @@
-import type { SurfaceName, ToolListing } from "@whop/mcp-server";
+import type { SurfaceName } from "@whop/mcp-server";
 import { createStreamableHttpHandler } from "@whop/mcp-server/streamable-http";
 import { registry } from "./registry.ts";
 import {
@@ -25,12 +25,6 @@ import type { Env } from "./types.ts";
  * `surface` is fixed per route, so what a connection can reach depends only
  * on the URL it was configured with — never on a header the client sends.
  */
-// The ChatGPT route keeps every tool listed: OpenAI's plugin guidelines bar
-// generic search and call tools for actions not listed on their own.
-function listingFor(surface: SurfaceName): ToolListing {
-	return surface === "chatgpt" ? "full" : "compact";
-}
-
 // A token with no audience passes the provider's route check, so this is what
 // keeps full-scope grants off the routes with a narrowed grant.
 function requiredProfile(surface: SurfaceName): string | undefined {
@@ -84,7 +78,7 @@ export function createMcpApiHandler(surface: SurfaceName = "full") {
 				requireHttps: env.MCP_BASE_URL.startsWith("https://"),
 				chatGptCompat: !muse,
 				surface,
-				toolListing: listingFor(surface),
+				toolListing: "compact",
 				promptsAndResources: surface === "full" || muse,
 				authenticator: {
 					async authenticate() {

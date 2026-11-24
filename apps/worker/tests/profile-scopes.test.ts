@@ -1,3 +1,4 @@
+import { CHATGPT_TOOLS } from "@whop/mcp-server";
 import { describe, expect, it } from "vitest";
 import {
 	expandChatgptToWhopScopes,
@@ -45,11 +46,22 @@ describe("muse scopes", () => {
 });
 
 describe("chatgpt scopes", () => {
-	it("requests the route's declared scopes and none of these money-moving ones", () => {
+	it("requests only scopes that operations in chatgpt-tools.json declare, and none of these money-moving ones", () => {
 		const scopes = expandChatgptToWhopScopes(operations);
-		for (const expected of ["media:generate", "domain:manage", "plan:create"]) {
-			expect(scopes).toContain(expected);
-		}
+		const declared = new Set(
+			operations
+				.filter((op) =>
+					Object.hasOwn(CHATGPT_TOOLS, `${op.method.toUpperCase()} ${op.path}`),
+				)
+				.flatMap((op) => op.scopes),
+		);
+		expect(scopes.length).toBeGreaterThan(2);
+		expect(
+			scopes.filter(
+				(scope) =>
+					!declared.has(scope) && !["openid", "profile"].includes(scope),
+			),
+		).toEqual([]);
 		for (const excluded of [
 			"payment:charge",
 			"invoice:create",

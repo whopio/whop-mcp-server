@@ -23,6 +23,7 @@ vi.mock("@cloudflare/workers-oauth-provider", () => ({
 }));
 
 await import("../src/index.ts");
+import { CHATGPT_BUILTIN_NAMES, operationInSurface } from "@whop/mcp-server";
 import {
 	expandChatgptToWhopScopes,
 	expandMuseToWhopScopes,
@@ -104,8 +105,14 @@ describe("route table", () => {
 		expect(claude).not.toContain("generate_media_asset");
 		expect(claude).not.toContain("create_transfer");
 		const chatgpt = await toolNames("/chatgpt/mcp", "chatgpt");
-		expect(chatgpt).toContain("generate_media_asset");
-		expect(chatgpt).toContain("create_domain");
+		const expectedChatgpt = [
+			...registry.operations
+				.filter((op) => operationInSurface(op, "chatgpt"))
+				.map((op) => op.verbName),
+			...CHATGPT_BUILTIN_NAMES,
+		];
+		expect(chatgpt).toContain("search");
+		expect(expectedChatgpt).toEqual(expect.arrayContaining(chatgpt));
 		expect(chatgpt).not.toContain("refund_payment");
 		expect(chatgpt).not.toContain("create_transfer");
 		expect(chatgpt).not.toContain("search_operations");

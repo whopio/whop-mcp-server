@@ -162921,7 +162921,7 @@
             "schema": {
               "enum": [
                 "global",
-                "trends"
+                "public"
               ],
               "type": "string"
             }
@@ -164350,7 +164350,7 @@
             }
           },
           {
-            "description": "Whose figures the metric reads, one of the modes the metric lists. `global` reads all of Whop and takes no account_id. Without it, the metric reads the account or user named.",
+            "description": "Whose figures the metric reads, one of the modes the metric lists. `global` reads all of Whop and takes no account_id. `public` reads the figures of Whop that are shown in public, and takes no account_id. Without it, the metric reads the account or user named.",
             "in": "query",
             "name": "mode",
             "required": false,
@@ -164358,7 +164358,7 @@
               "enum": [
                 "global",
                 "owner",
-                "trends"
+                "public"
               ],
               "type": "string"
             }
@@ -165547,7 +165547,7 @@
             }
           },
           {
-            "description": "Whose figures the metric reads, one of the modes the metric lists. `global` reads all of Whop and takes no account_id. Without it, the metric reads the account or user named.",
+            "description": "Whose figures the metric reads, one of the modes the metric lists. `global` reads all of Whop and takes no account_id. `public` reads the figures of Whop that are shown in public, and takes no account_id. Without it, the metric reads the account or user named.",
             "in": "query",
             "name": "mode",
             "required": false,
@@ -165555,7 +165555,7 @@
               "enum": [
                 "global",
                 "owner",
-                "trends"
+                "public"
               ],
               "type": "string"
             }

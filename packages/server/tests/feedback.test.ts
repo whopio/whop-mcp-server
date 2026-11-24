@@ -256,23 +256,26 @@ describe("feedback tools over authenticated HTTP", () => {
 		expect(whopApi.requests).toHaveLength(0);
 	});
 
-	it("asks ChatGPT for no intent and sends no context", async () => {
-		const whopApi = api();
+	// The ChatGPT route serves only its allowlisted operations and five built-ins,
+	// so the feedback tools are excluded.
+	it("keeps the feedback tools off the ChatGPT route, which asks for no intent and sends no context", async () => {
+		const whopApi = api({ data: [] });
 		const chatgpt = handler(whopApi, "biz_boundAccount", "chatgpt");
 		const listed = (await (await chatgpt(request("tools/list"))).json()) as {
 			result: ListToolsResult;
 		};
-		const tool = listed.result.tools.find(
-			(tool: { name: string }) => tool.name === "report_feedback",
-		);
-		expect(tool?.inputSchema.required).toEqual(["content"]);
-		expect(tool?.inputSchema.properties).not.toHaveProperty("intent");
+		const names = listed.result.tools.map((tool) => tool.name);
+		expect(names).not.toContain("report_feedback");
+		expect(names).not.toContain("ask_question");
+		expect(names).toContain("list_products");
+		for (const tool of listed.result.tools) {
+			expect(tool.inputSchema.properties ?? {}, tool.name).not.toHaveProperty(
+				"intent",
+			);
+		}
 
 		const response = await chatgpt(
-			request("tools/call", {
-				name: "report_feedback",
-				arguments: { content: "A real issue" },
-			}),
+			request("tools/call", { name: "list_products", arguments: {} }),
 		);
 		const { result } = (await response.json()) as ToolResponse;
 		expect(result.isError).not.toBe(true);

@@ -20,6 +20,8 @@ export interface DispatcherOptions {
 	userAgent?: string;
 	/** Extra headers stamped on every upstream request (attribution). */
 	extraHeaders?: Record<string, string>;
+	/** Applied to each successful dispatch body before it is returned; postUnlisted skips it. */
+	filterResponse?: (body: unknown) => unknown;
 }
 
 export interface DispatchOverrides {
@@ -226,7 +228,13 @@ export class Dispatcher {
 			}
 		}
 
-		return { status, requestId, body: parsed };
+		return {
+			status,
+			requestId,
+			body: this.options.filterResponse
+				? this.options.filterResponse(parsed)
+				: parsed,
+		};
 	}
 
 	async postUnlisted(

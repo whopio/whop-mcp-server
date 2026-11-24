@@ -29,8 +29,9 @@ to the signed-in user. `https://mcp.whop.com/claude/mcp` serves the Claude
 plugin directory surface instead: the same server without AI media generation
 or tools that move money out of the account (see
 `packages/server/src/policy/surfaces.ts`). `https://mcp.whop.com/chatgpt/mcp`
-serves the ChatGPT plugin directory surface: AI media generation stays, and
-one-off customer charges, refunds, and money movement are out, on a grant whose
+serves the ChatGPT plugin directory surface: only the operations in
+`packages/server/src/policy/chatgpt-tools.json` plus its five built-in tools,
+with no one-off customer charges, refunds, or money movement, on a grant whose
 Whop scopes are narrowed to match. `https://mcp.whop.com/muse/mcp` serves
 `/mcp`'s core tools minus those that move money, plus read-only search over
 everything else (see [MUSE.md](MUSE.md)), on a grant holding read scopes and

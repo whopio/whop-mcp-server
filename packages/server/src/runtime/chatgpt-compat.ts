@@ -1,5 +1,4 @@
 import type { JsonSchema, OperationDef } from "../registry/types.ts";
-import type { SurfaceName } from "../policy/surfaces.ts";
 import type { PrincipalContext } from "../policy/types.ts";
 import type { BuiltinTool, ToolDefinition } from "./builtin-tool.ts";
 import type { Dispatcher } from "./dispatcher.ts";
@@ -74,7 +73,7 @@ const SEARCH_TOOL: ToolDefinition = {
 	annotations: { readOnlyHint: true },
 };
 
-const CHATGPT_SEARCH_TOOL: ToolDefinition = {
+const SEARCH_TOOL_WITHOUT_ACCOUNT: ToolDefinition = {
 	...SEARCH_TOOL,
 	inputSchema: {
 		...SEARCH_TOOL.inputSchema,
@@ -211,42 +210,73 @@ async function runFetch(
 	};
 }
 
+/** How a route lists search or fetch in place of the defaults. */
+export type CompatToolCopy = Pick<
+	ToolDefinition,
+	"name" | "description" | "annotations"
+>;
+
+export interface SearchToolOptions {
+	/** Whether the tool takes an account_id to search inside one business. */
+	takesAccount?: boolean;
+	copy?: CompatToolCopy;
+}
+
+export function searchTool(
+	visibleOps: OperationDef[],
+	dispatcher: Dispatcher,
+	principal: PrincipalContext,
+	{ takesAccount = true, copy }: SearchToolOptions = {},
+): BuiltinTool {
+	return {
+		definition: {
+			...(takesAccount ? SEARCH_TOOL : SEARCH_TOOL_WITHOUT_ACCOUNT),
+			...copy,
+		},
+		call: async (args) => {
+			const query = typeof args.query === "string" ? args.query : "";
+			const accountId =
+				takesAccount && typeof args.account_id === "string"
+					? args.account_id
+					: principal.accountId;
+			return JSON.stringify(
+				await runSearch(query, accountId, visibleOps, dispatcher, principal),
+				null,
+				2,
+			);
+		},
+	};
+}
+
+export function fetchTool(
+	visibleOps: OperationDef[],
+	dispatcher: Dispatcher,
+	principal: PrincipalContext,
+	copy?: CompatToolCopy,
+): BuiltinTool {
+	return {
+		definition: { ...FETCH_TOOL, ...copy },
+		call: async (args) => {
+			const id = typeof args.id === "string" ? args.id : "";
+			const fetched = await runFetch(id, visibleOps, dispatcher, principal);
+			if (!fetched) {
+				throw new WhopMcpError(
+					"invalid_input",
+					`No fetchable resource for id "${id}". Use an id returned by search.`,
+				);
+			}
+			return JSON.stringify(fetched, null, 2);
+		},
+	};
+}
+
 export function chatGptTools(
 	visibleOps: OperationDef[],
 	dispatcher: Dispatcher,
 	principal: PrincipalContext,
-	surface?: SurfaceName,
 ): BuiltinTool[] {
-	const takesAccount = surface !== "chatgpt";
 	return [
-		{
-			definition: takesAccount ? SEARCH_TOOL : CHATGPT_SEARCH_TOOL,
-			call: async (args) => {
-				const query = typeof args.query === "string" ? args.query : "";
-				const accountId =
-					takesAccount && typeof args.account_id === "string"
-						? args.account_id
-						: principal.accountId;
-				return JSON.stringify(
-					await runSearch(query, accountId, visibleOps, dispatcher, principal),
-					null,
-					2,
-				);
-			},
-		},
-		{
-			definition: FETCH_TOOL,
-			call: async (args) => {
-				const id = typeof args.id === "string" ? args.id : "";
-				const fetched = await runFetch(id, visibleOps, dispatcher, principal);
-				if (!fetched) {
-					throw new WhopMcpError(
-						"invalid_input",
-						`No fetchable resource for id "${id}". Use an id returned by search.`,
-					);
-				}
-				return JSON.stringify(fetched, null, 2);
-			},
-		},
+		searchTool(visibleOps, dispatcher, principal),
+		fetchTool(visibleOps, dispatcher, principal),
 	];
 }

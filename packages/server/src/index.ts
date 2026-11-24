@@ -5,6 +5,8 @@ export {
 	PROFILE_NAMES,
 	type ProfileName,
 } from "./policy/profiles.ts";
+export { CHATGPT_TOOLS } from "./policy/chatgpt.ts";
+export { CHATGPT_BUILTIN_NAMES } from "./runtime/chatgpt-route.ts";
 export {
 	createWhopMcpServer,
 	type CreateWhopMcpServerOptions,

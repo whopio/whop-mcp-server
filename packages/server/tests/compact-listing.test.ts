@@ -66,9 +66,15 @@ async function connect(
 	return client;
 }
 
+// The ChatGPT route lists every tool whatever listing it is asked for: OpenAI
+// bars the search and call tools a compact listing depends on.
+const COMPACT_SURFACES = SURFACE_NAMES.filter(
+	(surface) => surface !== "chatgpt",
+);
+
 describe("compact tool listing", () => {
 	for (const profile of PROFILE_NAMES) {
-		for (const surface of SURFACE_NAMES) {
+		for (const surface of COMPACT_SURFACES) {
 			for (const principalType of ["user", "business"] as const) {
 				it(`stays under the size budget for ${principalType} ${profile} on ${surface}`, async () => {
 					const client = await connect({

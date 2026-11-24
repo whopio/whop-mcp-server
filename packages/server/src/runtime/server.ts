@@ -20,11 +20,9 @@ import {
 	type AuditSink,
 } from "../safety/audit.ts";
 import {
-	CHATGPT_DESTRUCTIVE_WRITES,
-	CHATGPT_OPEN_WORLD_WRITES,
-	CHATGPT_SIDE_EFFECT_READS,
 	DEFAULT_SURFACE,
 	listedOnSurface,
+	operationKey,
 	type SurfaceName,
 } from "../policy/surfaces.ts";
 import { visibleOperations } from "../policy/visibility.ts";
@@ -32,6 +30,14 @@ import { Dispatcher } from "./dispatcher.ts";
 import { WhopMcpError } from "./errors.ts";
 import type { BuiltinTool, ToolDefinition } from "./builtin-tool.ts";
 import { chatGptTools } from "./chatgpt-compat.ts";
+import {
+	CHATGPT_BUILTINS,
+	CHATGPT_INSTRUCTIONS,
+	chatgptBuiltins,
+	chatgptOperations,
+	rejectRemovedInputs,
+	withoutHiddenFields,
+} from "./chatgpt-route.ts";
 import type { McpRequestContext } from "./mcp-context.ts";
 import { docsTools } from "./docs.ts";
 import { feedbackTools } from "./feedback.ts";
@@ -83,46 +89,6 @@ const CONNECTION_STATUS_TOOL: ToolDefinition = {
 	annotations: { readOnlyHint: true },
 };
 
-// OpenAI requires all three hints on every tool, and these built-ins set only
-// readOnlyHint. The older routes keep what they have.
-const CHATGPT_BUILTIN_HINTS: Record<
-	string,
-	{ destructiveHint: boolean; openWorldHint: boolean }
-> = {
-	search: { destructiveHint: false, openWorldHint: true },
-	fetch: { destructiveHint: false, openWorldHint: true },
-	connection_status: { destructiveHint: false, openWorldHint: false },
-};
-
-// A signed-in user on this route isn't bound to one business, and search takes
-// no account, so it can't reach what the shared text promises.
-function chatgptSearchDescription(naming: ToolNaming): string {
-	const n = naming.name;
-	return `Matches a keyword against the newest public Whop marketplace listings and, by payment ID or status, the most recent sales across every business the signed-in user can read. It takes no business, so it can't narrow to one business or see its products, variants or members. For those, call ${n("products_list")}, ${n("variants_list")} or ${n("members_list")} with account_id, or ${n("search_list")} to look up one account's records. Returns result IDs for use with fetch.`;
-}
-
-const CHATGPT_CONNECTION_STATUS_DESCRIPTION =
-	"Shows who is signed in, the selected account, the permission profile, and how many tools are available. Never returns credentials.";
-
-function listedBuiltin(
-	definition: ToolDefinition,
-	surface: SurfaceName | undefined,
-	naming: ToolNaming,
-): ToolDefinition {
-	if (surface !== "chatgpt") return definition;
-	const hints = CHATGPT_BUILTIN_HINTS[definition.name];
-	return {
-		...definition,
-		...(definition.name === "search"
-			? { description: chatgptSearchDescription(naming) }
-			: {}),
-		...(definition.name === "connection_status"
-			? { description: CHATGPT_CONNECTION_STATUS_DESCRIPTION }
-			: {}),
-		...(hints ? { annotations: { ...definition.annotations, ...hints } } : {}),
-	};
-}
-
 export interface CreateWhopMcpServerOptions {
 	registry: RegistryManifest;
 	credentialAdapter: CredentialAdapter;
@@ -139,7 +105,12 @@ export interface CreateWhopMcpServerOptions {
 	pluginSource?: string;
 	/** Restrict to the native REST surface (full surface by default). */
 	nativeOnly?: boolean;
-	/** The fixed tool subset this endpoint serves (see policy/surfaces.ts). */
+	/**
+	 * The fixed tool subset this endpoint serves (see policy/surfaces.ts). The
+	 * chatgpt surface lists only the operations in policy/chatgpt-tools.json
+	 * plus its five built-ins, always in full, with no operation tools,
+	 * feedback tools, docs_query, or guides.
+	 */
 	surface?: SurfaceName;
 	/**
 	 * "compact" lists only core operations plus the operation tools
@@ -287,44 +258,15 @@ function hiddenListedProperties(
 	return new Set(operation.listedSchemaOmit ?? []);
 }
 
-function listedToolDescription(
-	operation: OperationDef,
-	surface: SurfaceName | undefined,
-): string {
-	const description = toolDescription(operation, surface);
+function listedToolDescription(operation: OperationDef): string {
+	const description = toolDescription(operation);
 	return operation.listedSchemaOmit || operation.listedSchemaOnly
 		? `${description}\n\n${LISTED_SCHEMA_OMIT_DESCRIPTION}`
 		: description;
 }
 
-// Write tools act on the first call, and OpenAI wants a person to confirm
-// irreversible actions. The tools flagged confirmationRequired say so here, and
-// the instructions cover the rest.
-const CHATGPT_CONSEQUENTIAL_DESCRIPTION =
-	"This tool acts on the first call. Tell the user what will happen and get their explicit yes before calling it.";
-
-function toolDescription(
-	operation: OperationDef,
-	surface: SurfaceName | undefined,
-): string {
-	const description = operation.description || operation.summary || "";
-	if (surface !== "chatgpt" || !operation.safety.confirmationRequired) {
-		return description;
-	}
-	return [description, CHATGPT_CONSEQUENTIAL_DESCRIPTION]
-		.filter(Boolean)
-		.join("\n\n");
-}
-
-function onChatgptList(
-	operation: OperationDef,
-	surface: SurfaceName | undefined,
-	writes: ReadonlySet<string>,
-): boolean {
-	return (
-		surface === "chatgpt" &&
-		writes.has(`${operation.method.toUpperCase()} ${operation.path}`)
-	);
+function toolDescription(operation: OperationDef): string {
+	return operation.description || operation.summary || "";
 }
 
 function jsonContent(value: unknown): {
@@ -356,26 +298,11 @@ function errorContentFor(
 	};
 }
 
-// The first call of most conversations doesn't need tax IDs, and accounts_get
-// still returns them.
-function withoutTaxIdentifiers(body: unknown): unknown {
-	const rows = (body as { data?: unknown } | null)?.data;
-	if (!Array.isArray(rows)) return body;
-	return {
-		...(body as Record<string, unknown>),
-		data: rows.map((row: unknown) => {
-			if (row === null || typeof row !== "object") return row;
-			const copy = { ...(row as Record<string, unknown>) };
-			delete copy.tax_identifiers;
-			return copy;
-		}),
-	};
-}
-
 export function createWhopMcpServer(
 	options: CreateWhopMcpServerOptions,
 ): WhopMcpServer {
 	const { registry, principal } = options;
+	const chatgpt = options.surface === "chatgpt";
 	// Muse reviewed and approved its tools under their registry names.
 	const naming =
 		options.surface === "muse"
@@ -383,18 +310,26 @@ export function createWhopMcpServer(
 			: verbNaming(registry.operations);
 	const errorContent = (error: WhopMcpError) =>
 		errorContentFor(error, options.surface, naming);
-	const operations = visibleOperations(registry, principal, {
+	const visible = visibleOperations(registry, principal, {
 		nativeOnly: options.nativeOnly,
 		surface: options.surface,
 	});
-	const byName = operationsByName(operations);
-	const compact = options.toolListing === "compact";
+	const operations = chatgpt ? chatgptOperations(visible) : visible;
+	// The ChatGPT route takes only the names it lists.
+	const byName = chatgpt
+		? new Map(operations.map((op) => [op.verbName, op]))
+		: operationsByName(operations);
+	// OpenAI bars search-and-call tools for operations that aren't listed on
+	// their own, and the guides name tools by their registry names, so the
+	// ChatGPT route lists every tool and serves no guides.
+	const compact = options.toolListing === "compact" && !chatgpt;
+	const guides = (options.promptsAndResources ?? false) && !chatgpt;
 	// Muse approves each tool and bars collecting more data than a tool needs,
 	// so its route offers only read-only operation tools and no intent fields.
 	const reviewedToolsOnly = options.surface === "muse";
 	// OpenAI allows a brief, task-specific intent field only when it improves
 	// execution. This one is attribution only, so ChatGPT skips it too.
-	const collectsIntent = !reviewedToolsOnly && options.surface !== "chatgpt";
+	const collectsIntent = !reviewedToolsOnly && !chatgpt;
 	const intentSchema = (schema: JsonSchema, asksForIntent: boolean) =>
 		collectsIntent && asksForIntent ? withIntentContext(schema) : schema;
 	const listedOperations = compact
@@ -413,50 +348,58 @@ export function createWhopMcpServer(
 		maxResponseBytes: options.maxResponseBytes,
 		userAgent: `whop-mcp/${SERVER_VERSION}`,
 		extraHeaders: options.extraHeaders,
+		filterResponse: chatgpt ? withoutHiddenFields : undefined,
 	});
 
-	const builtins: BuiltinTool[] = [
-		...(options.chatGptCompat
-			? chatGptTools(operations, dispatcher, principal, options.surface)
-			: []),
-		...(options.feedback
-			? feedbackTools(
-					dispatcher,
-					principal,
-					{
-						clientName: options.clientName,
-						pluginSource: options.pluginSource,
-					},
-					naming,
-				)
-			: []),
-		...(options.docs
-			? docsTools({ fetch: options.fetch, timeoutMs: options.timeoutMs })
-			: []),
-		...(compact
-			? operationTools(
-					operations,
-					executeOperation,
-					(operation) => withAccountRequirement(operation, principal),
-					{ readOnly: reviewedToolsOnly, naming },
-				)
-			: []),
-		{
-			definition: CONNECTION_STATUS_TOOL,
-			call: async () =>
-				JSON.stringify(
-					connectionStatus(
-						registry,
-						principal,
-						operations,
-						listedOperations,
-						options.surface ?? DEFAULT_SURFACE,
-					),
-					null,
-					2,
-				),
-		},
-	];
+	const docsOptions = { fetch: options.fetch, timeoutMs: options.timeoutMs };
+	const builtins: BuiltinTool[] = chatgpt
+		? chatgptBuiltins({
+				operations,
+				dispatcher,
+				principal,
+				chatGptCompat: options.chatGptCompat,
+				docs: options.docs ? docsOptions : undefined,
+			})
+		: [
+				...(options.chatGptCompat
+					? chatGptTools(operations, dispatcher, principal)
+					: []),
+				...(options.feedback
+					? feedbackTools(
+							dispatcher,
+							principal,
+							{
+								clientName: options.clientName,
+								pluginSource: options.pluginSource,
+							},
+							naming,
+						)
+					: []),
+				...(options.docs ? docsTools(docsOptions) : []),
+				...(compact
+					? operationTools(
+							operations,
+							executeOperation,
+							(operation) => withAccountRequirement(operation, principal),
+							{ readOnly: reviewedToolsOnly, naming },
+						)
+					: []),
+				{
+					definition: CONNECTION_STATUS_TOOL,
+					call: async () =>
+						JSON.stringify(
+							connectionStatus(
+								registry,
+								principal,
+								operations,
+								listedOperations,
+								options.surface ?? DEFAULT_SURFACE,
+							),
+							null,
+							2,
+						),
+				},
+			];
 	const builtinByName = new Map(
 		builtins.map((tool) => [tool.definition.name, tool]),
 	);
@@ -466,7 +409,7 @@ export function createWhopMcpServer(
 		{
 			capabilities: {
 				tools: {},
-				...(options.promptsAndResources && { prompts: {}, resources: {} }),
+				...(guides && { prompts: {}, resources: {} }),
 			},
 			instructions: naming.inText(
 				buildInstructions(
@@ -476,7 +419,7 @@ export function createWhopMcpServer(
 					listedOperations,
 					builtins,
 					collectsIntent,
-					options.promptsAndResources ?? false,
+					guides,
 				),
 			),
 		},
@@ -487,9 +430,7 @@ export function createWhopMcpServer(
 			...listedOperations.map((op) => ({
 				name: naming.name(op.toolName),
 				description: naming.inText(
-					compact
-						? listedToolDescription(op, options.surface)
-						: toolDescription(op, options.surface),
+					compact ? listedToolDescription(op) : toolDescription(op),
 				),
 				inputSchema: intentSchema(
 					compact
@@ -498,38 +439,24 @@ export function createWhopMcpServer(
 					true,
 				) as Record<string, unknown>,
 				annotations: {
-					readOnlyHint:
-						op.annotations.readOnlyHint &&
-						!onChatgptList(op, options.surface, CHATGPT_SIDE_EFFECT_READS),
-					destructiveHint:
-						op.annotations.destructiveHint ||
-						onChatgptList(op, options.surface, CHATGPT_DESTRUCTIVE_WRITES),
-					idempotentHint:
-						op.annotations.idempotentHint &&
-						!onChatgptList(op, options.surface, CHATGPT_SIDE_EFFECT_READS),
-					openWorldHint:
-						op.annotations.openWorldHint ||
-						onChatgptList(op, options.surface, CHATGPT_OPEN_WORLD_WRITES),
+					readOnlyHint: op.annotations.readOnlyHint,
+					destructiveHint: op.annotations.destructiveHint,
+					idempotentHint: op.annotations.idempotentHint,
+					openWorldHint: op.annotations.openWorldHint,
 					title: op.summary,
 				},
 			})),
-			...builtins.map((tool) =>
-				listedBuiltin(
-					{
-						...tool.definition,
-						inputSchema: intentSchema(
-							tool.definition.inputSchema,
-							tool.asksForIntent ?? false,
-						) as ToolDefinition["inputSchema"],
-					},
-					options.surface,
-					naming,
-				),
-			),
+			...builtins.map((tool) => ({
+				...tool.definition,
+				inputSchema: intentSchema(
+					tool.definition.inputSchema,
+					tool.asksForIntent ?? false,
+				) as ToolDefinition["inputSchema"],
+			})),
 		],
 	}));
 
-	if (options.promptsAndResources) {
+	if (guides) {
 		const reach = toolReach(
 			operations,
 			listedOperations,
@@ -656,6 +583,7 @@ export function createWhopMcpServer(
 			delete args[IDEMPOTENCY_KEY_FIELD];
 		}
 
+		if (chatgpt) rejectRemovedInputs(operation, args);
 		await options.beforeCall?.(operation, args, principal);
 		const result = await dispatcher.dispatch(operation, args, principal, {
 			idempotencyKey,
@@ -675,10 +603,7 @@ export function createWhopMcpServer(
 				},
 			),
 		);
-		return options.surface === "chatgpt" &&
-			operation.toolName === "accounts_list"
-			? withoutTaxIdentifiers(result.body)
-			: result.body;
+		return result.body;
 	}
 
 	return { server, operations };
@@ -723,10 +648,6 @@ function parseIntentContext(
 	};
 }
 
-function operationKey(operation: OperationDef): string {
-	return `${operation.method.toUpperCase()} ${operation.path}`;
-}
-
 function supportsUpstreamReplay(operation: OperationDef): boolean {
 	return operation.surface === "native" && operation.method === "post";
 }
@@ -741,16 +662,6 @@ function connectionStatus(
 	const byGroup: Record<string, number> = {};
 	for (const op of operations) {
 		byGroup[op.group] = (byGroup[op.group] ?? 0) + 1;
-	}
-	if (surface === "chatgpt") {
-		return {
-			user_name: principal.userName ?? null,
-			account_id: principal.accountId,
-			account_title: principal.accountTitle ?? null,
-			permission_profile: principal.permissionProfile,
-			tool_count: operations.length,
-			tool_categories: byGroup,
-		};
 	}
 	return {
 		user_id: principal.userId ?? null,
@@ -772,23 +683,6 @@ function connectionStatus(
 	};
 }
 
-// Write tools act on the first call. OpenAI says to keep the most important
-// details in the first 512 characters, so this comes right after the header.
-const CHATGPT_CONFIRMATION_INSTRUCTION =
-	"Consequential tools (anything that costs money, goes live, affects other people, or can't be undone) act on the first call, so never call one just to see a preview. Tell the user what will happen, get their explicit yes, then call it.";
-
-// This route leaves these out on purpose (see policy/surfaces.ts). Without this
-// line the model offers a substitute, such as an invoice in place of a charge.
-// The first sentence is kept short so it still ends inside the first 512
-// characters.
-const CHATGPT_UNAVAILABLE_INSTRUCTION =
-	"This connection cannot issue refunds, charge saved cards, create invoices or send payouts: say so, offer no workaround. Tell the user they can do it in their Whop dashboard.";
-
-// OpenAI's review turns down answers that echo personal data nobody asked
-// for. The tools still return these fields, so a user who asks for one gets it.
-const CHATGPT_PERSONAL_DATA_INSTRUCTION =
-	"Do not volunteer customers' email addresses, phone numbers, postal addresses, IP addresses or card or bank details. Include one when the user asks for it or needs it to tell two customers apart.";
-
 const GUIDES_INSTRUCTION =
 	"Step-by-step guides for common Whop workflows are resources under whop://guides/. whop://guides/finding-tools shows how to reach operations that aren't in the tool list.";
 
@@ -801,8 +695,10 @@ function buildInstructions(
 	collectsIntent: boolean,
 	guides: boolean,
 ): string {
-	const toolCount =
-		listedOperations.length === operations.length
+	const chatgpt = surface === "chatgpt";
+	const toolCount = chatgpt
+		? `${listedOperations.length + builtins.length} tools`
+		: listedOperations.length === operations.length
 			? `${operations.length} tools`
 			: `${listedOperations.length} operations listed as tools, ${operations.length} callable`;
 	return [
@@ -811,13 +707,7 @@ function buildInstructions(
 				? `account ${principal.accountId}`
 				: "the user, across every business they can act on"
 		} with the "${principal.permissionProfile}" permission profile (${toolCount}).`,
-		...(surface === "chatgpt"
-			? [
-					CHATGPT_CONFIRMATION_INSTRUCTION,
-					CHATGPT_UNAVAILABLE_INSTRUCTION,
-					CHATGPT_PERSONAL_DATA_INSTRUCTION,
-				]
-			: []),
+		...(chatgpt ? CHATGPT_INSTRUCTIONS : []),
 		principal.accountId
 			? "Account binding is enforced server-side: input referencing a different account is rejected. Switching accounts requires the user to reconnect."
 			: "Pick the context per call from what the user asks for: pass account_id/company_id when they mean a specific business (find it with accounts_list if they name it), and pass no account or user filter for questions about the user themselves, like the memberships they own across all of Whop.",
@@ -828,8 +718,8 @@ function buildInstructions(
 			: []),
 		...builtins.flatMap((tool) => tool.instruction ?? []),
 		...(guides ? [GUIDES_INSTRUCTION] : []),
-		surface === "chatgpt"
-			? "Call connection_status to see the signed-in user, account, permission profile, and tool coverage."
+		chatgpt
+			? `Call ${CHATGPT_BUILTINS.connection_status.name} to see the signed-in user, account, permission profile, and tool coverage.`
 			: "Call connection_status to see the authenticated identity, account, scopes, and tool coverage.",
 	].join("\n\n");
 }

@@ -621,6 +621,18 @@ overrides:
     verbName: complete_course_lesson
   "POST /course_lessons/{lesson_id}/submit_assessment":
     verbName: submit_course_lesson_assessment
+  "GET /accounts/{account_id}/reserves":
+    verbName: get_account_reserves
+  "GET /payments/{id}/fees":
+    verbName: get_payment_fees
+  "GET /permissions":
+    verbName: check_permissions
+  "GET /users/me/preferences/notifications/experiences":
+    verbName: list_experience_notification_levels
+  "GET /users/me/preferences/notifications/topics":
+    verbName: list_notification_topic_preferences
+  "PATCH /users/me/preferences/notifications":
+    verbName: update_notification_preferences
 
 core:
   - "GET /accounts"

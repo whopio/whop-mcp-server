@@ -2,6 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import type { AuthRequest } from "@cloudflare/workers-oauth-provider";
 import { defaultHandler } from "../src/authorize.ts";
 import { openJson, sealJson } from "../src/pending-state.ts";
+import { expandChatgptToWhopScopes } from "../src/profile-scopes.ts";
+import { registry } from "../src/registry.ts";
 import type { Env } from "../src/types.ts";
 
 const MCP_CLIENT = {
@@ -356,7 +358,7 @@ describe("OAuth authorize", () => {
 			"http://localhost:8788/chatgpt/mcp",
 		);
 		expect(profile).toBe("chatgpt");
-		expect(scopes).toContain("media:generate");
+		expect(scopes).toEqual(expandChatgptToWhopScopes(registry.operations));
 		expect(scopes).not.toContain("payment:charge");
 		expect(scopes).not.toContain("invoice:create");
 		expect(scopes).not.toContain("payout:withdraw_funds");

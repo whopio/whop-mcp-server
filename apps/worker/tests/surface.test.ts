@@ -3,8 +3,13 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("cloudflare:workers", () => ({ DurableObject: class {} }));
 
 const { createMcpApiHandler } = await import("../src/mcp-handler.ts");
-import type { SurfaceName } from "@whop/mcp-server";
 import {
+	CHATGPT_BUILTIN_NAMES,
+	operationInSurface,
+	type SurfaceName,
+} from "@whop/mcp-server";
+import {
+	expandChatgptToWhopScopes,
 	expandMuseToWhopScopes,
 	expandProfileToWhopScopes,
 } from "../src/profile-scopes.ts";
@@ -86,10 +91,13 @@ async function listToolNames(
 	const result = (await rpc(surface, path, "tools/list", undefined, grant)) as {
 		tools: { name: string }[];
 	};
-	return result.tools.map((tool) => registryName(tool.name));
+	// ChatGPT assertions check listed verb names directly so registry names cannot slip in.
+	return result.tools.map((tool) =>
+		surface === "chatgpt" ? tool.name : registryName(tool.name),
+	);
 }
 
-// Routes other than Muse list verb names; these tests compare registry names.
+// /mcp and /claude/mcp list verb names; these tests compare registry names.
 function registryName(name: string): string {
 	return (
 		registry.operations.find((op) => op.verbName === name)?.toolName ?? name
@@ -268,33 +276,43 @@ describe("per-route tool surfaces", () => {
 		expect(names).not.toContain("payments_list");
 	});
 
-	it("serves the ChatGPT list on /chatgpt/mcp to a ChatGPT grant", async () => {
-		const names = await listToolNames("chatgpt", "/chatgpt/mcp", {
-			...props,
-			profile: "chatgpt",
-		});
+	const chatgptGrant = {
+		...props,
+		profile: "chatgpt",
+		whopScope: expandChatgptToWhopScopes(registry.operations).join(" "),
+	};
+	const chatgptNames = [
+		...registry.operations
+			.filter((op) => operationInSurface(op, "chatgpt"))
+			.map((op) => op.verbName),
+		...CHATGPT_BUILTIN_NAMES,
+	];
+
+	it("serves only the ChatGPT allowlisted operations and built-ins on /chatgpt/mcp", async () => {
+		const names = await listToolNames("chatgpt", "/chatgpt/mcp", chatgptGrant);
+		expect(names).toContain("search");
+		expect(names).toContain("fetch");
+		expect(names.length).toBeGreaterThan(2);
+		expect(names.filter((name) => !chatgptNames.includes(name))).toEqual([]);
 		for (const name of [
-			"media_generate",
-			"domains_create",
-			"accounts_form_company",
-			"ad-campaigns_create",
-			"exports_create",
+			...registry.operations.map((op) => op.toolName),
 			"connection_status",
 			"docs_search",
-			"search",
-			"fetch",
-		]) {
-			expect(names).toContain(name);
-		}
-		for (const name of [
-			"payments_refund",
-			"invoices_charge",
-			"transfers_create",
-			"ads_report-stats",
-			"ads_report-issues",
+			"docs_query",
+			"report_feedback",
+			"ask_question",
+			"search_operations",
 		]) {
 			expect(names).not.toContain(name);
 		}
+	});
+
+	// A tool named here needs a scope a ChatGPT grant never holds: one missing
+	// from WHOP_SCOPES. Add the scope there once the OAuth app can grant it, or
+	// take the tool out of chatgpt-tools.json.
+	it("lists every ChatGPT operation and built-in to a ChatGPT grant", async () => {
+		const names = await listToolNames("chatgpt", "/chatgpt/mcp", chatgptGrant);
+		expect(chatgptNames.filter((name) => !names.includes(name))).toEqual([]);
 	});
 
 	it("rejects a full-scope grant on /chatgpt/mcp", async () => {

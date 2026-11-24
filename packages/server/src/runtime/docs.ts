@@ -88,6 +88,39 @@ const QUERY_TOOL: ToolDefinition = {
 	annotations: { ...annotations, title: "Read Whop docs" },
 };
 
+export interface DocsSearchToolOptions extends DocsOptions {
+	/** How the route lists the tool in place of docs_search. */
+	copy?: Pick<ToolDefinition, "name" | "description">;
+	/** Whether docs_query is served too, so results can point to it. */
+	withDocsQuery?: boolean;
+}
+
+export function docsSearchTool(
+	options: DocsSearchToolOptions = {},
+): BuiltinTool {
+	const withDocsQuery = options.withDocsQuery ?? true;
+	const definition: ToolDefinition = { ...SEARCH_TOOL, ...options.copy };
+	return {
+		definition,
+		instruction: withDocsQuery
+			? "For how-to and concept questions, or to learn what a field or endpoint means, search the Whop docs with docs_search and read full pages with docs_query before guessing or calling ask_question."
+			: `For how-to and concept questions, or to learn what a field or endpoint means, search the Whop docs with ${definition.name} before guessing.`,
+		call: async (args, signal) => {
+			validateToolArgs(definition, args);
+			const results = await callDocsMcp(
+				"search_whop_docs",
+				args,
+				options,
+				signal,
+			);
+			return bounded(
+				results.map((result) => trimResult(result, withDocsQuery)),
+				withDocsQuery,
+			);
+		},
+	};
+}
+
 /**
  * Proxies to the Mintlify-hosted docs MCP server with one stateless JSON-RPC
  * `tools/call` per request. The upstream accepts calls without an
@@ -95,21 +128,7 @@ const QUERY_TOOL: ToolDefinition = {
  */
 export function docsTools(options: DocsOptions = {}): BuiltinTool[] {
 	return [
-		{
-			definition: SEARCH_TOOL,
-			instruction:
-				"For how-to and concept questions, or to learn what a field or endpoint means, search the Whop docs with docs_search and read full pages with docs_query before guessing or calling ask_question.",
-			call: async (args, signal) => {
-				validateToolArgs(SEARCH_TOOL, args);
-				const results = await callDocsMcp(
-					"search_whop_docs",
-					args,
-					options,
-					signal,
-				);
-				return bounded(results.map(trimResult));
-			},
-		},
+		docsSearchTool(options),
 		{
 			definition: QUERY_TOOL,
 			call: async (args, signal) => {
@@ -127,16 +146,18 @@ export function docsTools(options: DocsOptions = {}): BuiltinTool[] {
 	];
 }
 
-function trimResult(text: string): string {
+function trimResult(text: string, withDocsQuery: boolean): string {
 	if (text.length <= MAX_RESULT_CHARS) return text;
+	if (!withDocsQuery)
+		return `${text.slice(0, MAX_RESULT_CHARS)}\n[Excerpt trimmed.]`;
 	const page = text.match(/^Page: (.+)$/m)?.[1]?.trim();
 	return `${text.slice(0, MAX_RESULT_CHARS)}\n[Excerpt trimmed.${page ? ` Read the full page with docs_query: head -200 /${page}.mdx` : " Read the full page with docs_query."}]`;
 }
 
-function bounded(parts: string[]): string {
+function bounded(parts: string[], withDocsQuery = true): string {
 	const content = parts.join("\n\n");
 	if (content.length <= MAX_RESPONSE_CHARS) return content;
-	return `${content.slice(0, MAX_RESPONSE_CHARS)}\n\n[Truncated at ${MAX_RESPONSE_CHARS} characters. Narrow the search, or read one page with docs_query.]`;
+	return `${content.slice(0, MAX_RESPONSE_CHARS)}\n\n[Truncated at ${MAX_RESPONSE_CHARS} characters. Narrow the search${withDocsQuery ? ", or read one page with docs_query" : ""}.]`;
 }
 
 async function callDocsMcp(

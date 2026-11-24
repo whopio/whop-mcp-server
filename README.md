@@ -61,6 +61,15 @@ The core list and those schema trims live in
 `tools/list` response under 260 KB for every permission profile. The local
 stdio adapter lists every operation.
 
+The `/chatgpt/mcp` route lists only the operations in
+`packages/server/src/policy/chatgpt-tools.json` (each under its verb name with
+the description given there), plus `search`, `fetch`, `get_connection_status`,
+`search_docs`, and `get_company_formation_link`. It has none of the four
+operation tools above and no `docs_query` or feedback tools, and registry tool
+names are not callable on it. It does not accept or return tax identifiers,
+dates of birth, or card expiry dates, does not charge a saved card for a
+domain, and leaves API key tokens and client secrets out of results.
+
 ### Tool names
 
 Tools are named verb first, after what they do: `list_payments`,
@@ -71,11 +80,12 @@ operation's OpenAPI operationId (`listPayments`), with `retrieve` read as
 
 Every operation also keeps its registry name, such as `payments_list`, which
 matches the public CLI's `whop payments list` and is what Whop AI, audit
-events and API attribution use. Every route accepts both names, in a direct
-call and in `describe_operation` and the `call_*_operation` tools. `/muse/mcp`
-lists the registry names, because Muse approved its tools under them; the other
-routes list the verb names, and their descriptions, instructions, guides and
-errors name tools the same way. The generator fails if a verb name matches
+events and API attribution use. `/mcp`, `/claude/mcp` and `/muse/mcp` accept
+both names, in a direct call and in `describe_operation` and the
+`call_*_operation` tools. `/muse/mcp` lists the registry names, because Muse
+approved its tools under them; `/mcp` and `/claude/mcp` list the verb names,
+and their descriptions, instructions, guides and errors name tools the same
+way. `/chatgpt/mcp` accepts only the verb names it lists. The generator fails if a verb name matches
 another operation's registry name. Each audit event's `calledAs`
 (`registry_name` or `verb_name`) records which name the client used, so the
 registry names can stop being accepted once nothing calls them.
@@ -157,7 +167,7 @@ the same connection:
   it to read a page that `docs_search` returned.
 
 Both read the public documentation and send no Whop credentials. They are available on every surface and permission
-profile. The stdio adapter enables them by default; the hosted adapter enables
+profile, except that `/chatgpt/mcp` serves the search tool alone. The stdio adapter enables them by default; the hosted adapter enables
 them with `docs: true`. A rate-limited docs lookup is returned as
 `upstream_error` with status 429 and its `Retry-After` hint.
 
