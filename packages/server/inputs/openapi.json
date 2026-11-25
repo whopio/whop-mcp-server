@@ -164528,6 +164528,7 @@
               "enum": [
                 "global",
                 "owner",
+                "partners",
                 "platforms",
                 "public"
               ],
@@ -165726,6 +165727,7 @@
               "enum": [
                 "global",
                 "owner",
+                "partners",
                 "platforms",
                 "public"
               ],
