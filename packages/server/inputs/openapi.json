@@ -12389,6 +12389,25 @@
         ],
         "type": "string"
       },
+      "BusinessTypeReference": {
+        "properties": {
+          "id": {
+            "description": "Business type slug, such as `education`.",
+            "example": "education",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the business type in the viewer's language, such as `Education`.",
+            "example": "Education",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "type": "object"
+      },
       "CancelOptions": {
         "description": "The different reasons a user can choose for why they are canceling their membership.",
         "enum": [
@@ -24692,6 +24711,30 @@
         ],
         "type": "string"
       },
+      "IndustryTypeReference": {
+        "properties": {
+          "business_type": {
+            "$ref": "#/components/schemas/BusinessTypeReference",
+            "description": "The business type the industry type belongs to."
+          },
+          "id": {
+            "description": "Industry type slug, such as `equity_research`. With `business_type`, it identifies one industry type.",
+            "example": "equity_research",
+            "type": "string"
+          },
+          "name": {
+            "description": "Name of the industry type in the viewer's language, such as `Equity research`.",
+            "example": "Equity research",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "business_type"
+        ],
+        "type": "object"
+      },
       "Invoice": {
         "properties": {
           "account": {
@@ -32556,6 +32599,16 @@
               "null"
             ]
           },
+          "lead_slot_limit": {
+            "description": "How many leads the partner can hold at once. A waiting lead offer takes a slot, and so does a lead accepted in the last 30 days whose business has made $1 or less.",
+            "example": 5,
+            "type": "integer"
+          },
+          "lead_slots_used": {
+            "description": "How many of the partner's lead slots are taken now.",
+            "example": 0,
+            "type": "integer"
+          },
           "payout_rates": {
             "items": {
               "$ref": "#/components/schemas/PartnerPayoutTier",
@@ -32604,6 +32657,8 @@
           "verification_waitlist_joined",
           "certification_complete",
           "referred_businesses_count",
+          "lead_slot_limit",
+          "lead_slots_used",
           "account_id",
           "payout_rates",
           "referring_partner",
@@ -33051,7 +33106,7 @@
       "PartnerReferralRequestLead": {
         "properties": {
           "business_type": {
-            "description": "What the business sells, as the owner picked it at signup, such as `education` or `coaching_and_courses`. `null` when they skipped it.",
+            "description": "The business type Whop classified the business into, the same value as the account's `business_type`, such as `education`. `null` until the business is classified.",
             "type": [
               "string",
               "null"
@@ -33064,6 +33119,17 @@
               "null"
             ]
           },
+          "industry_type": {
+            "description": "The industry type Whop classified the business into, the same one the account's `industry_type` names. `null` until the business is classified, or when no industry type fits.",
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/IndustryTypeReference"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "migrating_from": {
             "description": "The platform the owner said they are moving from, such as `stripe`, or `none`. `null` when the form did not ask.",
             "type": [
@@ -33074,6 +33140,27 @@
           "owner": {
             "$ref": "#/components/schemas/UserSummary",
             "description": "The business owner. A partner messages them with this user's ID."
+          },
+          "owner_email": {
+            "description": "The business owner's email address. `null` until the partner accepts the offer.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "owner_phone": {
+            "description": "The business owner's phone number in E.164 format, such as `+14155552671`. `null` until the partner accepts the offer, or when the owner gave none.",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "revenue_band": {
+            "description": "The revenue range the owner picked at signup, such as `0-50k` or `50-250k`. `null` when they skipped it.",
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "signed_up_at": {
             "description": "When the business was created, as an ISO 8601 timestamp.",
@@ -33089,8 +33176,12 @@
         },
         "required": [
           "owner",
+          "owner_email",
+          "owner_phone",
           "business_type",
+          "industry_type",
           "migrating_from",
+          "revenue_band",
           "country",
           "website",
           "signed_up_at"
