@@ -30122,7 +30122,7 @@
             ]
           },
           "status": {
-            "description": "Billing state of the membership. `active`/`trialing` memberships grant access; `past_due` is the grace period after a failed payment; `completed` one-time purchases keep access; `canceled`/`expired` do not.",
+            "description": "Billing state of the membership. `active` and `trialing` memberships grant access. `past_due` is the grace period after a failed payment. `completed` one-time purchases keep access. `scheduled` memberships wait for their variant's start date, when the first charge runs and access starts. `canceled` and `expired` memberships do not grant access.",
             "enum": [
               "trialing",
               "active",
@@ -30130,7 +30130,8 @@
               "completed",
               "canceled",
               "expired",
-              "unresolved"
+              "unresolved",
+              "scheduled"
             ],
             "example": "active",
             "type": "string"
@@ -31198,6 +31199,7 @@
           "canceled",
           "expired",
           "unresolved",
+          "scheduled",
           "drafted",
           "canceling"
         ],
@@ -43705,7 +43707,7 @@
           },
           "initial_price_due": {
             "$ref": "#/components/schemas/Money",
-            "description": "Total charged at checkout for one unit, before promo codes and tax: `initial_price` plus the first `renewal_price` for recurring variants, or `initial_price` alone while a free trial applies. The trial does not apply when the viewing user has already used one for this variant. Stated in `currency`."
+            "description": "Total charged at checkout for one unit, before promo codes and tax. For recurring variants it is `initial_price` plus the first `renewal_price`. It is `initial_price` alone while a free trial applies or the `subscription_starts_at` metadata key is in the future. The trial does not apply when the viewing user has already used one for this variant. Stated in `currency`."
           },
           "internal_notes": {
             "description": "Private notes not shown to customers. `null` unless the actor has the `plan:basic:read` scope on the variant's account.",
@@ -43732,7 +43734,7 @@
             ]
           },
           "metadata": {
-            "description": "Custom key-value pairs stored on the variant. Included in webhook payloads for payment and membership events. Maximum 50 keys, 100 characters per key, 500 characters per value. The reserved keys `custom_cta` and `custom_cta_url`, when set, override the product's checkout call to action for this variant.",
+            "description": "Custom key-value pairs stored on the variant. Included in webhook payloads for payment and membership events. Maximum 50 keys, 100 characters per key, 500 characters per value. The reserved keys `custom_cta` and `custom_cta_url`, when set, override the product's checkout call to action for this variant. The reserved key `subscription_starts_at` takes an ISO 8601 timestamp on a recurring variant. Until then, checkout saves the payment method without charging it. The membership is `scheduled` with no access until the first charge runs at that time.",
             "example": {
               "custom_cta": "subscribe",
               "custom_cta_url": "https://shinetime.example/wash-club"
@@ -44138,7 +44140,7 @@
           },
           "initial_price_due": {
             "$ref": "#/components/schemas/Money",
-            "description": "Total charged at checkout for one unit, before promo codes and tax: `initial_price` plus the first `renewal_price` for recurring variants, or `initial_price` alone while a free trial applies. The trial does not apply when the viewing user has already used one for this variant. Stated in `currency`."
+            "description": "Total charged at checkout for one unit, before promo codes and tax. For recurring variants it is `initial_price` plus the first `renewal_price`. It is `initial_price` alone while a free trial applies or the `subscription_starts_at` metadata key is in the future. The trial does not apply when the viewing user has already used one for this variant. Stated in `currency`."
           },
           "internal_notes": {
             "description": "Private notes not shown to customers. `null` unless the actor has the `plan:basic:read` scope on the variant's account.",
@@ -44165,7 +44167,7 @@
             ]
           },
           "metadata": {
-            "description": "Custom key-value pairs stored on the variant. Included in webhook payloads for payment and membership events. Maximum 50 keys, 100 characters per key, 500 characters per value. The reserved keys `custom_cta` and `custom_cta_url`, when set, override the product's checkout call to action for this variant.",
+            "description": "Custom key-value pairs stored on the variant. Included in webhook payloads for payment and membership events. Maximum 50 keys, 100 characters per key, 500 characters per value. The reserved keys `custom_cta` and `custom_cta_url`, when set, override the product's checkout call to action for this variant. The reserved key `subscription_starts_at` takes an ISO 8601 timestamp on a recurring variant. Until then, checkout saves the payment method without charging it. The membership is `scheduled` with no access until the first charge runs at that time.",
             "example": {
               "custom_cta": "subscribe",
               "custom_cta_url": "https://shinetime.example/wash-club"
@@ -49209,6 +49211,7 @@
               "canceled",
               "expired",
               "unresolved",
+              "scheduled",
               null
             ],
             "example": "trialing",
@@ -54590,7 +54593,7 @@
           },
           "initial_price_due": {
             "$ref": "#/components/schemas/Money",
-            "description": "Total charged at checkout for one unit, before promo codes and tax: `initial_price` plus the first `renewal_price` for recurring variants, or `initial_price` alone while a free trial applies. The trial does not apply when the viewing user has already used one for this variant. Stated in `currency`."
+            "description": "Total charged at checkout for one unit, before promo codes and tax. For recurring variants it is `initial_price` plus the first `renewal_price`. It is `initial_price` alone while a free trial applies or the `subscription_starts_at` metadata key is in the future. The trial does not apply when the viewing user has already used one for this variant. Stated in `currency`."
           },
           "internal_notes": {
             "description": "Private notes not shown to customers. `null` unless the actor has the `plan:basic:read` scope on the variant's account.",
@@ -54617,7 +54620,7 @@
             ]
           },
           "metadata": {
-            "description": "Custom key-value pairs stored on the variant. Included in webhook payloads for payment and membership events. Maximum 50 keys, 100 characters per key, 500 characters per value. The reserved keys `custom_cta` and `custom_cta_url`, when set, override the product's checkout call to action for this variant.",
+            "description": "Custom key-value pairs stored on the variant. Included in webhook payloads for payment and membership events. Maximum 50 keys, 100 characters per key, 500 characters per value. The reserved keys `custom_cta` and `custom_cta_url`, when set, override the product's checkout call to action for this variant. The reserved key `subscription_starts_at` takes an ISO 8601 timestamp on a recurring variant. Until then, checkout saves the payment method without charging it. The membership is `scheduled` with no access until the first charge runs at that time.",
             "example": {
               "custom_cta": "subscribe",
               "custom_cta_url": "https://shinetime.example/wash-club"
@@ -54993,7 +54996,7 @@
           },
           "initial_price_due": {
             "$ref": "#/components/schemas/Money",
-            "description": "Total charged at checkout for one unit, before promo codes and tax: `initial_price` plus the first `renewal_price` for recurring variants, or `initial_price` alone while a free trial applies. The trial does not apply when the viewing user has already used one for this variant. Stated in `currency`."
+            "description": "Total charged at checkout for one unit, before promo codes and tax. For recurring variants it is `initial_price` plus the first `renewal_price`. It is `initial_price` alone while a free trial applies or the `subscription_starts_at` metadata key is in the future. The trial does not apply when the viewing user has already used one for this variant. Stated in `currency`."
           },
           "internal_notes": {
             "description": "Private notes not shown to customers. `null` unless the actor has the `plan:basic:read` scope on the variant's account.",
@@ -55020,7 +55023,7 @@
             ]
           },
           "metadata": {
-            "description": "Custom key-value pairs stored on the variant. Included in webhook payloads for payment and membership events. Maximum 50 keys, 100 characters per key, 500 characters per value. The reserved keys `custom_cta` and `custom_cta_url`, when set, override the product's checkout call to action for this variant.",
+            "description": "Custom key-value pairs stored on the variant. Included in webhook payloads for payment and membership events. Maximum 50 keys, 100 characters per key, 500 characters per value. The reserved keys `custom_cta` and `custom_cta_url`, when set, override the product's checkout call to action for this variant. The reserved key `subscription_starts_at` takes an ISO 8601 timestamp on a recurring variant. Until then, checkout saves the payment method without charging it. The membership is `scheduled` with no access until the first charge runs at that time.",
             "example": {
               "custom_cta": "subscribe",
               "custom_cta_url": "https://shinetime.example/wash-club"
@@ -127571,7 +127574,7 @@
             }
           },
           {
-            "description": "Filter by billing state. `trialing`, `active`, `past_due`, `completed`, `canceled`, and `expired` match the membership's `status`; `active`, `trialing`, and `past_due` exclude memberships set to cancel at period end. The other values are derived buckets that never appear as a `status`: `canceling` matches memberships set to cancel at period end; `paused` matches memberships with payment collection paused; `expiring` matches one-time purchases that have not yet expired; `one_time` matches one-time purchases that never expire; `unclaimed` matches memberships with no buyer user, including memberships bought by another business; `banned` matches memberships whose buyer is banned from the account.",
+            "description": "Filter by billing state. `trialing`, `active`, `scheduled`, `past_due`, `completed`, `canceled`, and `expired` match the membership's `status`. `active`, `trialing`, and `past_due` exclude memberships set to cancel at period end. The other values are derived buckets that never appear as a `status`. `canceling` matches memberships set to cancel at period end. `paused` matches memberships with payment collection paused. `expiring` matches one-time purchases that have not yet expired. `one_time` matches one-time purchases that never expire. `unclaimed` matches memberships with no buyer user, including memberships bought by another business. `banned` matches memberships whose buyer is banned from the account.",
             "in": "query",
             "name": "status",
             "required": false,
@@ -127579,6 +127582,7 @@
               "enum": [
                 "active",
                 "trialing",
+                "scheduled",
                 "past_due",
                 "completed",
                 "canceled",
@@ -127603,6 +127607,7 @@
                 "enum": [
                   "active",
                   "trialing",
+                  "scheduled",
                   "past_due",
                   "completed",
                   "canceled",
