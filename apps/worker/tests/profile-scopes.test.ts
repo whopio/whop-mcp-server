@@ -206,6 +206,74 @@ describe("profile scopes", () => {
 		);
 	});
 
+	it("requests a scope for every listed operation, except these the OAuth server cannot grant", () => {
+		// Not user-grantable in the backend scope registry (user: false or
+		// first-party only), so requesting them fails the whole login. Their
+		// operations stay hidden; keep search text from advertising them.
+		const NOT_USER_GRANTABLE = new Set([
+			"developer:manage_webhook",
+			"developer:manage_api_key",
+			"company:delete_child",
+			"company:suspend_child",
+			"company:update_child_fees",
+			"developer:app_installation:update",
+			"authorized_user:create",
+			"authorized_user:delete",
+			"partner:email:read",
+			"partner:commission_advance:update",
+			"partner:commission_advance:accept",
+			"referral:basic:read",
+			"membership:create",
+			"crypto_wallet:manage",
+			"crypto_wallet:trade",
+		]);
+		const grantable = new Set<string>(WHOP_SCOPES);
+		const missing = new Set<string>();
+		for (const operation of operations) {
+			const reachable = operation.scopeAlternatives.some((alternative) =>
+				alternative.every((scope) => grantable.has(scope)),
+			);
+			if (reachable) continue;
+			for (const scope of operation.scopes) {
+				if (!grantable.has(scope) && !NOT_USER_GRANTABLE.has(scope)) {
+					missing.add(scope);
+				}
+			}
+		}
+		expect([...missing]).toEqual([]);
+	});
+
+	it("gives admin the ad pixel, email and automation scopes and keeps the manage/send ones off other profiles", () => {
+		const admin = expandProfileToWhopScopes("admin", operations);
+		for (const scope of [
+			"ad_pixel:manage",
+			"email:read",
+			"email:manage",
+			"email:send",
+			"automation:read",
+			"automation:write",
+			"automation:manage",
+		]) {
+			expect(admin).toContain(scope);
+		}
+		for (const profile of ["read_only", "standard"]) {
+			const scopes = expandProfileToWhopScopes(profile, operations);
+			for (const denied of [
+				"ad_pixel:manage",
+				"email:manage",
+				"email:send",
+				"automation:manage",
+			]) {
+				expect(scopes, `${profile} must not hold ${denied}`).not.toContain(
+					denied,
+				);
+			}
+		}
+		expect(expandProfileToWhopScopes("read_only", operations)).toContain(
+			"email:read",
+		);
+	});
+
 	it("never hands a non-admin credential a financial-action scope", () => {
 		for (const profile of ["read_only", "standard"]) {
 			const scopes = expandProfileToWhopScopes(profile, operations);

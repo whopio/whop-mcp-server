@@ -117,7 +117,7 @@ export function principalFromProps(props: WhopGrantProps): PrincipalContext {
 		accountId: null,
 		// The scopes Whop actually granted, not the ones requested: a tool whose
 		// scope the token lacks would only ever return a 403. Grants issued before
-		// a scope joined WHOP_SCOPES, and scopes outside it (ad_pixel:manage), are
+		// a scope joined WHOP_SCOPES, and scopes outside it (developer:manage_webhook), are
 		// hidden until the user reconnects.
 		scopes: grantedScopes(props.whopScope),
 		permissionProfile: NARROWED_PROFILES.has(props.profile)

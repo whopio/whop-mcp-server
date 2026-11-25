@@ -237,7 +237,7 @@ describe("per-route tool surfaces", () => {
 	});
 
 	it("hides tools whose scopes the token was never granted", async () => {
-		for (const name of ["ad-pixels_list", "automations_list"]) {
+		for (const name of ["webhooks_list", "api-keys_list"]) {
 			const result = await describeOperation(undefined, "/mcp", name);
 			expect(result.text).toContain("tool_not_found");
 		}

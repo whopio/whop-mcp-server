@@ -239,7 +239,7 @@ function searchDescription(operationCount: number, readOnly: boolean): string {
 	if (readOnly) {
 		return `The listed Whop tools cover only the most common tasks. This searches every other Whop read this connection can run (${operationCount} in total), such as payouts, invoices, affiliates, ads, apps, analytics, courses and forums. Call it before telling the user that Whop can't show something or that no tool exists. Describe what you want to see in plain words, for example "list my payouts". Returns matches with the full input schema for the top 3; run one with ${CALL_READ_OPERATION_TOOL}.`;
 	}
-	return `The listed Whop tools cover only the most common tasks. This searches every other Whop operation this connection can run (${operationCount} in total), such as webhooks, payouts, invoices, affiliates, ads, apps, analytics, courses and forums. Call it before telling the user that Whop can't do something or that no tool exists. Describe the task in plain words, for example "list my webhooks" or "create a promo code". Returns matches with the full input schema for the top 3; run one with ${CALL_READ_OPERATION_TOOL} or ${CALL_WRITE_OPERATION_TOOL}.`;
+	return `The listed Whop tools cover only the most common tasks. This searches every other Whop operation this connection can run (${operationCount} in total), such as payouts, invoices, affiliates, ads, apps, analytics, courses and forums. Call it before telling the user that Whop can't do something or that no tool exists. Describe the task in plain words, for example "create a promo code". Returns matches with the full input schema for the top 3; run one with ${CALL_READ_OPERATION_TOOL} or ${CALL_WRITE_OPERATION_TOOL}.`;
 }
 
 const SEARCH_DEFINITION: ToolDefinition = {
