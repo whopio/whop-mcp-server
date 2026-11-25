@@ -87,7 +87,7 @@ describe("search_operations", () => {
 		});
 	}
 
-	it("returns input schemas for the top 3 matches only", async () => {
+	it("returns the input schema for the best match only", async () => {
 		const client = await connect();
 		const result = await client.callTool({
 			name: "search_operations",
@@ -97,10 +97,46 @@ describe("search_operations", () => {
 			operations: { input_schema?: unknown; call_with: string }[];
 		};
 		expect(body.operations).toHaveLength(5);
-		expect(body.operations.slice(0, 3).every((op) => op.input_schema)).toBe(
-			true,
+		expect(body.operations[0]?.input_schema).toBeTruthy();
+		expect(body.operations.slice(1).some((op) => op.input_schema)).toBe(false);
+	});
+
+	it("ranks the resource noun above generic verbs", async () => {
+		const client = await connect();
+		const webhooks = await searchNames(client, "list my webhooks");
+		expect(webhooks[0]).toBe("webhooks_list");
+		expect(webhooks.every((name) => name.startsWith("webhooks_"))).toBe(true);
+		const entries = await searchNames(client, "waitlist entries");
+		expect(entries[0]).toBe("waitlist-entries_list");
+		expect(entries.every((name) => name.includes("waitlist"))).toBe(true);
+		expect((await searchNames(client, "webhook"))[0]).toBe("webhooks_list");
+	});
+
+	it("does not return every list operation for a bare verb", async () => {
+		const client = await connect();
+		expect(await searchNames(client, "list")).toEqual([]);
+		expect(await searchNames(client, "list my")).toEqual([]);
+	});
+
+	it("does not match on descriptions alone", async () => {
+		const client = await connect();
+		expect(await searchNames(client, "webhook")).not.toContain("payments_void");
+	});
+
+	it("prefers the verb the agent used among the matches", async () => {
+		const client = await connect();
+		expect((await searchNames(client, "create a promo code"))[0]).toBe(
+			"promo-codes_create",
 		);
-		expect(body.operations.slice(3).some((op) => op.input_schema)).toBe(false);
+		expect((await searchNames(client, "list promo codes"))[0]).toBe(
+			"promo-codes_list",
+		);
+		expect((await searchNames(client, "send an invoice"))[0]).toBe(
+			"invoices_send",
+		);
+		expect((await searchNames(client, "search accounts"))[0]).toBe(
+			"accounts_search",
+		);
 	});
 
 	it("answers an unmatched query with an empty result, not an error", async () => {
@@ -110,7 +146,9 @@ describe("search_operations", () => {
 			arguments: { query: "zzqqxx" },
 		});
 		expect(result.isError).toBeFalsy();
-		expect(JSON.parse(text(result)).operations).toEqual([]);
+		const body = JSON.parse(text(result));
+		expect(body.operations).toEqual([]);
+		expect(body.message).toContain("docs_search");
 	});
 
 	it("expands synonyms into the stemmed tokens the index holds", () => {
@@ -119,6 +157,7 @@ describe("search_operations", () => {
 		expect(trend).toContain(series);
 		expect(expandQuery("sales")).toEqual([["sale", "payment"]]);
 		expect(expandQuery("this")).toEqual([]);
+		expect(expandQuery("list my webhooks")).toEqual([["webhook", "webhook"]]);
 	});
 
 	it("marks account_id required in returned schemas when no business is bound", async () => {

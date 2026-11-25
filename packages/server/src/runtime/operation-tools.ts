@@ -33,7 +33,7 @@ export type OperationExecutor = (
 
 const DEFAULT_SEARCH_LIMIT = 10;
 const MAX_SEARCH_LIMIT = 25;
-const SCHEMAS_IN_SEARCH = 3;
+const SCHEMAS_IN_SEARCH = 1;
 
 const STOP_WORDS = new Set([
 	"the",
@@ -61,20 +61,37 @@ const STOP_WORDS = new Set([
 	"please",
 ]);
 
+/**
+ * Generic verbs. They never match an operation by themselves (every list_*
+ * operation would), they only prefer the matching verb among operations the
+ * rest of the query already matched.
+ */
+const VERBS: Record<string, string> = {
+	list: "list",
+	find: "list",
+	search: "list",
+	see: "list",
+	show: "list",
+	view: "list",
+	who: "list",
+	get: "get",
+	check: "get",
+	fetch: "get",
+	create: "create",
+	add: "create",
+	new: "create",
+	make: "create",
+	send: "create",
+	upload: "create",
+	update: "update",
+	edit: "update",
+	change: "update",
+	delete: "delete",
+	remove: "delete",
+};
+const READ_VERBS = new Set(["list", "get"]);
+
 const SYNONYMS: Record<string, string[]> = {
-	find: ["list", "search"],
-	see: ["list", "get"],
-	show: ["list", "get"],
-	view: ["list", "get"],
-	check: ["get", "list"],
-	who: ["list"],
-	add: ["create"],
-	new: ["create"],
-	make: ["create"],
-	send: ["create"],
-	remove: ["delete"],
-	edit: ["update"],
-	change: ["update"],
 	sell: ["product", "variant", "checkout"],
 	sale: ["payment"],
 	revenue: ["payment", "stat", "ledger"],
@@ -104,7 +121,6 @@ const SYNONYMS: Record<string, string[]> = {
 	dm: ["dm", "channel", "message"],
 	chat: ["message", "channel"],
 	inbox: ["dm", "channel"],
-	upload: ["file"],
 	image: ["file"],
 	video: ["file"],
 	lesson: ["course"],
@@ -117,6 +133,9 @@ const SYNONYMS: Record<string, string[]> = {
 };
 
 const STOP_TOKENS = new Set([...STOP_WORDS].map(stem));
+const VERB_TOKENS = new Map(
+	Object.entries(VERBS).map(([word, verb]) => [stem(word), verb]),
+);
 const SYNONYM_TOKENS = new Map(
 	Object.entries(SYNONYMS).map(([word, alternatives]) => [
 		stem(word),
@@ -129,14 +148,19 @@ const FIELD_WEIGHTS = {
 	group: 4,
 	summary: 3,
 	path: 2,
-	description: 1,
 } as const;
+
+// Descriptions are not searched: an operation that only mentions a word in
+// prose is not what the agent asked for.
 
 type SearchField = keyof typeof FIELD_WEIGHTS;
 
 interface IndexedOperation {
 	operation: OperationDef;
 	fields: Record<SearchField, Set<string>>;
+	/** The operation's own verb, such as "list" for list_waitlist_entries. */
+	verb: string;
+	readOnly: boolean;
 }
 
 function stem(token: string): string {
@@ -160,6 +184,8 @@ function tokenize(text: string | undefined): string[] {
 function indexOperation(operation: OperationDef): IndexedOperation {
 	return {
 		operation,
+		verb: tokenize(operation.verbName)[0] ?? "",
+		readOnly: operation.annotations.readOnlyHint,
 		fields: {
 			name: new Set([
 				...tokenize(operation.toolName),
@@ -168,32 +194,62 @@ function indexOperation(operation: OperationDef): IndexedOperation {
 			group: new Set(tokenize(operation.group)),
 			summary: new Set(tokenize(operation.summary)),
 			path: new Set(tokenize(operation.path)),
-			description: new Set(tokenize(operation.description)),
 		},
 	};
 }
 
+/** The query's nouns with their synonyms; stop words and generic verbs drop out. */
 export function expandQuery(query: string): string[][] {
 	return tokenize(query)
-		.filter((token) => !STOP_TOKENS.has(token))
+		.filter((token) => !STOP_TOKENS.has(token) && !VERB_TOKENS.has(token))
 		.map((token) => [token, ...(SYNONYM_TOKENS.get(token) ?? [])]);
 }
 
-function score(entry: IndexedOperation, terms: string[][]): number {
+function queryVerb(query: string): string | undefined {
+	for (const token of tokenize(query)) {
+		const verb = VERB_TOKENS.get(token);
+		if (verb) return verb;
+	}
+}
+
+/**
+ * Prefers the operation whose verb the query used as typed ("send", "search",
+ * "refund"), then one with its generic meaning ("list", "create"). Without
+ * either, reads come first and list beats get.
+ */
+function verbPreference(
+	entry: IndexedOperation,
+	verb = "list",
+	words: string[] = [],
+): number {
+	if (words.includes(entry.verb)) return 3;
+	if (entry.verb === verb) return 2;
+	return entry.readOnly === READ_VERBS.has(verb) ? 1 : 0;
+}
+
+/** Points for each query word, plus how many were typed rather than guessed. */
+function score(entry: IndexedOperation, terms: string[][]) {
 	let total = 0;
-	for (const alternatives of terms) {
+	let literal = 0;
+	for (const [word, ...synonyms] of terms) {
 		let best = 0;
+		let typed = false;
 		for (const [field, weight] of Object.entries(FIELD_WEIGHTS) as [
 			SearchField,
 			number,
 		][]) {
-			if (alternatives.some((term) => entry.fields[field].has(term))) {
+			const tokens = entry.fields[field];
+			if (word && tokens.has(word)) {
+				best = Math.max(best, weight);
+				typed = true;
+			} else if (synonyms.some((term) => tokens.has(term))) {
 				best = Math.max(best, weight);
 			}
 		}
 		total += best;
+		if (typed) literal += 1;
 	}
-	return total;
+	return { total, literal };
 }
 
 function operationSummary(operation: OperationDef, naming: ToolNaming) {
@@ -237,9 +293,9 @@ function nameProperty(naming: ToolNaming): JsonSchema {
 
 function searchDescription(operationCount: number, readOnly: boolean): string {
 	if (readOnly) {
-		return `The listed Whop tools cover only the most common tasks. This searches every other Whop read this connection can run (${operationCount} in total), such as payouts, invoices, affiliates, ads, apps, analytics, courses and forums. Call it before telling the user that Whop can't show something or that no tool exists. Describe what you want to see in plain words, for example "list my payouts". Returns matches with the full input schema for the top 3; run one with ${CALL_READ_OPERATION_TOOL}.`;
+		return `The listed Whop tools cover only the most common tasks. This searches every other Whop read this connection can run (${operationCount} in total), such as payouts, invoices, affiliates, ads, apps, analytics, courses and forums. Call it before telling the user that Whop can't show something or that no tool exists. Describe what you want to see in plain words, for example "list my payouts". Returns matches with the full input schema for the best match only (describe_operation returns it for the others); run one with ${CALL_READ_OPERATION_TOOL}.`;
 	}
-	return `The listed Whop tools cover only the most common tasks. This searches every other Whop operation this connection can run (${operationCount} in total), such as payouts, invoices, affiliates, ads, apps, analytics, courses and forums. Call it before telling the user that Whop can't do something or that no tool exists. Describe the task in plain words, for example "create a promo code". Returns matches with the full input schema for the top 3; run one with ${CALL_READ_OPERATION_TOOL} or ${CALL_WRITE_OPERATION_TOOL}.`;
+	return `The listed Whop tools cover only the most common tasks. This searches every other Whop operation this connection can run (${operationCount} in total), such as payouts, invoices, affiliates, ads, apps, analytics, courses and forums. Call it before telling the user that Whop can't do something or that no tool exists. Describe the task in plain words, for example "create a promo code". Returns matches with the full input schema for the best match only (describe_operation returns it for the others); run one with ${CALL_READ_OPERATION_TOOL} or ${CALL_WRITE_OPERATION_TOOL}.`;
 }
 
 const SEARCH_DEFINITION: ToolDefinition = {
@@ -428,12 +484,19 @@ export function operationTools(
 					),
 					MAX_SEARCH_LIMIT,
 				);
+				const verb = queryVerb(args.query as string);
+				const words = tokenize(args.query as string).filter(
+					(token) => !STOP_TOKENS.has(token),
+				);
 				const matches = index
-					.map((entry) => ({ entry, score: score(entry, terms) }))
-					.filter((match) => match.score > 0)
+					.map((entry) => ({ entry, ...score(entry, terms) }))
+					.filter((match) => match.total > 0)
 					.sort(
 						(a, b) =>
-							b.score - a.score ||
+							b.total - a.total ||
+							verbPreference(b.entry, verb, words) -
+								verbPreference(a.entry, verb, words) ||
+							b.literal - a.literal ||
 							a.entry.fields.name.size - b.entry.fields.name.size ||
 							(a.entry.operation.toolName < b.entry.operation.toolName
 								? -1
@@ -455,7 +518,7 @@ export function operationTools(
 						: {
 								operations: [],
 								message:
-									"No operations matched. Try other words, or describe the result you want.",
+									'No operation matches that. Rephrase with the thing you want (for example "payouts" or "promo codes"), or use docs_search to check whether Whop supports it.',
 							},
 					null,
 					2,

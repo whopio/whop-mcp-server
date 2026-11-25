@@ -1335,7 +1335,7 @@
             "type": "boolean"
           },
           "legal_name": {
-            "description": "Registered company name including the entity ending, for example `Acme, LLC`. Present once `status` leaves `draft`.",
+            "description": "Registered company name including the entity ending, for example `Shine Time Auto Detailing, LLC`. Present once `status` leaves `draft`.",
             "example": "Shine Time Auto Detailing, LLC",
             "type": [
               "string",
@@ -4920,7 +4920,7 @@
           },
           "title": {
             "description": "Account display name.",
-            "example": "Second Account",
+            "example": "Shine Time Auto Detailing",
             "type": "string"
           }
         },
@@ -10095,7 +10095,7 @@
           },
           "name": {
             "description": "App display name.",
-            "example": "Other App",
+            "example": "Shine Time Alerts",
             "type": "string"
           }
         },
@@ -13907,7 +13907,7 @@
           },
           "content": {
             "description": "Markdown content. `null` for a deleted message.",
-            "example": "Content 1",
+            "example": "Which detailing service should we demonstrate next?",
             "type": [
               "string",
               "null"
@@ -13996,7 +13996,7 @@
           },
           "plain_content": {
             "description": "Unformatted message text. null when the text is absent or the message is deleted",
-            "example": "Content 1",
+            "example": "Which detailing service should we demonstrate next?",
             "type": [
               "string",
               "null"
@@ -14110,7 +14110,7 @@
             "type": "string"
           },
           "text": {
-            "example": "A",
+            "example": "Ceramic coating",
             "type": "string"
           },
           "vote_count": {
@@ -21148,7 +21148,7 @@
                 "type": "string"
               },
               "route": {
-                "description": "URL slug for the account's store page. For example, `pickaxe` in whop.com/pickaxe.",
+                "description": "URL slug for the account's store page. For example, `shine-time-auto-detailing` in whop.com/shine-time-auto-detailing.",
                 "example": "shine-time-auto-detailing",
                 "type": "string"
               },
@@ -21318,7 +21318,7 @@
                 "type": "string"
               },
               "route": {
-                "description": "URL slug for the account's store page. For example, `pickaxe` in whop.com/pickaxe.",
+                "description": "URL slug for the account's store page. For example, `shine-time-auto-detailing` in whop.com/shine-time-auto-detailing.",
                 "example": "shine-time-auto-detailing",
                 "type": "string"
               },
@@ -21535,7 +21535,7 @@
           },
           "name": {
             "description": "Human-readable display name.",
-            "example": "Checkout Redesign V2",
+            "example": "Ceramic Coating Photo Test",
             "type": "string"
           },
           "related_resource": {
@@ -22005,7 +22005,7 @@
           },
           "name": {
             "description": "The display name of the external account on the platform.",
-            "example": "Allene Balistreri",
+            "example": "Shine Time Auto Detailing",
             "type": [
               "string",
               "null"
@@ -22050,7 +22050,7 @@
           },
           "profile_picture_url": {
             "description": "The URL where the profile picture of the external account can be accessed.",
-            "example": "https://api.whop.com/valencia",
+            "example": "https://shinetime.example/tiktok-profile.png",
             "type": [
               "string",
               "null"
@@ -22066,7 +22066,7 @@
           },
           "url": {
             "description": "The URL where the external account can be accessed on the platform. Null while a Whop-owned account is still being provisioned.",
-            "example": "https://tiktok.com/@creator",
+            "example": "https://tiktok.com/@shinetimedetail",
             "type": [
               "string",
               "null"
@@ -22074,7 +22074,7 @@
           },
           "username": {
             "description": "The username of the external account on the platform. Null while a Whop-owned account is still being provisioned, and on platforms without usernames, such as Klaviyo.",
-            "example": "creator",
+            "example": "shinetimedetail",
             "type": [
               "string",
               "null"
@@ -25898,7 +25898,7 @@
                     "type": "string"
                   },
                   "route": {
-                    "description": "URL slug for the account's store page. For example, `pickaxe` in whop.com/pickaxe.",
+                    "description": "URL slug for the account's store page. For example, `shine-time-auto-detailing` in whop.com/shine-time-auto-detailing.",
                     "example": "shine-time-auto-detailing",
                     "type": "string"
                   },
@@ -29284,7 +29284,7 @@
           },
           "name": {
             "description": "The name the account gave this customer with `PATCH /members/:id`. Invoices show it as the customer name on every invoice for this member, in place of the user's own name. `null` when the account has not set one.",
-            "example": "Northwind Legal LLP",
+            "example": "Austin Fleet Care",
             "type": [
               "string",
               "null"
@@ -44811,7 +44811,7 @@
           },
           "name": {
             "description": "Experience display name.",
-            "example": "Name1",
+            "example": "Ceramic Coating Care",
             "type": "string"
           }
         },
@@ -44890,7 +44890,7 @@
                 "type": "string"
               },
               "route": {
-                "description": "URL slug for the account's store page. For example, `pickaxe` in whop.com/pickaxe.",
+                "description": "URL slug for the account's store page. For example, `shine-time-auto-detailing` in whop.com/shine-time-auto-detailing.",
                 "example": "shine-time-auto-detailing",
                 "type": "string"
               },
@@ -45216,7 +45216,7 @@
           },
           "headline": {
             "description": "Short marketing headline displayed on product page.",
-            "example": "customer journey",
+            "example": "Wear your Unlimited Wash Club colors",
             "type": [
               "string",
               "null"
@@ -48608,7 +48608,7 @@
             "type": "string"
           },
           "route": {
-            "description": "URL slug for the account's store page. For example, `pickaxe` in whop.com/pickaxe.",
+            "description": "URL slug for the account's store page. For example, `shine-time-auto-detailing` in whop.com/shine-time-auto-detailing.",
             "example": "shine-time-auto-detailing",
             "type": "string"
           },
@@ -49118,7 +49118,7 @@
           },
           "title": {
             "description": "Record name, such as a customer's name or a promo code. Display text in your locale that can change without a version change, so show it rather than parse it. `null` when the record has no name.",
-            "example": "Marcus Webb",
+            "example": "Dana Whitfield",
             "type": [
               "string",
               "null"
@@ -49134,7 +49134,7 @@
           },
           "username": {
             "description": "The user's username. `null` when the buyer is another business.",
-            "example": "danaortiz",
+            "example": "danawhitfield",
             "type": [
               "string",
               "null"
@@ -49253,7 +49253,7 @@
           },
           "description": {
             "description": "Short text about the record, such as an account's headline or a case's reason. Display text in your locale that can change without a version change. `null` when there's none.",
-            "example": "Marcus Webb",
+            "example": "Dana Whitfield",
             "type": [
               "string",
               "null"
@@ -49309,7 +49309,7 @@
           },
           "title": {
             "description": "Record name, such as a customer's name or a promo code. Display text in your locale that can change without a version change, so show it rather than parse it. `null` when the record has no name.",
-            "example": "Marcus Webb - Ceramic Coating Masterclass",
+            "example": "Dana Whitfield - Ceramic Coating Masterclass",
             "type": [
               "string",
               "null"
@@ -57821,7 +57821,7 @@
                   },
                   "title": {
                     "description": "The display name of the account. Defaults to `external_id` or the owner's email when omitted.",
-                    "example": "Referred Studio",
+                    "example": "Shine Time North",
                     "type": "string"
                   },
                   "verification_ids": {
@@ -60612,7 +60612,7 @@
                           ]
                         },
                         "shop_domain": {
-                          "description": "The shop domain spend is reported for, such as `acme.myshopify.com` or a custom domain for a non-Shopify store. `null` when none is set.",
+                          "description": "The shop domain spend is reported for, such as `shine-time.myshopify.com` or a custom domain for a non-Shopify store. `null` when none is set.",
                           "example": "shinetime.myshopify.com",
                           "type": [
                             "string",
@@ -61661,7 +61661,7 @@
                           ]
                         },
                         "shop_domain": {
-                          "description": "The shop domain spend is reported for, such as `acme.myshopify.com` or a custom domain for a non-Shopify store. `null` when none is set.",
+                          "description": "The shop domain spend is reported for, such as `shine-time.myshopify.com` or a custom domain for a non-Shopify store. `null` when none is set.",
                           "example": "shinetime.myshopify.com",
                           "type": [
                             "string",
@@ -76920,7 +76920,7 @@
                 "properties": {
                   "external_id": {
                     "description": "Your app's own identifier for this installation, such as the ID of the linked account in another system, or `null` when none is set. At most 255 characters and unique across your app's installations, so you can find an installation with `GET /app_installations?external_id=`; setting one another installation already has returns a `409`. Only the app and its developer see it; for the account the app is installed on it is always `null`.",
-                    "example": "acme-store",
+                    "example": "shine-time-austin",
                     "type": [
                       "string",
                       "null"
@@ -111215,7 +111215,7 @@
                   },
                   "name": {
                     "description": "Human-readable display name. Defaults to `flag_key` when omitted.",
-                    "example": "Checkout Redesign V2",
+                    "example": "Ceramic Coating Photo Test",
                     "type": "string"
                   },
                   "related_resource": {
@@ -123258,7 +123258,7 @@
                             },
                             "title": {
                               "description": "Variant title.",
-                              "example": "Coaching",
+                              "example": "Unlimited Wash Club",
                               "type": [
                                 "string",
                                 "null"
@@ -124040,7 +124040,7 @@
                             },
                             "title": {
                               "description": "Variant title.",
-                              "example": "Coaching",
+                              "example": "Unlimited Wash Club",
                               "type": [
                                 "string",
                                 "null"
@@ -126777,7 +126777,7 @@
                   },
                   "name": {
                     "description": "The name invoices show for this member, in place of the user's own. `null` clears it. Requires `member:manage`.",
-                    "example": "Northwind Legal LLP",
+                    "example": "Austin Fleet Care",
                     "maxLength": 255,
                     "type": [
                       "string",
@@ -129232,7 +129232,7 @@
                   },
                   "content": {
                     "description": "Markdown content. May be empty when the message contains media or a poll.",
-                    "example": "New **message**",
+                    "example": "Your **ceramic coating** is booked for Tuesday.",
                     "maxLength": 5000,
                     "type": "string"
                   },
@@ -129561,7 +129561,7 @@
                   },
                   "content": {
                     "description": "Replacement Markdown content.",
-                    "example": "Edited **message**",
+                    "example": "Your **ceramic coating** is booked for Wednesday.",
                     "maxLength": 5000,
                     "type": "string"
                   },
@@ -139645,7 +139645,7 @@
                           },
                           "name": {
                             "description": "The buyer's full name.",
-                            "example": "Dana Shine",
+                            "example": "Dana Whitfield",
                             "type": [
                               "string",
                               "null"
@@ -140468,7 +140468,7 @@
                           },
                           "name": {
                             "description": "The name on the card.",
-                            "example": "Dana Shine",
+                            "example": "Dana Whitfield",
                             "type": "string"
                           },
                           "phone": {
@@ -144829,7 +144829,7 @@
                   },
                   "statement_descriptor": {
                     "description": "Payment description sent with the payout, such as an invoice number or what it pays for. Must be 5-80 printable ASCII characters (letters, digits, spaces and punctuation); Whop sends it in upper case. Not all countries and banks show it on the recipient's statement, and it is not the sender name. Set this value when creating the quote; the payout request may omit it but cannot add or change it.",
-                    "example": "ACME INV-10432",
+                    "example": "SHINE INV-10432",
                     "maxLength": 80,
                     "minLength": 5,
                     "pattern": "^[ -~]+$",
@@ -147248,7 +147248,7 @@
                   },
                   "statement_descriptor": {
                     "description": "Payment description sent with the payout, such as an invoice number or what it pays for. Must be 5-80 printable ASCII characters (letters, digits, spaces and punctuation); Whop sends it in upper case. Not all countries and banks show it on the recipient's statement, and it is not the sender name. Omit or pass `null` to use the default descriptor.",
-                    "example": "ACME INV-10432",
+                    "example": "SHINE INV-10432",
                     "maxLength": 80,
                     "minLength": 5,
                     "pattern": "^[ -~]+$",
@@ -160652,7 +160652,7 @@
                       },
                       "name": {
                         "description": "The name on the card.",
-                        "example": "Dana Shine",
+                        "example": "Dana Whitfield",
                         "type": "string"
                       },
                       "phone": {
@@ -174177,7 +174177,7 @@
                                   ]
                                 },
                                 "first_name": {
-                                  "example": "Riley",
+                                  "example": "Marcus",
                                   "type": [
                                     "string",
                                     "null"
@@ -174189,7 +174189,7 @@
                                   "type": "string"
                                 },
                                 "last_name": {
-                                  "example": "Owner",
+                                  "example": "Webb",
                                   "type": [
                                     "string",
                                     "null"
@@ -175105,12 +175105,12 @@
                             },
                             "first_name": {
                               "description": "The new owner's first name.",
-                              "example": "Riley",
+                              "example": "Marcus",
                               "type": "string"
                             },
                             "last_name": {
                               "description": "The new owner's last name.",
-                              "example": "Owner",
+                              "example": "Webb",
                               "type": "string"
                             },
                             "ownership_percentage": {
@@ -175395,7 +175395,7 @@
                             ]
                           },
                           "first_name": {
-                            "example": "Riley",
+                            "example": "Marcus",
                             "type": [
                               "string",
                               "null"
@@ -175407,7 +175407,7 @@
                             "type": "string"
                           },
                           "last_name": {
-                            "example": "Owner",
+                            "example": "Webb",
                             "type": [
                               "string",
                               "null"
@@ -175982,7 +175982,7 @@
                             ]
                           },
                           "first_name": {
-                            "example": "Riley",
+                            "example": "Marcus",
                             "type": [
                               "string",
                               "null"
@@ -175994,7 +175994,7 @@
                             "type": "string"
                           },
                           "last_name": {
-                            "example": "Owner",
+                            "example": "Webb",
                             "type": [
                               "string",
                               "null"
@@ -176625,7 +176625,7 @@
                             ]
                           },
                           "first_name": {
-                            "example": "Riley",
+                            "example": "Marcus",
                             "type": [
                               "string",
                               "null"
@@ -176637,7 +176637,7 @@
                             "type": "string"
                           },
                           "last_name": {
-                            "example": "Owner",
+                            "example": "Webb",
                             "type": [
                               "string",
                               "null"
@@ -177576,7 +177576,7 @@
                             },
                             "first_name": {
                               "description": "The new owner's first name.",
-                              "example": "Riley",
+                              "example": "Marcus",
                               "type": "string"
                             },
                             "id": {
@@ -177586,7 +177586,7 @@
                             },
                             "last_name": {
                               "description": "The new owner's last name.",
-                              "example": "Owner",
+                              "example": "Webb",
                               "type": "string"
                             },
                             "ownership_percentage": {
@@ -178019,7 +178019,7 @@
                             ]
                           },
                           "first_name": {
-                            "example": "Riley",
+                            "example": "Marcus",
                             "type": [
                               "string",
                               "null"
@@ -178031,7 +178031,7 @@
                             "type": "string"
                           },
                           "last_name": {
-                            "example": "Owner",
+                            "example": "Webb",
                             "type": [
                               "string",
                               "null"

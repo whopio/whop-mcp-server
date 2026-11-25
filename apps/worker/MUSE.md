@@ -172,7 +172,7 @@ for approval on every use.
 
 | Tool | Classification | What it does |
 |---|---|---|
-| `search_operations` | Read | Finds read-only Whop operations from plain words, with the input schema for the top 3 |
+| `search_operations` | Read | Finds read-only Whop operations from plain words, with the input schema for the best match |
 | `describe_operation` | Read | Returns one operation's full input schema, including inputs a listed tool leaves out |
 | `call_read_operation` | Read | Runs one read-only operation found with `search_operations`; it refuses anything that changes data |
 
