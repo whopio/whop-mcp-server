@@ -100,7 +100,8 @@ overrides:
     description: >-
       Chart a business metric over time for an account or user, as points
       over a date range. Use it for trend questions. Find the metric names
-      with stats_time-series_list. For a single total that is not bucketed
+      with stats_time-series_list. Traffic metrics allow at most 30 days
+      per request: split longer ranges into 30-day windows. For a single total that is not bucketed
       over time, use a report from `GET /stats/reports`.
     listedSchemaOnly:
       - account_id
