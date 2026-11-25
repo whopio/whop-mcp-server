@@ -111153,7 +111153,7 @@
             }
           },
           {
-            "description": "The field to sort experiments by.",
+            "description": "The field to sort experiments by. `lift` puts the experiment whose primary measure moved the most first. With `account_id=global` it is the only order allowed.",
             "in": "query",
             "name": "order",
             "required": false,
@@ -111161,7 +111161,8 @@
               "default": "created_at",
               "enum": [
                 "created_at",
-                "flag_key"
+                "flag_key",
+                "lift"
               ],
               "type": "string"
             }
