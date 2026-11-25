@@ -6242,6 +6242,24 @@
       },
       "AdContentReviewTag": {
         "properties": {
+          "blocking": {
+            "description": "Whether this rule keeps the ad from running until it's fixed. `false` when the ad can still run and fixing it only lets the ad run on more networks.",
+            "type": "boolean"
+          },
+          "locations": {
+            "items": {
+              "description": "Where on the ad the review found this. `creative` is the image or video, and `audio` is what is said or heard in it. `copy` is the ad's text, and `destination` is the landing page. Empty on reviews saved before findings recorded where they were found.",
+              "enum": [
+                "creative",
+                "audio",
+                "copy",
+                "destination"
+              ],
+              "example": "creative",
+              "type": "string"
+            },
+            "type": "array"
+          },
           "message": {
             "description": "The evidence the review recorded for this rule.",
             "type": "string"
@@ -6253,7 +6271,9 @@
         },
         "required": [
           "title",
-          "message"
+          "message",
+          "blocking",
+          "locations"
         ],
         "type": "object"
       },
