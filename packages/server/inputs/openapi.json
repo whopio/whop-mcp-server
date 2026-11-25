@@ -5212,7 +5212,7 @@
           },
           "click_through_rate": {
             "description": "Clicks divided by impressions, between 0 and 1.",
-            "example": 0.0261,
+            "example": 0.0209,
             "type": "number"
           },
           "clicks": {
@@ -5254,7 +5254,7 @@
           },
           "cost_per_click": {
             "description": "Spend divided by clicks; 0 when there are no clicks.",
-            "example": 0.36,
+            "example": 0.45,
             "type": "number"
           },
           "cost_per_completed_registration": {
@@ -5743,7 +5743,7 @@
           },
           "click_through_rate": {
             "description": "Clicks divided by impressions, between 0 and 1.",
-            "example": 0.025,
+            "example": 0.02,
             "type": "number"
           },
           "clicks": {
@@ -5781,7 +5781,7 @@
           },
           "cost_per_click": {
             "description": "Spend divided by clicks; 0 when there are no clicks.",
-            "example": 0.24,
+            "example": 0.3,
             "type": "number"
           },
           "cost_per_completed_registration": {
@@ -6482,7 +6482,7 @@
           },
           "click_through_rate": {
             "description": "Clicks divided by impressions, between 0 and 1.",
-            "example": 0.025,
+            "example": 0.02,
             "type": "number"
           },
           "clicks": {
@@ -6523,7 +6523,7 @@
           },
           "cost_per_click": {
             "description": "Spend divided by clicks; 0 when there are no clicks.",
-            "example": 0.24,
+            "example": 0.3,
             "type": "number"
           },
           "cost_per_completed_registration": {
