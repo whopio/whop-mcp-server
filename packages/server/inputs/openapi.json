@@ -25026,6 +25026,7 @@
             "$ref": "#/components/schemas/Money"
           },
           "tax_amount": {
+            "description": "The tax charged on the invoice. On a draft, it is an estimate once the draft has a complete billing address, calculated as if it were issued now. Issuing calculates it again, so the final tax can differ. `null` on a draft without a complete billing address, and when tax could not be estimated.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/Money"
@@ -25041,7 +25042,8 @@
             "type": "string"
           },
           "total": {
-            "$ref": "#/components/schemas/Money"
+            "$ref": "#/components/schemas/Money",
+            "description": "The amount the invoice charges, including tax. On a draft, it includes the estimated `tax_amount`, if any."
           },
           "totals_status": {
             "enum": [
