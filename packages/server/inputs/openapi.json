@@ -7,7 +7,7 @@
         "name": "Api-Version-Date",
         "required": false,
         "schema": {
-          "example": "2026-11-23-3",
+          "example": "2026-11-25",
           "type": "string"
         }
       },
@@ -4580,13 +4580,14 @@
             ]
           },
           "type": {
-            "description": "Why this part of the balance is held. `regular` is the account's standing risk reserve; `bnpl` and `sequra` cover buy-now-pay-later settlement; `preshipment_hold` covers a physical order that has not shipped yet; `fraud_hold` is held while activity is reviewed.",
+            "description": "Why this part of the balance is held. `regular` is the account's standing risk reserve. `bnpl` and `sequra` cover buy-now-pay-later settlement. `preshipment_hold` covers a physical order that has not shipped yet. `fraud_hold` is held while activity is reviewed. `subaccount_negative_balances` is held by a platform for the negative balances of its sub-accounts.",
             "enum": [
               "regular",
               "bnpl",
               "sequra",
               "fraud_hold",
-              "preshipment_hold"
+              "preshipment_hold",
+              "subaccount_negative_balances"
             ],
             "example": "regular",
             "type": "string"
@@ -8521,9 +8522,10 @@
               "2026-11-23",
               "2026-11-23-1",
               "2026-11-23-2",
-              "2026-11-23-3"
+              "2026-11-23-3",
+              "2026-11-25"
             ],
-            "example": "2026-11-23-3",
+            "example": "2026-11-25",
             "type": "string"
           },
           "created_at": {
@@ -55744,7 +55746,7 @@
           },
           "api_version_date": {
             "description": "The dated API version (Api-Version-Date) that v1 payloads for this endpoint are pinned to: events serialize exactly like a REST read at this version (the native serializer where the resource has one). Null when unpinned — legacy (v2/v5) webhooks, and v1 webhooks on the legacy payload shape.",
-            "example": "2026-11-23-3",
+            "example": "2026-01-01",
             "type": [
               "string",
               "null"
@@ -56346,7 +56348,7 @@
           },
           "api_version_date": {
             "description": "The dated API version (Api-Version-Date) that v1 payloads for this endpoint are pinned to: events serialize exactly like a REST read at this version (the native serializer where the resource has one). Null when unpinned — legacy (v2/v5) webhooks, and v1 webhooks on the legacy payload shape.",
-            "example": "2026-11-23-3",
+            "example": "2026-01-01",
             "type": [
               "string",
               "null"
@@ -56756,7 +56758,7 @@
     "termsOfService": "https://whop.com/tos-developer-api/",
     "title": "Whop API",
     "version": "1.0.0",
-    "x-api-version-date": "2026-11-23-3"
+    "x-api-version-date": "2026-11-25"
   },
   "openapi": "3.1.0",
   "paths": {
@@ -75375,9 +75377,10 @@
                       "2026-11-23",
                       "2026-11-23-1",
                       "2026-11-23-2",
-                      "2026-11-23-3"
+                      "2026-11-23-3",
+                      "2026-11-25"
                     ],
-                    "example": "2026-11-23-3",
+                    "example": "2026-11-25",
                     "type": "string"
                   },
                   "expires_at": {
@@ -75858,9 +75861,10 @@
                       "2026-11-23",
                       "2026-11-23-1",
                       "2026-11-23-2",
-                      "2026-11-23-3"
+                      "2026-11-23-3",
+                      "2026-11-25"
                     ],
-                    "example": "2026-11-23-3",
+                    "example": "2026-11-25",
                     "type": "string"
                   },
                   "expires_at": {
@@ -179773,7 +179777,7 @@
                 "properties": {
                   "api_version_date": {
                     "description": "The dated API version (Api-Version-Date) to pin this webhook's payloads to. Omit to leave the webhook unpinned, tracking the current payload shape.",
-                    "example": "2026-11-23-3",
+                    "example": "2026-01-01",
                     "type": [
                       "string",
                       "null"
@@ -180118,7 +180122,7 @@
                 "properties": {
                   "api_version_date": {
                     "description": "The dated API version (Api-Version-Date) to pin this webhook's payloads to. Only valid for `v1` webhooks. Omit to leave the current pin unchanged, or pass `null` to unpin and track the current payload shape.",
-                    "example": "2026-11-23-3",
+                    "example": "2026-01-01",
                     "type": [
                       "string",
                       "null"
@@ -181451,7 +181455,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -181783,7 +181787,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -182115,7 +182119,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "disabled_at": "2026-01-01T12:00:00.000Z",
@@ -182248,7 +182252,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "ads_spend_usd": null,
                   "balances": [],
@@ -182586,7 +182590,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "ad_campaign": {
                     "id": "adcamp_xxxxxxxxxxxxxx"
@@ -182926,7 +182930,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "banner_image_url": null,
@@ -183294,7 +183298,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "banner_image_url": null,
@@ -183668,7 +183672,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "ad_campaign": {
                     "id": "adcamp_xxxxxxxxxxxxxx"
@@ -184071,7 +184075,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxx2",
@@ -184217,7 +184221,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxx2",
@@ -184363,7 +184367,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -184784,7 +184788,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -185205,7 +185209,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -185626,7 +185630,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "billing": null,
                   "canceled_at": null,
@@ -186047,7 +186051,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -186216,7 +186220,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -186385,7 +186389,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -186554,7 +186558,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "hosted_url": null,
                   "id": "ciac_xxxxxxxxxxxxxx",
@@ -186723,7 +186727,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -186864,7 +186868,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -187005,7 +187009,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -187146,7 +187150,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -187287,7 +187291,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "card_id": "icrd_xxxxxxxxxxxxxx",
                   "cardholder_id": null,
@@ -187428,7 +187432,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "audience": {
                     "type": "channel",
@@ -187685,7 +187689,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "audience": {
                     "type": "channel",
@@ -187956,7 +187960,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "completed": true,
                   "course": {
@@ -188100,7 +188104,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "amount": "75000000000",
                   "available_at": null,
@@ -188241,7 +188245,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "acceptable": true,
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -188434,7 +188438,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "acceptable": false,
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -188627,7 +188631,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": null,
                   "amount": 25.0,
@@ -188768,7 +188772,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -188913,7 +188917,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -189058,7 +189062,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "apple_pay": null,
@@ -189203,7 +189207,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -189348,7 +189352,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -189493,7 +189497,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -189638,7 +189642,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "custom_field_responses": [
@@ -189783,7 +189787,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "events": [
                     {
@@ -190206,7 +190210,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "download_url": "https://s3.amazonaws.com/uploads/exports/members-export.csv",
@@ -190336,7 +190340,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "created_at": "2026-01-01T12:00:00.000Z",
                   "download_url": null,
@@ -190466,7 +190470,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "amount": "512345000000",
                   "available_at": "2026-01-01T12:00:00.000Z",
@@ -190606,7 +190610,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "id": "idpf_xxxxxxxxxxxxxx"
                 },
@@ -190739,7 +190743,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -190923,7 +190927,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -191107,7 +191111,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -191291,7 +191295,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -191475,7 +191479,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "automatically_finalizes_at": null,
                   "charge_buyer_fee": false,
@@ -191659,7 +191663,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "balances": [
                     {
@@ -191803,7 +191807,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -191969,7 +191973,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "access_level": "customer",
                   "account_id": "biz_xxxxxxxxxxxxxx",
@@ -192135,7 +192139,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "banner_image_url": null,
@@ -192312,7 +192316,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "banner_image_url": null,
@@ -192489,7 +192493,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "banner_image_url": null,
@@ -192666,7 +192670,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -192976,7 +192980,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -193286,7 +193290,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -193596,7 +193600,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -193906,7 +193910,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -194209,7 +194213,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -194519,7 +194523,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "amount_after_fees": {
@@ -194829,7 +194833,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -195372,7 +195376,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -195912,7 +195916,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "amount": "10.0",
                   "cancelable": false,
@@ -196447,7 +196451,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "address": {
                     "city": "Austin",
@@ -196589,7 +196593,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_reference": "4483",
                   "bank_verification_state": null,
@@ -197196,7 +197200,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -197512,7 +197516,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -197828,7 +197832,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -198144,7 +198148,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -198307,7 +198311,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -198470,7 +198474,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -198633,7 +198637,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -198796,7 +198800,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -198959,7 +198963,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "amount": 50.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -199129,7 +199133,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "amount": 50.0,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -199299,7 +199303,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -199475,7 +199479,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -199647,7 +199651,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -199819,7 +199823,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -199970,7 +199974,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -200118,7 +200122,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "checkout_configuration_id": null,
@@ -200309,7 +200313,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "carrier": "ups",
@@ -200442,7 +200446,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account_id": "biz_xxxxxxxxxxxxxx",
                   "carrier": "ups",
@@ -200575,7 +200579,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "amount": {
                     "amount": "-1234.56",
@@ -200761,7 +200765,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "account": {
                     "id": "biz_xxxxxxxxxxxxxx",
@@ -201014,7 +201018,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "amount": {
                     "amount": "250.00",
@@ -201404,7 +201408,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "amount": {
                     "amount": "250.00",
@@ -201794,7 +201798,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "amount": null,
                   "created_at": "2026-01-01T12:00:00.000Z",
@@ -202172,7 +202176,7 @@
               "example": {
                 "account_id": "biz_xxxxxxxxxxxxxx",
                 "api_version": "v1",
-                "api_version_date": "2026-11-23-3",
+                "api_version_date": "2026-11-25",
                 "data": {
                   "id": "verf_xxxxxxxxxxxxxx",
                   "last_error_code": null,
