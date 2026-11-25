@@ -5157,6 +5157,14 @@
             "example": 74,
             "type": "number"
           },
+          "appeal_available_at": {
+            "description": "When the ad can next be appealed, as an ISO 8601 timestamp. `null` when it can be appealed now.",
+            "example": "2026-01-01T12:00:00.000Z",
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "call_to_action": {
             "description": "The call-to-action button shown on the ad.",
             "enum": [
@@ -5647,6 +5655,7 @@
           "ad_campaign",
           "creatives",
           "content_review",
+          "appeal_available_at",
           "created_at",
           "updated_at",
           "issues"
@@ -6216,6 +6225,11 @@
       },
       "AdContentReview": {
         "properties": {
+          "blocked_by_website": {
+            "description": "Whether the ad is held back for a rule the review found on its website. Changing the website and rechecking it can clear the ad.",
+            "example": false,
+            "type": "boolean"
+          },
           "status": {
             "description": "`reviewed` once Whop content review finishes, `in_review` while it runs, `not_reviewed` when it never ran.",
             "enum": [
@@ -6236,7 +6250,8 @@
         },
         "required": [
           "status",
-          "tags"
+          "tags",
+          "blocked_by_website"
         ],
         "type": "object"
       },
@@ -67789,6 +67804,111 @@
           }
         ],
         "summary": "Update an Ad",
+        "tags": [
+          "Ads"
+        ]
+      },
+      "x-whop-surface": "native"
+    },
+    "/ads/{id}/appeal": {
+      "parameters": [
+        {
+          "$ref": "#/components/parameters/ApiVersionDate"
+        },
+        {
+          "description": "The ad ID.",
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "description": "Asks Whop to review the ad again. A `website` appeal reviews the ad against its website as it is now. It only applies to an ad held back for something found on its website. An ad can be appealed once an hour.",
+        "operationId": "appealAd",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "type": {
+                    "description": "How to review the ad again. `website` reviews it against its website as it is now.",
+                    "enum": [
+                      "website"
+                    ],
+                    "example": "website",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type"
+                ],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Ad"
+                }
+              }
+            },
+            "description": "review started"
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1ErrorResponse"
+                }
+              }
+            },
+            "description": "nothing found on the ad's website is holding it back"
+          },
+          "403": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1ErrorResponse"
+                }
+              }
+            },
+            "description": "the ad belongs to a business the caller can't edit"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/V1ErrorResponse"
+                }
+              }
+            },
+            "description": "appealed less than an hour ago"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": [
+              "ad_campaign:update"
+            ]
+          }
+        ],
+        "summary": "Appeal an Ad",
         "tags": [
           "Ads"
         ]
@@ -182339,8 +182459,10 @@
                   "ad_group": {
                     "id": "adgrp_xxxxxxxxxxxxxx"
                   },
+                  "appeal_available_at": null,
                   "call_to_action": null,
                   "content_review": {
+                    "blocked_by_website": false,
                     "status": "not_reviewed",
                     "tags": []
                   },
@@ -182398,6 +182520,14 @@
                       "ad_group": {
                         "$ref": "#/components/schemas/AdEntityReference",
                         "description": "The ad group this ad belongs to."
+                      },
+                      "appeal_available_at": {
+                        "description": "When the ad can next be appealed, as an ISO 8601 timestamp. `null` when it can be appealed now.",
+                        "example": "2026-01-01T12:00:00.000Z",
+                        "type": [
+                          "string",
+                          "null"
+                        ]
                       },
                       "call_to_action": {
                         "description": "The call-to-action button shown on the ad.",
@@ -182563,6 +182693,7 @@
                       "ad_campaign",
                       "creatives",
                       "content_review",
+                      "appeal_available_at",
                       "created_at",
                       "updated_at",
                       "issues"
