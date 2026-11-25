@@ -89,6 +89,16 @@ export class Dispatcher {
 		rawArgs: Record<string, unknown>,
 		principal: PrincipalContext,
 	): Record<string, unknown> {
+		if (
+			principal.principalType === "user" &&
+			operation.path.startsWith("/accounts/{id}") &&
+			rawArgs.id === "me"
+		) {
+			throw new WhopMcpError(
+				"invalid_input",
+				`"me" only works with an account API key. Pass a biz_ id as id; list your businesses with accounts_list.`,
+			);
+		}
 		const args = enforceAccountBinding(operation, rawArgs, principal);
 
 		const validationErrors = validateAgainstSchema(args, operation.inputSchema);

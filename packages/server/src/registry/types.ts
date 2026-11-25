@@ -94,6 +94,8 @@ export interface OperationDef {
 	/** The account parameter this operation accepts, if any. */
 	accountParam: AccountParam | null;
 	requiresAccount: boolean;
+	/** Inputs that stand in for the account (product_ids, user_id) when the API accepts either. */
+	accountAlternatives?: string[];
 	/** Position in compact tool listings (1 = listed first); every other operation is reached through the operation tools. */
 	core?: number;
 	/** Optional inputs left out of compact listings; describe_operation shows them and validation still uses inputSchema. */

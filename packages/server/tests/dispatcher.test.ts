@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { Dispatcher } from "../src/runtime/dispatcher.ts";
 import type { OperationDef } from "../src/registry/types.ts";
-import { WhopMcpError } from "../src/runtime/errors.ts";
+import { WhopMcpError, withNotFoundHint } from "../src/runtime/errors.ts";
 import {
 	buildRealRegistry,
 	fakeFetch,
@@ -695,6 +695,71 @@ describe("dispatcher", () => {
 				makeDispatcher(fetch).dispatch(op, {}, principal),
 			).rejects.toMatchObject({ code, status });
 		}
+	});
+
+	it("maps upstream statuses to stable codes", async () => {
+		const op = findOperation(registry, "products_list");
+		for (const [status, code, retryable] of [
+			[400, "invalid_input", false],
+			[422, "invalid_input", false],
+			[404, "not_found", false],
+			[409, "conflict", false],
+			[429, "rate_limited", true],
+			[500, "upstream_unavailable", true],
+			[503, "upstream_unavailable", true],
+			[418, "upstream_error", false],
+		] as const) {
+			const { fetch } = fakeFetch(() => ({
+				status,
+				body: { error: { message: "Nope" } },
+			}));
+			const error = await makeDispatcher(fetch)
+				.dispatch(op, {}, principal)
+				.catch((e: WhopMcpError) => e);
+			expect(error).toMatchObject({ code, status, message: "Nope" });
+			expect((error as WhopMcpError).toResult()).toMatchObject({
+				error: retryable ? { retryable: true } : {},
+			});
+		}
+	});
+
+	it("rejects id me for a user credential before calling Whop", async () => {
+		const op = findOperation(registry, "accounts_get");
+		const { fetch, requests } = fakeFetch();
+		await expect(
+			makeDispatcher(fetch).dispatch(
+				op,
+				{ id: "me" },
+				{ ...principal, principalType: "user", accountId: null },
+			),
+		).rejects.toMatchObject({
+			code: "invalid_input",
+			message: expect.stringContaining("accounts_list"),
+		});
+		expect(requests).toHaveLength(0);
+	});
+
+	it("names the list tool on a 404 for a by-id operation", () => {
+		const notFound = new WhopMcpError("not_found", "Ad campaign not found", {
+			status: 404,
+		});
+		const get = findOperation(registry, "ad-campaigns_get");
+		const hinted = withNotFoundHint(notFound, get, registry.operations);
+		expect(hinted.code).toBe("not_found");
+		expect(hinted.status).toBe(404);
+		expect(hinted.message).toBe(
+			"Ad campaign not found Find valid ids with ad-campaigns_list (needs account_id).",
+		);
+		const list = findOperation(registry, "ad-campaigns_list");
+		expect(withNotFoundHint(notFound, list, registry.operations)).toBe(
+			notFound,
+		);
+		const other = new WhopMcpError("conflict", "x");
+		expect(withNotFoundHint(other, get, registry.operations)).toBe(other);
+		const nested = findOperation(registry, "affiliates_overrides");
+		expect(
+			withNotFoundHint(notFound, nested, registry.operations).message,
+		).toContain("affiliates_list-overrides");
 	});
 
 	it("times out slow upstream requests", async () => {

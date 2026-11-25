@@ -596,7 +596,7 @@
           },
           "route": {
             "description": "Account public route identifier.",
-            "example": "biz_xxxxxxxxxxxxxx",
+            "example": "jordan",
             "type": "string"
           },
           "send_customer_emails": {
@@ -21273,7 +21273,7 @@
         "type": "object"
       },
       "ExperienceAccessLevels": {
-        "description": "The different access levels for experiences (PUBLIC IS NEVER USED ANYMORE).",
+        "description": "The different access levels for experiences.",
         "enum": [
           "public",
           "private"
@@ -21586,7 +21586,7 @@
           },
           "updated_at": {
             "example": "2026-01-01T12:00:00.000Z",
-            "format": "date_time",
+            "format": "date-time",
             "nullable": true,
             "type": "string"
           },
@@ -64183,7 +64183,8 @@
           "account_user_token",
           "oauth_token",
           "user_api_key"
-        ]
+        ],
+        "x-whop-requires-account": true
       },
       "parameters": [
         {
@@ -65125,7 +65126,8 @@
           "account_user_token",
           "oauth_token",
           "user_api_key"
-        ]
+        ],
+        "x-whop-requires-account": true
       },
       "parameters": [
         {
@@ -67245,7 +67247,8 @@
           "account_user_token",
           "oauth_token",
           "user_api_key"
-        ]
+        ],
+        "x-whop-requires-account": true
       },
       "parameters": [
         {
@@ -76235,7 +76238,8 @@
         "summary": "List Api Logs",
         "tags": [
           "Api Logs"
-        ]
+        ],
+        "x-whop-requires-account": true
       },
       "parameters": [
         {
@@ -92624,7 +92628,7 @@
                 "description": "Parameters for CreateChapter",
                 "properties": {
                   "course_id": {
-                    "description": "The unique identifier of the course to create the chapter in (e.g., \"course_XXXXX\").",
+                    "description": "The unique identifier of the course to create the chapter in (for example, \"cors_XXXXX\").",
                     "example": "cors_xxxxxxxxxxxxx",
                     "type": "string"
                   },
@@ -96007,7 +96011,7 @@
         "operationId": "deleteCourseLesson",
         "parameters": [
           {
-            "description": "The unique identifier of the lesson to delete (e.g., \"les_XXXXX\").",
+            "description": "The unique identifier of the lesson to delete (for example, \"lesn_XXXXX\").",
             "in": "path",
             "name": "id",
             "required": true,
@@ -96780,7 +96784,7 @@
         "operationId": "updateCourseLesson",
         "parameters": [
           {
-            "description": "The unique identifier of the lesson to update (e.g., \"les_XXXXX\").",
+            "description": "The unique identifier of the lesson to update (for example, \"lesn_XXXXX\").",
             "in": "path",
             "name": "id",
             "required": true,
@@ -97427,7 +97431,7 @@
         "operationId": "markAsCompletedCourseLesson",
         "parameters": [
           {
-            "description": "The unique identifier of the lesson to mark as completed (e.g., \"les_XXXXX\").",
+            "description": "The unique identifier of the lesson to mark as completed (for example, \"lesn_XXXXX\").",
             "in": "path",
             "name": "lesson_id",
             "required": true,
@@ -97813,7 +97817,7 @@
         "operationId": "startCourseLesson",
         "parameters": [
           {
-            "description": "The unique identifier of the lesson the user is starting (e.g., \"les_XXXXX\").",
+            "description": "The unique identifier of the lesson the user is starting (for example, \"lesn_XXXXX\").",
             "in": "path",
             "name": "lesson_id",
             "required": true,
@@ -98199,7 +98203,7 @@
         "operationId": "submitAssessmentCourseLesson",
         "parameters": [
           {
-            "description": "The unique identifier of the quiz or knowledge check lesson to submit answers for (e.g., \"les_XXXXX\").",
+            "description": "The unique identifier of the quiz or knowledge check lesson to submit answers for (for example, \"lesn_XXXXX\").",
             "in": "path",
             "name": "lesson_id",
             "required": true,
@@ -100524,7 +100528,7 @@
         "operationId": "deleteCourse",
         "parameters": [
           {
-            "description": "The unique identifier of the course to delete (e.g., \"course_XXXXX\").",
+            "description": "The unique identifier of the course to delete (for example, \"cors_XXXXX\").",
             "in": "path",
             "name": "id",
             "required": true,
@@ -101297,7 +101301,7 @@
         "operationId": "updateCourse",
         "parameters": [
           {
-            "description": "The unique identifier of the course to update (e.g., \"course_XXXXX\").",
+            "description": "The unique identifier of the course to update (for example, \"cors_XXXXX\").",
             "in": "path",
             "name": "id",
             "required": true,
@@ -112445,7 +112449,8 @@
         "summary": "List Exports",
         "tags": [
           "Exports"
-        ]
+        ],
+        "x-whop-requires-account": true
       },
       "parameters": [
         {
@@ -112730,7 +112735,8 @@
         "summary": "Create Export",
         "tags": [
           "Exports"
-        ]
+        ],
+        "x-whop-requires-account": true
       },
       "x-whop-surface": "native"
     },
@@ -117279,7 +117285,8 @@
           "account_api_key",
           "account_token",
           "oauth_token"
-        ]
+        ],
+        "x-whop-requires-account": true
       },
       "x-whop-surface": "native"
     },
@@ -126311,7 +126318,8 @@
         "summary": "Generate Media Asset",
         "tags": [
           "Media"
-        ]
+        ],
+        "x-whop-requires-account": true
       },
       "x-whop-surface": "native"
     },
@@ -126733,7 +126741,8 @@
         "summary": "List Members",
         "tags": [
           "Members"
-        ]
+        ],
+        "x-whop-requires-account": true
       },
       "parameters": [
         {
@@ -150657,7 +150666,8 @@
         "summary": "List People",
         "tags": [
           "People"
-        ]
+        ],
+        "x-whop-requires-account": true
       },
       "x-whop-surface": "native"
     },
@@ -151619,7 +151629,8 @@
         "summary": "Retrieve Person",
         "tags": [
           "People"
-        ]
+        ],
+        "x-whop-requires-account": true
       },
       "x-whop-surface": "native"
     },
@@ -151913,8 +151924,12 @@
         "tags": [
           "Plans"
         ],
+        "x-whop-account-alternatives": [
+          "product_ids"
+        ],
         "x-whop-deprecated-since": "2026-09-24",
         "x-whop-docs": "hidden",
+        "x-whop-requires-account": true,
         "x-whop-successor": "GET /variants"
       },
       "parameters": [
@@ -152205,6 +152220,7 @@
         ],
         "x-whop-deprecated-since": "2026-09-24",
         "x-whop-docs": "hidden",
+        "x-whop-requires-account": true,
         "x-whop-successor": "POST /variants"
       },
       "x-whop-surface": "native"
@@ -153629,7 +153645,8 @@
         "summary": "Create Product",
         "tags": [
           "Products"
-        ]
+        ],
+        "x-whop-requires-account": true
       },
       "x-whop-surface": "native"
     },
@@ -154270,6 +154287,7 @@
                     "type": "string"
                   },
                   "amount_off": {
+                    "description": "The discount. For `percentage`, a whole percent from 0.01 to 100 (25 means 25% off). Responses return it as a fraction, 0.25. For `flat_amount`, an amount in `base_currency` units, such as dollars (5 means $5.00).",
                     "example": 25,
                     "type": "number"
                   },
@@ -154375,6 +154393,7 @@
                     "type": "boolean"
                   },
                   "code": {
+                    "description": "The code customers enter at checkout. Stored lowercase.",
                     "example": "AFFILIATE25",
                     "type": "string"
                   },
@@ -154405,6 +154424,7 @@
                     ]
                   },
                   "promo_duration_months": {
+                    "description": "How many billing cycles the discount applies to: 0 for every payment, 1 for the first payment only, N to cover the first N payments.",
                     "example": 3,
                     "type": "integer"
                   },
@@ -154417,6 +154437,7 @@
                     "type": "string"
                   },
                   "stock": {
+                    "description": "How many times the code can be used. Required unless `unlimited_stock` is true.",
                     "example": 200,
                     "type": [
                       "integer",
@@ -154424,6 +154445,7 @@
                     ]
                   },
                   "unlimited_stock": {
+                    "description": "Allow unlimited uses. When false or omitted, `stock` is required.",
                     "example": false,
                     "type": "boolean"
                   },
@@ -164506,6 +164528,7 @@
               "enum": [
                 "global",
                 "owner",
+                "platforms",
                 "public"
               ],
               "type": "string"
@@ -165703,6 +165726,7 @@
               "enum": [
                 "global",
                 "owner",
+                "platforms",
                 "public"
               ],
               "type": "string"
@@ -167277,7 +167301,12 @@
         "summary": "List Team Members",
         "tags": [
           "Team Members"
-        ]
+        ],
+        "x-whop-account-alternatives": [
+          "user_id",
+          "user_ids"
+        ],
+        "x-whop-requires-account": true
       },
       "parameters": [
         {
@@ -172761,7 +172790,11 @@
         "summary": "List Variants",
         "tags": [
           "Variants"
-        ]
+        ],
+        "x-whop-account-alternatives": [
+          "product_ids"
+        ],
+        "x-whop-requires-account": true
       },
       "parameters": [
         {
@@ -172859,7 +172892,7 @@
                     "type": "string"
                   },
                   "custom_fields": {
-                    "description": "An array of custom field definitions to collect from customers at checkout. Omitting this field clears existing custom fields.",
+                    "description": "An array of custom field definitions to collect from customers at checkout. On update, omitting this field leaves existing custom fields unchanged. Send an empty array to clear them.",
                     "items": {
                       "properties": {
                         "field_type": {
@@ -173142,7 +173175,8 @@
         "summary": "Create Variant",
         "tags": [
           "Variants"
-        ]
+        ],
+        "x-whop-requires-account": true
       },
       "x-whop-surface": "native"
     },
@@ -173358,7 +173392,7 @@
                     "type": "string"
                   },
                   "custom_fields": {
-                    "description": "An array of custom field definitions to collect from customers at checkout. Omitting this field clears existing custom fields.",
+                    "description": "An array of custom field definitions to collect from customers at checkout. On update, omitting this field leaves existing custom fields unchanged. Send an empty array to clear them.",
                     "items": {
                       "properties": {
                         "field_type": {
@@ -178816,7 +178850,7 @@
             "name": "created_before",
             "required": false,
             "schema": {
-              "format": "date_time",
+              "format": "date-time",
               "type": "string"
             }
           },
@@ -178826,7 +178860,7 @@
             "name": "created_after",
             "required": false,
             "schema": {
-              "format": "date_time",
+              "format": "date-time",
               "type": "string"
             }
           },

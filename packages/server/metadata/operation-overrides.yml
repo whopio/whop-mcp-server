@@ -4,8 +4,11 @@
 #
 # Supported fields:
 #   description:      replaces the public tool description
+#   summary:          replaces the one-line summary search results show
 #   principals:       restricts supported principal types (user | business | app)
-#   requiresAccount:  overrides whether a selected business account is required
+#   requiresAccount:  overrides whether a selected business account is required;
+#                     prefer requires_account on the Rails controller, which
+#                     reaches the registry as x-whop-requires-account
 #   listedSchemaOmit: optional inputs that compact tool listings leave out;
 #                     describe_operation shows them and validation still uses
 #                     the full schema, so required inputs cannot be omitted
@@ -84,8 +87,9 @@ overrides:
       variant. Only call this for a payment whose `retryable` field is true
       (read it with payments_get or payments_list); any other payment returns
       400, and calling again will not change that. A payment can be retried
-      manually once, so after one attempt `retryable` turns false. Do not retry
-      every failed payment in a list: filter to `retryable: true` first.
+      manually once, so after one attempt `retryable` turns false. Payments
+      cannot be filtered by `retryable`, so check the payment's `retryable`
+      field first and never retry every failed payment in a list.
 
   "POST /ads/{id}/pause":
     description: >-
@@ -102,7 +106,7 @@ overrides:
       over a date range. Use it for trend questions. Find the metric names
       with stats_time-series_list. Traffic metrics allow at most 30 days
       per request: split longer ranges into 30-day windows. For a single total that is not bucketed
-      over time, use a report from `GET /stats/reports`.
+      over time, use a report from stats_reports_list.
     listedSchemaOnly:
       - account_id
       - breakdown_by
@@ -115,11 +119,6 @@ overrides:
       - product
       - time_zone
       - user_id
-
-  # The API rejects a user token without account_id on this list, so a user
-  # connection is asked for the business up front.
-  "GET /ad_campaigns":
-    requiresAccount: true
 
   "GET /apps":
     listedSchemaOnly:
@@ -183,7 +182,6 @@ overrides:
       See your customers: everyone who has bought from an account. A
       member is one buyer's relationship with the account, however many
       memberships they hold.
-    requiresAccount: true
     listedSchemaOmit: [affiliate_id, buyer_account_ids]
 
   "GET /channels":
@@ -271,9 +269,10 @@ overrides:
 
   "GET /refunds":
     description: >-
-      See refunds you have issued. Filter by exactly one of `payment_id`,
-      `company_id` or `user_id`; they cannot be combined. Optionally
-      filter by date.
+      See refunds you have issued. Optionally narrow by `account_id`,
+      `payment_id` or `user_id` (a user token without `account_id` lists
+      refunds across the businesses you can read), and by date. No filter
+      is required.
 
   "POST /messages":
     description: >-
@@ -353,7 +352,42 @@ overrides:
 
   "POST /promo_codes":
     description: >-
-      Create a promo code (discount code) for a business.
+      Create a promo code (discount code) for a business. Set `promo_type`
+      to `percentage` or `flat_amount` and give `amount_off` in that unit.
+      Pass `stock`, or `unlimited_stock: true`; one of them is required.
+      The code is stored lowercase.
+
+  # The API names this route Delete, but it only archives: the code stops
+  # working at checkout and stays listed with status archived.
+  "DELETE /promo_codes/{id}":
+    verbName: archive_promo_code
+    summary: Archive Promo Code
+    description: >-
+      Archive a promo code so it cannot be used in future checkouts. The
+      code stays listed with status `archived`; it is not removed.
+
+  "GET /ad_pixels/{id}":
+    description: >-
+      Look up one ad pixel you added for a business: its ad platform,
+      status, any `error_message` from the platform, and the account it
+      serves.
+
+  "DELETE /ads/{id}":
+    description: >-
+      Delete an ad so it stops serving. The ad no longer appears in lists;
+      pause it instead with ads_pause if you may want it back.
+
+  "PATCH /members/{id}":
+    description: >-
+      Update a member's `name` (shown on invoices instead of the user's own)
+      or its `metadata` key-value data. Metadata replaces what is stored, so
+      send every key you want to keep. A member sets `unsubscribe_status`
+      for themselves only.
+
+  "POST /exports":
+    description: >-
+      Starts an asynchronous export of a resource for an account. Returns the
+      export in `pending`; call exports_get until `download_url` is set.
 
   "GET /resolution_center_cases/{id}":
     description: >-
@@ -436,7 +470,8 @@ overrides:
 
   "GET /refunds/{id}":
     description: >-
-      Look up one refund.
+      Look up one refund by ID: the payment it refunds, its amount and
+      status, and when it was requested. Find IDs with refunds_list.
 
   "GET /financial_reports/breakdown":
     description: >-
@@ -525,8 +560,10 @@ overrides:
 
   "POST /courses":
     description: >-
-      Create a course inside a course app (experience), with optional
-      chapters, lessons and a certificate.
+      Create a course inside a course app (experience) from its title and
+      visibility. Whop adds a first chapter ("Chapter 1") with one lesson
+      ("Lesson 1") automatically; add or rename content afterwards with
+      course_chapters_create, course_lessons_create and the update tools.
 
   "POST /course_chapters":
     description: >-
@@ -575,8 +612,6 @@ overrides:
     verbName: resend_referred_business_invite
   "POST /products/{id}/publish":
     verbName: submit_app_product_for_review
-  "DELETE /promo_codes/{id}":
-    verbName: archive_promo_code
   "GET /stats/reports":
     verbName: list_stats_reports
   "GET /search":

@@ -236,8 +236,9 @@ describe("docs upstream", () => {
 			.call({ query: "refunds" })
 			.catch((e: unknown) => e);
 		expect(error).toMatchObject({
-			code: "upstream_error",
+			code: "rate_limited",
 			status: 429,
+			retryable: true,
 			details: { retry_after: "30" },
 		});
 		expect(String(error)).toContain("Retry after 30 seconds");

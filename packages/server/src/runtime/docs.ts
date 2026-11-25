@@ -205,10 +205,11 @@ async function callDocsMcp(
 	if (response.status === 429) {
 		const retryAfter = response.headers.get("Retry-After");
 		throw new WhopMcpError(
-			"upstream_error",
+			"rate_limited",
 			`Whop docs search is rate limited.${retryAfter ? ` Retry after ${retryAfter} seconds.` : " Try again later."} Rephrasing the request does not bypass the limit.`,
 			{
 				status: 429,
+				retryable: true,
 				...(retryAfter ? { details: { retry_after: retryAfter } } : {}),
 			},
 		);

@@ -169,7 +169,7 @@ the same connection:
 Both read the public documentation and send no Whop credentials. They are available on every surface and permission
 profile, except that `/chatgpt/mcp` serves the search tool alone. The stdio adapter enables them by default; the hosted adapter enables
 them with `docs: true`. A rate-limited docs lookup is returned as
-`upstream_error` with status 429 and its `Retry-After` hint.
+`rate_limited` (status 429) and its `Retry-After` hint.
 
 ## Repository layout
 

@@ -27,7 +27,7 @@ import {
 } from "../policy/surfaces.ts";
 import { visibleOperations } from "../policy/visibility.ts";
 import { Dispatcher } from "./dispatcher.ts";
-import { WhopMcpError } from "./errors.ts";
+import { WhopMcpError, withNotFoundHint } from "./errors.ts";
 import type { BuiltinTool, ToolDefinition } from "./builtin-tool.ts";
 import { chatGptTools } from "./chatgpt-compat.ts";
 import {
@@ -191,8 +191,29 @@ function withAccountRequirement(
 	if (!accountParam || !operation.requiresAccount || principal.accountId) {
 		return inputSchema;
 	}
-	return {
+	// The API's own text says the account defaults to the credential's, which
+	// is true for an account key but not for the user token this connection has.
+	const property = inputSchema.properties?.[accountParam];
+	const schema = {
 		...inputSchema,
+		properties: {
+			...inputSchema.properties,
+			[accountParam]: {
+				...property,
+				description: [
+					operation.accountAlternatives?.length
+						? `Required when signed in as a user, unless you pass ${operation.accountAlternatives.join(" or ")}: the business's biz_ ID (look it up with the accounts list tool).`
+						: "Required when signed in as a user: the business's biz_ ID (look it up with the accounts list tool).",
+					property?.description?.replace(/\s*Defaults to [^.]*\./, ""),
+				]
+					.filter(Boolean)
+					.join(" "),
+			},
+		},
+	};
+	if (operation.accountAlternatives?.length) return schema;
+	return {
+		...schema,
 		required: [
 			...new Set([...(inputSchema.required ?? []), accountParam]),
 		].sort(),
@@ -547,7 +568,7 @@ export function createWhopMcpServer(
 		} catch (error) {
 			const failure =
 				error instanceof WhopMcpError
-					? error
+					? withNotFoundHint(error, operation, operations)
 					: new WhopMcpError("internal_error", "Unexpected server error.");
 			await auditSink.record(
 				auditEvent(

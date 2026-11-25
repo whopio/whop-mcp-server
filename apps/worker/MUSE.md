@@ -214,7 +214,11 @@ Failed calls return `isError: true` with a JSON body of
 | `account_required` | The tool needs a business | Pass `account_id` from `accounts_list` |
 | `missing_scope` | The grant lacks a permission | Reconnect, or use another tool |
 | `invalid_input` | An argument is missing or wrong | Correct the argument |
-| `upstream_error` | The Whop API refused the call; `status` holds the HTTP status | Follow the message |
+| `not_found` | No record has that id (404); the message names the list tool | Find the id with it |
+| `conflict` | The record's state blocks this call (409) | Read it back, then retry |
+| `rate_limited` | Too many calls (429); `retryable` is true | Wait, then retry |
+| `upstream_unavailable` | The Whop API failed (5xx); `retryable` is true | Retry later |
+| `upstream_error` | The Whop API refused the call another way; `status` holds the HTTP status | Follow the message |
 | `timeout` | The Whop API did not answer in time | Check the result before retrying a write |
 
 Before retrying a write whose result is unclear, such as after a `timeout`,
@@ -224,7 +228,7 @@ when the same key is sent again. `messages_create` has no replay protection, so
 a repeated call sends again.
 
 The Whop API allows 600 requests per minute per operation and credential by
-default. Past that, a tool returns `upstream_error` with status 429 and a
+default. Past that, a tool returns `rate_limited` with status 429 and a
 message saying how long to wait.
 
 ## Test account

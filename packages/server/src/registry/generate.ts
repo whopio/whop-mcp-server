@@ -215,6 +215,7 @@ export interface SafetyRule {
 
 export interface OperationOverride {
 	description?: string;
+	summary?: string;
 	principals?: PrincipalType[];
 	requiresAccount?: boolean;
 	listedSchemaOmit?: string[];
@@ -614,10 +615,16 @@ function buildOperation(
 				parameters.some((p) => p.name === name) || name in body.properties,
 		) ?? null;
 
+	// x-whop-requires-account comes from the controller's requires_account
+	// declaration: account_id is optional for account keys but not user tokens.
 	const accountParamRequired = accountParam
 		? parameters.some((p) => p.name === accountParam && p.required) ||
-			body.required.includes(accountParam)
+			body.required.includes(accountParam) ||
+			op["x-whop-requires-account"] === true
 		: false;
+	const accountAlternatives = Array.isArray(op["x-whop-account-alternatives"])
+		? (op["x-whop-account-alternatives"] as string[])
+		: [];
 
 	const override = metadata.overrides.overrides[key];
 
@@ -681,7 +688,9 @@ function buildOperation(
 		tag,
 		group,
 		surface: raw.surface,
-		summary: typeof op.summary === "string" ? op.summary : undefined,
+		summary:
+			override?.summary ??
+			(typeof op.summary === "string" ? op.summary : undefined),
 		description,
 		parameters,
 		hasRequestBody: body.present,
@@ -691,6 +700,9 @@ function buildOperation(
 		inputSchema,
 		accountParam,
 		requiresAccount: override?.requiresAccount ?? accountParamRequired,
+		...(accountAlternatives.length
+			? { accountAlternatives: [...accountAlternatives].sort() }
+			: {}),
 		...(override?.listedSchemaOmit?.length
 			? { listedSchemaOmit: [...override.listedSchemaOmit].sort() }
 			: {}),

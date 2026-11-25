@@ -790,7 +790,15 @@ describe("lists that need a business for a user token", () => {
 		accountId: null,
 	});
 
-	it.each(["members_list", "ad-campaigns_list"])(
+	it.each([
+		"members_list",
+		"ad-campaigns_list",
+		"ads_list",
+		"ad-groups_list",
+		"people_list",
+		"api-logs_list",
+		"exports_list",
+	])(
 		"%s asks a user connection for account_id before calling the API",
 		async (name) => {
 			const { fetch, requests } = fakeFetch();
@@ -813,6 +821,43 @@ describe("lists that need a business for a user token", () => {
 			});
 			expect(result.isError).toBeFalsy();
 			expect(requests[0]?.url).toContain("account_id=biz_1");
+		},
+	);
+
+	it.each([
+		["variants_list", "product_ids"],
+		["team-members_list", "user_id"],
+	])(
+		"%s accepts %s instead of account_id but names both when neither is given",
+		async (name, alternative) => {
+			const { fetch, requests } = fakeFetch();
+			const client = await connect({ principal: userPrincipal, fetch });
+			const tool = (await listTools(client)).tools.find(
+				(candidate) => candidate.name === name,
+			);
+			expect(tool?.inputSchema.required).not.toContain("account_id");
+			const description = (
+				tool?.inputSchema.properties?.account_id as { description?: string }
+			).description;
+			expect(description).toContain("Required when signed in as a user");
+			expect(description).toContain(alternative);
+			expect(description).not.toContain("Defaults to");
+
+			const missing = parseResult(
+				await client.callTool({ name, arguments: {} }),
+			);
+			expect(JSON.stringify(missing)).toContain("account_required");
+			expect(JSON.stringify(missing)).toContain(`account_id or ${alternative}`);
+			expect(requests).toHaveLength(0);
+
+			const result = await client.callTool({
+				name,
+				arguments: {
+					[alternative]: alternative === "product_ids" ? ["prod_1"] : "user_1",
+				},
+			});
+			expect(result.isError).toBeFalsy();
+			expect(requests).toHaveLength(1);
 		},
 	);
 

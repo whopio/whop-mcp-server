@@ -107,7 +107,7 @@ function feedbackDefinitions(naming: ToolNaming): ToolDefinition[] {
 		{
 			name: "ask_question",
 			description:
-				"Record a question about Whop the tools and docs could not answer, for Whop's internal review. Returns a receipt only: no answer will ever come back, so do not wait or ask again. Never include credentials, secrets, personal data or payment details.",
+				"Files a question for Whop's team to review. It returns a receipt only and never an answer, so do not wait or ask again. To get an answer, use docs_search and docs_query first; use this only for what the tools and docs could not answer. Never include credentials, secrets, personal data or payment details.",
 			inputSchema: {
 				type: "object",
 				properties: {

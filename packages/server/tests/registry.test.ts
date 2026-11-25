@@ -46,6 +46,40 @@ describe("registry generation", () => {
 		expect(submit.safety.confirmationRequired).toBe(true);
 	});
 
+	// requires_account on the Rails controller reaches the spec as
+	// x-whop-requires-account (and x-whop-account-alternatives).
+	it("asks for the business where the API requires one for a user token", () => {
+		const needsAccount = registry.operations
+			.filter((op) => op.requiresAccount)
+			.map((op) => op.toolName);
+		expect(needsAccount).toEqual(
+			expect.arrayContaining([
+				"ad-campaigns_list",
+				"members_list",
+				"people_get",
+				"products_create",
+				"variants_create",
+				"variants_list",
+			]),
+		);
+		for (const toolName of [
+			"ads_create",
+			"financing-applications_list",
+			"stats_time-series_get",
+		]) {
+			expect(findOperation(registry, toolName).requiresAccount).toBe(false);
+		}
+	});
+
+	it("accepts the inputs the API takes in place of the business", () => {
+		expect(
+			findOperation(registry, "variants_list").accountAlternatives,
+		).toEqual(["product_ids"]);
+		expect(
+			findOperation(registry, "team-members_list").accountAlternatives,
+		).toEqual(["user_id", "user_ids"]);
+	});
+
 	it("keeps API-key-only operations off user tokens", () => {
 		for (const toolName of ["accounts_me", "account-links_create"]) {
 			const op = registry.operations.find((o) => o.toolName === toolName);
@@ -768,6 +802,68 @@ describe("inferOperationName", () => {
 		);
 		expect(inferOperationName("GET", "/users/{id}/access/{resource_id}")).toBe(
 			"access",
+		);
+	});
+});
+
+describe("generated tool schemas", () => {
+	// JSON Schema (and OpenAPI) format names; "date_time" is not one of them.
+	const knownFormats = new Set([
+		"binary",
+		"byte",
+		"date",
+		"date-time",
+		"double",
+		"duration",
+		"email",
+		"float",
+		"hostname",
+		"int32",
+		"int64",
+		"ipv4",
+		"ipv6",
+		"password",
+		"regex",
+		"time",
+		"uri",
+		"uri-reference",
+		"uuid",
+	]);
+
+	function collectFormats(node: unknown, out: string[]): string[] {
+		if (Array.isArray(node)) {
+			for (const item of node) collectFormats(item, out);
+		} else if (node !== null && typeof node === "object") {
+			for (const [key, value] of Object.entries(node)) {
+				if (key === "format" && typeof value === "string") out.push(value);
+				else collectFormats(value, out);
+			}
+		}
+		return out;
+	}
+
+	it("only uses valid JSON Schema formats", () => {
+		const invalid = registry.operations.flatMap((op) =>
+			collectFormats(op.inputSchema, [])
+				.filter((format) => !knownFormats.has(format))
+				.map((format) => `${op.toolName}: ${format}`),
+		);
+		expect(invalid).toEqual([]);
+	});
+
+	it("names real id prefixes and tools in hand-written descriptions", () => {
+		const text = (key: string) =>
+			JSON.stringify(
+				registry.operations.find(
+					(op) => `${op.method.toUpperCase()} ${op.path}` === key,
+				),
+			);
+		expect(text("PATCH /courses/{id}")).toContain("cors_");
+		expect(text("PATCH /course_lessons/{id}")).toContain("lesn_");
+		expect(text("GET /refunds")).not.toContain("company_id");
+		expect(text("PATCH /experiences/{id}")).not.toContain("NEVER USED");
+		expect(findOperation(registry, "promo-codes_delete").summary).toBe(
+			"Archive Promo Code",
 		);
 	});
 });

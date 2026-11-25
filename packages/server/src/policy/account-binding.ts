@@ -56,15 +56,22 @@ export function enforceAccountBinding(
 		operation.accountParam &&
 		operation.requiresAccount &&
 		!bound &&
-		args[operation.accountParam] === undefined
+		args[operation.accountParam] === undefined &&
+		!operation.accountAlternatives?.some((name) => isProvided(args[name]))
 	) {
+		const alternatives = operation.accountAlternatives ?? [];
 		throw new WhopMcpError(
 			"account_required",
-			`${operation.toolName} requires ${operation.accountParam}. This connection is not bound to one account, so pass the business's biz_ ID (find it with accounts_list).`,
+			`${operation.toolName} requires ${[operation.accountParam, ...alternatives].join(" or ")}. This connection is not bound to one account, so pass the business's biz_ ID (find it with accounts_list).`,
 		);
 	}
 
 	return args;
+}
+
+function isProvided(value: unknown): boolean {
+	if (value === undefined || value === null || value === "") return false;
+	return !Array.isArray(value) || value.length > 0;
 }
 
 function checkAccountFields(
