@@ -1,11 +1,11 @@
-import type { Tool } from "@modelcontextprotocol/sdk/types.js";
+import type { Tool } from "@modelcontextprotocol/server";
 import type { JsonSchema } from "../registry/types.ts";
 import { WhopMcpError } from "./errors.ts";
 import type { McpRequestContext } from "./mcp-context.ts";
 import { validateAgainstSchema } from "./validate.ts";
 
-export type ToolDefinition = Tool & {
-	inputSchema: JsonSchema & Tool["inputSchema"];
+export type ToolDefinition = Omit<Tool, "inputSchema"> & {
+	inputSchema: JsonSchema & { type: "object" };
 };
 
 export interface BuiltinTool {

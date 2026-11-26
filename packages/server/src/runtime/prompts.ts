@@ -1,9 +1,9 @@
 import {
-	ErrorCode,
 	type GetPromptResult,
-	McpError,
 	type Prompt,
-} from "@modelcontextprotocol/sdk/types.js";
+	ProtocolError,
+	ProtocolErrorCode,
+} from "@modelcontextprotocol/server";
 import { canReach, type ToolReach, ToolNamer } from "./tool-reach.ts";
 
 type PromptArgs = Record<string, string | undefined>;
@@ -616,23 +616,26 @@ export function getPrompt(
 			candidate.prompt.name === name && promptReachable(candidate, reach),
 	);
 	if (!guide) {
-		throw new McpError(ErrorCode.InvalidParams, `Unknown prompt "${name}".`);
+		throw new ProtocolError(
+			ProtocolErrorCode.InvalidParams,
+			`Unknown prompt "${name}".`,
+		);
 	}
 	const declared = guide.prompt.arguments ?? [];
 	const known = new Set(declared.map((argument) => argument.name));
 	const cleaned: PromptArgs = {};
 	for (const [key, value] of Object.entries(args)) {
 		if (!known.has(key)) {
-			throw new McpError(
-				ErrorCode.InvalidParams,
+			throw new ProtocolError(
+				ProtocolErrorCode.InvalidParams,
 				`Prompt "${name}" has no argument "${key}".`,
 			);
 		}
 		const trimmed = value?.trim();
 		if (!trimmed) continue;
 		if (trimmed.length > MAX_ARGUMENT_LENGTH) {
-			throw new McpError(
-				ErrorCode.InvalidParams,
+			throw new ProtocolError(
+				ProtocolErrorCode.InvalidParams,
 				`Argument "${key}" is longer than ${MAX_ARGUMENT_LENGTH} characters.`,
 			);
 		}
@@ -642,8 +645,8 @@ export function getPrompt(
 		(argument) => argument.required && cleaned[argument.name] === undefined,
 	);
 	if (missing.length) {
-		throw new McpError(
-			ErrorCode.InvalidParams,
+		throw new ProtocolError(
+			ProtocolErrorCode.InvalidParams,
 			`Prompt "${name}" needs ${missing.map((argument) => argument.name).join(", ")}.`,
 		);
 	}

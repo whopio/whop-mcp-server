@@ -1,4 +1,4 @@
-import type { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
+import type { ListToolsResult } from "@modelcontextprotocol/server";
 import { Buffer } from "node:buffer";
 import { describe, expect, it } from "vitest";
 import {

@@ -1,5 +1,5 @@
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { Client } from "@modelcontextprotocol/client";
+import { InMemoryTransport } from "@modelcontextprotocol/client";
 import { Buffer } from "node:buffer";
 import { describe, expect, it } from "vitest";
 import type { SurfaceName } from "../src/policy/surfaces.ts";

@@ -1,4 +1,4 @@
-import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
 import type { RegistryManifest } from "../registry/types.ts";
 import type { CredentialAdapter, PrincipalContext } from "../policy/types.ts";
 import { DEFAULT_PROFILE } from "../policy/profiles.ts";

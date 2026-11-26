@@ -43,10 +43,8 @@
 		"format": "oxfmt src scripts tests metadata",
 		"test": "vitest run"
 	},
-	"dependencies": {
-		"@modelcontextprotocol/sdk": "^1.31.0"
-	},
 	"devDependencies": {
+		"@modelcontextprotocol/client": "^2.4.0",
 		"@types/node": "25.3.5",
 		"oxfmt": "^0.42.0",
 		"oxlint": "^1.55.0",
@@ -58,5 +56,8 @@
 	},
 	"engines": {
 		"node": ">=22"
+	},
+	"dependencies": {
+		"@modelcontextprotocol/server": "^2.4.0"
 	}
 }

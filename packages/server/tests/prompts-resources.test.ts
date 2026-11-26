@@ -1,5 +1,5 @@
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { Client } from "@modelcontextprotocol/client";
+import { InMemoryTransport } from "@modelcontextprotocol/client";
 import { describe, expect, it } from "vitest";
 import { createStreamableHttpHandler } from "../src/adapters/streamable-http.ts";
 import { SURFACE_NAMES, type SurfaceName } from "../src/policy/surfaces.ts";
@@ -123,8 +123,12 @@ describe("prompts and resources", () => {
 			expect(capabilities?.prompts).toBeUndefined();
 			expect(capabilities?.resources).toBeUndefined();
 			expect(client.getInstructions()).not.toContain("whop://guides/");
-			await expect(client.listPrompts()).rejects.toThrow();
-			await expect(client.listResources()).rejects.toThrow();
+			await expect(client.request({ method: "prompts/list" })).rejects.toThrow(
+				/Method not found/,
+			);
+			await expect(
+				client.request({ method: "resources/list" }),
+			).rejects.toThrow(/Method not found/);
 		}
 	});
 
@@ -402,6 +406,9 @@ describe("prompts and resources", () => {
 		await expect(
 			client.readResource({ uri: "whop://guides/payouts" }),
 		).rejects.toThrow(/Unknown resource/);
+		await expect(
+			client.readResource({ uri: "whop://guides/payouts" }),
+		).rejects.toMatchObject({ code: -32602 });
 		await expect(
 			client.readResource({ uri: "whop://guides/website" }),
 		).rejects.toThrow(/Unknown resource/);

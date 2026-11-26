@@ -1,13 +1,8 @@
-import { Server } from "@modelcontextprotocol/sdk/server/index.js";
 import {
-	CallToolRequestSchema,
-	GetPromptRequestSchema,
-	ListPromptsRequestSchema,
-	ListResourcesRequestSchema,
-	ListToolsRequestSchema,
-	McpError,
-	ReadResourceRequestSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+	ResourceNotFoundError,
+	Server,
+	type Tool,
+} from "@modelcontextprotocol/server";
 import type {
 	JsonSchema,
 	OperationDef,
@@ -65,7 +60,6 @@ export const SERVER_ICONS = [
 ];
 
 // The MCP spec's code for a resource that doesn't exist.
-const RESOURCE_NOT_FOUND = -32002;
 const IDEMPOTENCY_KEY_FIELD = "idempotency_key";
 const INTENT_FIELD = "intent";
 const INTENT_ID_FIELD = "intent_id";
@@ -446,7 +440,7 @@ export function createWhopMcpServer(
 		},
 	);
 
-	server.setRequestHandler(ListToolsRequestSchema, async () => ({
+	server.setRequestHandler("tools/list", async () => ({
 		tools: [
 			...listedOperations.map((op) => ({
 				name: naming.name(op.toolName),
@@ -458,7 +452,7 @@ export function createWhopMcpServer(
 						? listedInputSchema(op, principal)
 						: toolInputSchema(op, principal),
 					true,
-				) as Record<string, unknown>,
+				) as Tool["inputSchema"],
 				annotations: {
 					readOnlyHint: op.annotations.readOnlyHint,
 					destructiveHint: op.annotations.destructiveHint,
@@ -472,7 +466,7 @@ export function createWhopMcpServer(
 				inputSchema: intentSchema(
 					tool.definition.inputSchema,
 					tool.asksForIntent ?? false,
-				) as ToolDefinition["inputSchema"],
+				) as Tool["inputSchema"],
 			})),
 		],
 	}));
@@ -484,20 +478,20 @@ export function createWhopMcpServer(
 			builtinByName.keys(),
 			naming,
 		);
-		server.setRequestHandler(ListPromptsRequestSchema, async () => ({
+		server.setRequestHandler("prompts/list", async () => ({
 			prompts: listedPrompts(reach),
 		}));
-		server.setRequestHandler(GetPromptRequestSchema, async (request) =>
+		server.setRequestHandler("prompts/get", async (request) =>
 			getPrompt(request.params.name, request.params.arguments ?? {}, reach),
 		);
-		server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+		server.setRequestHandler("resources/list", async () => ({
 			resources: listedResources(reach),
 		}));
-		server.setRequestHandler(ReadResourceRequestSchema, async (request) => {
+		server.setRequestHandler("resources/read", async (request) => {
 			const resource = readResource(request.params.uri, reach);
 			if (!resource) {
-				throw new McpError(
-					RESOURCE_NOT_FOUND,
+				throw new ResourceNotFoundError(
+					request.params.uri,
 					`Unknown resource "${request.params.uri}".`,
 				);
 			}
@@ -505,7 +499,7 @@ export function createWhopMcpServer(
 		});
 	}
 
-	server.setRequestHandler(CallToolRequestSchema, async (request, extra) => {
+	server.setRequestHandler("tools/call", async (request, ctx) => {
 		const { name, arguments: rawArgs = {} } = request.params;
 		const builtin = builtinByName.get(name);
 		const operation = builtin ? undefined : byName.get(name);
@@ -520,7 +514,7 @@ export function createWhopMcpServer(
 					content: [
 						{
 							type: "text" as const,
-							text: await builtin.call(args, extra.signal, context),
+							text: await builtin.call(args, ctx.mcpReq.signal, context),
 						},
 					],
 				};

@@ -1,4 +1,4 @@
-import type { Resource } from "@modelcontextprotocol/sdk/types.js";
+import type { Resource } from "@modelcontextprotocol/server";
 import { FLOWS, type Flow, type FlowGroup } from "./flows.ts";
 import {
 	CALL_READ_OPERATION_TOOL,

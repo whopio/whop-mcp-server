@@ -1,5 +1,5 @@
-import { Client } from "@modelcontextprotocol/sdk/client/index.js";
-import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { Client } from "@modelcontextprotocol/client";
+import { InMemoryTransport } from "@modelcontextprotocol/client";
 import { Buffer } from "node:buffer";
 import { describe, expect, it } from "vitest";
 import type { PrincipalContext } from "../src/policy/types.ts";
@@ -38,11 +38,7 @@ const TEST_INTENT_ID = "123e4567-e89b-42d3-a456-426614174000";
 
 function withTestIntent(client: Client): Client {
 	const callTool = client.callTool.bind(client);
-	const callToolWithIntent: typeof client.callTool = (
-		params,
-		resultSchema,
-		requestOptions,
-	) =>
+	const callToolWithIntent: typeof client.callTool = (params, requestOptions) =>
 		callTool(
 			params.name === "connection_status"
 				? params
@@ -54,7 +50,6 @@ function withTestIntent(client: Client): Client {
 							...params.arguments,
 						},
 					},
-			resultSchema,
 			requestOptions,
 		);
 	client.callTool = callToolWithIntent;

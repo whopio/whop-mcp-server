@@ -1,4 +1,4 @@
-import type { ListToolsResult } from "@modelcontextprotocol/sdk/types.js";
+import type { ListToolsResult } from "@modelcontextprotocol/server";
 import { describe, expect, it, vi } from "vitest";
 import {
 	createStreamableHttpHandler,

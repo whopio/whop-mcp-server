@@ -1,4 +1,8 @@
-import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
+import {
+	createMcpHandler,
+	isLegacyRequest,
+	WebStandardStreamableHTTPServerTransport,
+} from "@modelcontextprotocol/server";
 import type { RegistryManifest } from "../registry/types.ts";
 import type { SurfaceName } from "../policy/surfaces.ts";
 import type { ToolListing } from "../runtime/server.ts";
@@ -80,8 +84,10 @@ function jsonRpcError(status: number, code: number, message: string): Response {
 /**
  * Stateless Streamable HTTP endpoint: every POST is authenticated, builds a
  * per-request server over the shared runtime, and streams the response (JSON
- * or SSE, negotiated by the transport). GET/DELETE return 405 — there are no
- * server-initiated streams or stateful sessions to resume in this adapter.
+ * or SSE, negotiated by the transport). Requests carrying the 2026-07-28
+ * per-request envelope go to the SDK's modern handler; everything else takes
+ * the 2025-era stateless transport. GET/DELETE return 405 — there are no
+ * stateful sessions to resume in this adapter.
  */
 export function createStreamableHttpHandler(
 	options: StreamableHttpAdapterOptions,
@@ -159,6 +165,14 @@ export function createStreamableHttpHandler(
 			extraHeaders: auth.extraHeaders,
 		});
 
+		if (!(await isLegacyRequest(request))) {
+			const rejected = await rejectSubscriptionStream(request);
+			if (rejected) return rejected;
+			return createMcpHandler(() => server, { legacy: "reject" }).fetch(
+				request,
+			);
+		}
+
 		const transport = new WebStandardStreamableHTTPServerTransport({
 			sessionIdGenerator: undefined,
 			enableJsonResponse: true,
@@ -166,6 +180,27 @@ export function createStreamableHttpHandler(
 		await server.connect(transport);
 		return transport.handleRequest(request);
 	};
+}
+
+// The server publishes no change notifications, so a subscription stream
+// would stay open with nothing on it, holding a per-request server and
+// outliving the access token that opened it.
+async function rejectSubscriptionStream(
+	request: Request,
+): Promise<Response | undefined> {
+	const body = (await request
+		.clone()
+		.json()
+		.catch(() => undefined)) as { id?: unknown; method?: unknown } | undefined;
+	if (body?.method !== "subscriptions/listen") return undefined;
+	return new Response(
+		JSON.stringify({
+			jsonrpc: "2.0",
+			id: body.id ?? null,
+			error: { code: -32601, message: "Method not found" },
+		}),
+		{ status: 404, headers: { "Content-Type": "application/json" } },
+	);
 }
 
 function isAllowedOrigin(origin: string, allowed: string[]): boolean {
