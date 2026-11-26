@@ -24767,6 +24767,11 @@
             "example": 0.0,
             "type": "number"
           },
+          "charge_at_subscription_start": {
+            "description": "True when the customer pays only the initial fee of each item now and is first charged the renewal price at `subscription_starts_at`. Until then the membership is `scheduled` and has no access.",
+            "example": false,
+            "type": "boolean"
+          },
           "checkout_link": {
             "description": "A signed link that opens this invoice in a checkout session so the buyer can pay it. Pass it as `link` to `POST /checkout_sessions`. Present while the invoice is open. `null` in any other status, for an invoice billed to a business buyer, and for an invoice whose membership was canceled. Also `null` unless you have `payment:charge`, or `invoice:create` or `invoice:update` on an invoice with no `payment_method_id`.",
             "example": "pay_xxxxxxxxxxxxxx.xxxxxxxxxxxxxxxx",
@@ -25060,7 +25065,7 @@
             "type": "string"
           },
           "subscription_starts_at": {
-            "description": "When the first billing period of the invoice's recurring items starts, as an ISO 8601 timestamp. Renewals count from this moment. `null` starts the period when the invoice is paid, and so does a time that has passed by then. An invoice with a start date skips its variants' free trial.",
+            "description": "When the first billing period of the invoice's recurring items starts, as an ISO 8601 timestamp. Renewals count from this moment. `null` starts the period when the invoice is paid, and so does a time that has passed by then. An invoice with a start date skips its variants' free trial. With `charge_at_subscription_start`, the subscription and its access begin at this moment instead.",
             "example": null,
             "type": [
               "string",
@@ -25117,6 +25122,7 @@
           "deletable",
           "due_at",
           "subscription_starts_at",
+          "charge_at_subscription_start",
           "scheduled_send_at",
           "scheduled_charge_at",
           "scheduled_collection_method",
@@ -123100,6 +123106,11 @@
                     "minimum": 0,
                     "type": "number"
                   },
+                  "charge_at_subscription_start": {
+                    "description": "When true, the customer pays only each item's initial fee now, and their payment method is first charged the renewal price at `subscription_starts_at`. The membership is `scheduled` and has no access until then. Needs `subscription_starts_at`, items that all renew, no split pay, and renewals that charge the payment method. With nothing due now, it also needs `payment_method_id`. Defaults to `false`. Can be updated on drafts.",
+                    "example": true,
+                    "type": "boolean"
+                  },
                   "customer_name": {
                     "description": "The contact name when creating an email-only member.",
                     "type": [
@@ -123625,7 +123636,7 @@
                     "type": "array"
                   },
                   "subscription_starts_at": {
-                    "description": "When the first billing period of the invoice's recurring items starts, as an ISO 8601 timestamp in the future. Renewals count from this moment. `null` starts the period when the invoice is paid. Needs a recurring item. Can be updated on drafts. A start date replaces a variant's free trial, and the invoice bills the full price.",
+                    "description": "When the first billing period of the invoice's recurring items starts, as an ISO 8601 timestamp in the future. Renewals count from this moment. `null` starts the period when the invoice is paid. Needs a recurring item. Can be updated on drafts. A start date replaces a variant's free trial, and the invoice bills the full price. With `charge_at_subscription_start`, the subscription, its first renewal charge and its access begin at this moment instead.",
                     "example": "2026-01-01T12:00:00.000Z",
                     "format": "date-time",
                     "type": [
@@ -123896,6 +123907,11 @@
                     "maximum": 100,
                     "minimum": 0,
                     "type": "number"
+                  },
+                  "charge_at_subscription_start": {
+                    "description": "When true, the customer pays only each item's initial fee now, and their payment method is first charged the renewal price at `subscription_starts_at`. The membership is `scheduled` and has no access until then. Needs `subscription_starts_at`, items that all renew, no split pay, and renewals that charge the payment method. With nothing due now, it also needs `payment_method_id`. Defaults to `false`. Can be updated on drafts.",
+                    "example": true,
+                    "type": "boolean"
                   },
                   "due_at": {
                     "description": "When payment is due, as an ISO 8601 timestamp.",
@@ -124407,7 +124423,7 @@
                     "type": "array"
                   },
                   "subscription_starts_at": {
-                    "description": "When the first billing period of the invoice's recurring items starts, as an ISO 8601 timestamp in the future. Renewals count from this moment. `null` starts the period when the invoice is paid. Needs a recurring item. Can be updated on drafts. A start date replaces a variant's free trial, and the invoice bills the full price.",
+                    "description": "When the first billing period of the invoice's recurring items starts, as an ISO 8601 timestamp in the future. Renewals count from this moment. `null` starts the period when the invoice is paid. Needs a recurring item. Can be updated on drafts. A start date replaces a variant's free trial, and the invoice bills the full price. With `charge_at_subscription_start`, the subscription, its first renewal charge and its access begin at this moment instead.",
                     "example": "2026-01-01T12:00:00.000Z",
                     "format": "date-time",
                     "type": [
