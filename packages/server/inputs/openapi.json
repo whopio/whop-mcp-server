@@ -34067,6 +34067,14 @@
               }
             ]
           },
+          "statement_descriptor": {
+            "description": "The text the buyer's bank or card statement shows for this payment. Null when the processor did not report one.",
+            "example": null,
+            "type": [
+              "string",
+              "null"
+            ]
+          },
           "status": {
             "$ref": "#/components/schemas/ReceiptStatus",
             "description": "The lifecycle state of the charge: `open` while collection is outstanding, `paid` once the money moved, `pending` while a settlement rail clears, `void`/`uncollectible` when it ended without collecting."
@@ -34242,6 +34250,7 @@
           "payment_method_type",
           "payment_method_id",
           "payment_instrument",
+          "statement_descriptor",
           "customer_email",
           "presentment_total",
           "presentment_tax_amount",
@@ -192835,6 +192844,7 @@
                   "settlement_time_at": null,
                   "shipment_id": null,
                   "shipping_address": null,
+                  "statement_descriptor": null,
                   "status": "authorized",
                   "substatus": "requires_capture",
                   "subtotal": {
@@ -193145,6 +193155,7 @@
                   "settlement_time_at": null,
                   "shipment_id": null,
                   "shipping_address": null,
+                  "statement_descriptor": null,
                   "status": "void",
                   "substatus": "canceled",
                   "subtotal": {
@@ -193455,6 +193466,7 @@
                   "settlement_time_at": null,
                   "shipment_id": null,
                   "shipping_address": null,
+                  "statement_descriptor": null,
                   "status": "open",
                   "substatus": "incomplete",
                   "subtotal": {
@@ -193765,6 +193777,7 @@
                   "settlement_time_at": null,
                   "shipment_id": null,
                   "shipping_address": null,
+                  "statement_descriptor": null,
                   "status": "open",
                   "substatus": "failed",
                   "subtotal": {
@@ -194068,6 +194081,7 @@
                   "settlement_time_at": null,
                   "shipment_id": null,
                   "shipping_address": null,
+                  "statement_descriptor": null,
                   "status": "pending",
                   "substatus": "pending",
                   "subtotal": {
@@ -194378,6 +194392,7 @@
                   "settlement_time_at": null,
                   "shipment_id": null,
                   "shipping_address": null,
+                  "statement_descriptor": null,
                   "status": "open",
                   "substatus": "incomplete",
                   "subtotal": {
@@ -194688,6 +194703,7 @@
                   "settlement_time_at": null,
                   "shipment_id": null,
                   "shipping_address": null,
+                  "statement_descriptor": null,
                   "status": "paid",
                   "substatus": "succeeded",
                   "subtotal": {
