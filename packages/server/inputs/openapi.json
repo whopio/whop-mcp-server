@@ -164722,6 +164722,10 @@
                                 "description": "Present only when broken down: one entry per property value in this period.",
                                 "items": {
                                   "properties": {
+                                    "label": {
+                                      "description": "The display name of the property value. It is present only when the value has a name. For example, a country code has the name of its country.",
+                                      "type": "string"
+                                    },
                                     "name": {
                                       "description": "The property value, for example usd or visa.",
                                       "example": "visa",
@@ -164869,6 +164873,10 @@
                                         "description": "Present only when broken down: one entry per property value in this period.",
                                         "items": {
                                           "properties": {
+                                            "label": {
+                                              "description": "The display name of the property value. It is present only when the value has a name. For example, a country code has the name of its country.",
+                                              "type": "string"
+                                            },
                                             "name": {
                                               "description": "The property value, for example usd or visa.",
                                               "example": "visa",
@@ -165920,6 +165928,10 @@
                                 "description": "Present only when broken down: one entry per property value in this period.",
                                 "items": {
                                   "properties": {
+                                    "label": {
+                                      "description": "The display name of the property value. It is present only when the value has a name. For example, a country code has the name of its country.",
+                                      "type": "string"
+                                    },
                                     "name": {
                                       "description": "The property value, for example usd or visa.",
                                       "example": "control",
